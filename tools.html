@@ -2130,7 +2130,7 @@
             '.rpt-chart{display:flex;align-items:flex-end;justify-content:space-around;height:160px;padding:10px 10px 0;border-bottom:2px solid #e2e8f0}' +
             '.rpt-chart-item{display:flex;flex-direction:column;align-items:center;gap:4px}' +
             '.rpt-chart-val{font-size:13px;font-weight:700}' +
-            '.rpt-chart-bar{width:40px;border-radius:6px 6px 0 0;min-height:4px}' +
+            '.rpt-chart-bar{width:40px;border-radius:6px 6px 0 0;min-height:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
             '.rpt-chart-lbl{font-size:11px;color:#64748b;text-align:center;max-width:60px;margin-top:4px}' +
 
             '.rpt-week{margin-bottom:20px;padding:16px 20px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;page-break-inside:avoid}' +
@@ -2202,6 +2202,70 @@
             overallColor = overallEl.style.color || '#2563eb';
         }
         var gradeTxt = overallVal >= 90 ? 'A+' : overallVal >= 80 ? 'A' : overallVal >= 70 ? 'B' : overallVal >= 60 ? 'C' : overallVal >= 50 ? 'D' : 'F';
+        /* --- Build bar chart from data (avoids DOM transform issues in PDF) --- */
+        var barData = [
+            { label: 'Technical', score: techPct, color: '#2563eb' },
+            { label: 'Content', score: contentPct, color: '#8b5cf6' },
+            { label: 'Links', score: linkPct, color: '#f59e0b' },
+            { label: 'Images', score: imgPct, color: '#10b981' },
+            { label: 'Speed', score: speedPct, color: '#ef4444' }
+        ];
+        var barChartBuilt = '<div class="rpt-chart">';
+        for (var bi = 0; bi < barData.length; bi++) {
+            var bd = barData[bi];
+            var bh = Math.max(4, Math.round(bd.score * 1.5));
+            barChartBuilt +=
+                '<div class="rpt-chart-item">' +
+                    '<div class="rpt-chart-val" style="color:' + bd.color + ';">' + bd.score + '%</div>' +
+                    '<div class="rpt-chart-bar" style="height:' + bh + 'px;background:' + bd.color + ';"></div>' +
+                    '<div class="rpt-chart-lbl">' + bd.label + '</div>' +
+                '</div>';
+        }
+        barChartBuilt += '</div>';
+
+        /* --- Extract Quick Stats from Overview tab DOM --- */
+        var overviewTab = document.getElementById('af-overview');
+        var quickStatsHtml = '';
+        var issuesSummaryHtml = '';
+        if (overviewTab) {
+            var sections = overviewTab.querySelectorAll('.audit-section');
+            for (var si = 0; si < sections.length; si++) {
+                var secH4 = sections[si].querySelector('div[style]');
+                var secTitle = secH4 ? secH4.textContent : '';
+                var metrics = sections[si].querySelectorAll('.audit-metric');
+                var metricsHtml = '';
+                for (var mj = 0; mj < metrics.length; mj++) {
+                    var lbl = metrics[mj].querySelector('.am-label');
+                    var val = metrics[mj].querySelector('.am-val');
+                    if (lbl && val) {
+                        var valHtml = val.innerHTML.replace(/var\(--gray-1\)/g, '#64748b').replace(/var\(--gray-2\)/g, '#94a3b8');
+                        metricsHtml += '<div class="rpt-metric"><span class="rpt-metric-label">' + lbl.textContent + '</span><span class="rpt-metric-val">' + valHtml + '</span></div>';
+                    }
+                }
+                if (metricsHtml) {
+                    var boxHtml = '<div class="rpt-card"><div style="font-size:15px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e2e8f0;color:#1e293b;">' + secTitle + '</div>' + metricsHtml + '</div>';
+                    if (secTitle === 'Issues Summary') { issuesSummaryHtml = boxHtml; }
+                    else { quickStatsHtml += boxHtml; }
+                }
+            }
+        }
+
+        var overviewSectionHtml =
+            '<div class="rpt-section">' +
+                '<div class="rpt-section-title">' +
+                    '<span class="rpt-icon" style="background:#f1f5f9;">\uD83D\uDCCB</span>' +
+                    'Overview & Stats' +
+                '</div>' +
+                '<div class="rpt-card" style="margin-bottom:16px;">' +
+                    '<div style="font-size:15px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e2e8f0;color:#1e293b;">Score Breakdown</div>' +
+                    barChartBuilt +
+                '</div>' +
+                '<div class="rpt-grid-2">' +
+                    quickStatsHtml +
+                    issuesSummaryHtml +
+                '</div>' +
+            '</div>';
+
         var scoreOverviewHtml =
             '<div class="rpt-score-hero">' +
                 '<div class="rpt-score-num" style="color:' + overallColor + ';">' + overallVal + '<span style="font-size:28px;">%</span></div>' +
@@ -2302,6 +2366,7 @@
         for (var ti = 0; ti < tabContents.length; ti++) {
             var tc = tabContents[ti];
             var tcId = tc.id || '';
+            if (tcId === 'af-overview') continue;
             var icon = sectionIcons[tcId] || ['\uD83D\uDCCB', '#f1f5f9'];
             var title = sectionTitles[tcId] || tcId;
             var html = transformHTML(tc.innerHTML, tcId);
@@ -2325,6 +2390,7 @@
                 headerHtml +
                 '<div class="rpt-body">' +
                     scoreOverviewHtml +
+                    overviewSectionHtml +
                     sectionsHtml +
                 '</div>' +
                 '<div class="rpt-footer">' +
