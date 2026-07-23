@@ -8,150 +8,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .tools-hero {
-            padding: 140px 0 60px;
-            background: linear-gradient(180deg, var(--gray-5) 0%, var(--white) 100%);
-            text-align: center;
-        }
+        .tools-hero { padding: 140px 0 60px; background: linear-gradient(180deg, var(--gray-5) 0%, var(--white) 100%); text-align: center; }
         .tools-hero h1 { font-size: 48px; font-weight: 900; margin-bottom: 16px; }
         .tools-hero p { font-size: 18px; color: var(--gray-1); max-width: 600px; margin: 0 auto; }
-        .tools-full-grid {
-            padding: 60px 0 100px;
-        }
-        .tools-full-grid .tools-grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
-        .tool-card-full {
-            padding: 32px 24px;
-            background: var(--white);
-            border: 1px solid var(--gray-4);
-            border-radius: var(--radius-lg);
-            transition: var(--transition);
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-        }
-        .tool-card-full:hover {
-            border-color: var(--primary);
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-4px);
-        }
-        .tool-card-full .tool-icon {
-            width: 64px;
-            height: 64px;
-            background: var(--gray-5);
-            border-radius: var(--radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
-        .tool-card-full h3 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        .tool-card-full p {
-            font-size: 14px;
-            color: var(--gray-1);
-            margin-bottom: 16px;
-            flex: 1;
-        }
-        .tool-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .tool-category {
-            padding: 4px 12px;
-            background: rgba(37,99,235,0.1);
-            color: var(--primary);
-            border-radius: 100px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .tool-status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: var(--gray-1);
-        }
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-        }
-        .tool-features {
-            padding: 100px 0;
-            background: var(--gray-5);
-        }
-        .features-comparison {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
-        }
-        .comparison-card {
-            padding: 40px 32px;
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            border: 2px solid var(--gray-4);
-        }
-        .comparison-card.featured {
-            border-color: var(--primary);
-            position: relative;
-        }
-        .comparison-card.featured::before {
-            content: 'Most Popular';
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 4px 16px;
-            background: var(--primary);
-            color: white;
-            border-radius: 100px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .comparison-card h3 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        .comparison-card .price {
-            font-size: 40px;
-            font-weight: 900;
-            color: var(--primary);
-            margin-bottom: 24px;
-        }
-        .comparison-card .price span {
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--gray-1);
-        }
-        .comparison-features {
-            margin-bottom: 32px;
-        }
-        .comparison-features li {
-            padding: 12px 0;
-            border-bottom: 1px solid var(--gray-4);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 15px;
-        }
-        .comparison-features li::before {
-            content: '✓';
-            color: var(--success);
-            font-weight: 700;
-        }
-        @media (max-width: 1024px) {
-            .tools-full-grid .tools-grid { grid-template-columns: repeat(2, 1fr); }
-            .features-comparison { grid-template-columns: 1fr; }
-        }
+        .tools-full-grid { padding: 60px 0 40px; }
+        .tools-full-grid .tools-grid { grid-template-columns: repeat(4, 1fr); }
+        .section-divider { padding: 60px 0; background: var(--gray-5); text-align: center; }
+        .section-divider h2 { font-size: 32px; font-weight: 800; margin-bottom: 12px; }
+        .section-divider p { font-size: 16px; color: var(--gray-1); max-width: 500px; margin: 0 auto; }
+        .section-divider .badge { display: inline-block; padding: 6px 16px; background: var(--primary); color: white; border-radius: 100px; font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+        .tool-features { padding: 80px 0; background: var(--gray-5); }
+        .features-comparison { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+        .comparison-card { padding: 40px 32px; background: var(--white); border-radius: var(--radius-lg); border: 2px solid var(--gray-4); }
+        .comparison-card.featured { border-color: var(--primary); position: relative; }
+        .comparison-card.featured::before { content: 'Most Popular'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 16px; background: var(--primary); color: white; border-radius: 100px; font-size: 12px; font-weight: 600; }
+        .comparison-card h3 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+        .comparison-card .price { font-size: 40px; font-weight: 900; color: var(--primary); margin-bottom: 24px; }
+        .comparison-card .price span { font-size: 16px; font-weight: 500; color: var(--gray-1); }
+        .comparison-features { margin-bottom: 32px; }
+        .comparison-features li { padding: 12px 0; border-bottom: 1px solid var(--gray-4); display: flex; align-items: center; gap: 12px; font-size: 15px; }
+        .comparison-features li::before { content: '✓'; color: var(--success); font-weight: 700; }
+        @media (max-width: 1024px) { .tools-full-grid .tools-grid { grid-template-columns: repeat(2, 1fr); } .features-comparison { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -182,14 +59,15 @@
     <section class="tools-hero">
         <div class="container">
             <h1>Our SEO Tools</h1>
-            <p>20+ professional tools built with Python. From technical audits to content analysis — everything you need for SEO success.</p>
+            <p>20+ professional tools built with Python. Click any Online tool to use it instantly — no signup required.</p>
         </div>
     </section>
 
     <section class="tools-full-grid">
         <div class="container">
             <div class="tools-categories">
-                <button class="category-btn active" data-category="all">All Tools (20)</button>
+                <button class="category-btn active" data-category="all">All Tools</button>
+                <button class="category-btn" data-category="online">🟢 Online Tools</button>
                 <button class="category-btn" data-category="technical">Technical SEO</button>
                 <button class="category-btn" data-category="content">Content SEO</button>
                 <button class="category-btn" data-category="offpage">Off-Page SEO</button>
@@ -199,12 +77,16 @@
         </div>
     </section>
 
+    <div class="section-divider">
+        <div class="container">
+            <span class="badge">How It Works</span>
+            <h2>Online Tools vs Python Scripts</h2>
+            <p>Online tools work instantly in your browser. Python scripts run on your computer for deeper analysis.</p>
+        </div>
+    </div>
+
     <section class="tool-features">
         <div class="container">
-            <div class="section-header">
-                <h2>Why Choose Our Tools?</h2>
-                <p>Built by an SEO professional, for SEO professionals</p>
-            </div>
             <div class="features-comparison">
                 <div class="comparison-card">
                     <h3>Python Scripts</h3>
@@ -216,7 +98,7 @@
                         <li>No API keys needed (most)</li>
                         <li>Run locally or on server</li>
                     </ul>
-                    <a href="#" class="btn btn-outline" style="width:100%">Download Scripts</a>
+                    <a href="https://github.com/mmetwily1-sudo" class="btn btn-outline" style="width:100%" target="_blank">View on GitHub</a>
                 </div>
                 <div class="comparison-card featured">
                     <h3>Online Tools</h3>
