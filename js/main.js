@@ -25,6 +25,8 @@ const tools = [
     { name: "Content Planner", desc: "Content strategy and calendar planning", icon: "📅", category: "content", tag: "Python" },
     { name: "SEO Score Calculator", desc: "Online SEO score calculator", icon: "📊", category: "automation", tag: "Online", link: "tools/seo-score-calculator.html" },
     { name: "Schema Generator", desc: "Online JSON-LD schema generator", icon: "🔧", category: "technical", tag: "Online", link: "tools/schema-generator.html" },
+    { name: "Meta Tag Analyzer", desc: "Analyze title, description, OG tags", icon: "🏷️", category: "technical", tag: "Online", link: "tools/meta-tag-analyzer.html" },
+    { name: "Heading Structure Checker", desc: "Check H1-H6 hierarchy and SEO", icon: "📑", category: "technical", tag: "Online", link: "tools/heading-structure.html" },
 ];
 
 // Render Tools Grid

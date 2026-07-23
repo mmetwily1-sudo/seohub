@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Meta Tag Analyzer - SEOHUB</title>
+    <meta name="description" content="Analyze any website's meta tags, title, description, Open Graph tags, and more. Free online SEO tool.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .tool-hero { padding: 140px 0 40px; background: linear-gradient(180deg, var(--gray-5) 0%, var(--white) 100%); text-align: center; }
+        .tool-hero h1 { font-size: 42px; font-weight: 900; margin-bottom: 12px; }
+        .tool-hero p { font-size: 18px; color: var(--gray-1); max-width: 600px; margin: 0 auto; }
+        .tool-section { padding: 40px 0 80px; }
+        .tool-form { max-width: 700px; margin: 0 auto 40px; display: flex; gap: 12px; }
+        .tool-input { flex: 1; padding: 16px 20px; border: 2px solid var(--gray-4); border-radius: var(--radius); font-size: 16px; font-family: inherit; transition: var(--transition); }
+        .tool-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
+        .tool-btn { padding: 16px 32px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); white-space: nowrap; }
+        .tool-btn:hover { background: #1d4ed8; }
+        .tool-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #results { display: none; max-width: 800px; margin: 0 auto; }
+        .result-section { padding: 24px; background: var(--gray-5); border-radius: var(--radius-lg); margin-bottom: 20px; }
+        .result-section h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .meta-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--gray-4); }
+        .meta-item:last-child { border-bottom: none; }
+        .meta-label { font-weight: 600; font-size: 14px; color: var(--gray-2); min-width: 140px; }
+        .meta-value { font-size: 14px; color: var(--dark); word-break: break-all; flex: 1; margin-left: 16px; }
+        .meta-value.missing { color: var(--error); font-style: italic; }
+        .meta-preview { background: var(--white); border: 1px solid var(--gray-4); border-radius: var(--radius); padding: 20px; margin-top: 16px; }
+        .meta-preview-title { font-size: 20px; color: #1a0dab; font-weight: 400; margin-bottom: 4px; }
+        .meta-preview-url { font-size: 14px; color: #006621; margin-bottom: 4px; }
+        .meta-preview-desc { font-size: 14px; color: #545454; line-height: 1.5; }
+        .tag-item { padding: 10px 16px; background: var(--white); border-radius: var(--radius); margin-bottom: 8px; font-family: monospace; font-size: 13px; word-break: break-all; border-left: 3px solid var(--primary); }
+        .tag-item.missing { border-left-color: var(--error); opacity: 0.6; }
+        .score-badge { display: inline-block; padding: 4px 12px; border-radius: 100px; font-size: 14px; font-weight: 700; }
+        .score-badge.good { background: #dcfce7; color: #16a34a; }
+        .score-badge.warning { background: #fef3c7; color: #d97706; }
+        .score-badge.poor { background: #fee2e2; color: #dc2626; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="../index.html" class="logo">
+                    <span class="logo-icon">S</span>
+                    <span class="logo-text">SEO<span class="logo-accent">HUB</span></span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../tools.html">Tools</a></li>
+                    <li><a href="../tools/seo-score-calculator.html">Free Tools</a></li>
+                    <li><a href="../about.html">About</a></li>
+                    <li><a href="../blog.html">Blog</a></li>
+                </ul>
+                <div class="nav-cta">
+                    <a href="../tools.html" class="btn btn-primary">Explore Tools</a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <section class="tool-hero">
+        <div class="container">
+            <h1>Meta Tag Analyzer</h1>
+            <p>Analyze title tags, meta descriptions, Open Graph tags, and more for any URL.</p>
+        </div>
+    </section>
+
+    <section class="tool-section">
+        <div class="container">
+            <div class="tool-form">
+                <input type="url" id="url" class="tool-input" placeholder="https://example.com" required>
+                <button id="analyzeBtn" class="tool-btn" onclick="analyzeMeta()">Analyze</button>
+            </div>
+            <div id="results">
+                <div class="result-section">
+                    <h3>🔍 Google Preview</h3>
+                    <div class="meta-preview">
+                        <div id="previewTitle" class="meta-preview-title"></div>
+                        <div id="previewUrl" class="meta-preview-url"></div>
+                        <div id="previewDesc" class="meta-preview-desc"></div>
+                    </div>
+                </div>
+                <div class="result-section">
+                    <h3>📊 Title Tag</h3>
+                    <div class="meta-item">
+                        <span class="meta-label">Content:</span>
+                        <span id="titleContent" class="meta-value"></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Length:</span>
+                        <span id="titleLength" class="meta-value"></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Status:</span>
+                        <span id="titleStatus" class="meta-value"></span>
+                    </div>
+                </div>
+                <div class="result-section">
+                    <h3>📝 Meta Description</h3>
+                    <div class="meta-item">
+                        <span class="meta-label">Content:</span>
+                        <span id="descContent" class="meta-value"></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Length:</span>
+                        <span id="descLength" class="meta-value"></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Status:</span>
+                        <span id="descStatus" class="meta-value"></span>
+                    </div>
+                </div>
+                <div class="result-section">
+                    <h3>🌐 Open Graph Tags</h3>
+                    <div id="ogTags"></div>
+                </div>
+                <div class="result-section">
+                    <h3>🐦 Twitter Cards</h3>
+                    <div id="twitterTags"></div>
+                </div>
+                <div class="result-section">
+                    <h3>🔗 Other Meta Tags</h3>
+                    <div id="otherTags"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Want a Complete SEO Audit?</h2>
+            <p>Try our full SEO Score Calculator for a comprehensive analysis</p>
+            <div class="cta-buttons">
+                <a href="seo-score-calculator.html" class="btn btn-white btn-lg">SEO Score Calculator</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 SEOHUB. Built by Mohamed Metwily.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    document.querySelector('.mobile-menu-btn')?.addEventListener('click', function() {
+        document.querySelector('.nav-links').classList.toggle('active');
+    });
+
+    async function analyzeMeta() {
+        const url = document.getElementById('url').value.trim();
+        if (!url) return;
+        const btn = document.getElementById('analyzeBtn');
+        btn.disabled = true;
+        btn.textContent = 'Analyzing...';
+        document.getElementById('results').style.display = 'none';
+        try {
+            const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const meta = extractMeta(doc, url);
+            displayResults(meta);
+            document.getElementById('results').style.display = 'block';
+        } catch (err) {
+            alert('Error fetching URL. Make sure the URL is valid and accessible.');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Analyze';
+    }
+
+    function extractMeta(doc, url) {
+        const get = (sel) => doc.querySelector(sel)?.content || '';
+        const title = doc.querySelector('title')?.textContent || '';
+        const desc = get('meta[name="description"]');
+        const ogTitle = get('meta[property="og:title"]');
+        const ogDesc = get('meta[property="og:description"]');
+        const ogImage = get('meta[property="og:image"]');
+        const ogType = get('meta[property="og:type"]');
+        const ogUrl = get('meta[property="og:url"]');
+        const twitterCard = get('meta[name="twitter:card"]');
+        const twitterTitle = get('meta[name="twitter:title"]');
+        const twitterDesc = get('meta[name="twitter:description"]');
+        const twitterImage = get('meta[name="twitter:image"]');
+        const canonical = doc.querySelector('link[rel="canonical"]')?.href || '';
+        const robots = get('meta[name="robots"]');
+        const viewport = get('meta[name="viewport"]');
+        const charset = doc.querySelector('meta[charset]')?.getAttribute('charset') || get('meta[http-equiv="Content-Type"]');
+        return { url, title, desc, ogTitle, ogDesc, ogImage, ogType, ogUrl, twitterCard, twitterTitle, twitterDesc, twitterImage, canonical, robots, viewport, charset };
+    }
+
+    function displayResults(meta) {
+        document.getElementById('previewTitle').textContent = meta.title || 'No title';
+        document.getElementById('previewUrl').textContent = meta.url;
+        document.getElementById('previewDesc').textContent = meta.desc || 'No meta description';
+        document.getElementById('titleContent').textContent = meta.title || 'Missing';
+        document.getElementById('titleContent').className = 'meta-value' + (!meta.title ? ' missing' : '');
+        document.getElementById('titleLength').textContent = meta.title ? `${meta.title.length} characters` : 'N/A';
+        const titleLen = meta.title.length;
+        document.getElementById('titleStatus').innerHTML = getStatusBadge(titleLen >= 30 && titleLen <= 60 ? 'good' : titleLen > 0 ? 'warning' : 'poor', titleLen >= 30 && titleLen <= 60 ? 'Optimal' : titleLen > 0 ? 'Non-optimal length' : 'Missing');
+        document.getElementById('descContent').textContent = meta.desc || 'Missing';
+        document.getElementById('descContent').className = 'meta-value' + (!meta.desc ? ' missing' : '');
+        document.getElementById('descLength').textContent = meta.desc ? `${meta.desc.length} characters` : 'N/A';
+        const descLen = meta.desc.length;
+        document.getElementById('descStatus').innerHTML = getStatusBadge(descLen >= 120 && descLen <= 160 ? 'good' : descLen > 0 ? 'warning' : 'poor', descLen >= 120 && descLen <= 160 ? 'Optimal' : descLen > 0 ? 'Non-optimal length' : 'Missing');
+        const ogItems = [{k:'og:title',v:meta.ogTitle},{k:'og:description',v:meta.ogDesc},{k:'og:image',v:meta.ogImage},{k:'og:type',v:meta.ogType},{k:'og:url',v:meta.ogUrl}];
+        document.getElementById('ogTags').innerHTML = ogItems.map(i => `<div class="tag-item${!i.v?' missing':''}"><strong>${i.k}:</strong> ${i.v||'Missing'}</div>`).join('');
+        const twItems = [{k:'twitter:card',v:meta.twitterCard},{k:'twitter:title',v:meta.twitterTitle},{k:'twitter:description',v:meta.twitterDesc},{k:'twitter:image',v:meta.twitterImage}];
+        document.getElementById('twitterTags').innerHTML = twItems.map(i => `<div class="tag-item${!i.v?' missing':''}"><strong>${i.k}:</strong> ${i.v||'Missing'}</div>`).join('');
+        const otherItems = [{k:'canonical',v:meta.canonical},{k:'robots',v:meta.robots||'Not set'},{k:'viewport',v:meta.viewport||'Missing'},{k:'charset',v:meta.charset||'Missing'}];
+        document.getElementById('otherTags').innerHTML = otherItems.map(i => `<div class="tag-item${!i.v?' missing':''}"><strong>${i.k}:</strong> ${i.v||'Missing'}</div>`).join('');
+    }
+
+    function getStatusBadge(type, text) {
+        return `<span class="score-badge ${type}">${text}</span>`;
+    }
+
+    document.getElementById('url').addEventListener('keypress', e => { if (e.key === 'Enter') analyzeMeta(); });
+    </script>
+</body>
+</html>
