@@ -2059,119 +2059,309 @@
         var dash = container.querySelector('.audit-dash');
         if (!dash) return;
 
+        var urlEl = document.getElementById('auditfull-url');
+        var pageUrl = urlEl ? urlEl.value : 'N/A';
+        var now = new Date().toLocaleString();
+
+        var reportCSS =
+            '*{margin:0;padding:0;box-sizing:border-box}' +
+            '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");' +
+            'body{font-family:Inter,Segoe UI,Tahoma,sans-serif;color:#1e293b;line-height:1.6;background:#f8fafc;padding:0;margin:0}' +
+            '.report-wrap{max-width:900px;margin:0 auto;background:#fff}' +
+
+            /* HEADER */
+            '.rpt-header{background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 50%,#3b82f6 100%);color:#fff;padding:48px 40px 40px;text-align:center;position:relative;overflow:hidden}' +
+            '.rpt-header::before{content:"";position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:rgba(255,255,255,.06);border-radius:50%}' +
+            '.rpt-header::after{content:"";position:absolute;bottom:-40px;left:-40px;width:160px;height:160px;background:rgba(255,255,255,.04);border-radius:50%}' +
+            '.rpt-logo{font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;opacity:.8;margin-bottom:16px}' +
+            '.rpt-header h1{font-size:32px;font-weight:900;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,.15)}' +
+            '.rpt-header .rpt-url{font-size:15px;opacity:.85;margin-bottom:6px;word-break:break-all}' +
+            '.rpt-header .rpt-meta{font-size:12px;opacity:.6}' +
+
+            /* BODY */
+            '.rpt-body{padding:36px 40px 48px}' +
+
+            /* SCORE OVERVIEW */
+            '.rpt-score-hero{text-align:center;margin:0 0 32px;padding:32px;background:#f8fafc;border-radius:16px;border:1px solid #e2e8f0}' +
+            '.rpt-score-num{font-size:64px;font-weight:900;line-height:1}' +
+            '.rpt-score-label{font-size:14px;color:#64748b;font-weight:600;margin-top:4px}' +
+            '.rpt-score-grade{display:inline-block;margin-top:8px;padding:4px 16px;border-radius:100px;font-size:13px;font-weight:700;color:#fff}' +
+
+            '.rpt-cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:32px}' +
+            '.rpt-cat{text-align:center;padding:20px 8px;background:#fff;border-radius:12px;border:1px solid #e2e8f0;transition:all .2s}' +
+            '.rpt-cat:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.06)}' +
+            '.rpt-cat-label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px}' +
+            '.rpt-cat-score{font-size:28px;font-weight:900;line-height:1}' +
+            '.rpt-cat-bar{height:5px;background:#e2e8f0;border-radius:3px;margin-top:10px;overflow:hidden}' +
+            '.rpt-cat-fill{height:100%;border-radius:3px}' +
+
+            /* SECTIONS */
+            '.rpt-section{margin-bottom:28px;page-break-inside:avoid}' +
+            '.rpt-section-title{font-size:18px;font-weight:800;color:#1e293b;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e2e8f0;display:flex;align-items:center;gap:10px}' +
+            '.rpt-section-title .rpt-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}' +
+            '.rpt-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}' +
+            '.rpt-card{background:#f8fafc;border-radius:12px;padding:20px;border:1px solid #e2e8f0}' +
+            '.rpt-card h4{font-size:14px;font-weight:700;margin-bottom:12px;color:#1e293b}' +
+
+            /* METRICS */
+            '.rpt-metric{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f1f5f9;font-size:13px}' +
+            '.rpt-metric:last-child{border-bottom:none}' +
+            '.rpt-metric-label{color:#64748b;font-weight:500}' +
+            '.rpt-metric-val{font-weight:700;color:#1e293b}' +
+
+            /* ISSUES */
+            '.rpt-issue{padding:10px 14px;margin-bottom:6px;border-radius:8px;font-size:13px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}' +
+            '.rpt-pass{background:rgba(16,185,129,.07);border-left:3px solid #10b981}' +
+            '.rpt-warn{background:rgba(245,158,11,.07);border-left:3px solid #f59e0b}' +
+            '.rpt-fail{background:rgba(239,68,68,.07);border-left:3px solid #ef4444}' +
+
+            /* BADGES */
+            '.rpt-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700}' +
+            '.rpt-bg{background:rgba(16,185,129,.1);color:#10b981}' +
+            '.rpt-br{background:rgba(239,68,68,.1);color:#ef4444}' +
+            '.rpt-by{background:rgba(245,158,11,.1);color:#f59e0b}' +
+            '.rpt-bb{background:rgba(37,99,235,.1);color:#2563eb}' +
+
+            /* RECOMMENDATIONS */
+            '.rpt-rec{padding:12px 16px;margin-bottom:8px;border-radius:8px;background:#f8fafc;border-left:4px solid #2563eb;font-size:13px;line-height:1.5}' +
+            '.rpt-priority{display:inline-block;padding:2px 10px;border-radius:100px;font-size:10px;font-weight:700;margin-right:8px;text-transform:uppercase;letter-spacing:.5px}' +
+            '.rpt-ph{background:rgba(239,68,68,.1);color:#ef4444}' +
+            '.rpt-pm{background:rgba(245,158,11,.1);color:#f59e0b}' +
+            '.rpt-pl{background:rgba(59,130,246,.1);color:#3b82f6}' +
+
+            /* HEADING TREE */
+            '.rpt-heading{padding:6px 12px;margin:3px 0;background:#fff;border-radius:6px;display:flex;align-items:center;gap:8px;border-left:3px solid #2563eb;font-size:13px}' +
+            '.rpt-htag{padding:1px 7px;background:#2563eb;color:#fff;border-radius:4px;font-size:10px;font-weight:700;font-family:monospace;min-width:24px;text-align:center}' +
+
+            /* TABLES */
+            '.rpt-table{width:100%;border-collapse:collapse;font-size:13px}' +
+            '.rpt-table th{padding:10px 12px;text-align:left;background:#f1f5f9;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;font-weight:700}' +
+            '.rpt-table td{padding:10px 12px;border-bottom:1px solid #f1f5f9}' +
+            '.rpt-table tr:last-child td{border-bottom:none}' +
+
+            /* BAR CHART */
+            '.rpt-chart{display:flex;align-items:flex-end;justify-content:space-around;height:140px;padding:0 10px;border-bottom:2px solid #e2e8f0;margin-top:8px}' +
+            '.rpt-chart-item{display:flex;flex-direction:column;align-items:center;gap:4px}' +
+            '.rpt-chart-val{font-size:13px;font-weight:700}' +
+            '.rpt-chart-bar{width:36px;border-radius:6px 6px 0 0;min-height:4px}' +
+            '.rpt-chart-lbl{font-size:10px;color:#64748b;text-align:center;max-width:56px}' +
+
+            /* ACTION PLAN */
+            '.rpt-week{margin-bottom:20px;padding:16px 20px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;page-break-inside:avoid}' +
+            '.rpt-week-title{font-size:15px;font-weight:700;color:#2563eb;margin-bottom:10px}' +
+            '.rpt-task{padding:6px 0 6px 20px;font-size:13px;position:relative;color:#334155}' +
+            '.rpt-task::before{content:"\\2022";position:absolute;left:4px;color:#2563eb;font-weight:700}' +
+
+            /* FOOTER */
+            '.rpt-footer{padding:24px 40px;background:#f1f5f9;text-align:center;border-top:1px solid #e2e8f0}' +
+            '.rpt-footer p{font-size:11px;color:#94a3b8;line-height:1.6}' +
+            '.rpt-footer a{color:#2563eb;text-decoration:none;font-weight:600}' +
+
+            /* PRINT */
+            '@media print{' +
+                'body{padding:0;background:#fff}' +
+                '.report-wrap{box-shadow:none;border:none}' +
+                '.rpt-section{page-break-inside:avoid}' +
+                '.rpt-header{padding:32px 24px}' +
+                '.rpt-body{padding:24px}' +
+                '.rpt-footer{padding:16px 24px}' +
+            '}' +
+
+            '@media(max-width:768px){' +
+                '.rpt-cat-grid{grid-template-columns:repeat(2,1fr)}' +
+                '.rpt-grid-2{grid-template-columns:1fr}' +
+                '.rpt-header{padding:32px 20px}' +
+                '.rpt-body{padding:20px}' +
+            '}';
+
+        /* --- Build header --- */
+        var headerHtml =
+            '<div class="rpt-header">' +
+                '<div class="rpt-logo">SEOHUB</div>' +
+                '<h1>\uD83D\uDCCA SEO Audit Report</h1>' +
+                '<div class="rpt-url">' + esc(pageUrl) + '</div>' +
+                '<div class="rpt-meta">Generated on ' + now + ' &middot; Powered by SEOHUB - mmetwily1-sudo.github.io/seohub</div>' +
+            '</div>';
+
+        /* --- Extract & transform score section from dash --- */
+        var scoreGrid = dash.querySelector('.audit-score-grid');
+        var scoreCards = scoreGrid ? scoreGrid.querySelectorAll('.audit-score-card') : [];
+        var catHtml = '';
+        var catNames = ['Technical', 'Content', 'Links', 'Images', 'Speed'];
+        var catColors = ['#2563eb', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444'];
+        for (var ci = 0; ci < scoreCards.length && ci < 5; ci++) {
+            var scoreText = scoreCards[ci].querySelector('.asc-score');
+            var scoreVal = scoreText ? scoreText.textContent.replace('%', '').trim() : '0';
+            var barFill = scoreCards[ci].querySelector('.asc-bar-fill');
+            var barW = barFill ? barFill.style.width : '0%';
+            catHtml +=
+                '<div class="rpt-cat">' +
+                    '<div class="rpt-cat-label">' + catNames[ci] + '</div>' +
+                    '<div class="rpt-cat-score" style="color:' + catColors[ci] + ';">' + scoreVal + '%</div>' +
+                    '<div class="rpt-cat-bar"><div class="rpt-cat-fill" style="width:' + barW + ';background:' + catColors[ci] + ';"></div></div>' +
+                '</div>';
+        }
+
+        /* --- Extract overall score from dash header --- */
+        var overallEl = dash.querySelector('.rpt-score-num');
+        if (!overallEl) {
+            var bigScore = dash.querySelector('div[style*="font-size:48px"]');
+            overallEl = bigScore;
+        }
+        var overallVal = '0';
+        var overallColor = '#2563eb';
+        if (overallEl) {
+            overallVal = overallEl.textContent.replace('%', '').trim();
+            overallColor = overallEl.style.color || '#2563eb';
+        }
+        var gradeTxt = overallVal >= 90 ? 'A+' : overallVal >= 80 ? 'A' : overallVal >= 70 ? 'B' : overallVal >= 60 ? 'C' : overallVal >= 50 ? 'D' : 'F';
+        var scoreOverviewHtml =
+            '<div class="rpt-score-hero">' +
+                '<div class="rpt-score-num" style="color:' + overallColor + ';">' + overallVal + '<span style="font-size:28px;">%</span></div>' +
+                '<div class="rpt-score-label">Overall SEO Score</div>' +
+                '<div class="rpt-score-grade" style="background:' + overallColor + ';">Grade ' + gradeTxt + '</div>' +
+            '</div>' +
+            '<div class="rpt-cat-grid">' + catHtml + '</div>';
+
+        /* --- Transform tab sections --- */
+        var tabContents = dash.querySelectorAll('.audit-tab-content');
+        var sectionsHtml = '';
+        var sectionIcons = {
+            'af-overview': ['\uD83D\uDCCB', '#f1f5f9'],
+            'af-technical': ['\u2699\uFE0F', '#eff6ff'],
+            'af-content': ['\uD83D\uDCDD', '#f0fdf4'],
+            'af-links': ['\uD83D\uDD17', '#fefce8'],
+            'af-images': ['\uD83D\uDDBC\uFE0F', '#fdf4ff'],
+            'af-recommendations': ['\u2728', '#fff7ed'],
+            'af-actionplan': ['\uD83D\uDCC5', '#f0f9ff']
+        };
+        var sectionTitles = {
+            'af-overview': 'Overview & Stats',
+            'af-technical': 'Technical Analysis',
+            'af-content': 'Content Analysis',
+            'af-links': 'Link Analysis',
+            'af-images': 'Image Analysis',
+            'af-recommendations': 'Recommendations',
+            'af-actionplan': '4-Week Action Plan'
+        };
+
+        for (var ti = 0; ti < tabContents.length; ti++) {
+            var tc = tabContents[ti];
+            var tcId = tc.id || '';
+            var icon = sectionIcons[tcId] || ['\uD83D\uDCCB', '#f1f5f9'];
+            var title = sectionTitles[tcId] || tcId;
+
+            /* Convert headings to our style */
+            var html = tc.innerHTML;
+
+            /* Transform h4 to section titles */
+            html = html.replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, '<div style="font-size:15px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e2e8f0;color:#1e293b;">$1</div>');
+
+            /* Transform audit-section */
+            html = html.replace(/class="audit-section"/g, 'class="rpt-card"');
+
+            /* Transform audit-metric */
+            html = html.replace(/class="audit-metric"/g, 'class="rpt-metric"');
+            html = html.replace(/class="am-label"/g, 'class="rpt-metric-label"');
+            html = html.replace(/class="am-val"/g, 'class="rpt-metric-val"');
+
+            /* Transform audit-issue classes */
+            html = html.replace(/class="audit-issue ai-pass"/g, 'class="rpt-issue rpt-pass"');
+            html = html.replace(/class="audit-issue ai-warn"/g, 'class="rpt-issue rpt-warn"');
+            html = html.replace(/class="audit-issue ai-fail"/g, 'class="rpt-issue rpt-fail"');
+            html = html.replace(/class="audit-issue"/g, 'class="rpt-issue rpt-pass"');
+
+            /* Transform badges */
+            html = html.replace(/class="audit-badge ab-green"/g, 'class="rpt-badge rpt-bg"');
+            html = html.replace(/class="audit-badge ab-red"/g, 'class="rpt-badge rpt-br"');
+            html = html.replace(/class="audit-badge ab-yellow"/g, 'class="rpt-badge rpt-by"');
+            html = html.replace(/class="audit-badge ab-blue"/g, 'class="rpt-badge rpt-bb"');
+            html = html.replace(/class="audit-badge"/g, 'class="rpt-badge rpt-bb"');
+
+            /* Transform audit-grid-2 */
+            html = html.replace(/class="audit-grid-2"/g, 'class="rpt-grid-2"');
+
+            /* Transform recommendations */
+            html = html.replace(/class="audit-rec"/g, 'class="rpt-rec"');
+            html = html.replace(/class="ar-priority ar-high"/g, 'class="rpt-priority rpt-ph"');
+            html = html.replace(/class="ar-priority ar-medium"/g, 'class="rpt-priority rpt-pm"');
+            html = html.replace(/class="ar-priority ar-low"/g, 'class="rpt-priority rpt-pl"');
+            html = html.replace(/class="ar-priority"/g, 'class="rpt-priority rpt-ph"');
+
+            /* Transform keyword table */
+            html = html.replace(/class="keyword-table"/g, 'class="rpt-table"');
+
+            /* Transform heading items */
+            html = html.replace(/class="heading-item"/g, 'class="rpt-heading"');
+            html = html.replace(/class="htag"/g, 'class="rpt-htag"');
+
+            /* Transform bar chart */
+            html = html.replace(/class="audit-bar-chart"/g, 'class="rpt-chart"');
+            html = html.replace(/class="ab-item"/g, 'class="rpt-chart-item"');
+            html = html.replace(/class="ab-val"/g, 'class="rpt-chart-val"');
+            html = html.replace(/class="ab-rect"/g, 'class="rpt-chart-bar"');
+            html = html.replace(/class="ab-lbl"/g, 'class="rpt-chart-lbl"');
+
+            /* Fix CSS variable references in inline styles */
+            html = html.replace(/var\(--gray-1\)/g, '#64748b');
+            html = html.replace(/var\(--gray-2\)/g, '#94a3b8');
+            html = html.replace(/var\(--gray-4\)/g, '#e2e8f0');
+            html = html.replace(/var\(--gray-5\)/g, '#f1f5f9');
+            html = html.replace(/var\(--white\)/g, '#ffffff');
+            html = html.replace(/var\(--primary\)/g, '#2563eb');
+            html = html.replace(/var\(--primary-dark\)/g, '#1d4ed8');
+            html = html.replace(/var\(--radius\)/g, '12px');
+            html = html.replace(/var\(--radius-lg\)/g, '16px');
+
+            /* Action plan - style week blocks */
+            if (tcId === 'af-actionplan') {
+                html = html.replace(/<div[^>]*style="margin-bottom:20px;"[^>]*><h4[^>]*>/g, '<div class="rpt-week"><div class="rpt-week-title">');
+                html = html.replace(/<\/h4><\/div>/g, '</div></div>');
+                html = html.replace(/class="audit-issue ai-pass">/g, 'class="rpt-task">');
+            }
+
+            sectionsHtml +=
+                '<div class="rpt-section">' +
+                    '<div class="rpt-section-title">' +
+                        '<span class="rpt-icon" style="background:' + icon[1] + ';">' + icon[0] + '</span>' +
+                        title +
+                    '</div>' +
+                    html +
+                '</div>';
+        }
+
+        /* --- Assemble full report --- */
+        var reportHtml =
+            '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+            '<title>SEO Audit Report - ' + esc(pageUrl) + '</title>' +
+            '<style>' + reportCSS + '</style>' +
+            '</head><body>' +
+            '<div class="report-wrap">' +
+                headerHtml +
+                '<div class="rpt-body">' +
+                    scoreOverviewHtml +
+                    sectionsHtml +
+                '</div>' +
+                '<div class="rpt-footer">' +
+                    '<p>Report generated by <a href="https://mmetwily1-sudo.github.io/seohub" target="_blank">SEOHUB</a> &middot; Built by Mohamed Metwily</p>' +
+                    '<p>' + now + '</p>' +
+                '</div>' +
+            '</div>' +
+            '</body></html>';
+
         if (mode === 'print') {
             var printWin = window.open('', '_blank');
             if (!printWin) { alert('Please allow popups to print the report.'); return; }
-            printWin.document.write(
-                '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
-                '<title>SEO Audit Report</title><style>' +
-                '*{margin:0;padding:0;box-sizing:border-box}' +
-                'body{font-family:Segoe UI,Tahoma,sans-serif;padding:24px;color:#1a1a2e;line-height:1.6}' +
-                '.audit-dash{max-width:100%}' +
-                '.audit-score-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}' +
-                '.audit-score-card{background:#fff;border-radius:8px;padding:20px 12px;text-align:center;border:1px solid #e5e7eb}' +
-                '.asc-label{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}' +
-                '.asc-score{font-size:32px;font-weight:900;line-height:1}' +
-                '.asc-bar{height:6px;background:#e5e7eb;border-radius:3px;margin-top:10px;overflow:hidden}' +
-                '.asc-bar-fill{height:100%;border-radius:3px}' +
-                '.audit-tabs{display:none!important}' +
-                '.audit-tab-content{display:block!important;margin-bottom:24px}' +
-                '.audit-tab-content h3{font-size:18px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e5e7eb}' +
-                '.audit-issue-list{list-style:none;padding:0}' +
-                '.audit-issue-list li{padding:8px 12px;border-left:4px solid #e5e7eb;margin-bottom:8px;background:#f9fafb;border-radius:0 6px 6px 0;font-size:14px}' +
-                '.issue-pass{border-left-color:#10b981}' +
-                '.issue-warn{border-left-color:#f59e0b}' +
-                '.issue-fail{border-left-color:#ef4444}' +
-                '.audit-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}' +
-                '.audit-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:600}' +
-                '.ab-green{background:rgba(16,185,129,.1);color:#10b981}.ab-red{background:rgba(239,68,68,.1);color:#ef4444}' +
-                '.ab-yellow{background:rgba(245,158,11,.1);color:#f59e0b}.ab-blue{background:rgba(59,130,246,.1);color:#3b82f6}' +
-                '.audit-bar-chart{display:flex;align-items:flex-end;justify-content:space-around;height:160px;padding:0 10px;border-bottom:2px solid #e5e7eb;margin-top:10px}' +
-                '.ab-item{display:flex;flex-direction:column;align-items:center;gap:6px}' +
-                '.ab-rect{width:40px;border-radius:6px 6px 0 0;min-height:4px}' +
-                '.ab-val{font-size:14px;font-weight:700}' +
-                '.ab-lbl{font-size:11px;color:#6b7280;text-align:center;max-width:60px}' +
-                '.audit-rec{padding:12px;border-radius:8px;margin-bottom:10px;background:#f9fafb;border-left:4px solid #3b82f6}' +
-                '.ar-priority{display:inline-block;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-right:8px}' +
-                '.ar-high{background:rgba(239,68,68,.1);color:#ef4444}' +
-                '.ar-medium{background:rgba(245,158,11,.1);color:#f59e0b}' +
-                '.ar-low{background:rgba(59,130,246,.1);color:#3b82f6}' +
-                '.audit-kw-freq{width:100%;border-collapse:collapse}' +
-                '.audit-kw-freq th,.audit-kw-freq td{padding:6px 12px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px}' +
-                '.audit-kw-freq th{background:#f3f4f6;font-weight:600}' +
-                '@media(max-width:768px){.audit-score-grid{grid-template-columns:repeat(2,1fr)}.audit-grid-2{grid-template-columns:1fr}}' +
-                '</style></head><body>' +
-                '<div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #e5e7eb">' +
-                    '<h1 style="font-size:22px;margin-bottom:4px">SEO Audit Report | \u062a\u0642\u0631\u064a\u0631 \u0641\u062d\u0635 SEO</h1>' +
-                    '<p style="color:#6b7280;font-size:13px">Generated by SEOHUB - mmetwily1-sudo.github.io/seohub</p>' +
-                    '<p style="color:#6b7280;font-size:12px">' + new Date().toLocaleString() + '</p>' +
-                '</div>' +
-                dash.innerHTML +
-                '<script>window.onload=function(){setTimeout(function(){window.print();},500)}<\/script>' +
-                '</body></html>'
-            );
+            printWin.document.write(reportHtml);
             printWin.document.close();
+            setTimeout(function() { printWin.print(); }, 600);
             return;
         }
-
-        var fullCss =
-            '<style>' +
-            '*{margin:0;padding:0;box-sizing:border-box}' +
-            'body{font-family:Segoe UI,Tahoma,sans-serif;padding:30px;color:#1a1a2e;line-height:1.6;background:#f8fafc}' +
-            '.audit-dash{max-width:960px;margin:0 auto;background:#fff;padding:30px;border-radius:12px;box-shadow:0 2px 20px rgba(0,0,0,.08)}' +
-            '.audit-score-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}' +
-            '.audit-score-card{background:#fff;border-radius:8px;padding:20px 12px;text-align:center;border:1px solid #e5e7eb}' +
-            '.asc-label{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}' +
-            '.asc-score{font-size:32px;font-weight:900;line-height:1}' +
-            '.asc-bar{height:6px;background:#e5e7eb;border-radius:3px;margin-top:10px;overflow:hidden}' +
-            '.asc-bar-fill{height:100%;border-radius:3px}' +
-            '.audit-tabs{display:none!important}' +
-            '.audit-tab-content{display:block!important;margin-bottom:28px}' +
-            '.audit-tab-content h3{font-size:20px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #e5e7eb}' +
-            '.audit-issue-list{list-style:none;padding:0}' +
-            '.audit-issue-list li{padding:10px 14px;border-left:4px solid #e5e7eb;margin-bottom:8px;background:#f9fafb;border-radius:0 6px 6px 0;font-size:14px}' +
-            '.issue-pass{border-left-color:#10b981}' +
-            '.issue-warn{border-left-color:#f59e0b}' +
-            '.issue-fail{border-left-color:#ef4444}' +
-            '.audit-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}' +
-            '.audit-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:600}' +
-            '.ab-green{background:rgba(16,185,129,.1);color:#10b981}.ab-red{background:rgba(239,68,68,.1);color:#ef4444}' +
-            '.ab-yellow{background:rgba(245,158,11,.1);color:#f59e0b}.ab-blue{background:rgba(59,130,246,.1);color:#3b82f6}' +
-            '.audit-bar-chart{display:flex;align-items:flex-end;justify-content:space-around;height:160px;padding:0 10px;border-bottom:2px solid #e5e7eb;margin-top:10px}' +
-            '.ab-item{display:flex;flex-direction:column;align-items:center;gap:6px}' +
-            '.ab-rect{width:40px;border-radius:6px 6px 0 0;min-height:4px}' +
-            '.ab-val{font-size:14px;font-weight:700}' +
-            '.ab-lbl{font-size:11px;color:#6b7280;text-align:center;max-width:60px}' +
-            '.audit-rec{padding:12px;border-radius:8px;margin-bottom:10px;background:#f9fafb;border-left:4px solid #3b82f6}' +
-            '.ar-priority{display:inline-block;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-right:8px}' +
-            '.ar-high{background:rgba(239,68,68,.1);color:#ef4444}' +
-            '.ar-medium{background:rgba(245,158,11,.1);color:#f59e0b}' +
-            '.ar-low{background:rgba(59,130,246,.1);color:#3b82f6}' +
-            '.audit-kw-freq{width:100%;border-collapse:collapse}' +
-            '.audit-kw-freq th,.audit-kw-freq td{padding:6px 12px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px}' +
-            '.audit-kw-freq th{background:#f3f4f6;font-weight:600}' +
-            '@media(max-width:768px){.audit-score-grid{grid-template-columns:repeat(2,1fr)}.audit-grid-2{grid-template-columns:1fr}}' +
-            '</style>';
-
-        var reportHtml =
-            '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
-            '<title>SEO Audit Report</title>' +
-            fullCss +
-            '</head><body>' +
-            '<div class="audit-dash">' +
-                '<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #e5e7eb">' +
-                    '<h1 style="font-size:24px;margin-bottom:4px">&#128200; SEO Audit Report</h1>' +
-                    '<p style="color:#6b7280;font-size:13px">Generated by SEOHUB &middot; mmetwily1-sudo.github.io/seohub</p>' +
-                    '<p style="color:#6b7280;font-size:12px">' + new Date().toLocaleString() + '</p>' +
-                '</div>' +
-                dash.innerHTML +
-            '</div>' +
-            '</body></html>';
 
         var blob = new Blob([reportHtml], { type: 'text/html;charset=utf-8' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'seo-audit-report.html';
+        a.download = 'seo-audit-report-' + new Date().toISOString().slice(0, 10) + '.html';
         a.click();
         URL.revokeObjectURL(a.href);
     }
