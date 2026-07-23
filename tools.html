@@ -1,98 +1,120 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free SEO Tools - SEOHUB</title>
-    <meta name="description" content="Free online SEO tools: Score Calculator, Meta Tag Analyzer, Heading Checker, Schema Generator. Instant results, no signup.">
+    <meta name="description" content="Free online SEO tools: Score Calculator, Meta Tag Analyzer, Heading Checker, Schema Generator, Technical Audit, Speed Test, Content Analysis, and more.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .tools-hero { padding: 120px 0 40px; background: linear-gradient(180deg, var(--gray-5) 0%, var(--white) 100%); text-align: center; }
-        .tools-hero h1 { font-size: 42px; font-weight: 900; margin-bottom: 12px; }
-        .tools-hero p { font-size: 17px; color: var(--gray-1); max-width: 600px; margin: 0 auto; }
-        .tool-tabs { display: flex; justify-content: center; gap: 8px; padding: 20px 0 0; flex-wrap: wrap; }
-        .tool-tab { padding: 12px 24px; border: 2px solid var(--gray-4); border-radius: 100px; background: var(--white); font-weight: 600; cursor: pointer; transition: var(--transition); font-size: 15px; display: flex; align-items: center; gap: 8px; }
-        .tool-tab:hover { border-color: var(--primary); color: var(--primary); }
-        .tool-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .tool-tab-icon { font-size: 18px; }
-        .tools-body { padding: 40px 0 80px; }
-        .tool-panel { display: none; max-width: 900px; margin: 0 auto; }
-        .tool-panel.active { display: block; }
-        .tool-input-row { display: flex; gap: 12px; margin-bottom: 32px; }
-        .tool-input { flex: 1; padding: 16px 20px; border: 2px solid var(--gray-4); border-radius: var(--radius); font-size: 16px; font-family: inherit; transition: var(--transition); }
-        .tool-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
-        .tool-go-btn { padding: 16px 32px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); white-space: nowrap; }
-        .tool-go-btn:hover { background: var(--primary-dark); }
-        .tool-go-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .tool-output { background: var(--gray-5); border-radius: var(--radius-lg); padding: 32px; min-height: 200px; }
-        .tool-output h3 { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-        .tool-loading { text-align: center; padding: 40px; color: var(--gray-1); }
-        .tool-loading .spinner { width: 40px; height: 40px; border: 4px solid var(--gray-4); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .score-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--gray-4); }
-        .score-row:last-child { border-bottom: none; }
-        .score-label { font-weight: 500; font-size: 15px; }
-        .score-val { font-weight: 700; font-size: 15px; }
-        .score-val.good { color: #10b981; }
-        .score-val.warn { color: #f59e0b; }
-        .score-val.bad { color: #ef4444; }
-        .score-bar { width: 100px; height: 6px; background: var(--gray-4); border-radius: 3px; overflow: hidden; margin-left: 12px; }
-        .score-bar-fill { height: 100%; border-radius: 3px; }
-        .issue-item { padding: 12px 16px; margin-bottom: 8px; border-radius: var(--radius); display: flex; align-items: flex-start; gap: 10px; font-size: 14px; }
-        .issue-pass { background: rgba(16,185,129,0.08); border-left: 3px solid #10b981; }
-        .issue-warn { background: rgba(245,158,11,0.08); border-left: 3px solid #f59e0b; }
-        .issue-fail { background: rgba(239,68,68,0.08); border-left: 3px solid #ef4444; }
-        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
-        .meta-box { padding: 16px; background: var(--white); border-radius: var(--radius); }
-        .meta-box label { display: block; font-size: 12px; color: var(--gray-1); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600; }
-        .meta-box .val { font-weight: 600; font-size: 14px; word-break: break-all; }
-        .tag-row { padding: 10px 14px; background: var(--white); border-radius: var(--radius); margin-bottom: 6px; font-family: monospace; font-size: 13px; word-break: break-all; border-left: 3px solid var(--primary); }
-        .tag-row.miss { border-left-color: var(--danger); opacity: 0.6; }
-        .heading-item { padding: 8px 14px; margin: 3px 0; background: var(--white); border-radius: var(--radius); display: flex; align-items: center; gap: 10px; border-left: 3px solid var(--primary); font-size: 14px; }
-        .heading-item.lv2 { margin-left: 20px; border-left-color: #8b5cf6; }
-        .heading-item.lv3 { margin-left: 40px; border-left-color: #10b981; }
-        .heading-item.lv4 { margin-left: 60px; border-left-color: #f59e0b; }
-        .htag { padding: 2px 8px; background: var(--primary); color: white; border-radius: 4px; font-size: 11px; font-weight: 700; font-family: monospace; min-width: 26px; text-align: center; }
-        .heading-item.lv2 .htag { background: #8b5cf6; }
-        .heading-item.lv3 .htag { background: #10b981; }
-        .heading-item.lv4 .htag { background: #f59e0b; }
-        .schema-type-select { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-        .schema-btn { padding: 8px 16px; border: 2px solid var(--gray-4); border-radius: 100px; background: var(--white); font-weight: 500; cursor: pointer; transition: var(--transition); font-size: 14px; }
-        .schema-btn:hover { border-color: var(--primary); }
-        .schema-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .schema-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-        .schema-form .full { grid-column: span 2; }
-        .schema-form input, .schema-form textarea { width: 100%; padding: 12px 16px; border: 2px solid var(--gray-4); border-radius: var(--radius); font-size: 14px; font-family: inherit; transition: var(--transition); }
-        .schema-form input:focus, .schema-form textarea:focus { outline: none; border-color: var(--primary); }
-        .schema-form label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 4px; color: var(--gray-2); }
-        .schema-output { background: var(--dark); color: #e2e8f0; padding: 20px; border-radius: var(--radius); font-family: monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; position: relative; max-height: 400px; overflow-y: auto; }
-        .copy-btn { position: absolute; top: 8px; right: 8px; padding: 6px 14px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-size: 12px; font-weight: 600; cursor: pointer; }
-        .copy-btn:hover { background: var(--primary-dark); }
-        .score-circle-wrap { display: flex; align-items: center; gap: 32px; margin-bottom: 24px; }
-        .score-circle-svg { width: 120px; height: 120px; flex-shrink: 0; }
-        .score-circle-svg circle { fill: none; stroke-width: 8; stroke-linecap: round; }
-        .score-circle-bg { stroke: var(--gray-4); }
-        .score-circle-fill { stroke: var(--primary); stroke-dasharray: 283; transition: stroke-dashoffset 1s ease; transform: rotate(-90deg); transform-origin: center; }
-        .score-big { font-size: 36px; font-weight: 900; }
-        .score-sub { font-size: 14px; color: var(--gray-1); }
-        .google-preview { background: var(--white); border: 1px solid var(--gray-4); border-radius: var(--radius); padding: 20px; margin-top: 16px; }
-        .gp-title { font-size: 18px; color: #1a0dab; font-weight: 400; margin-bottom: 3px; }
-        .gp-url { font-size: 13px; color: #006621; margin-bottom: 3px; }
-        .gp-desc { font-size: 13px; color: #545454; line-height: 1.4; }
-        .schema-section { margin-bottom: 24px; }
-        .schema-section h4 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
-        @media (max-width: 768px) {
-            .tool-input-row { flex-direction: column; }
-            .meta-grid { grid-template-columns: 1fr; }
-            .schema-form { grid-template-columns: 1fr; }
-            .schema-form .full { grid-column: span 1; }
-            .score-circle-wrap { flex-direction: column; text-align: center; }
-            .tool-tab { padding: 10px 16px; font-size: 14px; }
-        }
+        .tools-hero{padding:120px 0 30px;background:linear-gradient(180deg,var(--gray-5) 0%,var(--white) 100%);text-align:center}
+        .tools-hero h1{font-size:42px;font-weight:900;margin-bottom:12px}
+        .tools-hero p{font-size:17px;color:var(--gray-1);max-width:600px;margin:0 auto}
+        .tool-tabs{display:flex;justify-content:center;gap:6px;padding:20px 0 0;flex-wrap:wrap}
+        .tool-tab{padding:10px 18px;border:2px solid var(--gray-4);border-radius:100px;background:var(--white);font-weight:600;cursor:pointer;transition:var(--transition);font-size:14px;display:flex;align-items:center;gap:6px}
+        .tool-tab:hover{border-color:var(--primary);color:var(--primary)}
+        .tool-tab.active{background:var(--primary);color:white;border-color:var(--primary)}
+        .tool-tab-icon{font-size:16px}
+        .tools-body{padding:40px 0 80px}
+        .tool-panel{display:none;max-width:900px;margin:0 auto}
+        .tool-panel.active{display:block}
+        .tool-input-row{display:flex;gap:12px;margin-bottom:32px}
+        .tool-input{flex:1;padding:16px 20px;border:2px solid var(--gray-4);border-radius:var(--radius);font-size:16px;font-family:inherit;transition:var(--transition)}
+        .tool-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(37,99,235,0.1)}
+        .tool-go-btn{padding:16px 32px;background:var(--primary);color:white;border:none;border-radius:var(--radius);font-size:16px;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap}
+        .tool-go-btn:hover{background:var(--primary-dark)}
+        .tool-go-btn:disabled{opacity:0.5;cursor:not-allowed}
+        .tool-output{background:var(--gray-5);border-radius:var(--radius-lg);padding:32px;min-height:200px}
+        .tool-output h3{font-size:20px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+        .tool-loading{text-align:center;padding:40px;color:var(--gray-1)}
+        .tool-loading .spinner{width:40px;height:40px;border:4px solid var(--gray-4);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .score-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--gray-4)}
+        .score-row:last-child{border-bottom:none}
+        .score-label{font-weight:500;font-size:15px}
+        .score-val{font-weight:700;font-size:15px}
+        .score-val.good{color:#10b981}.score-val.warn{color:#f59e0b}.score-val.bad{color:#ef4444}
+        .issue-item{padding:12px 16px;margin-bottom:8px;border-radius:var(--radius);display:flex;align-items:flex-start;gap:10px;font-size:14px}
+        .issue-pass{background:rgba(16,185,129,0.08);border-left:3px solid #10b981}
+        .issue-warn{background:rgba(245,158,11,0.08);border-left:3px solid #f59e0b}
+        .issue-fail{background:rgba(239,68,68,0.08);border-left:3px solid #ef4444}
+        .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+        .meta-box{padding:16px;background:var(--white);border-radius:var(--radius)}
+        .meta-box label{display:block;font-size:12px;color:var(--gray-1);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;font-weight:600}
+        .meta-box .val{font-weight:600;font-size:14px;word-break:break-all}
+        .tag-row{padding:10px 14px;background:var(--white);border-radius:var(--radius);margin-bottom:6px;font-family:monospace;font-size:13px;word-break:break-all;border-left:3px solid var(--primary)}
+        .tag-row.miss{border-left-color:var(--danger);opacity:0.6}
+        .heading-item{padding:8px 14px;margin:3px 0;background:var(--white);border-radius:var(--radius);display:flex;align-items:center;gap:10px;border-left:3px solid var(--primary);font-size:14px}
+        .heading-item.lv2{margin-left:20px;border-left-color:#8b5cf6}
+        .heading-item.lv3{margin-left:40px;border-left-color:#10b981}
+        .heading-item.lv4{margin-left:60px;border-left-color:#f59e0b}
+        .htag{padding:2px 8px;background:var(--primary);color:white;border-radius:4px;font-size:11px;font-weight:700;font-family:monospace;min-width:26px;text-align:center}
+        .heading-item.lv2 .htag{background:#8b5cf6}
+        .heading-item.lv3 .htag{background:#10b981}
+        .heading-item.lv4 .htag{background:#f59e0b}
+        .schema-type-select{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+        .schema-btn{padding:8px 16px;border:2px solid var(--gray-4);border-radius:100px;background:var(--white);font-weight:500;cursor:pointer;transition:var(--transition);font-size:14px}
+        .schema-btn:hover{border-color:var(--primary)}
+        .schema-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+        .schema-form{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+        .schema-form .full{grid-column:span 2}
+        .schema-form input,.schema-form textarea{width:100%;padding:12px 16px;border:2px solid var(--gray-4);border-radius:var(--radius);font-size:14px;font-family:inherit;transition:var(--transition)}
+        .schema-form input:focus,.schema-form textarea:focus{outline:none;border-color:var(--primary)}
+        .schema-form label{display:block;font-weight:600;font-size:13px;margin-bottom:4px;color:var(--gray-2)}
+        .schema-output-code{background:var(--dark);color:#e2e8f0;padding:20px;border-radius:var(--radius);font-family:monospace;font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-all;position:relative;max-height:400px;overflow-y:auto}
+        .copy-btn{position:absolute;top:8px;right:8px;padding:6px 14px;background:var(--primary);color:white;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer}
+        .copy-btn:hover{background:var(--primary-dark)}
+        .score-circle-wrap{display:flex;align-items:center;gap:32px;margin-bottom:24px}
+        .score-circle-svg{width:120px;height:120px;flex-shrink:0}
+        .score-circle-svg circle{fill:none;stroke-width:8;stroke-linecap:round}
+        .score-circle-bg{stroke:var(--gray-4)}
+        .score-circle-fill{stroke:var(--primary);stroke-dasharray:283;transition:stroke-dashoffset 1s ease;transform:rotate(-90deg);transform-origin:center}
+        .score-big{font-size:36px;font-weight:900}
+        .score-sub{font-size:14px;color:var(--gray-1)}
+        .google-preview{background:var(--white);border:1px solid var(--gray-4);border-radius:var(--radius);padding:20px;margin-top:16px}
+        .gp-title{font-size:18px;color:#1a0dab;font-weight:400;margin-bottom:3px}
+        .gp-url{font-size:13px;color:#006621;margin-bottom:3px}
+        .gp-desc{font-size:13px;color:#545454;line-height:1.4}
+        .schema-section{margin-bottom:24px}
+        .schema-section h4{font-size:16px;font-weight:700;margin-bottom:12px}
+        .audit-stat{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+        .audit-stat-card{flex:1;min-width:100px;padding:20px;background:var(--white);border-radius:var(--radius);text-align:center;border:1px solid var(--gray-4)}
+        .audit-stat-card .num{display:block;font-size:28px;font-weight:900}
+        .audit-stat-card .lbl{font-size:13px;color:var(--gray-1)}
+        .speed-metric{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--gray-4)}
+        .speed-metric:last-child{border-bottom:none}
+        .speed-bar{width:120px;height:8px;background:var(--gray-4);border-radius:4px;overflow:hidden}
+        .speed-bar-fill{height:100%;border-radius:4px;transition:width 0.5s}
+        .keyword-table{width:100%;border-collapse:collapse;margin-top:16px}
+        .keyword-table th{text-align:left;padding:10px 12px;background:var(--white);border-bottom:2px solid var(--gray-4);font-size:13px;color:var(--gray-1);text-transform:uppercase;letter-spacing:0.5px}
+        .keyword-table td{padding:10px 12px;border-bottom:1px solid var(--gray-4);font-size:14px}
+        .keyword-table tr:hover td{background:var(--white)}
+        .img-table{width:100%;border-collapse:collapse;margin-top:16px}
+        .img-table th{text-align:left;padding:10px 12px;background:var(--white);border-bottom:2px solid var(--gray-4);font-size:13px;color:var(--gray-1)}
+        .img-table td{padding:10px 12px;border-bottom:1px solid var(--gray-4);font-size:13px;word-break:break-all}
+        .img-preview{width:48px;height:48px;object-fit:cover;border-radius:6px;background:var(--gray-4)}
+        .link-table{width:100%;border-collapse:collapse;margin-top:16px}
+        .link-table th{text-align:left;padding:10px 12px;background:var(--white);border-bottom:2px solid var(--gray-4);font-size:13px;color:var(--gray-1)}
+        .link-table td{padding:10px 12px;border-bottom:1px solid var(--gray-4);font-size:13px;word-break:break-all}
+        .badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:600}
+        .badge-green{background:rgba(16,185,129,0.1);color:#10b981}
+        .badge-yellow{background:rgba(245,158,11,0.1);color:#f59e0b}
+        .badge-red{background:rgba(239,68,68,0.1);color:#ef4444}
+        .badge-blue{background:rgba(37,99,235,0.1);color:#2563eb}
+        .report-section{margin-bottom:28px;padding:24px;background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--gray-4)}
+        .report-section h4{font-size:16px;font-weight:700;margin-bottom:14px}
+        .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px}
+        .compare-box{padding:16px;background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-4)}
+        .compare-box h4{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--primary)}
+        .robots-form{display:grid;gap:12px;margin-top:16px}
+        .robots-row{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--white);border-radius:var(--radius)}
+        .robots-row label{font-weight:600;font-size:14px;min-width:120px}
+        .robots-row select,.robots-row input{flex:1;padding:8px 12px;border:2px solid var(--gray-4);border-radius:var(--radius);font-size:14px;font-family:inherit}
+        .robots-row select:focus,.robots-row input:focus{outline:none;border-color:var(--primary)}
+        @media(max-width:768px){.tool-input-row{flex-direction:column}.meta-grid,.compare-grid{grid-template-columns:1fr}.schema-form{grid-template-columns:1fr}.schema-form .full{grid-column:span 1}.score-circle-wrap{flex-direction:column;text-align:center}.tool-tab{padding:8px 12px;font-size:13px}}
     </style>
-</head>
-<body>
+</head><body>
     <header class="header">
         <div class="container">
             <nav class="nav">
@@ -119,76 +141,158 @@
             <h1>Free SEO Tools</h1>
             <p>Analyze any website instantly. No signup, no API keys — just paste a URL and get results.</p>
             <div class="tool-tabs">
-                <button class="tool-tab active" onclick="showTab('score',this)"><span class="tool-tab-icon">📊</span> SEO Score</button>
-                <button class="tool-tab" onclick="showTab('meta',this)"><span class="tool-tab-icon">🏷️</span> Meta Tags</button>
-                <button class="tool-tab" onclick="showTab('headings',this)"><span class="tool-tab-icon">📑</span> Headings</button>
-                <button class="tool-tab" onclick="showTab('schema',this)"><span class="tool-tab-icon">🔧</span> Schema</button>
+                <button class="tool-tab active" onclick="showTab('score',this)"><span class="tool-tab-icon">&#128202;</span> Score</button>
+                <button class="tool-tab" onclick="showTab('meta',this)"><span class="tool-tab-icon">&#127991;</span> Meta</button>
+                <button class="tool-tab" onclick="showTab('headings',this)"><span class="tool-tab-icon">&#128209;</span> Headings</button>
+                <button class="tool-tab" onclick="showTab('schema',this)"><span class="tool-tab-icon">&#128295;</span> Schema</button>
+                <button class="tool-tab" onclick="showTab('audit',this)"><span class="tool-tab-icon">&#128269;</span> Audit</button>
+                <button class="tool-tab" onclick="showTab('speed',this)"><span class="tool-tab-icon">&#9889;</span> Speed</button>
+                <button class="tool-tab" onclick="showTab('content',this)"><span class="tool-tab-icon">&#128221;</span> Content</button>
+                <button class="tool-tab" onclick="showTab('keywords',this)"><span class="tool-tab-icon">&#128273;</span> Keywords</button>
+                <button class="tool-tab" onclick="showTab('images',this)"><span class="tool-tab-icon">&#128444;</span> Images</button>
+                <button class="tool-tab" onclick="showTab('links',this)"><span class="tool-tab-icon">&#128279;</span> Links</button>
+                <button class="tool-tab" onclick="showTab('robots',this)"><span class="tool-tab-icon">&#129302;</span> Robots</button>
+                <button class="tool-tab" onclick="showTab('sitemap',this)"><span class="tool-tab-icon">&#128506;</span> Sitemap</button>
+                <button class="tool-tab" onclick="showTab('competitor',this)"><span class="tool-tab-icon">&#127919;</span> Competitor</button>
+                <button class="tool-tab" onclick="showTab('report',this)"><span class="tool-tab-icon">&#128196;</span> Report</button>
             </div>
         </div>
-    </section>
-
-    <section class="tools-body">
+    </section>    <section class="tools-body">
         <div class="container">
-
-            <!-- TAB 1: SEO Score Calculator -->
             <div class="tool-panel active" id="tab-score">
                 <div class="tool-input-row">
                     <input type="url" id="score-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runScore()">
                     <button class="tool-go-btn" onclick="runScore()">Analyze</button>
                 </div>
-                <div class="tool-output" id="score-output">
-                    <div class="tool-loading"><p>Paste a URL above and click Analyze</p></div>
-                </div>
+                <div class="tool-output" id="score-output"><div class="tool-loading"><p>Paste a URL above and click Analyze</p></div></div>
             </div>
-
-            <!-- TAB 2: Meta Tag Analyzer -->
             <div class="tool-panel" id="tab-meta">
                 <div class="tool-input-row">
                     <input type="url" id="meta-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runMeta()">
                     <button class="tool-go-btn" onclick="runMeta()">Analyze Meta Tags</button>
                 </div>
-                <div class="tool-output" id="meta-output">
-                    <div class="tool-loading"><p>Paste a URL above and click Analyze</p></div>
-                </div>
+                <div class="tool-output" id="meta-output"><div class="tool-loading"><p>Paste a URL above and click Analyze</p></div></div>
             </div>
-
-            <!-- TAB 3: Heading Checker -->
             <div class="tool-panel" id="tab-headings">
                 <div class="tool-input-row">
                     <input type="url" id="head-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runHeadings()">
                     <button class="tool-go-btn" onclick="runHeadings()">Check Headings</button>
                 </div>
-                <div class="tool-output" id="head-output">
-                    <div class="tool-loading"><p>Paste a URL above and click Check Headings</p></div>
-                </div>
+                <div class="tool-output" id="head-output"><div class="tool-loading"><p>Paste a URL above and click Check Headings</p></div></div>
             </div>
-
-            <!-- TAB 4: Schema Generator -->
             <div class="tool-panel" id="tab-schema">
                 <div class="tool-output" id="schema-output">
-                    <h3>🔧 Schema Generator</h3>
+                    <h3>&#128295; Schema Generator</h3>
                     <p style="color:var(--gray-1);margin-bottom:20px;">Select a type and fill in the fields to generate JSON-LD structured data.</p>
                     <div class="schema-type-select">
                         <button class="schema-btn active" onclick="setSchemaType('Organization',this)">Organization</button>
                         <button class="schema-btn" onclick="setSchemaType('Article',this)">Article</button>
                         <button class="schema-btn" onclick="setSchemaType('Product',this)">Product</button>
                         <button class="schema-btn" onclick="setSchemaType('FAQPage',this)">FAQ</button>
-                        <button class="schema-btn" onclick="setSchemaType('LocalBusiness',this)">Local Business</button>
+                        <button class="schema-btn" onclick="setSchemaType('LocalBusiness',this)">LocalBusiness</button>
                         <button class="schema-btn" onclick="setSchemaType('Person',this)">Person</button>
+                        <button class="schema-btn" onclick="setSchemaType('BreadcrumbList',this)">BreadcrumbList</button>
                     </div>
                     <div class="schema-form" id="schema-form"></div>
                     <button class="tool-go-btn" onclick="generateSchema()" style="margin-bottom:20px;">Generate JSON-LD</button>
-                    <div class="schema-output" id="schema-code" style="display:none;">
+                    <div class="schema-output-code" id="schema-code" style="display:none;">
                         <button class="copy-btn" onclick="copySchema()">Copy</button>
                         <pre id="schema-pre"></pre>
                     </div>
                 </div>
             </div>
-
+            <div class="tool-panel" id="tab-audit">
+                <div class="tool-input-row">
+                    <input type="url" id="audit-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runAudit()">
+                    <button class="tool-go-btn" onclick="runAudit()">Run Audit</button>
+                </div>
+                <div class="tool-output" id="audit-output"><div class="tool-loading"><p>Paste a URL above and click Run Audit</p></div></div>
+            </div>
+            <div class="tool-panel" id="tab-speed">
+                <div class="tool-input-row">
+                    <input type="url" id="speed-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runSpeed()">
+                    <button class="tool-go-btn" onclick="runSpeed()">Test Speed</button>
+                </div>
+                <div class="tool-output" id="speed-output"><div class="tool-loading"><p>Paste a URL above and click Test Speed</p></div></div>
+            </div>
+            <div class="tool-panel" id="tab-content">
+                <div class="tool-input-row">
+                    <input type="url" id="content-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runContent()">
+                    <button class="tool-go-btn" onclick="runContent()">Analyze Content</button>
+                </div>
+                <div class="tool-output" id="content-output"><div class="tool-loading"><p>Paste a URL above and click Analyze Content</p></div></div>
+            </div>
+            <div class="tool-panel" id="tab-keywords">
+                <div class="tool-input-row">
+                    <input type="url" id="kw-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runKeywords()">
+                    <button class="tool-go-btn" onclick="runKeywords()">Extract Keywords</button>
+                </div>
+                <div class="tool-output" id="kw-output"><div class="tool-loading"><p>Paste a URL above and click Extract Keywords</p></div></div>
+            </div>
+            <div class="tool-panel" id="tab-images">
+                <div class="tool-input-row">
+                    <input type="url" id="img-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runImages()">
+                    <button class="tool-go-btn" onclick="runImages()">Check Images</button>
+                </div>
+                <div class="tool-output" id="img-output"><div class="tool-loading"><p>Paste a URL above and click Check Images</p></div></div>
+            </div>
+            <div class="tool-panel" id="tab-links">
+                <div class="tool-input-row">
+                    <input type="url" id="link-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runLinks()">
+                    <button class="tool-go-btn" onclick="runLinks()">Analyze Links</button>
+                </div>
+                <div class="tool-output" id="link-output"><div class="tool-loading"><p>Paste a URL above and click Analyze Links</p></div></div>
+            </div>
+            <div class="tool-panel" id="tab-robots">
+                <div class="tool-output" id="robots-output">
+                    <h3>&#129302; Robots.txt Generator</h3>
+                    <p style="color:var(--gray-1);margin-bottom:20px;">Configure rules and generate a downloadable robots.txt file.</p>
+                    <div class="robots-form">
+                        <div class="robots-row"><label>Site URL</label><input type="text" id="robots-site" placeholder="https://example.com"></div>
+                        <div class="robots-row"><label>Sitemap URL</label><input type="text" id="robots-sitemap" placeholder="https://example.com/sitemap.xml"></div>
+                        <div class="robots-row"><label>Crawl-delay</label><select id="robots-delay"><option value="">None</option><option value="1">1 second</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="30">30 seconds</option></select></div>
+                        <div class="robots-row"><label>Block /admin?</label><select id="robots-admin"><option value="yes">Yes - Disallow /admin</option><option value="no" selected>No</option></select></div>
+                        <div class="robots-row"><label>Block /private?</label><select id="robots-private"><option value="yes">Yes - Disallow /private</option><option value="no" selected>No</option></select></div>
+                        <div class="robots-row"><label>Block /tmp?</label><select id="robots-tmp"><option value="yes">Yes - Disallow /tmp</option><option value="no" selected>No</option></select></div>
+                        <div class="robots-row"><label>Custom Disallow</label><input type="text" id="robots-custom" placeholder="/path/to/block"></div>
+                        <div><button class="tool-go-btn" onclick="generateRobots()">Generate Robots.txt</button></div>
+                    </div>
+                    <div id="robots-result" style="display:none;margin-top:24px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                            <h4 style="margin:0;">Generated robots.txt</h4>
+                            <div style="display:flex;gap:8px;">
+                                <button class="tool-go-btn" onclick="copyRobots()" style="padding:8px 16px;font-size:13px;">Copy</button>
+                                <button class="tool-go-btn" onclick="downloadRobots()" style="padding:8px 16px;font-size:13px;background:#10b981;">Download</button>
+                            </div>
+                        </div>
+                        <div class="schema-output-code"><pre id="robots-pre"></pre></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tool-panel" id="tab-sitemap">
+                <div class="tool-input-row">
+                    <input type="url" id="sm-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runSitemap()">
+                    <button class="tool-go-btn" onclick="runSitemap()">Generate Sitemap</button>
+                </div>
+                <div class="tool-output" id="sm-output"><div class="tool-loading"><p>Paste a URL above and click Generate Sitemap</p></div></div>
+            </div>
+            <div class="tool-panel" id="tab-competitor">
+                <div class="tool-input-row" style="flex-wrap:wrap;">
+                    <input type="url" id="comp-url1" class="tool-input" placeholder="Your URL" style="flex:1;min-width:200px;">
+                    <input type="url" id="comp-url2" class="tool-input" placeholder="Competitor URL" style="flex:1;min-width:200px;">
+                    <button class="tool-go-btn" onclick="runCompetitor()">Compare</button>
+                </div>
+                <div class="tool-output" id="comp-output"><div class="tool-loading"><p>Enter two URLs above and click Compare</p></div></div>
+            </div>
+            <div class="tool-panel" id="tab-report">
+                <div class="tool-input-row">
+                    <input type="url" id="rpt-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runReport()">
+                    <button class="tool-go-btn" onclick="runReport()">Generate Report</button>
+                </div>
+                <div class="tool-output" id="rpt-output"><div class="tool-loading"><p>Paste a URL above and click Generate Report</p></div></div>
+            </div>
         </div>
-    </section>
-
-    <section class="cta-section">
+    </section>    <section class="cta-section">
         <div class="container">
             <h2>Need Deeper Analysis?</h2>
             <p>Check out our Python SEO tools for complete automation</p>
@@ -201,217 +305,1080 @@
 
     <footer class="footer">
         <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <span class="logo-icon">S</span>
+                        <span class="logo-text">SEO<span class="logo-accent">HUB</span></span>
+                    </a>
+                    <p>Professional SEO tools built with Python. Open source, free, and powerful.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="GitHub"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
+                        <a href="#" aria-label="LinkedIn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>
+                        <a href="#" aria-label="Twitter"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Tools</h4>
+                    <ul>
+                        <li><a href="tools.html">All Tools</a></li>
+                        <li><a href="tools.html">SEO Score Calculator</a></li>
+                        <li><a href="tools.html">Schema Generator</a></li>
+                        <li><a href="tools.html">Meta Tag Analyzer</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">GitHub</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <ul>
+                        <li><a href="#">LinkedIn</a></li>
+                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#">GitHub</a></li>
+                        <li><a href="mailto:mmetwily1@gmail.com">Email</a></li>
+                    </ul>
+                </div>
+            </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 SEOHUB. Built by Mohamed Metwily.</p>
             </div>
         </div>
     </footer>
 
-    <script>
-    // ===================== CONFIG =====================
-    const API = 'https://seohub-backend.onrender.com';
+    <script src="js/main.js"></script>    <script>
+    // =====================================================
+    // CLIENT-SIDE SEO TOOLS - CORS PROXY
+    // =====================================================
+    const PROXY = 'https://api.allorigins.win/get?url=';
 
-    // ===================== TAB NAVIGATION =====================
+    function esc(s) {
+        if (!s) return '';
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
     function showTab(name, btn) {
-        document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tool-panel').forEach(function(p) { p.classList.remove('active'); });
+        document.querySelectorAll('.tool-tab').forEach(function(t) { t.classList.remove('active'); });
         document.getElementById('tab-' + name).classList.add('active');
         btn.classList.add('active');
     }
 
-    function esc(s) {
-        if (!s) return '';
-        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    async function fetchHTML(url) {
+        var u = PROXY + encodeURIComponent(url);
+        var res = await fetch(u);
+        if (!res.ok) throw new Error('Failed to fetch: ' + res.status);
+        var json = await res.json();
+        if (!json.contents) throw new Error('Empty response from proxy');
+        return json.contents;
     }
 
-    // ===================== 1. SEO SCORE =====================
+    function parseHTML(html) {
+        var parser = new DOMParser();
+        return parser.parseFromString(html, 'text/html');
+    }
+
+    function getBodyText(doc) {
+        var clone = doc.cloneNode(true);
+        clone.querySelectorAll('script,style,noscript,svg').forEach(function(e) { e.remove(); });
+        return clone.body ? clone.body.textContent : '';
+    }
+
+    function extractMeta(doc) {
+        var getAttr = function(name, attr) {
+            var sel = 'meta[' + attr + '="' + name + '"]';
+            var el = doc.querySelector(sel);
+            return el ? (el.getAttribute('content') || '') : '';
+        };
+        var titleEl = doc.querySelector('title');
+        var canonicalEl = doc.querySelector('link[rel="canonical"]');
+        return {
+            title: titleEl ? titleEl.textContent.trim() : '',
+            description: getAttr('description', 'name'),
+            canonical: canonicalEl ? canonicalEl.href : '',
+            robots: getAttr('robots', 'name'),
+            viewport: getAttr('viewport', 'name'),
+            lang: doc.documentElement.getAttribute('lang') || '',
+            ogTitle: getAttr('og:title', 'property'),
+            ogDesc: getAttr('og:description', 'property'),
+            ogImage: getAttr('og:image', 'property'),
+            ogType: getAttr('og:type', 'property'),
+            ogUrl: getAttr('og:url', 'property'),
+            twCard: getAttr('twitter:card', 'name') || getAttr('twitter:card', 'property'),
+            twTitle: getAttr('twitter:title', 'name') || getAttr('twitter:title', 'property'),
+            twDesc: getAttr('twitter:description', 'name') || getAttr('twitter:description', 'property'),
+            twImage: getAttr('twitter:image', 'name') || getAttr('twitter:image', 'property')
+        };
+    }
+
+    function wordCount(text) { return text.split(/\s+/).filter(function(w) { return w.length > 0; }).length; }
+    function sentenceCount(text) { return (text.match(/[.!?]+/g) || []).length || 1; }
+    function syllableCount(word) {
+        word = word.toLowerCase().replace(/[^a-z]/g, '');
+        if (word.length <= 3) return 1;
+        word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+        word = word.replace(/^y/, '');
+        var m = word.match(/[aeiouy]{1,2}/g);
+        return m ? m.length : 1;
+    }
+    function fleschScore(text) {
+        var words = text.split(/\s+/).filter(function(w) { return w.length > 0; });
+        var wc = words.length || 1;
+        var sc = sentenceCount(text);
+        var sy = words.reduce(function(a, w) { return a + syllableCount(w); }, 0);
+        return Math.round(206.835 - 1.015 * (wc / sc) - 84.6 * (sy / wc));
+    }
+    function gradeLabel(score) {
+        if (score >= 90) return 'A+';
+        if (score >= 80) return 'A';
+        if (score >= 70) return 'B';
+        if (score >= 60) return 'C';
+        if (score >= 50) return 'D';
+        return 'F';
+    }
+
+    function issueHTML(c) {
+        var icon = c.t === 'pass' ? '&#9989;' : c.t === 'warn' ? '&#9888;' : '&#10060;';
+        return '<div class="issue-item issue-' + c.t + '">' + icon + ' <div><strong>' + esc(c.h) + '</strong><br>' + esc(c.d) + '</div></div>';
+    }    // =====================================================
+    // 1. SEO SCORE CALCULATOR
+    // =====================================================
     async function runScore() {
-        const url = document.getElementById('score-url').value.trim();
+        var url = document.getElementById('score-url').value.trim();
         if (!url) return alert('Enter a URL');
-        const out = document.getElementById('score-output');
+        var out = document.getElementById('score-output');
         out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Analyzing ' + esc(url) + '...</p></div>';
         try {
-            const res = await fetch(API + '/api/score?url=' + encodeURIComponent(url));
-            const data = await res.json();
-            if (data.error) { out.innerHTML = '<div class="issue-item issue-fail">❌ ' + esc(data.error) + '</div>'; return; }
-            const score = data.score;
-            const color = score>=80?'#10b981':score>=60?'#2563eb':score>=40?'#f59e0b':'#ef4444';
-            const dashoff = 283 - (score/100)*283;
-            const m = data.meta;
+            var html = await fetchHTML(url);
+            var doc = parseHTML(html);
+            var m = extractMeta(doc);
+            var text = getBodyText(doc);
+            var wc = wordCount(text);
+            var h1s = doc.querySelectorAll('h1');
+            var h2s = doc.querySelectorAll('h2');
+            var imgs = doc.querySelectorAll('img');
+            var imgsAlt = Array.from(imgs).filter(function(i) { return i.getAttribute('alt') && i.getAttribute('alt').trim().length > 0; });
+            var score = 0;
+            var issues = [];
+
+            if (m.title.length > 0) {
+                if (m.title.length >= 30 && m.title.length <= 60) { score += 15; issues.push({t:'pass',h:'Title Tag',d:'Optimal length (' + m.title.length + ' chars)'}); }
+                else { score += 7; issues.push({t:'warn',h:'Title Tag Length',d:m.title.length + ' chars. Recommended: 30-60.'}); }
+            } else { issues.push({t:'fail',h:'Missing Title',d:'No title tag found.'}); }
+
+            if (m.description.length > 0) {
+                if (m.description.length >= 120 && m.description.length <= 160) { score += 15; issues.push({t:'pass',h:'Meta Description',d:'Optimal length (' + m.description.length + ' chars).'}); }
+                else { score += 7; issues.push({t:'warn',h:'Meta Description Length',d:m.description.length + ' chars. Recommended: 120-160.'}); }
+            } else { issues.push({t:'fail',h:'Missing Meta Description',d:'No meta description found.'}); }
+
+            if (h1s.length === 1) { score += 15; issues.push({t:'pass',h:'H1 Tag',d:'One H1 found.'}); }
+            else if (h1s.length === 0) { issues.push({t:'fail',h:'Missing H1',d:'No H1 tag found.'}); }
+            else { score += 5; issues.push({t:'warn',h:'Multiple H1 Tags',d:h1s.length + ' H1 tags found. Use exactly one.'}); }
+
+            if (h2s.length > 0) { score += 10; issues.push({t:'pass',h:'H2 Tags',d:h2s.length + ' H2 tag(s) found.'}); }
+            else { issues.push({t:'warn',h:'No H2 Tags',d:'Use H2s to structure content.'}); }
+
+            if (imgs.length === 0) { score += 5; issues.push({t:'warn',h:'No Images',d:'No images found on the page.'}); }
+            else {
+                var pct = Math.round((imgsAlt.length / imgs.length) * 100);
+                if (pct === 100) { score += 10; issues.push({t:'pass',h:'Image Alt Text',d:'All ' + imgs.length + ' images have alt text.'}); }
+                else { score += Math.round(10 * pct / 100); issues.push({t:'warn',h:'Image Alt Text',d:pct + '% of images have alt text (' + imgsAlt.length + '/' + imgs.length + ').'}); }
+            }
+
+            var ogCount = [m.ogTitle, m.ogDesc, m.ogImage].filter(function(v) { return v.length > 0; }).length;
+            if (ogCount === 3) { score += 10; issues.push({t:'pass',h:'Open Graph Tags',d:'All essential OG tags present.'}); }
+            else { score += Math.round(10 * ogCount / 3); issues.push({t:'warn',h:'Open Graph Tags',d:ogCount + '/3 essential OG tags found.'}); }
+
+            if (m.canonical) { score += 5; issues.push({t:'pass',h:'Canonical URL',d:'Canonical tag found.'}); }
+            else { issues.push({t:'warn',h:'Missing Canonical',d:'No canonical tag found.'}); }
+
+            if (m.lang) { score += 5; issues.push({t:'pass',h:'Language Attribute',d:'lang="' + m.lang + '" set.'}); }
+            else { issues.push({t:'fail',h:'Missing Language',d:'No lang attribute on html.'}); }
+
+            if (wc >= 300) { score += 10; issues.push({t:'pass',h:'Word Count',d:wc + ' words. Good content length.'}); }
+            else if (wc >= 150) { score += 5; issues.push({t:'warn',h:'Low Word Count',d:wc + ' words. Aim for 300+.'}); }
+            else { issues.push({t:'fail',h:'Very Low Word Count',d:wc + ' words. Very thin content.'}); }
+
+            var color = score >= 80 ? '#10b981' : score >= 60 ? '#2563eb' : score >= 40 ? '#f59e0b' : '#ef4444';
+            var dashoff = 283 - (score / 100) * 283;
             out.innerHTML =
                 '<div class="score-circle-wrap">' +
-                    '<svg class="score-circle-svg" viewBox="0 0 100 100">' +
-                        '<circle cx="50" cy="50" r="45" class="score-circle-bg"/>' +
-                        '<circle cx="50" cy="50" r="45" class="score-circle-fill" style="stroke:'+color+';stroke-dashoffset:'+dashoff+'"/>' +
-                    '</svg>' +
-                    '<div><div class="score-big" style="color:'+color+'">'+score+'/100</div><div class="score-sub">Overall SEO Score</div></div>' +
+                    '<svg class="score-circle-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" class="score-circle-bg"/><circle cx="50" cy="50" r="45" class="score-circle-fill" style="stroke:' + color + ';stroke-dashoffset:' + dashoff + '"/></svg>' +
+                    '<div><div class="score-big" style="color:' + color + '">' + score + '/100</div><div class="score-sub">Overall SEO Score &middot; Grade ' + gradeLabel(score) + '</div></div>' +
                 '</div>' +
                 '<div class="meta-grid">' +
-                    '<div class="meta-box"><label>Title</label><div class="val">'+esc(m.title||'Missing')+(m.titleLen?' ('+m.titleLen+' chars)':'')+'</div></div>' +
-                    '<div class="meta-box"><label>Description</label><div class="val">'+esc(m.desc||'Missing')+(m.descLen?' ('+m.descLen+' chars)':'')+'</div></div>' +
-                    '<div class="meta-box"><label>H1 Tags</label><div class="val">'+m.h1Count+' found'+(m.h1?': '+esc(m.h1.substring(0,60)):'')+'</div></div>' +
-                    '<div class="meta-box"><label>Word Count</label><div class="val">'+m.words+' words</div></div>' +
-                    '<div class="meta-box"><label>Images</label><div class="val">'+m.imgs+' total, '+m.imgsAlt+' with alt</div></div>' +
-                    '<div class="meta-box"><label>Language</label><div class="val">'+esc(m.lang||'Not set')+'</div></div>' +
+                    '<div class="meta-box"><label>Title</label><div class="val">' + esc(m.title || 'Missing') + (m.title ? ' (' + m.title.length + ' chars)' : '') + '</div></div>' +
+                    '<div class="meta-box"><label>Description</label><div class="val">' + esc(m.description || 'Missing') + (m.description ? ' (' + m.description.length + ' chars)' : '') + '</div></div>' +
+                    '<div class="meta-box"><label>H1 Tags</label><div class="val">' + h1s.length + ' found</div></div>' +
+                    '<div class="meta-box"><label>Word Count</label><div class="val">' + wc + ' words</div></div>' +
+                    '<div class="meta-box"><label>Images</label><div class="val">' + imgs.length + ' total, ' + imgsAlt.length + ' with alt</div></div>' +
+                    '<div class="meta-box"><label>Language</label><div class="val">' + esc(m.lang || 'Not set') + '</div></div>' +
                 '</div>' +
                 '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Issues & Results</h4>' +
-                data.issues.map(function(i){
-                    var icon = i.t==='pass'?'✅':i.t==='warn'?'⚠️':'❌';
-                    return '<div class="issue-item issue-'+i.t+'">'+icon+' <div><strong>'+esc(i.h)+'</strong><br>'+esc(i.d)+'</div></div>';
-                }).join('') +
-                '</div>';
-        } catch(e) {
-            out.innerHTML = '<div class="issue-item issue-fail">❌ Server error. Make sure the backend is running.</div>';
+                issues.map(issueHTML).join('') + '</div>';
+        } catch (e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: ' + esc(e.message) + '. Note: CORS proxy may block some sites.</div>';
         }
-    }
-
-    // ===================== 2. META TAG ANALYZER =====================
+    }    // =====================================================
+    // 2. META TAG ANALYZER
+    // =====================================================
     async function runMeta() {
-        const url = document.getElementById('meta-url').value.trim();
+        var url = document.getElementById('meta-url').value.trim();
         if (!url) return alert('Enter a URL');
-        const out = document.getElementById('meta-output');
+        var out = document.getElementById('meta-output');
         out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Analyzing meta tags...</p></div>';
         try {
-            const res = await fetch(API + '/api/meta?url=' + encodeURIComponent(url));
-            const d = await res.json();
-            if (d.error) { out.innerHTML = '<div class="issue-item issue-fail">❌ ' + esc(d.error) + '</div>'; return; }
-            var badge = function(ok) { return ok ? '<span style="color:#10b981;font-weight:700;">✓ Optimal</span>' : '<span style="color:#f59e0b;font-weight:700;">⚠ Check</span>'; };
+            var html = await fetchHTML(url);
+            var doc = parseHTML(html);
+            var m = extractMeta(doc);
+            var schemas = doc.querySelectorAll('script[type="application/ld+json"]');
+            var schemaTypes = Array.from(schemas).map(function(s) { try { var j = JSON.parse(s.textContent); return j['@type'] || 'Unknown'; } catch(e) { return 'Invalid'; } });
+            var badge = function(ok) { return ok ? '<span style="color:#10b981;font-weight:700;">&#10003; Optimal</span>' : '<span style="color:#f59e0b;font-weight:700;">&#9888; Check</span>'; };
             var ogKeys = ['og:title','og:description','og:image','og:type','og:url'];
             var twKeys = ['twitter:card','twitter:title','twitter:description','twitter:image'];
+            var ogVals = [m.ogTitle, m.ogDesc, m.ogImage, m.ogType, m.ogUrl];
+            var twVals = [m.twCard, m.twTitle, m.twDesc, m.twImage];
+            var displayUrl = url;
+            try { displayUrl = new URL(url).href; } catch(e) {}
+
             out.innerHTML =
-                '<h3>🏷️ Meta Tag Analysis</h3>' +
+                '<h3>&#127991; Meta Tag Analysis</h3>' +
                 '<div class="google-preview">' +
-                    '<div class="gp-title">'+esc(d.title||'No title')+'</div>' +
-                    '<div class="gp-url">'+esc(d.url)+'</div>' +
-                    '<div class="gp-desc">'+esc(d.description||'No meta description')+'</div>' +
+                    '<div class="gp-title">' + esc(m.title || 'No title') + '</div>' +
+                    '<div class="gp-url">' + esc(displayUrl) + '</div>' +
+                    '<div class="gp-desc">' + esc(m.description || 'No meta description') + '</div>' +
                 '</div>' +
                 '<div class="meta-grid">' +
-                    '<div class="meta-box"><label>Title Tag ('+d.titleLen+' chars)</label><div class="val">'+esc(d.title||'Missing')+'</div>'+badge(d.titleLen>=30&&d.titleLen<=60)+'</div>' +
-                    '<div class="meta-box"><label>Meta Description ('+d.descLen+' chars)</label><div class="val">'+esc(d.description||'Missing')+'</div>'+badge(d.descLen>=120&&d.descLen<=160)+'</div>' +
-                    '<div class="meta-box"><label>Canonical</label><div class="val">'+esc(d.canonical||'Missing')+'</div></div>' +
-                    '<div class="meta-box"><label>Robots</label><div class="val">'+esc(d.robots)+'</div></div>' +
-                    '<div class="meta-box"><label>Viewport</label><div class="val">'+esc(d.viewport)+'</div></div>' +
-                    '<div class="meta-box"><label>Language</label><div class="val">'+esc(d.lang)+'</div></div>' +
+                    '<div class="meta-box"><label>Title Tag (' + m.title.length + ' chars)</label><div class="val">' + esc(m.title || 'Missing') + '</div>' + badge(m.title.length >= 30 && m.title.length <= 60) + '</div>' +
+                    '<div class="meta-box"><label>Meta Description (' + m.description.length + ' chars)</label><div class="val">' + esc(m.description || 'Missing') + '</div>' + badge(m.description.length >= 120 && m.description.length <= 160) + '</div>' +
+                    '<div class="meta-box"><label>Canonical</label><div class="val">' + esc(m.canonical || 'Missing') + '</div></div>' +
+                    '<div class="meta-box"><label>Robots</label><div class="val">' + esc(m.robots || 'Not set') + '</div></div>' +
+                    '<div class="meta-box"><label>Viewport</label><div class="val">' + esc(m.viewport || 'Missing') + '</div></div>' +
+                    '<div class="meta-box"><label>Language</label><div class="val">' + esc(m.lang || 'Not set') + '</div></div>' +
                 '</div>' +
                 '<div class="schema-section" style="margin-top:24px;"><h4>Open Graph Tags</h4>' +
-                ogKeys.map(function(p){ var v = d.ogTags[p]; return '<div class="tag-row'+(v?'':' miss')+'"><strong>'+p+':</strong> '+esc(v||'Missing')+'</div>'; }).join('') + '</div>' +
+                ogKeys.map(function(k, i) { return '<div class="tag-row' + (ogVals[i] ? '' : ' miss') + '"><strong>' + k + ':</strong> ' + esc(ogVals[i] || 'Missing') + '</div>'; }).join('') + '</div>' +
                 '<div class="schema-section"><h4>Twitter Cards</h4>' +
-                twKeys.map(function(p){ var v = d.twitterTags[p]; return '<div class="tag-row'+(v?'':' miss')+'"><strong>'+p+':</strong> '+esc(v||'Missing')+'</div>'; }).join('') + '</div>' +
-                (d.schemas.length > 0 ? '<div class="schema-section"><h4>Structured Data Found</h4>' +
-                d.schemas.map(function(s){ return '<div class="tag-row"><strong>'+esc(s['@type']||'Unknown')+'</strong></div>'; }).join('') + '</div>' : '');
-        } catch(e) {
-            out.innerHTML = '<div class="issue-item issue-fail">❌ Server error. Make sure the backend is running.</div>';
+                twKeys.map(function(k, i) { return '<div class="tag-row' + (twVals[i] ? '' : ' miss') + '"><strong>' + k + ':</strong> ' + esc(twVals[i] || 'Missing') + '</div>'; }).join('') + '</div>' +
+                (schemaTypes.length > 0 ? '<div class="schema-section"><h4>Structured Data Found</h4>' + schemaTypes.map(function(t) { return '<div class="tag-row"><strong>' + esc(t) + '</strong></div>'; }).join('') + '</div>' : '');
+        } catch (e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: ' + esc(e.message) + '</div>';
         }
-    }
-
-    // ===================== 3. HEADING CHECKER =====================
+    }    // =====================================================
+    // 3. HEADING CHECKER
+    // =====================================================
     async function runHeadings() {
-        const url = document.getElementById('head-url').value.trim();
+        var url = document.getElementById('head-url').value.trim();
         if (!url) return alert('Enter a URL');
-        const out = document.getElementById('head-output');
+        var out = document.getElementById('head-output');
         out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Checking heading structure...</p></div>';
         try {
-            const res = await fetch(API + '/api/headings?url=' + encodeURIComponent(url));
-            const d = await res.json();
-            if (d.error) { out.innerHTML = '<div class="issue-item issue-fail">❌ ' + esc(d.error) + '</div>'; return; }
+            var html = await fetchHTML(url);
+            var doc = parseHTML(html);
             var labels = ['H1','H2','H3','H4','H5','H6'];
-            var gridHtml = labels.map(function(h,i){
-                return '<div style="text-align:center;padding:16px;background:var(--white);border-radius:var(--radius);"><div style="font-size:24px;font-weight:900;color:var(--primary);">'+d.counts[i]+'</div><div style="font-size:12px;color:var(--gray-1);">'+h+'</div></div>';
+            var counts = labels.map(function(_, i) { return doc.querySelectorAll('h' + (i + 1)).length; });
+            var headings = [];
+            labels.forEach(function(l, i) {
+                Array.from(doc.querySelectorAll('h' + (i + 1))).forEach(function(el) {
+                    headings.push({ level: i + 1, text: el.textContent.trim() });
+                });
+            });
+            var issues = [];
+            if (counts[0] === 1) issues.push({t:'pass',h:'H1 Count',d:'Exactly one H1 tag found.'});
+            else if (counts[0] === 0) issues.push({t:'fail',h:'Missing H1',d:'No H1 tag found.'});
+            else issues.push({t:'warn',h:'Multiple H1 Tags',d:counts[0] + ' H1 tags found. Use exactly one.'});
+            if (headings.length > 0) {
+                var prevLevel = 0, skip = false;
+                headings.forEach(function(h) { if (h.level > prevLevel + 1 && prevLevel > 0) skip = true; prevLevel = h.level; });
+                if (skip) issues.push({t:'warn',h:'Skipped Heading Level',d:'Heading hierarchy skips levels.'});
+                else issues.push({t:'pass',h:'Heading Hierarchy',d:'Heading levels follow proper order.'});
+            }
+            if (headings.length === 0) issues.push({t:'fail',h:'No Headings',d:'Page has no heading tags.'});
+
+            var gridHtml = labels.map(function(l, i) {
+                return '<div style="text-align:center;padding:16px;background:var(--white);border-radius:var(--radius);"><div style="font-size:24px;font-weight:900;color:var(--primary);">' + counts[i] + '</div><div style="font-size:12px;color:var(--gray-1);">' + l + '</div></div>';
             }).join('');
-            var treeHtml = d.headings.length===0 ? '<p style="color:var(--gray-1);">No headings found.</p>' :
-                d.headings.map(function(h){
-                    var cls = h.level>=2 ? ' lv'+h.level : '';
-                    return '<div class="heading-item'+cls+'"><span class="htag">H'+h.level+'</span><span>'+esc(h.text||'(empty)')+'</span></div>';
+            var treeHtml = headings.length === 0 ? '<p style="color:var(--gray-1);">No headings found.</p>' :
+                headings.map(function(h) {
+                    var cls = h.level >= 2 ? ' lv' + Math.min(h.level, 4) : '';
+                    return '<div class="heading-item' + cls + '"><span class="htag">H' + h.level + '</span><span>' + esc(h.text || '(empty)') + '</span></div>';
                 }).join('');
+
             out.innerHTML =
-                '<h3>📑 Heading Structure</h3>' +
-                '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:24px;">'+gridHtml+'</div>' +
+                '<h3>&#128209; Heading Structure</h3>' +
+                '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:24px;">' + gridHtml + '</div>' +
                 '<h4 style="margin-bottom:12px;font-weight:700;">Heading Tree</h4>' + treeHtml +
                 '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Issues</h4>' +
-                d.issues.map(function(i){
-                    var icon = i.t==='pass'?'✅':i.t==='warn'?'⚠️':'❌';
-                    return '<div class="issue-item issue-'+i.t+'">'+icon+' <div><strong>'+esc(i.h)+'</strong><br>'+esc(i.d)+'</div></div>';
-                }).join('') + '</div>';
-        } catch(e) {
-            out.innerHTML = '<div class="issue-item issue-fail">❌ Server error. Make sure the backend is running.</div>';
+                issues.map(issueHTML).join('') + '</div>';
+        } catch (e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: ' + esc(e.message) + '</div>';
         }
-    }
-
-    // ===================== 4. SCHEMA GENERATOR =====================
-    let currentSchemaType = 'Organization';
-    const schemaFields = {
+    }    // =====================================================
+    // 4. SCHEMA GENERATOR
+    // =====================================================
+    var currentSchemaType = 'Organization';
+    var schemaFields = {
         Organization: ['name','url','logo','description','email','phone'],
         Article: ['headline','author','datePublished','dateModified','image','description'],
         Product: ['name','description','image','brand','price','priceCurrency','availability'],
         FAQPage: ['question1','answer1','question2','answer2'],
         LocalBusiness: ['name','description','url','telephone','address','openingHours','image'],
-        Person: ['name','jobTitle','url','image','sameAs']
+        Person: ['name','jobTitle','url','image','sameAs'],
+        BreadcrumbList: ['item1Name','item1Url','item2Name','item2Url','item3Name','item3Url']
     };
-    const schemaLabels = {
+    var schemaLabels = {
         name:'Name',url:'URL',logo:'Logo URL',description:'Description',email:'Email',phone:'Phone',
         headline:'Headline',author:'Author',datePublished:'Date Published (YYYY-MM-DD)',dateModified:'Date Modified',image:'Image URL',
         brand:'Brand',price:'Price',priceCurrency:'Currency (e.g. SAR)',availability:'Availability (e.g. InStock)',
         question1:'Question 1',answer1:'Answer 1',question2:'Question 2',answer2:'Answer 2',
         address:'Address',openingHours:'Opening Hours (e.g. Mo-Fr 09:00-17:00)',
-        jobTitle:'Job Title',sameAs:'Social Media URL'
+        jobTitle:'Job Title',sameAs:'Social Media URL',
+        item1Name:'Item 1 Name',item1Url:'Item 1 URL',
+        item2Name:'Item 2 Name',item2Url:'Item 2 URL',
+        item3Name:'Item 3 Name',item3Url:'Item 3 URL'
     };
 
     function setSchemaType(type, btn) {
         currentSchemaType = type;
-        document.querySelectorAll('.schema-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.schema-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
         renderSchemaForm();
     }
 
     function renderSchemaForm() {
-        const fields = schemaFields[currentSchemaType];
-        const form = document.getElementById('schema-form');
-        form.innerHTML = fields.map(f=>{
-            const isLong = f==='description'||f==='answer1'||f==='answer2';
+        var fields = schemaFields[currentSchemaType];
+        var form = document.getElementById('schema-form');
+        form.innerHTML = fields.map(function(f) {
+            var isLong = ['description','answer1','answer2','address'].indexOf(f) !== -1;
             return isLong ?
-                '<div class="full"><label>'+(schemaLabels[f]||f)+'</label><textarea id="sf-'+f+'" rows="3" placeholder="'+(schemaLabels[f]||f)+'"></textarea></div>' :
-                '<div><label>'+(schemaLabels[f]||f)+'</label><input id="sf-'+f+'" placeholder="'+(schemaLabels[f]||f)+'"></div>';
+                '<div class="full"><label>' + (schemaLabels[f] || f) + '</label><textarea id="sf-' + f + '" rows="3" placeholder="' + (schemaLabels[f] || f) + '"></textarea></div>' :
+                '<div><label>' + (schemaLabels[f] || f) + '</label><input id="sf-' + f + '" placeholder="' + (schemaLabels[f] || f) + '"></div>';
         }).join('');
     }
 
     function generateSchema() {
-        const fields = schemaFields[currentSchemaType];
-        const data = {};
-        fields.forEach(f=>{ const v = document.getElementById('sf-'+f)?.value?.trim(); if(v) data[f]=v; });
-        let schema = {};
-        if (currentSchemaType==='Organization') {
-            schema = {"@context":"https://schema.org","@type":"Organization",name:data.name,url:data.url,logo:data.logo,description:data.description,email:data.email,telephone:data.phone};
-        } else if (currentSchemaType==='Article') {
-            schema = {"@context":"https://schema.org","@type":"Article",headline:data.headline,author:{"@type":"Person",name:data.author},datePublished:data.datePublished,dateModified:data.dateModified,image:data.image,description:data.description};
-        } else if (currentSchemaType==='Product') {
-            schema = {"@context":"https://schema.org","@type":"Product",name:data.name,description:data.description,image:data.image,brand:{"@type":"Brand",name:data.brand},offers:{"@type":"Offer",price:data.price,priceCurrency:data.priceCurrency,availability:"https://schema.org/"+(data.availability||"InStock")}};
-        } else if (currentSchemaType==='FAQPage') {
-            schema = {"@context":"https://schema.org","@type":"FAQPage",mainEntity:[{"@type":"Question",name:data.question1,acceptedAnswer:{"@type":"Answer",text:data.answer1}},...(data.question2?[{"@type":"Question",name:data.question2,acceptedAnswer:{"@type":"Answer",text:data.answer2}}]:[])]};
-        } else if (currentSchemaType==='LocalBusiness') {
-            schema = {"@context":"https://schema.org","@type":"LocalBusiness",name:data.name,description:data.description,url:data.url,telephone:data.phone,address:data.address,openingHours:data.openingHours,image:data.image};
-        } else if (currentSchemaType==='Person') {
-            schema = {"@context":"https://schema.org","@type":"Person",name:data.name,jobTitle:data.jobTitle,url:data.url,image:data.image,sameAs:data.sameAs?[data.sameAs]:undefined};
+        var fields = schemaFields[currentSchemaType];
+        var d = {};
+        fields.forEach(function(f) { var v = document.getElementById('sf-' + f); if (v && v.value.trim()) d[f] = v.value.trim(); });
+        var schema = {};
+        switch (currentSchemaType) {
+            case 'Organization':
+                schema = {"@context":"https://schema.org","@type":"Organization",name:d.name,url:d.url,logo:d.logo,description:d.description,email:d.email,telephone:d.phone};
+                break;
+            case 'Article':
+                schema = {"@context":"https://schema.org","@type":"Article",headline:d.headline,author:{"@type":"Person",name:d.author},datePublished:d.datePublished,dateModified:d.dateModified,image:d.image,description:d.description};
+                break;
+            case 'Product':
+                schema = {"@context":"https://schema.org","@type":"Product",name:d.name,description:d.description,image:d.image,brand:{"@type":"Brand",name:d.brand},offers:{"@type":"Offer",price:d.price,priceCurrency:d.priceCurrency,availability:"https://schema.org/"+(d.availability||"InStock")}};
+                break;
+            case 'FAQPage':
+                var ents = [{"@type":"Question",name:d.question1,acceptedAnswer:{"@type":"Answer",text:d.answer1}}];
+                if (d.question2) ents.push({"@type":"Question",name:d.question2,acceptedAnswer:{"@type":"Answer",text:d.answer2}});
+                schema = {"@context":"https://schema.org","@type":"FAQPage",mainEntity:ents};
+                break;
+            case 'LocalBusiness':
+                schema = {"@context":"https://schema.org","@type":"LocalBusiness",name:d.name,description:d.description,url:d.url,telephone:d.telephone,address:d.address,openingHours:d.openingHours,image:d.image};
+                break;
+            case 'Person':
+                schema = {"@context":"https://schema.org","@type":"Person",name:d.name,jobTitle:d.jobTitle,url:d.url,image:d.image};
+                if (d.sameAs) schema.sameAs = [d.sameAs];
+                break;
+            case 'BreadcrumbList':
+                var items = [];
+                if (d.item1Name && d.item1Url) items.push({"@type":"ListItem",position:items.length+1,name:d.item1Name,item:d.item1Url});
+                if (d.item2Name && d.item2Url) items.push({"@type":"ListItem",position:items.length+1,name:d.item2Name,item:d.item2Url});
+                if (d.item3Name && d.item3Url) items.push({"@type":"ListItem",position:items.length+1,name:d.item3Name,item:d.item3Url});
+                schema = {"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:items};
+                break;
         }
-        Object.keys(schema).forEach(k=>{if(schema[k]===undefined)delete schema[k];});
-        const json = JSON.stringify(schema, null, 2);
-        document.getElementById('schema-pre').textContent = json;
+        Object.keys(schema).forEach(function(k) { if (schema[k] === undefined) delete schema[k]; });
+        document.getElementById('schema-pre').textContent = JSON.stringify(schema, null, 2);
         document.getElementById('schema-code').style.display = 'block';
     }
 
     function copySchema() {
-        const text = document.getElementById('schema-pre').textContent;
-        navigator.clipboard.writeText(text).then(()=>{
-            const btn = document.querySelector('.copy-btn');
+        var text = document.getElementById('schema-pre').textContent;
+        navigator.clipboard.writeText(text).then(function() {
+            var btn = document.querySelector('.copy-btn');
             btn.textContent = 'Copied!';
-            setTimeout(()=>btn.textContent='Copy',2000);
+            setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+        });
+    }
+    renderSchemaForm();    // =====================================================
+    // 5. TECHNICAL AUDIT
+    // =====================================================
+    async function runAudit() {
+        var url = document.getElementById('audit-url').value.trim();
+        if (!url) return alert('Enter a URL');
+        var out = document.getElementById('audit-output');
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Running technical audit...</p></div>';
+        try {
+            var html = await fetchHTML(url);
+            var doc = parseHTML(html);
+            var m = extractMeta(doc);
+            var text = getBodyText(doc);
+            var wc = wordCount(text);
+            var checks = [], pass = 0, warn = 0, fail = 0;
+            function add(s, n, d) { checks.push({t:s,h:n,d:d}); if(s==='pass')pass++; else if(s==='warn')warn++; else fail++; }
+
+            if (m.title) { if (m.title.length >= 30 && m.title.length <= 60) add('pass','Title Tag','Optimal: '+m.title.length+' chars'); else add('warn','Title Length',m.title.length+' chars'); }
+            else add('fail','Missing Title','No title tag');
+            if (m.description) { if (m.description.length >= 120 && m.description.length <= 160) add('pass','Meta Description','Optimal: '+m.description.length+' chars'); else add('warn','Meta Description Length',m.description.length+' chars'); }
+            else add('fail','Missing Meta Description','No meta description');
+            var h1c = doc.querySelectorAll('h1').length;
+            if (h1c===1) add('pass','H1 Tag','Exactly one H1'); else if(h1c===0) add('fail','Missing H1','No H1 tag'); else add('warn','Multiple H1',h1c+' H1 tags');
+            if (m.canonical) add('pass','Canonical Tag','Set'); else add('warn','Missing Canonical','No canonical');
+            if (m.robots) add('pass','Robots Meta','Set: '+m.robots); else add('warn','No Robots Meta','Defaults to index,follow');
+            if (m.viewport) add('pass','Viewport Meta','Mobile viewport set'); else add('fail','Missing Viewport','No viewport tag');
+            if (m.lang) add('pass','Language Attribute','lang="'+m.lang+'"'); else add('fail','Missing Language','No lang attribute');
+            if (url.startsWith('https://')) add('pass','HTTPS','Site uses HTTPS'); else add('warn','No HTTPS','Site does not use HTTPS');
+            var ogFull = [m.ogTitle,m.ogDesc,m.ogImage].filter(function(v){return v.length>0;}).length;
+            if (ogFull===3) add('pass','Open Graph','All essential OG tags'); else add('warn','Incomplete OG Tags',ogFull+'/3 OG tags');
+            if (m.twCard) add('pass','Twitter Card','Set'); else add('warn','Missing Twitter Card','No twitter:card');
+            var imgs = doc.querySelectorAll('img');
+            var noAlt = Array.from(imgs).filter(function(i){return !i.getAttribute('alt')||!i.getAttribute('alt').trim();});
+            if (imgs.length===0) add('warn','No Images','No images found');
+            else if (noAlt.length===0) add('pass','Image Alt Text','All '+imgs.length+' have alt');
+            else add('warn','Missing Alt Text',noAlt.length+'/'+imgs.length+' missing alt');
+            if (wc>=300) add('pass','Content Length',wc+' words');
+            else if(wc>=100) add('warn','Thin Content',wc+' words');
+            else add('fail','Very Thin Content',wc+' words');
+            var schemas = doc.querySelectorAll('script[type="application/ld+json"]');
+            if (schemas.length>0) add('pass','Structured Data',schemas.length+' schema(s) found');
+            else add('warn','No Structured Data','No JSON-LD found');
+            var extCount = 0, targetBlank = 0;
+            try {
+                var baseHost = new URL(url).hostname;
+                Array.from(doc.querySelectorAll('a[href]')).forEach(function(a) {
+                    var href = a.getAttribute('href');
+                    if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                    try { if (new URL(href, url).hostname !== baseHost) extCount++; } catch(e) { extCount++; }
+                    if (a.getAttribute('target') === '_blank') targetBlank++;
+                });
+            } catch(e) {}
+            if (extCount > 0) add('pass','External Links',extCount+' external links');
+            if (targetBlank > 0) add('warn','New Tab Links',targetBlank+' links with target="_blank"');
+            var inlineStyles = doc.querySelectorAll('[style]').length;
+            if (inlineStyles > 5) add('warn','Inline Styles',inlineStyles+' elements with inline styles');
+            else add('pass','Inline Styles','Minimal inline styles');
+            if (m.viewport && m.viewport.indexOf('user-scalable=no') !== -1) add('fail','User Scaling Disabled','Viewport disables pinch-to-zoom');
+            else add('pass','User Scaling','Pinch-to-zoom enabled');
+            var h2c = doc.querySelectorAll('h2').length;
+            if (h2c > 0) add('pass','Subheadings',h2c+' H2 tags');
+            else add('warn','No Subheadings','No H2 tags');
+            if (html.length > 100000) add('warn','Large HTML',Math.round(html.length/1024)+'KB');
+            else add('pass','HTML Size',Math.round(html.length/1024)+'KB');
+            var total = pass + warn + fail;
+            var score = Math.round((pass / total) * 100);
+            var sc = score >= 80 ? '#10b981' : score >= 60 ? '#2563eb' : score >= 40 ? '#f59e0b' : '#ef4444';
+            out.innerHTML =
+                '<h3>&#128269; Technical Audit</h3>' +
+                '<div class="audit-stat">' +
+                    '<div class="audit-stat-card"><span class="num" style="color:#10b981;">'+pass+'</span><span class="lbl">Passed</span></div>' +
+                    '<div class="audit-stat-card"><span class="num" style="color:#f59e0b;">'+warn+'</span><span class="lbl">Warnings</span></div>' +
+                    '<div class="audit-stat-card"><span class="num" style="color:#ef4444;">'+fail+'</span><span class="lbl">Failed</span></div>' +
+                    '<div class="audit-stat-card"><span class="num" style="color:'+sc+';">'+score+'%</span><span class="lbl">Score</span></div>' +
+                '</div>' + checks.map(issueHTML).join('');
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: '+esc(e.message)+'</div>';
+        }
+    }    // =====================================================
+    // 6. SPEED ANALYZER
+    // =====================================================
+    async function runSpeed() {
+        var url = document.getElementById('speed-url').value.trim();
+        if (!url) return alert('Enter a URL');
+        var out = document.getElementById('speed-output');
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Measuring speed for '+esc(url)+'...</p></div>';
+        try {
+            var start = performance.now();
+            var html = await fetchHTML(url);
+            var end = performance.now();
+            var doc = parseHTML(html);
+            var elapsed = Math.round(end - start);
+            var sizeKB = Math.round(html.length / 1024);
+            var imgs = doc.querySelectorAll('img');
+            var scripts = doc.querySelectorAll('script[src]');
+            var stylesheets = doc.querySelectorAll('link[rel="stylesheet"]');
+            var inlineStyles = doc.querySelectorAll('style');
+            var inlineScripts = doc.querySelectorAll('script:not([src])');
+            var fonts = doc.querySelectorAll('link[rel="preload"][as="font"], link[href*="fonts.googleapis"], link[href*="fonts.gstatic"]');
+            var recs = [], issues = 0;
+            if (elapsed > 3000) { recs.push({t:'fail',h:'Slow Response',d:'Response time: '+elapsed+'ms. Target: under 2000ms.'}); issues++; }
+            else if (elapsed > 2000) { recs.push({t:'warn',h:'Moderate Response',d:'Response time: '+elapsed+'ms.'}); issues++; }
+            else recs.push({t:'pass',h:'Fast Response',d:'Response time: '+elapsed+'ms.'});
+            if (sizeKB > 500) { recs.push({t:'fail',h:'Large Page Size',d:'HTML is '+sizeKB+'KB. Aim for under 100KB.'}); issues++; }
+            else if (sizeKB > 100) { recs.push({t:'warn',h:'Moderate Page Size',d:'HTML is '+sizeKB+'KB.'}); issues++; }
+            else recs.push({t:'pass',h:'Page Size',d:'HTML is '+sizeKB+'KB.'});
+            if (scripts.length > 15) { recs.push({t:'warn',h:'Many External Scripts',d:scripts.length+' scripts.'}); issues++; }
+            else recs.push({t:'pass',h:'Script Count',d:scripts.length+' external scripts.'});
+            if (inlineScripts.length > 5) { recs.push({t:'warn',h:'Many Inline Scripts',d:inlineScripts.length+' inline scripts.'}); issues++; }
+            if (stylesheets.length > 5) { recs.push({t:'warn',h:'Many Stylesheets',d:stylesheets.length+' stylesheets.'}); issues++; }
+            else recs.push({t:'pass',h:'Stylesheets',d:stylesheets.length+' stylesheet(s).'});
+            if (imgs.length > 0) {
+                var noLazy = Array.from(imgs).filter(function(i){return !i.getAttribute('loading')||i.getAttribute('loading')!=='lazy';}).length;
+                if (noLazy > 3) { recs.push({t:'warn',h:'Lazy Loading',d:noLazy+'/'+imgs.length+' images not lazy-loaded.'}); issues++; }
+                else recs.push({t:'pass',h:'Image Loading',d:'Images configured.'});
+            }
+            if (fonts.length > 3) { recs.push({t:'warn',h:'Many Font Files',d:fonts.length+' font preload links.'}); issues++; }
+            if (inlineStyles.length > 10) { recs.push({t:'warn',h:'Inline Styles',d:inlineStyles.length+' inline style blocks.'}); issues++; }
+            var grade = issues === 0 ? 'A' : issues <= 2 ? 'B' : issues <= 4 ? 'C' : 'D';
+            var gc = grade === 'A' ? '#10b981' : grade === 'B' ? '#2563eb' : grade === 'C' ? '#f59e0b' : '#ef4444';
+            function bar(pct, c) { return '<div class="speed-bar"><div class="speed-bar-fill" style="width:'+pct+'%;background:'+c+';"></div></div>'; }
+            out.innerHTML =
+                '<h3>&#9889; Speed Analysis</h3>' +
+                '<div class="audit-stat">' +
+                    '<div class="audit-stat-card"><span class="num">'+elapsed+'ms</span><span class="lbl">Response Time</span></div>' +
+                    '<div class="audit-stat-card"><span class="num">'+sizeKB+'KB</span><span class="lbl">HTML Size</span></div>' +
+                    '<div class="audit-stat-card"><span class="num">'+scripts.length+'</span><span class="lbl">Scripts</span></div>' +
+                    '<div class="audit-stat-card"><span class="num" style="color:'+gc+';">'+grade+'</span><span class="lbl">Grade</span></div>' +
+                '</div>' +
+                '<div style="margin-bottom:24px;">' +
+                    '<div class="speed-metric"><span class="score-label">Response Time</span>'+bar(Math.min(100,Math.max(0,100-elapsed/50)),elapsed<2000?'#10b981':elapsed<3000?'#f59e0b':'#ef4444')+'</div>' +
+                    '<div class="speed-metric"><span class="score-label">HTML Size</span>'+bar(Math.min(100,Math.max(0,100-sizeKB/5)),sizeKB<100?'#10b981':sizeKB<500?'#f59e0b':'#ef4444')+'</div>' +
+                '</div>' +
+                '<div class="meta-grid">' +
+                    '<div class="meta-box"><label>External Scripts</label><div class="val">'+scripts.length+'</div></div>' +
+                    '<div class="meta-box"><label>Stylesheets</label><div class="val">'+stylesheets.length+' ext, '+inlineStyles.length+' inline</div></div>' +
+                    '<div class="meta-box"><label>Images</label><div class="val">'+imgs.length+'</div></div>' +
+                    '<div class="meta-box"><label>Font Preloads</label><div class="val">'+fonts.length+'</div></div>' +
+                '</div>' +
+                '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Recommendations</h4>' +
+                recs.map(issueHTML).join('') + '</div>';
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: '+esc(e.message)+'</div>';
+        }
+    }    // =====================================================
+    // 7. CONTENT ANALYZER
+    // =====================================================
+    var STOP = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','from','is','it','as','be','was','are','this','that','these','those','not','no','can','will','do','has','had','have','he','she','we','they','you','i','me','my','our','your','his','her','its','their','what','which','who','when','where','how','all','each','every','any','more','most','other','some','such','than','too','very','also','just','about','above','after','again','before','between','both','during','into','through','until','up','down','out','off','over','under','further','then','once','here','there','because','while','if','so','been','being','does','did','doing','would','could','should','may','might','shall','must','need','like','get','got','make','made','see','know','take','come','want','use','find','give','tell','work','call','try','ask','feel','become','leave','put','mean','keep','let','begin','seem','help','show','hear','play','run','move','live','believe','happen','lot','many','much','still','back','well','right','even','new','old','great','big','small','long','high','low','next','last','same','first','different','only','own','part','way','around','never','always','often','sometimes','now','today','going','things','thing','something','nothing','everything','people','time','year','day','week','month','place','world','life','hand','case','company','program','question','government','number','night','point']);
+
+    async function runContent() {
+        var url = document.getElementById('content-url').value.trim();
+        if (!url) return alert('Enter a URL');
+        var out = document.getElementById('content-output');
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Analyzing content...</p></div>';
+        try {
+            var html = await fetchHTML(url);
+            var doc = parseHTML(html);
+            var text = getBodyText(doc);
+            var wc = wordCount(text);
+            var sc = sentenceCount(text);
+            var paragraphs = doc.querySelectorAll('p');
+            var readability = fleschScore(text);
+            var avgWordLen = wc > 0 ? (text.replace(/[^a-zA-Z]/g,'').length / wc).toFixed(1) : 0;
+            var avgSentLen = wc > 0 ? Math.round(wc / sc) : 0;
+            var readGrade, readColor;
+            if (readability >= 70) { readGrade = 'Easy to read'; readColor = '#10b981'; }
+            else if (readability >= 50) { readGrade = 'Moderately easy'; readColor = '#2563eb'; }
+            else if (readability >= 30) { readGrade = 'Difficult'; readColor = '#f59e0b'; }
+            else { readGrade = 'Very difficult'; readColor = '#ef4444'; }
+
+            var issues = [];
+            if (wc >= 300) issues.push({t:'pass',h:'Word Count',d:wc+' words. Good length.'});
+            else if (wc >= 150) issues.push({t:'warn',h:'Low Word Count',d:wc+' words. Aim for 300+.'});
+            else issues.push({t:'fail',h:'Very Low Word Count',d:wc+' words. Very thin content.'});
+            if (readability >= 60) issues.push({t:'pass',h:'Readability',d:'Flesch: '+readability+'. '+readGrade+'.'});
+            else issues.push({t:'warn',h:'Readability',d:'Flesch: '+readability+'. '+readGrade+'. Aim for 60+.'});
+            if (paragraphs.length >= 3) issues.push({t:'pass',h:'Paragraph Count',d:paragraphs.length+' paragraphs.'});
+            else issues.push({t:'warn',h:'Few Paragraphs',d:paragraphs.length+' paragraphs. Add more.'});
+            var links = doc.querySelectorAll('a[href]');
+            if (links.length > 0) issues.push({t:'pass',h:'Links',d:links.length+' links found.'});
+            else issues.push({t:'warn',h:'No Links',d:'No links found.'});
+
+            var words = text.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/).filter(function(w){return w.length>2&&!STOP.has(w);});
+            var freq = {};
+            words.forEach(function(w){freq[w]=(freq[w]||0)+1;});
+            var topKw = Object.entries(freq).sort(function(a,b){return b[1]-a[1];}).slice(0,15);
+            var kwHtml = topKw.length === 0 ? '<p style="color:var(--gray-1);">No significant keywords found.</p>' :
+                '<table class="keyword-table"><thead><tr><th>Keyword</th><th>Count</th><th>Density</th></tr></thead><tbody>' +
+                topKw.map(function(kw){return '<tr><td><strong>'+esc(kw[0])+'</strong></td><td>'+kw[1]+'</td><td>'+(wc>0?(kw[1]/wc*100).toFixed(1):0)+'%</td></tr>';}).join('') +
+                '</tbody></table>';
+
+            out.innerHTML =
+                '<h3>&#128221; Content Analysis</h3>' +
+                '<div class="audit-stat">' +
+                    '<div class="audit-stat-card"><span class="num">'+wc+'</span><span class="lbl">Words</span></div>' +
+                    '<div class="audit-stat-card"><span class="num">'+sc+'</span><span class="lbl">Sentences</span></div>' +
+                    '<div class="audit-stat-card"><span class="num">'+paragraphs.length+'</span><span class="lbl">Paragraphs</span></div>' +
+                    '<div class="audit-stat-card"><span class="num" style="color:'+readColor+';">'+readability+'</span><span class="lbl">Flesch Score</span></div>' +
+                '</div>' +
+                '<div class="meta-grid">' +
+                    '<div class="meta-box"><label>Avg Sentence Length</label><div class="val">'+avgSentLen+' words</div></div>' +
+                    '<div class="meta-box"><label>Avg Word Length</label><div class="val">'+avgWordLen+' chars</div></div>' +
+                    '<div class="meta-box"><label>Readability</label><div class="val" style="color:'+readColor+';">'+readGrade+'</div></div>' +
+                    '<div class="meta-box"><label>Characters</label><div class="val">'+text.length.toLocaleString()+'</div></div>' +
+                '</div>' +
+                '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Issues</h4>' +
+                issues.map(issueHTML).join('') + '</div>' +
+                '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Top Keywords</h4>' + kwHtml + '</div>';
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: '+esc(e.message)+'</div>';
+        }
+    }    // =====================================================
+    // 8. KEYWORD RESEARCH
+    // =====================================================
+    async function runKeywords() {
+        var url = document.getElementById('kw-url').value.trim();
+        if (!url) return alert('Enter a URL');
+        var out = document.getElementById('kw-output');
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Extracting keywords...</p></div>';
+        try {
+            var html = await fetchHTML(url);
+            var doc = parseHTML(html);
+            var text = getBodyText(doc);
+            var wc = wordCount(text);
+            var words = text.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/).filter(function(w){return w.length>2&&!STOP.has(w);});
+            var freq = {};
+            words.forEach(function(w){freq[w]=(freq[w]||0)+1;});
+            var topKw = Object.entries(freq).sort(function(a,b){return b[1]-a[1];}).slice(0,30);
+
+            var bigrams = {};
+            for (var i = 0; i < words.length - 1; i++) {
+                var bg = words[i] + ' ' + words[i+1];
+                bigrams[bg] = (bigrams[bg] || 0) + 1;
+            }
+            var topBigrams = Object.entries(bigrams).filter(function(b){return b[1]>=2;}).sort(function(a,b){return b[1]-a[1];}).slice(0,15);
+
+            var kwHtml = topKw.length === 0 ? '<p style="color:var(--gray-1);">No keywords found.</p>' :
+                '<table class="keyword-table"><thead><tr><th>#</th><th>Keyword</th><th>Count</th><th>Density</th></tr></thead><tbody>' +
+                topKw.map(function(kw,i){return '<tr><td>'+(i+1)+'</td><td><strong>'+esc(kw[0])+'</strong></td><td>'+kw[1]+'</td><td>'+(wc>0?(kw[1]/wc*100).toFixed(2):0)+'%</td></tr>';}).join('') +
+                '</tbody></table>';
+            var bgHtml = topBigrams.length === 0 ? '<p style="color:var(--gray-1);">No significant bigrams found.</p>' :
+                '<table class="keyword-table"><thead><tr><th>#</th><th>Bigram</th><th>Count</th><th>Density</th></tr></thead><tbody>' +
+                topBigrams.map(function(bg,i){return '<tr><td>'+(i+1)+'</td><td><strong>'+esc(bg[0])+'</strong></td><td>'+bg[1]+'</td><td>'+(wc>0?(bg[1]/wc*100).toFixed(2):0)+'%</td></tr>';}).join('') +
+                '</tbody></table>';
+
+            out.innerHTML =
+                '<h3>&#128273; Keyword Research</h3>' +
+                '<div class="meta-grid">' +
+                    '<div class="meta-box"><label>Total Words</label><div class="val">'+wc+'</div></div>' +
+                    '<div class="meta-box"><label>Unique Keywords</label><div class="val">'+Object.keys(freq).length+'</div></div>' +
+                    '<div class="meta-box"><label>Bigrams Found</label><div class="val">'+topBigrams.length+'</div></div>' +
+                    '<div class="meta-box"><label>Densest Keyword</label><div class="val">'+(topKw[0]?esc(topKw[0][0]):'-')+'</div></div>' +
+                '</div>' +
+                '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Single Keywords</h4>' + kwHtml + '</div>' +
+                '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Bigrams (2-word phrases)</h4>' + bgHtml + '</div>';
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: '+esc(e.message)+'</div>';
+        }
+    }    // =====================================================
+    // 9. IMAGE ALT CHECKER
+    // =====================================================
+    async function runImages() {
+        var url = document.getElementById('img-url').value.trim();
+        if (!url) return alert('Enter a URL');
+        var out = document.getElementById('img-output');
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Checking images...</p></div>';
+        try {
+            var html = await fetchHTML(url);
+            var doc = parseHTML(html);
+            var imgs = doc.querySelectorAll('img');
+            var total = imgs.length;
+            var withAlt = 0, withoutAlt = 0, withLazy = 0, withDimensions = 0;
+            var imgData = [];
+            Array.from(imgs).forEach(function(img) {
+                var alt = img.getAttribute('alt');
+                var src = img.getAttribute('src') || '';
+                var hasAlt = alt && alt.trim().length > 0;
+                var lazy = img.getAttribute('loading') === 'lazy';
+                var w = img.getAttribute('width');
+                var h = img.getAttribute('height');
+                var hasDims = w && h;
+                if (hasAlt) withAlt++; else withoutAlt++;
+                if (lazy) withLazy++;
+                if (hasDims) withDimensions++;
+                if (src.length > 80) src = src.substring(0, 77) + '...';
+                imgData.push({src:src,alt:alt||'',hasAlt:hasAlt,lazy:lazy,hasDims:hasDims});
+            });
+            var pct = total > 0 ? Math.round((withAlt/total)*100) : 0;
+            var issues = [];
+            if (total === 0) issues.push({t:'warn',h:'No Images',d:'No images found on the page.'});
+            else if (pct === 100) issues.push({t:'pass',h:'All Images Have Alt Text',d:'All '+total+' images are optimized.'});
+            else issues.push({t:'warn',h:'Missing Alt Text',d:withoutAlt+'/'+total+' images missing alt text.'});
+            if (withLazy > 0 && total > 0) issues.push({t:'pass',h:'Lazy Loading',d:withLazy+' images use lazy loading.'});
+            else if (total > 5) issues.push({t:'warn',h:'No Lazy Loading',d:'Consider adding loading="lazy" to images.'});
+            if (withDimensions === total && total > 0) issues.push({t:'pass',h:'Image Dimensions',d:'All images have width/height attributes.'});
+            else if (total > 0) issues.push({t:'warn',h:'Missing Dimensions',d:(total-withDimensions)+' images lack width/height.'});
+
+            var rows = imgData.map(function(img,i) {
+                return '<tr><td>'+(i+1)+'</td><td style="max-width:200px;">'+esc(img.src)+'</td><td>'+(img.hasAlt?'<span class="badge badge-green">Has Alt</span>':'<span class="badge badge-red">Missing</span>')+'</td><td>'+(img.alt?esc(img.alt.substring(0,50)):'<em style="color:var(--gray-2);">empty</em>')+'</td><td>'+(img.lazy?'Yes':'No')+'</td><td>'+(img.hasDims?'Yes':'No')+'</td></tr>';
+            }).join('');
+
+            out.innerHTML =
+                '<h3>&#128444; Image Alt Checker</h3>' +
+                '<div class="audit-stat">' +
+                    '<div class="audit-stat-card"><span class="num">'+total+'</span><span class="lbl">Total Images</span></div>' +
+                    '<div class="audit-stat-card"><span class="num" style="color:#10b981;">'+withAlt+'</span><span class="lbl">With Alt</span></div>' +
+                    '<div class="audit-stat-card"><span class="num" style="color:#ef4444;">'+withoutAlt+'</span><span class="lbl">Missing Alt</span></div>' +
+                    '<div class="audit-stat-card"><span class="num" style="color:#2563eb;">'+pct+'%</span><span class="lbl">Coverage</span></div>' +
+                '</div>' +
+                (total > 0 ? '<div style="overflow-x:auto;"><table class="img-table"><thead><tr><th>#</th><th>Source</th><th>Alt Status</th><th>Alt Text</th><th>Lazy</th><th>Dimensions</th></tr></thead><tbody>'+rows+'</tbody></table></div>' : '') +
+                '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Issues</h4>' + issues.map(issueHTML).join('') + '</div>';
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: '+esc(e.message)+'</div>';
+        }
+    }    // =====================================================
+    // 10. LINK ANALYZER
+    // =====================================================
+    async function runLinks() {
+        var url = document.getElementById('link-url').value.trim();
+        if (!url) return alert('Enter a URL');
+        var out = document.getElementById('link-output');
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Analyzing links...</p></div>';
+        try {
+            var html = await fetchHTML(url);
+            var doc = parseHTML(html);
+            var baseHost = new URL(url).hostname;
+            var allLinks = doc.querySelectorAll('a[href]');
+            var internal = [], external = [], nofollow = [], dofollow = [], broken = [], mailto = [], tel = [], anchors = [];
+            Array.from(allLinks).forEach(function(a) {
+                var href = a.getAttribute('href') || '';
+                var text = a.textContent.trim().substring(0, 50);
+                var nf = (a.getAttribute('rel') || '').indexOf('nofollow') !== -1;
+                var blank = a.getAttribute('target') === '_blank';
+                if (href.startsWith('mailto:')) { mailto.push({href:href,text:text,nf:nf}); return; }
+                if (href.startsWith('tel:')) { tel.push({href:href,text:text,nf:nf}); return; }
+                if (href === '#' || href === '') { anchors.push({href:href,text:text,nf:nf}); return; }
+                if (href.startsWith('#')) { anchors.push({href:href,text:text,nf:nf}); return; }
+                var isInternal = false;
+                try {
+                    var linkHost = new URL(href, url).hostname;
+                    isInternal = linkHost === baseHost;
+                } catch(e) { isInternal = true; }
+                var entry = {href:href.substring(0,80),text:text,nf:nf,blank:blank};
+                if (isInternal) internal.push(entry); else external.push(entry);
+                if (nf) nofollow.push(entry); else dofollow.push(entry);
+            });
+
+            var issues = [];
+            if (internal.length > 0) issues.push({t:'pass',h:'Internal Links',d:internal.length+' internal links found.'});
+            else issues.push({t:'warn',h:'No Internal Links',d:'No internal links found on this page.'});
+            if (external.length > 0) issues.push({t:'pass',h:'External Links',d:external.length+' external links found.'});
+            if (nofollow.length > 0) issues.push({t:'warn',h:'Nofollow Links',d:nofollow.length+' links are nofollow.'});
+            if (mailto.length > 0) issues.push({t:'pass',h:'Email Links',d:mailto.length+' email links.'});
+            if (allLinks.length === 0) issues.push({t:'fail',h:'No Links',d:'No links found on the page.'});
+
+            var intRows = internal.slice(0,20).map(function(l,i){
+                return '<tr><td>'+(i+1)+'</td><td>'+esc(l.href)+'</td><td>'+esc(l.text||'-')+'</td><td>'+(l.nf?'<span class="badge badge-yellow">nofollow</span>':'<span class="badge badge-green">follow</span>')+'</td></tr>';
+            }).join('');
+            var extRows = external.slice(0,20).map(function(l,i){
+                return '<tr><td>'+(i+1)+'</td><td>'+esc(l.href)+'</td><td>'+esc(l.text||'-')+'</td><td>'+(l.nf?'<span class="badge badge-yellow">nofollow</span>':'<span class="badge badge-blue">dofollow</span>')+'</td></tr>';
+            }).join('');
+
+            out.innerHTML =
+                '<h3>&#128279; Link Analyzer</h3>' +
+                '<div class="audit-stat">' +
+                    '<div class="audit-stat-card"><span class="num">'+allLinks.length+'</span><span class="lbl">Total Links</span></div>' +
+                    '<div class="audit-stat-card"><span class="num" style="color:#10b981;">'+internal.length+'</span><span class="lbl">Internal</span></div>' +
+                    '<div class="audit-stat-card"><span class="num" style="color:#2563eb;">'+external.length+'</span><span class="lbl">External</span></div>' +
+                    '<div class="audit-stat-card"><span class="num" style="color:#f59e0b;">'+nofollow.length+'</span><span class="lbl">Nofollow</span></div>' +
+                '</div>' +
+                (internal.length > 0 ? '<div style="margin-top:20px;"><h4 style="margin-bottom:12px;font-weight:700;">Internal Links ('+internal.length+')</h4><div style="overflow-x:auto;"><table class="link-table"><thead><tr><th>#</th><th>URL</th><th>Text</th><th>Type</th></tr></thead><tbody>'+intRows+'</tbody></table></div></div>' : '') +
+                (external.length > 0 ? '<div style="margin-top:20px;"><h4 style="margin-bottom:12px;font-weight:700;">External Links ('+external.length+')</h4><div style="overflow-x:auto;"><table class="link-table"><thead><tr><th>#</th><th>URL</th><th>Text</th><th>Type</th></tr></thead><tbody>'+extRows+'</tbody></table></div></div>' : '') +
+                '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Issues</h4>' + issues.map(issueHTML).join('') + '</div>';
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: '+esc(e.message)+'</div>';
+        }
+    }    // =====================================================
+    // 11. ROBOTS.TXT GENERATOR
+    // =====================================================
+    function generateRobots() {
+        var site = document.getElementById('robots-site').value.trim() || 'https://example.com';
+        var sitemap = document.getElementById('robots-sitemap').value.trim();
+        var delay = document.getElementById('robots-delay').value;
+        var blockAdmin = document.getElementById('robots-admin').value === 'yes';
+        var blockPrivate = document.getElementById('robots-private').value === 'yes';
+        var blockTmp = document.getElementById('robots-tmp').value === 'yes';
+        var custom = document.getElementById('robots-custom').value.trim();
+        var lines = ['# robots.txt generated by SEOHUB', '# https://seohub.github.io', ''];
+        lines.push('User-agent: *');
+        lines.push('Allow: /');
+        if (blockAdmin) lines.push('Disallow: /admin');
+        if (blockPrivate) lines.push('Disallow: /private');
+        if (blockTmp) lines.push('Disallow: /tmp');
+        if (custom) lines.push('Disallow: ' + custom);
+        lines.push('Disallow: /wp-admin');
+        lines.push('Disallow: /wp-includes');
+        if (delay) lines.push('Crawl-delay: ' + delay);
+        lines.push('');
+        if (sitemap) {
+            lines.push('Sitemap: ' + sitemap);
+        } else {
+            var base = site.replace(/\/$/, '');
+            lines.push('Sitemap: ' + base + '/sitemap.xml');
+        }
+        var result = lines.join('\n');
+        document.getElementById('robots-pre').textContent = result;
+        document.getElementById('robots-result').style.display = 'block';
+    }
+
+    function copyRobots() {
+        var text = document.getElementById('robots-pre').textContent;
+        navigator.clipboard.writeText(text).then(function() {
+            alert('Copied to clipboard!');
         });
     }
 
-    renderSchemaForm();
+    function downloadRobots() {
+        var text = document.getElementById('robots-pre').textContent;
+        var blob = new Blob([text], {type:'text/plain'});
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'robots.txt';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }    // =====================================================
+    // 12. SITEMAP GENERATOR
+    // =====================================================
+    async function runSitemap() {
+        var url = document.getElementById('sm-url').value.trim();
+        if (!url) return alert('Enter a URL');
+        var out = document.getElementById('sm-output');
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Generating sitemap for '+esc(url)+'...</p></div>';
+        try {
+            var html = await fetchHTML(url);
+            var doc = parseHTML(html);
+            var baseHost = new URL(url).hostname;
+            var baseUrl = new URL(url);
+            var links = doc.querySelectorAll('a[href]');
+            var urls = {};
+            urls[url.replace(/\/$/, '')] = true;
+            Array.from(links).forEach(function(a) {
+                var href = a.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+                try {
+                    var resolved = new URL(href, url);
+                    if (resolved.hostname === baseHost) {
+                        var clean = resolved.href.replace(/\/$/, '').split('#')[0].split('?')[0];
+                        if (clean.length > 0) urls[clean] = true;
+                    }
+                } catch(e) {}
+            });
+            var urlList = Object.keys(urls).sort();
+            var today = new Date().toISOString().split('T')[0];
+            var xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+            xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+            urlList.forEach(function(u) {
+                xml += '  <url>\n';
+                xml += '    <loc>' + esc(u) + '</loc>\n';
+                xml += '    <lastmod>' + today + '</lastmod>\n';
+                xml += '    <changefreq>weekly</changefreq>\n';
+                xml += '    <priority>0.8</priority>\n';
+                xml += '  </url>\n';
+            });
+            xml += '</urlset>';
 
-    document.querySelector('.mobile-menu-btn')?.addEventListener('click', function() {
-        document.querySelector('.nav-links').classList.toggle('active');
-    });
-    </script>
-</body>
+            out.innerHTML =
+                '<h3>&#128506; Sitemap Generator</h3>' +
+                '<div class="meta-grid">' +
+                    '<div class="meta-box"><label>URLs Found</label><div class="val">'+urlList.length+'</div></div>' +
+                    '<div class="meta-box"><label>Base URL</label><div class="val">'+esc(baseHost)+'</div></div>' +
+                '</div>' +
+                '<div style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;">' +
+                    '<h4 style="margin:0;">Generated XML Sitemap</h4>' +
+                    '<div style="display:flex;gap:8px;">' +
+                        '<button class="tool-go-btn" onclick="navigator.clipboard.writeText(document.getElementById(\'sm-xml\').textContent).then(function(){alert(\'Copied!\');})" style="padding:8px 16px;font-size:13px;">Copy</button>' +
+                        '<button class="tool-go-btn" onclick="var t=document.getElementById(\'sm-xml\').textContent;var b=new Blob([t],{type:\'text/xml\'});var a=document.createElement(\'a\');a.href=URL.createObjectURL(b);a.download=\'sitemap.xml\';a.click();" style="padding:8px 16px;font-size:13px;background:#10b981;">Download</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="schema-output-code" style="margin-top:12px;"><pre id="sm-xml">' + esc(xml) + '</pre></div>';
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: '+esc(e.message)+'</div>';
+        }
+    }    // =====================================================
+    // 13. COMPETITOR ANALYZER
+    // =====================================================
+    async function runCompetitor() {
+        var url1 = document.getElementById('comp-url1').value.trim();
+        var url2 = document.getElementById('comp-url2').value.trim();
+        if (!url1 || !url2) return alert('Enter both URLs');
+        var out = document.getElementById('comp-output');
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Comparing '+esc(url1)+' vs '+esc(url2)+'...</p></div>';
+        try {
+            var html1 = await fetchHTML(url1);
+            var doc1 = parseHTML(html1);
+            var m1 = extractMeta(doc1);
+            var text1 = getBodyText(doc1);
+            var wc1 = wordCount(text1);
+
+            var html2 = await fetchHTML(url2);
+            var doc2 = parseHTML(html2);
+            var m2 = extractMeta(doc2);
+            var text2 = getBodyText(doc2);
+            var wc2 = wordCount(text2);
+
+            function analyzeSite(doc, m, wc) {
+                var imgs = doc.querySelectorAll('img');
+                var withAlt = Array.from(imgs).filter(function(i){return i.getAttribute('alt')&&i.getAttribute('alt').trim().length>0;}).length;
+                var links = doc.querySelectorAll('a[href]');
+                var schemas = doc.querySelectorAll('script[type="application/ld+json"]');
+                var h1 = doc.querySelectorAll('h1').length;
+                var h2 = doc.querySelectorAll('h2').length;
+                return {
+                    title: m.title, titleLen: m.title.length, desc: m.description, descLen: m.description.length,
+                    h1: h1, h2: h2, words: wc, images: imgs.length, altPct: imgs.length > 0 ? Math.round(withAlt/imgs.length*100) : 0,
+                    links: links.length, canonical: m.canonical ? 'Yes' : 'No', lang: m.lang || '-', og: [m.ogTitle,m.ogDesc,m.ogImage].filter(function(v){return v.length>0;}).length,
+                    twitter: m.twCard ? 'Yes' : 'No', schemas: schemas.length
+                };
+            }
+            var s1 = analyzeSite(doc1, m1, wc1);
+            var s2 = analyzeSite(doc2, m2, wc2);
+
+            function val(a, b) { return a > b ? 'badge-green' : a < b ? 'badge-red' : 'badge-blue'; }
+
+            out.innerHTML =
+                '<h3>&#127919; Competitor Comparison</h3>' +
+                '<div class="compare-grid">' +
+                    '<div class="compare-box"><h4>'+esc(url1)+'</h4>' +
+                        '<div class="score-row"><span class="score-label">Title</span><span class="score-val">'+esc(s1.title||'None')+' ('+s1.titleLen+')</span></div>' +
+                        '<div class="score-row"><span class="score-label">Description</span><span class="score-val">'+esc(s1.desc||'None')+' ('+s1.descLen+')</span></div>' +
+                        '<div class="score-row"><span class="score-label">H1 Tags</span><span class="score-val">'+s1.h1+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">H2 Tags</span><span class="score-val">'+s1.h2+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">Word Count</span><span class="score-val">'+s1.words+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">Images</span><span class="score-val">'+s1.images+' ('+s1.altPct+'% alt)</span></div>' +
+                        '<div class="score-row"><span class="score-label">Links</span><span class="score-val">'+s1.links+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">OG Tags</span><span class="score-val">'+s1.og+'/3</span></div>' +
+                        '<div class="score-row"><span class="score-label">Twitter Card</span><span class="score-val">'+s1.twitter+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">Schemas</span><span class="score-val">'+s1.schemas+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">Canonical</span><span class="score-val">'+s1.canonical+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">Language</span><span class="score-val">'+s1.lang+'</span></div>' +
+                    '</div>' +
+                    '<div class="compare-box"><h4>'+esc(url2)+'</h4>' +
+                        '<div class="score-row"><span class="score-label">Title</span><span class="score-val">'+esc(s2.title||'None')+' ('+s2.titleLen+')</span></div>' +
+                        '<div class="score-row"><span class="score-label">Description</span><span class="score-val">'+esc(s2.desc||'None')+' ('+s2.descLen+')</span></div>' +
+                        '<div class="score-row"><span class="score-label">H1 Tags</span><span class="score-val">'+s2.h1+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">H2 Tags</span><span class="score-val">'+s2.h2+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">Word Count</span><span class="score-val">'+s2.words+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">Images</span><span class="score-val">'+s2.images+' ('+s2.altPct+'% alt)</span></div>' +
+                        '<div class="score-row"><span class="score-label">Links</span><span class="score-val">'+s2.links+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">OG Tags</span><span class="score-val">'+s2.og+'/3</span></div>' +
+                        '<div class="score-row"><span class="score-label">Twitter Card</span><span class="score-val">'+s2.twitter+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">Schemas</span><span class="score-val">'+s2.schemas+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">Canonical</span><span class="score-val">'+s2.canonical+'</span></div>' +
+                        '<div class="score-row"><span class="score-label">Language</span><span class="score-val">'+s2.lang+'</span></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Quick Comparison</h4>' +
+                    '<div class="issue-item issue-'+(s1.words>s2.words?'pass':s1.words<s2.words?'warn':'pass')+'">Word Count: '+esc(url1)+': '+s1.words+' vs '+esc(url2)+': '+s2.words+'</div>' +
+                    '<div class="issue-item issue-'+(s1.links>s2.links?'pass':s1.links<s2.links?'warn':'pass')+'">Link Count: '+esc(url1)+': '+s1.links+' vs '+esc(url2)+': '+s2.links+'</div>' +
+                    '<div class="issue-item issue-'+(s1.altPct>=s2.altPct?'pass':'warn')+'">Alt Text Coverage: '+esc(url1)+': '+s1.altPct+'% vs '+esc(url2)+': '+s2.altPct+'%</div>' +
+                    '<div class="issue-item issue-'+(s1.schemas>=s2.schemas?'pass':'warn')+'">Schemas: '+esc(url1)+': '+s1.schemas+' vs '+esc(url2)+': '+s2.schemas+'</div>' +
+                '</div>';
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: '+esc(e.message)+'</div>';
+        }
+    }    // =====================================================
+    // 14. SEO REPORT
+    // =====================================================
+    async function runReport() {
+        var url = document.getElementById('rpt-url').value.trim();
+        if (!url) return alert('Enter a URL');
+        var out = document.getElementById('rpt-output');
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Generating full SEO report for '+esc(url)+'...</p></div>';
+        try {
+            var html = await fetchHTML(url);
+            var doc = parseHTML(html);
+            var m = extractMeta(doc);
+            var text = getBodyText(doc);
+            var wc = wordCount(text);
+            var sc = sentenceCount(text);
+            var readability = fleschScore(text);
+            var imgs = doc.querySelectorAll('img');
+            var h1s = doc.querySelectorAll('h1');
+            var h2s = doc.querySelectorAll('h2');
+            var schemas = doc.querySelectorAll('script[type="application/ld+json"]');
+            var links = doc.querySelectorAll('a[href]');
+            var baseHost = new URL(url).hostname;
+            var extLinks = 0;
+            Array.from(links).forEach(function(a) {
+                var href = a.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('mailto:')) return;
+                try { if (new URL(href, url).hostname !== baseHost) extLinks++; } catch(e) { extLinks++; }
+            });
+            var withAlt = Array.from(imgs).filter(function(i){return i.getAttribute('alt')&&i.getAttribute('alt').trim().length>0;}).length;
+
+            // Score calculation
+            var score = 0, recommendations = [];
+            // Title
+            if (m.title.length > 0) { score += 15; recommendations.push({t:'pass',h:'Title Tag',d:'Present ('+m.title.length+' chars).'}); }
+            else recommendations.push({t:'fail',h:'Missing Title',d:'Add a title tag (30-60 chars).'});
+            // Description
+            if (m.description.length > 0) { score += 15; recommendations.push({t:'pass',h:'Meta Description',d:'Present ('+m.description.length+' chars).'}); }
+            else recommendations.push({t:'fail',h:'Missing Description',d:'Add a meta description (120-160 chars).'});
+            // H1
+            if (h1s.length === 1) { score += 15; recommendations.push({t:'pass',h:'H1 Tag',d:'One H1 tag found.'}); }
+            else if (h1s.length === 0) recommendations.push({t:'fail',h:'Missing H1',d:'Add one H1 tag.'});
+            else { score += 5; recommendations.push({t:'warn',h:'Multiple H1',d:h1s.length+' H1 tags. Use exactly one.'}); }
+            // H2
+            if (h2s.length > 0) { score += 10; recommendations.push({t:'pass',h:'H2 Tags',d:h2s.length+' found.'}); }
+            else recommendations.push({t:'warn',h:'No H2 Tags',d:'Add H2 subheadings.'});
+            // Images
+            if (imgs.length > 0) { var ap = Math.round(withAlt/imgs.length*100); if(ap===100){score+=10;recommendations.push({t:'pass',h:'Image Alt Text',d:'All images have alt text.'});}else{score+=Math.round(10*ap/100);recommendations.push({t:'warn',h:'Image Alt Text',d:ap+'% coverage ('+withAlt+'/'+imgs.length+').');} }
+            else { score += 5; recommendations.push({t:'warn',h:'No Images',d:'Add visual content.'}); }
+            // OG
+            var ogC = [m.ogTitle,m.ogDesc,m.ogImage].filter(function(v){return v.length>0;}).length;
+            if (ogC === 3) { score += 10; recommendations.push({t:'pass',h:'Open Graph',d:'All essential OG tags present.'}); }
+            else { score += Math.round(10*ogC/3); recommendations.push({t:'warn',h:'Open Graph',d:ogC+'/3 essential OG tags.'}); }
+            // Canonical
+            if (m.canonical) { score += 5; recommendations.push({t:'pass',h:'Canonical',d:'Set.'}); }
+            else recommendations.push({t:'warn',h:'No Canonical',d:'Add a canonical tag.'});
+            // Lang
+            if (m.lang) { score += 5; recommendations.push({t:'pass',h:'Language',d:'lang="'+m.lang+'".'}); }
+            else recommendations.push({t:'fail',h:'No Language',d:'Add lang attribute to html.'});
+            // Word count
+            if (wc >= 300) { score += 10; recommendations.push({t:'pass',h:'Content Length',d:wc+' words.'}); }
+            else { score += 0; recommendations.push({t:'warn',h:'Thin Content',d:wc+' words. Aim for 300+.'}); }
+            // Structured data
+            if (schemas.length > 0) { score += 5; recommendations.push({t:'pass',h:'Structured Data',d:schemas.length+' schema(s).'}); }
+            else recommendations.push({t:'warn',h:'No Schema',d:'Add JSON-LD structured data.'});
+
+            var color = score >= 80 ? '#10b981' : score >= 60 ? '#2563eb' : score >= 40 ? '#f59e0b' : '#ef4444';
+            var dashoff = 283 - (score / 100) * 283;
+
+            out.innerHTML =
+                '<h3>&#128196; Full SEO Report</h3>' +
+                '<div style="text-align:center;margin-bottom:24px;">' +
+                    '<div style="font-size:12px;color:var(--gray-1);margin-bottom:8px;">Report for '+esc(url)+'</div>' +
+                    '<svg width="140" height="140" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" class="score-circle-bg" fill="none" stroke-width="8" stroke-linecap="round" stroke="#e2e8f0"/><circle cx="50" cy="50" r="45" fill="none" stroke-width="8" stroke-linecap="round" stroke="'+color+'" stroke-dasharray="283" stroke-dashoffset="'+dashoff+'" style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1s ease;"/></svg>' +
+                    '<div style="margin-top:-95px;margin-bottom:80px;"><div style="font-size:40px;font-weight:900;color:'+color+';">'+score+'</div><div style="font-size:14px;color:var(--gray-1);">out of 100</div></div>' +
+                '</div>' +
+                '<div class="report-section"><h4>Overview</h4>' +
+                    '<div class="meta-grid">' +
+                        '<div class="meta-box"><label>Title</label><div class="val">'+esc(m.title||'Missing')+' ('+m.title.length+')</div></div>' +
+                        '<div class="meta-box"><label>Description</label><div class="val">'+esc(m.description||'Missing')+' ('+m.description.length+')</div></div>' +
+                        '<div class="meta-box"><label>H1 Tags</label><div class="val">'+h1s.length+'</div></div>' +
+                        '<div class="meta-box"><label>Word Count</label><div class="val">'+wc+'</div></div>' +
+                        '<div class="meta-box"><label>Images</label><div class="val">'+imgs.length+' ('+withAlt+' with alt)</div></div>' +
+                        '<div class="meta-box"><label>Links</label><div class="val">'+links.length+' total, '+extLinks+' external</div></div>' +
+                        '<div class="meta-box"><label>Readability</label><div class="val">'+readability+' (Flesch)</div></div>' +
+                        '<div class="meta-box"><label>Sentences</label><div class="val">'+sc+'</div></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="report-section"><h4>Technical SEO</h4>' +
+                    '<div class="meta-grid">' +
+                        '<div class="meta-box"><label>HTTPS</label><div class="val">'+(url.startsWith('https://')?'<span style="color:#10b981;">Yes</span>':'<span style="color:#ef4444;">No</span>')+'</div></div>' +
+                        '<div class="meta-box"><label>Canonical</label><div class="val">'+esc(m.canonical||'Missing')+'</div></div>' +
+                        '<div class="meta-box"><label>Viewport</label><div class="val">'+esc(m.viewport||'Missing')+'</div></div>' +
+                        '<div class="meta-box"><label>Robots</label><div class="val">'+esc(m.robots||'Not set')+'</div></div>' +
+                        '<div class="meta-box"><label>Language</label><div class="val">'+esc(m.lang||'Missing')+'</div></div>' +
+                        '<div class="meta-box"><label>Structured Data</label><div class="val">'+schemas.length+' schema(s)</div></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="report-section"><h4>Recommendations</h4>' +
+                recommendations.map(issueHTML).join('') +
+                '</div>';
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">&#10060; Error: '+esc(e.message)+'</div>';
+        }
+    }
+    </script></body>
 </html>
