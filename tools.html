@@ -2001,6 +2001,14 @@
 
             var overallColor = auditScoreColor(overall);
 
+            window._auditData = {
+                techPct: techPct,
+                contentPct: contentPct,
+                linkPct: linkPct,
+                imgPct: imgPct,
+                speedPct: speedPct
+            };
+
             out.innerHTML =
                 '<div class="audit-download-bar">' +
                     '<button class="audit-dl-btn" onclick="downloadFullAuditReport(\'html\')" data-i18n="audit_dl_html">&#128190; Download HTML Report</button>' +
@@ -2059,6 +2067,7 @@
         var dash = container.querySelector('.audit-dash');
         if (!dash) return;
 
+        var ad = window._auditData || {};
         var urlEl = document.getElementById('auditfull-url');
         var pageUrl = urlEl ? urlEl.value : 'N/A';
         var now = new Date().toLocaleString();
@@ -2207,11 +2216,11 @@
         var gradeTxt = overallVal >= 90 ? 'A+' : overallVal >= 80 ? 'A' : overallVal >= 70 ? 'B' : overallVal >= 60 ? 'C' : overallVal >= 50 ? 'D' : 'F';
         /* --- Build bar chart from data (avoids DOM transform issues in PDF) --- */
         var barData = [
-            { label: 'Technical', score: techPct, color: '#2563eb' },
-            { label: 'Content', score: contentPct, color: '#8b5cf6' },
-            { label: 'Links', score: linkPct, color: '#f59e0b' },
-            { label: 'Images', score: imgPct, color: '#10b981' },
-            { label: 'Speed', score: speedPct, color: '#ef4444' }
+            { label: 'Technical', score: ad.techPct || 0, color: '#2563eb' },
+            { label: 'Content', score: ad.contentPct || 0, color: '#8b5cf6' },
+            { label: 'Links', score: ad.linkPct || 0, color: '#f59e0b' },
+            { label: 'Images', score: ad.imgPct || 0, color: '#10b981' },
+            { label: 'Speed', score: ad.speedPct || 0, color: '#ef4444' }
         ];
         var barChartBuilt = '<div class="rpt-chart">';
         for (var bi = 0; bi < barData.length; bi++) {
