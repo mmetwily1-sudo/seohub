@@ -1343,8 +1343,11 @@
             if (h2s.length > 0) { score += 10; recommendations.push({t:'pass',h:'H2 Tags',d:h2s.length+' found.'}); }
             else recommendations.push({t:'warn',h:'No H2 Tags',d:'Add H2 subheadings.'});
             // Images
-            if (imgs.length > 0) { var ap = Math.round(withAlt/imgs.length*100); if(ap===100){score+=10;recommendations.push({t:'pass',h:'Image Alt Text',d:'All images have alt text.'});}else{score+=Math.round(10*ap/100);recommendations.push({t:'warn',h:'Image Alt Text',d:ap+'% coverage ('+withAlt+'/'+imgs.length+').');} }
-            else { score += 5; recommendations.push({t:'warn',h:'No Images',d:'Add visual content.'}); }
+            if (imgs.length > 0) {
+                var ap = Math.round(withAlt/imgs.length*100);
+                if(ap===100){score+=10;recommendations.push({t:'pass',h:'Image Alt Text',d:'All images have alt text.'});}
+                else{score+=Math.round(10*ap/100);recommendations.push({t:'warn',h:'Image Alt Text',d:ap+'% coverage ('+withAlt+'/'+imgs.length+').'});}
+            } else { score += 5; recommendations.push({t:'warn',h:'No Images',d:'Add visual content.'}); }
             // OG
             var ogC = [m.ogTitle,m.ogDesc,m.ogImage].filter(function(v){return v.length>0;}).length;
             if (ogC === 3) { score += 10; recommendations.push({t:'pass',h:'Open Graph',d:'All essential OG tags present.'}); }
