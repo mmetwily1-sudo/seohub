@@ -154,6 +154,18 @@
         .ab-rect{width:40px;border-radius:6px 6px 0 0;transition:height 1s ease;min-height:4px}
         .ab-val{font-size:14px;font-weight:700}
         .ab-lbl{font-size:11px;color:var(--gray-1);text-align:center;max-width:60px}
+        .audit-download-bar{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+        .audit-dl-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:var(--radius);border:2px solid var(--primary);background:var(--white);color:var(--primary);font-size:14px;font-weight:700;cursor:pointer;transition:var(--transition)}
+        .audit-dl-btn:hover{background:var(--primary);color:#fff;transform:translateY(-2px);box-shadow:0 4px 16px rgba(37,99,235,0.3)}
+        @media print{
+            body *{visibility:hidden!important}
+            #auditfull-output,#auditfull-output *{visibility:visible!important}
+            #auditfull-output{position:absolute;left:0;top:0;width:100%;padding:20px!important}
+            .tool-panel{display:block!important}
+            .audit-download-bar{display:none!important}
+            .audit-tabs{display:none!important}
+            .audit-tab-content{display:block!important}
+        }
         .seo-term{position:relative;cursor:help;border-bottom:1px dotted var(--primary);color:inherit;font-weight:inherit}
         .seo-term:hover{color:var(--primary)}
         .seo-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:12px 16px;border-radius:var(--radius);font-size:13px;line-height:1.5;width:280px;z-index:1000;pointer-events:none;opacity:0;transition:opacity 0.2s;box-shadow:0 4px 20px rgba(0,0,0,0.2);font-weight:400;text-align:left;direction:rtl}
@@ -1990,6 +2002,10 @@
             var overallColor = auditScoreColor(overall);
 
             out.innerHTML =
+                '<div class="audit-download-bar">' +
+                    '<button class="audit-dl-btn" onclick="downloadFullAuditReport(\'html\')" data-i18n="audit_dl_html">&#128190; Download HTML Report</button>' +
+                    '<button class="audit-dl-btn" onclick="downloadFullAuditReport(\'print\')" data-i18n="audit_dl_print">&#128424; Print / Save PDF</button>' +
+                '</div>' +
                 '<div class="audit-dash">' +
                     '<div style="text-align:center;margin-bottom:24px;">' +
                         '<h3 style="font-size:24px;margin-bottom:8px;">&#128200; Full SEO Audit Dashboard</h3>' +
@@ -2035,6 +2051,129 @@
         var target = document.getElementById(tabId);
         if (target) target.classList.add('active');
         btn.classList.add('active');
+    }
+
+    function downloadFullAuditReport(mode) {
+        var container = document.getElementById('auditfull-output');
+        if (!container) return;
+        var dash = container.querySelector('.audit-dash');
+        if (!dash) return;
+
+        if (mode === 'print') {
+            var printWin = window.open('', '_blank');
+            if (!printWin) { alert('Please allow popups to print the report.'); return; }
+            printWin.document.write(
+                '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+                '<title>SEO Audit Report</title><style>' +
+                '*{margin:0;padding:0;box-sizing:border-box}' +
+                'body{font-family:Segoe UI,Tahoma,sans-serif;padding:24px;color:#1a1a2e;line-height:1.6}' +
+                '.audit-dash{max-width:100%}' +
+                '.audit-score-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}' +
+                '.audit-score-card{background:#fff;border-radius:8px;padding:20px 12px;text-align:center;border:1px solid #e5e7eb}' +
+                '.asc-label{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}' +
+                '.asc-score{font-size:32px;font-weight:900;line-height:1}' +
+                '.asc-bar{height:6px;background:#e5e7eb;border-radius:3px;margin-top:10px;overflow:hidden}' +
+                '.asc-bar-fill{height:100%;border-radius:3px}' +
+                '.audit-tabs{display:none!important}' +
+                '.audit-tab-content{display:block!important;margin-bottom:24px}' +
+                '.audit-tab-content h3{font-size:18px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e5e7eb}' +
+                '.audit-issue-list{list-style:none;padding:0}' +
+                '.audit-issue-list li{padding:8px 12px;border-left:4px solid #e5e7eb;margin-bottom:8px;background:#f9fafb;border-radius:0 6px 6px 0;font-size:14px}' +
+                '.issue-pass{border-left-color:#10b981}' +
+                '.issue-warn{border-left-color:#f59e0b}' +
+                '.issue-fail{border-left-color:#ef4444}' +
+                '.audit-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}' +
+                '.audit-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:600}' +
+                '.ab-green{background:rgba(16,185,129,.1);color:#10b981}.ab-red{background:rgba(239,68,68,.1);color:#ef4444}' +
+                '.ab-yellow{background:rgba(245,158,11,.1);color:#f59e0b}.ab-blue{background:rgba(59,130,246,.1);color:#3b82f6}' +
+                '.audit-bar-chart{display:flex;align-items:flex-end;justify-content:space-around;height:160px;padding:0 10px;border-bottom:2px solid #e5e7eb;margin-top:10px}' +
+                '.ab-item{display:flex;flex-direction:column;align-items:center;gap:6px}' +
+                '.ab-rect{width:40px;border-radius:6px 6px 0 0;min-height:4px}' +
+                '.ab-val{font-size:14px;font-weight:700}' +
+                '.ab-lbl{font-size:11px;color:#6b7280;text-align:center;max-width:60px}' +
+                '.audit-rec{padding:12px;border-radius:8px;margin-bottom:10px;background:#f9fafb;border-left:4px solid #3b82f6}' +
+                '.ar-priority{display:inline-block;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-right:8px}' +
+                '.ar-high{background:rgba(239,68,68,.1);color:#ef4444}' +
+                '.ar-medium{background:rgba(245,158,11,.1);color:#f59e0b}' +
+                '.ar-low{background:rgba(59,130,246,.1);color:#3b82f6}' +
+                '.audit-kw-freq{width:100%;border-collapse:collapse}' +
+                '.audit-kw-freq th,.audit-kw-freq td{padding:6px 12px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px}' +
+                '.audit-kw-freq th{background:#f3f4f6;font-weight:600}' +
+                '@media(max-width:768px){.audit-score-grid{grid-template-columns:repeat(2,1fr)}.audit-grid-2{grid-template-columns:1fr}}' +
+                '</style></head><body>' +
+                '<div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #e5e7eb">' +
+                    '<h1 style="font-size:22px;margin-bottom:4px">SEO Audit Report | \u062a\u0642\u0631\u064a\u0631 \u0641\u062d\u0635 SEO</h1>' +
+                    '<p style="color:#6b7280;font-size:13px">Generated by SEOHUB - mmetwily1-sudo.github.io/seohub</p>' +
+                    '<p style="color:#6b7280;font-size:12px">' + new Date().toLocaleString() + '</p>' +
+                '</div>' +
+                dash.innerHTML +
+                '<script>window.onload=function(){setTimeout(function(){window.print();},500)}<\/script>' +
+                '</body></html>'
+            );
+            printWin.document.close();
+            return;
+        }
+
+        var fullCss =
+            '<style>' +
+            '*{margin:0;padding:0;box-sizing:border-box}' +
+            'body{font-family:Segoe UI,Tahoma,sans-serif;padding:30px;color:#1a1a2e;line-height:1.6;background:#f8fafc}' +
+            '.audit-dash{max-width:960px;margin:0 auto;background:#fff;padding:30px;border-radius:12px;box-shadow:0 2px 20px rgba(0,0,0,.08)}' +
+            '.audit-score-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}' +
+            '.audit-score-card{background:#fff;border-radius:8px;padding:20px 12px;text-align:center;border:1px solid #e5e7eb}' +
+            '.asc-label{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}' +
+            '.asc-score{font-size:32px;font-weight:900;line-height:1}' +
+            '.asc-bar{height:6px;background:#e5e7eb;border-radius:3px;margin-top:10px;overflow:hidden}' +
+            '.asc-bar-fill{height:100%;border-radius:3px}' +
+            '.audit-tabs{display:none!important}' +
+            '.audit-tab-content{display:block!important;margin-bottom:28px}' +
+            '.audit-tab-content h3{font-size:20px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #e5e7eb}' +
+            '.audit-issue-list{list-style:none;padding:0}' +
+            '.audit-issue-list li{padding:10px 14px;border-left:4px solid #e5e7eb;margin-bottom:8px;background:#f9fafb;border-radius:0 6px 6px 0;font-size:14px}' +
+            '.issue-pass{border-left-color:#10b981}' +
+            '.issue-warn{border-left-color:#f59e0b}' +
+            '.issue-fail{border-left-color:#ef4444}' +
+            '.audit-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}' +
+            '.audit-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:600}' +
+            '.ab-green{background:rgba(16,185,129,.1);color:#10b981}.ab-red{background:rgba(239,68,68,.1);color:#ef4444}' +
+            '.ab-yellow{background:rgba(245,158,11,.1);color:#f59e0b}.ab-blue{background:rgba(59,130,246,.1);color:#3b82f6}' +
+            '.audit-bar-chart{display:flex;align-items:flex-end;justify-content:space-around;height:160px;padding:0 10px;border-bottom:2px solid #e5e7eb;margin-top:10px}' +
+            '.ab-item{display:flex;flex-direction:column;align-items:center;gap:6px}' +
+            '.ab-rect{width:40px;border-radius:6px 6px 0 0;min-height:4px}' +
+            '.ab-val{font-size:14px;font-weight:700}' +
+            '.ab-lbl{font-size:11px;color:#6b7280;text-align:center;max-width:60px}' +
+            '.audit-rec{padding:12px;border-radius:8px;margin-bottom:10px;background:#f9fafb;border-left:4px solid #3b82f6}' +
+            '.ar-priority{display:inline-block;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-right:8px}' +
+            '.ar-high{background:rgba(239,68,68,.1);color:#ef4444}' +
+            '.ar-medium{background:rgba(245,158,11,.1);color:#f59e0b}' +
+            '.ar-low{background:rgba(59,130,246,.1);color:#3b82f6}' +
+            '.audit-kw-freq{width:100%;border-collapse:collapse}' +
+            '.audit-kw-freq th,.audit-kw-freq td{padding:6px 12px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px}' +
+            '.audit-kw-freq th{background:#f3f4f6;font-weight:600}' +
+            '@media(max-width:768px){.audit-score-grid{grid-template-columns:repeat(2,1fr)}.audit-grid-2{grid-template-columns:1fr}}' +
+            '</style>';
+
+        var reportHtml =
+            '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+            '<title>SEO Audit Report</title>' +
+            fullCss +
+            '</head><body>' +
+            '<div class="audit-dash">' +
+                '<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #e5e7eb">' +
+                    '<h1 style="font-size:24px;margin-bottom:4px">&#128200; SEO Audit Report</h1>' +
+                    '<p style="color:#6b7280;font-size:13px">Generated by SEOHUB &middot; mmetwily1-sudo.github.io/seohub</p>' +
+                    '<p style="color:#6b7280;font-size:12px">' + new Date().toLocaleString() + '</p>' +
+                '</div>' +
+                dash.innerHTML +
+            '</div>' +
+            '</body></html>';
+
+        var blob = new Blob([reportHtml], { type: 'text/html;charset=utf-8' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'seo-audit-report.html';
+        a.click();
+        URL.revokeObjectURL(a.href);
     }
     // =====================================================
     // SEO GLOSSARY TOOLTIPS
@@ -2386,6 +2525,7 @@
             btn_extract_kw: 'Extract Keywords', btn_check_images: 'Check Images', btn_analyze_links: 'Analyze Links',
             btn_generate_sitemap: 'Generate Sitemap', btn_compare: 'Compare', btn_full_audit: 'Run Full Audit',
             btn_generate_report: 'Generate Report',
+            audit_dl_html: '\uD83D\uDCBE Download HTML Report', audit_dl_print: '\uD83D\uDC24 Print / Save PDF',
             load_score: 'Paste a URL above and click Analyze', load_meta: 'Paste a URL above and click Analyze Meta Tags',
             load_head: 'Paste a URL above and click Check Headings', load_audit: 'Paste a URL above and click Run Audit',
             load_speed: 'Paste a URL above and click Test Speed', load_content: 'Paste a URL above and click Analyze Content',
@@ -2429,6 +2569,7 @@
             btn_extract_kw: '\u0627\u0633\u062a\u062e\u0631\u0627\u062c \u0627\u0644\u0643\u0644\u0645\u0627\u062a', btn_check_images: '\u0641\u062d\u0635 \u0627\u0644\u0635\u0648\u0631', btn_analyze_links: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0631\u0648\u0627\u0628\u0637',
             btn_generate_sitemap: '\u062a\u0648\u0644\u064a\u062f \u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639', btn_compare: '\u0645\u0639\u0627\u0631\u0641\u0629', btn_full_audit: '\u062a\u062d\u0644\u064a\u0644 \u0634\u0627\u0645\u0644',
             btn_generate_report: '\u062a\u0648\u0644\u064a\u062f \u0627\u0644\u062a\u0642\u0631\u064a\u0631',
+            audit_dl_html: '\uD83D\uDCBE \u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u062a\u0642\u0631\u064a\u0631 HTML', audit_dl_print: '\uD83D\uDC24 \u0637\u0628\u0627\u0639\u0629 / \u062d\u0641\u0638 PDF',
             load_score: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u062d\u0644\u064a\u0644', load_meta: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0648\u0633\u0648\u0645',
             load_head: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0641\u062d\u0635 \u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646', load_audit: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629',
             load_speed: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0644\u0633\u0631\u0639\u0629', load_content: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649',
