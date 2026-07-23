@@ -248,13 +248,13 @@
                     <h3>&#129302; Robots.txt Generator</h3>
                     <p style="color:var(--gray-1);margin-bottom:20px;">Configure rules and generate a downloadable robots.txt file.</p>
                     <div class="robots-form">
-                        <div class="robots-row"><label>Site URL</label><input type="text" id="robots-site" placeholder="https://example.com"></div>
-                        <div class="robots-row"><label>Sitemap URL</label><input type="text" id="robots-sitemap" placeholder="https://example.com/sitemap.xml"></div>
-                        <div class="robots-row"><label>Crawl-delay</label><select id="robots-delay"><option value="">None</option><option value="1">1 second</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="30">30 seconds</option></select></div>
-                        <div class="robots-row"><label>Block /admin?</label><select id="robots-admin"><option value="yes">Yes - Disallow /admin</option><option value="no" selected>No</option></select></div>
-                        <div class="robots-row"><label>Block /private?</label><select id="robots-private"><option value="yes">Yes - Disallow /private</option><option value="no" selected>No</option></select></div>
-                        <div class="robots-row"><label>Block /tmp?</label><select id="robots-tmp"><option value="yes">Yes - Disallow /tmp</option><option value="no" selected>No</option></select></div>
-                        <div class="robots-row"><label>Custom Disallow</label><input type="text" id="robots-custom" placeholder="/path/to/block"></div>
+                        <div class="robots-row"><label for="robots-site">Site URL</label><input type="text" id="robots-site" placeholder="https://example.com"></div>
+                        <div class="robots-row"><label for="robots-sitemap">Sitemap URL</label><input type="text" id="robots-sitemap" placeholder="https://example.com/sitemap.xml"></div>
+                        <div class="robots-row"><label for="robots-delay">Crawl-delay</label><select id="robots-delay"><option value="">None</option><option value="1">1 second</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="30">30 seconds</option></select></div>
+                        <div class="robots-row"><label for="robots-admin">Block /admin?</label><select id="robots-admin"><option value="yes">Yes - Disallow /admin</option><option value="no" selected>No</option></select></div>
+                        <div class="robots-row"><label for="robots-private">Block /private?</label><select id="robots-private"><option value="yes">Yes - Disallow /private</option><option value="no" selected>No</option></select></div>
+                        <div class="robots-row"><label for="robots-tmp">Block /tmp?</label><select id="robots-tmp"><option value="yes">Yes - Disallow /tmp</option><option value="no" selected>No</option></select></div>
+                        <div class="robots-row"><label for="robots-custom">Custom Disallow</label><input type="text" id="robots-custom" placeholder="/path/to/block"></div>
                         <div><button class="tool-go-btn" onclick="generateRobots()">Generate Robots.txt</button></div>
                     </div>
                     <div id="robots-result" style="display:none;margin-top:24px;">
@@ -372,9 +372,11 @@
 
     async function fetchHTML(url) {
         var proxies = [
-            { url: 'https://api.allorigins.win/get?url=', type: 'json' },
-            { url: 'https://corsproxy.io/?', type: 'text' },
-            { url: 'https://api.codetabs.com/v1/proxy?quest=', type: 'text' }
+            { url: 'https://api.allorigins.win/raw?url=', type: 'text' },
+            { url: 'https://corsproxy.io/?url=', type: 'text' },
+            { url: 'https://api.codetabs.com/v1/proxy?quest=', type: 'text' },
+            { url: 'https://api.cors.lol/?url=', type: 'text' },
+            { url: 'https://thingproxy.freeboard.io/fetch/', type: 'text' }
         ];
         var lastError;
         for (var i = 0; i < proxies.length; i++) {
@@ -382,19 +384,19 @@
             var u = p.url + encodeURIComponent(url);
             try {
                 var controller = new AbortController();
-                var timer = setTimeout(function() { controller.abort(); }, 15000);
+                var timer = setTimeout(function() { controller.abort(); }, 12000);
                 var res = await fetch(u, { signal: controller.signal });
                 clearTimeout(timer);
                 if (!res.ok) throw new Error('HTTP ' + res.status);
+                var text;
                 if (p.type === 'json') {
                     var json = await res.json();
-                    if (!json.contents) throw new Error('Empty response');
-                    return json.contents;
+                    text = json.contents || '';
                 } else {
-                    var text = await res.text();
-                    if (!text || text.length < 50) throw new Error('Empty or too short response');
-                    return text;
+                    text = await res.text();
                 }
+                if (!text || text.length < 50) throw new Error('Empty or too short response');
+                return text;
             } catch (e) {
                 lastError = e;
             }
