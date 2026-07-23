@@ -208,6 +208,9 @@
     </footer>
 
     <script>
+    // ===================== CONFIG =====================
+    const API = 'https://seohub-backend.onrender.com';
+
     // ===================== TAB NAVIGATION =====================
     function showTab(name, btn) {
         document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
@@ -216,134 +219,50 @@
         btn.classList.add('active');
     }
 
-    // ===================== PROXY FETCH =====================
-    const PROXIES = [
-        url => `https://proxy.cors.sh/${url}`,
-        url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-        url => `https://corsproxy.io/?${encodeURIComponent(url)}`
-    ];
-
-    async function fetchWithProxy(url) {
-        for (const proxyFn of PROXIES) {
-            try {
-                const res = await fetch(proxyFn(url), { signal: AbortSignal.timeout(12000) });
-                if (res.ok) return await res.text();
-            } catch(e) { continue; }
-        }
-        throw new Error('All CORS proxies failed. The target site may block external requests.');
+    function esc(s) {
+        if (!s) return '';
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    async function fetchHTML(url, outputEl) {
-        try {
-            return await fetchWithProxy(url);
-        } catch(e) {
-            if (outputEl) outputEl.innerHTML = `<div class="issue-item issue-fail">❌ Could not fetch URL. ${e.message}</div>`;
-            return null;
-        }
-    }
-
-    // ===================== 1. SEO SCORE CALCULATOR =====================
+    // ===================== 1. SEO SCORE =====================
     async function runScore() {
         const url = document.getElementById('score-url').value.trim();
         if (!url) return alert('Enter a URL');
         const out = document.getElementById('score-output');
-        out.innerHTML = `<div class="tool-loading"><div class="spinner"></div><p>Analyzing ${url}...</p></div>`;
-        const html = await fetchHTML(url, out);
-        if (!html) return;
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        let score = 0, issues = [], meta = {};
-
-        // Title (15)
-        const title = doc.querySelector('title');
-        if (title && title.textContent.trim()) {
-            const l = title.textContent.trim().length;
-            meta.title = title.textContent.trim();
-            meta.titleLen = l;
-            if (l >= 30 && l <= 60) { score += 15; issues.push({t:'pass',h:'Title optimized',d:l+' chars (ideal: 30-60)'}); }
-            else if (l > 0) { score += 7; issues.push({t:'warn',h:'Title length issue',d:l+' chars. Aim for 30-60.'}); }
-        } else { issues.push({t:'fail',h:'Missing title tag',d:'Every page needs a title (30-60 chars).'}); }
-
-        // Meta Desc (15)
-        const desc = doc.querySelector('meta[name="description"]');
-        if (desc && desc.content) {
-            const l = desc.content.length;
-            meta.desc = desc.content;
-            meta.descLen = l;
-            if (l >= 120 && l <= 160) { score += 15; issues.push({t:'pass',h:'Meta description optimized',d:l+' chars (ideal: 120-160)'}); }
-            else if (l > 0) { score += 7; issues.push({t:'warn',h:'Description length issue',d:l+' chars. Aim for 120-160.'}); }
-        } else { issues.push({t:'fail',h:'Missing meta description',d:'Add a 120-160 char description.'}); }
-
-        // H1 (15)
-        const h1s = doc.querySelectorAll('h1');
-        meta.h1Count = h1s.length;
-        if (h1s.length === 1) { score += 15; meta.h1 = h1s[0].textContent.trim(); issues.push({t:'pass',h:'Single H1 found',d:'Perfect.'}); }
-        else if (h1s.length === 0) { issues.push({t:'fail',h:'No H1 tag',d:'Add exactly one H1.'}); }
-        else { score += 5; issues.push({t:'warn',h:'Multiple H1s: '+h1s.length, d:'Use only one H1.'}); }
-
-        // Headings (10)
-        const h2s = doc.querySelectorAll('h2').length;
-        meta.h2Count = h2s;
-        if (h2s >= 2) { score += 10; issues.push({t:'pass',h:'Good heading structure',d:h2s+' H2 tags found.'}); }
-        else if (h2s === 1) { score += 5; issues.push({t:'warn',h:'Only 1 H2 tag',d:'Add more H2s for structure.'}); }
-        else { issues.push({t:'warn',h:'No H2 tags',d:'Add H2 subheadings.'}); }
-
-        // Images (10)
-        const imgs = doc.querySelectorAll('img');
-        let withAlt = 0;
-        imgs.forEach(i => { if (i.alt && i.alt.trim()) withAlt++; });
-        meta.imgs = imgs.length; meta.imgsAlt = withAlt;
-        if (imgs.length > 0) { const p = Math.round(withAlt/imgs.length*10); score += p; issues.push(withAlt===imgs.length ? {t:'pass',h:'All images have alt',d:withAlt+'/'+imgs.length} : {t:'warn',h:'Missing alt text',d:withAlt+'/'+imgs.length+' images have alt'}); }
-
-        // OG Tags (10)
-        const ogT = !!doc.querySelector('meta[property="og:title"]');
-        const ogD = !!doc.querySelector('meta[property="og:description"]');
-        const ogI = !!doc.querySelector('meta[property="og:image"]');
-        let ogS = (ogT?3:0)+(ogD?3:0)+(ogI?4:0);
-        score += ogS;
-        meta.og = {t:ogT,d:ogD,i:ogI};
-        if (ogS===10) issues.push({t:'pass',h:'OG tags complete',d:'All Open Graph tags present.'});
-        else if (ogS>0) issues.push({t:'warn',h:'Incomplete OG tags',d:ogS+'/10 OG tags.'});
-        else issues.push({t:'warn',h:'No OG tags',d:'Add OG tags for social sharing.'});
-
-        // Canonical (5)
-        if (doc.querySelector('link[rel="canonical"]')) { score += 5; issues.push({t:'pass',h:'Canonical tag',d:'Present.'}); }
-        else issues.push({t:'warn',h:'No canonical tag',d:'Add canonical to prevent duplicates.'});
-
-        // Lang (5)
-        const lang = doc.querySelector('html').getAttribute('lang');
-        if (lang) { score += 5; meta.lang = lang; issues.push({t:'pass',h:'Language set',d:lang}); }
-        else issues.push({t:'warn',h:'No lang attribute',d:'Add lang to html tag.'});
-
-        // Word count (10)
-        const wc = (doc.body?doc.body.textContent:'').split(/\s+/).filter(w=>w.length>0).length;
-        meta.words = wc;
-        if (wc>=300) { score += 10; issues.push({t:'pass',h:'Good content length',d:wc+' words.'}); }
-        else if (wc>=100) { score += 5; issues.push({t:'warn',h:'Thin content',d:wc+' words. Aim for 300+.'}); }
-        else issues.push({t:'fail',h:'Very thin content',d:wc+' words.'});
-
-        score = Math.min(score, 100);
-        const color = score>=80?'#10b981':score>=60?'#2563eb':score>=40?'#f59e0b':'#ef4444';
-        const dashoff = 283 - (score/100)*283;
-
-        out.innerHTML = `
-            <div class="score-circle-wrap">
-                <svg class="score-circle-svg" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" class="score-circle-bg"/>
-                    <circle cx="50" cy="50" r="45" class="score-circle-fill" style="stroke:${color};stroke-dashoffset:${dashoff}"/>
-                </svg>
-                <div><div class="score-big" style="color:${color}">${score}/100</div><div class="score-sub">Overall SEO Score</div></div>
-            </div>
-            <div class="meta-grid">
-                <div class="meta-box"><label>Title</label><div class="val">${meta.title||'Missing'}${meta.titleLen?' ('+meta.titleLen+' chars)':''}</div></div>
-                <div class="meta-box"><label>Description</label><div class="val">${meta.desc||'Missing'}${meta.descLen?' ('+meta.descLen+' chars)':''}</div></div>
-                <div class="meta-box"><label>H1 Tags</label><div class="val">${meta.h1Count} found${meta.h1?': '+meta.h1.substring(0,60):''}</div></div>
-                <div class="meta-box"><label>Word Count</label><div class="val">${meta.words} words</div></div>
-                <div class="meta-box"><label>Images</label><div class="val">${meta.imgs} total, ${meta.imgsAlt} with alt</div></div>
-                <div class="meta-box"><label>Language</label><div class="val">${meta.lang||'Not set'}</div></div>
-            </div>
-            <div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Issues & Results</h4>
-            ${issues.map(i=>`<div class="issue-item issue-${i.t}">${i.t==='pass'?'✅':i.t==='warn'?'⚠️':'❌'} <div><strong>${i.h}</strong><br>${i.d}</div></div>`).join('')}
-            </div>`;
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Analyzing ' + esc(url) + '...</p></div>';
+        try {
+            const res = await fetch(API + '/api/score?url=' + encodeURIComponent(url));
+            const data = await res.json();
+            if (data.error) { out.innerHTML = '<div class="issue-item issue-fail">❌ ' + esc(data.error) + '</div>'; return; }
+            const score = data.score;
+            const color = score>=80?'#10b981':score>=60?'#2563eb':score>=40?'#f59e0b':'#ef4444';
+            const dashoff = 283 - (score/100)*283;
+            const m = data.meta;
+            out.innerHTML =
+                '<div class="score-circle-wrap">' +
+                    '<svg class="score-circle-svg" viewBox="0 0 100 100">' +
+                        '<circle cx="50" cy="50" r="45" class="score-circle-bg"/>' +
+                        '<circle cx="50" cy="50" r="45" class="score-circle-fill" style="stroke:'+color+';stroke-dashoffset:'+dashoff+'"/>' +
+                    '</svg>' +
+                    '<div><div class="score-big" style="color:'+color+'">'+score+'/100</div><div class="score-sub">Overall SEO Score</div></div>' +
+                '</div>' +
+                '<div class="meta-grid">' +
+                    '<div class="meta-box"><label>Title</label><div class="val">'+esc(m.title||'Missing')+(m.titleLen?' ('+m.titleLen+' chars)':'')+'</div></div>' +
+                    '<div class="meta-box"><label>Description</label><div class="val">'+esc(m.desc||'Missing')+(m.descLen?' ('+m.descLen+' chars)':'')+'</div></div>' +
+                    '<div class="meta-box"><label>H1 Tags</label><div class="val">'+m.h1Count+' found'+(m.h1?': '+esc(m.h1.substring(0,60)):'')+'</div></div>' +
+                    '<div class="meta-box"><label>Word Count</label><div class="val">'+m.words+' words</div></div>' +
+                    '<div class="meta-box"><label>Images</label><div class="val">'+m.imgs+' total, '+m.imgsAlt+' with alt</div></div>' +
+                    '<div class="meta-box"><label>Language</label><div class="val">'+esc(m.lang||'Not set')+'</div></div>' +
+                '</div>' +
+                '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Issues & Results</h4>' +
+                data.issues.map(function(i){
+                    var icon = i.t==='pass'?'✅':i.t==='warn'?'⚠️':'❌';
+                    return '<div class="issue-item issue-'+i.t+'">'+icon+' <div><strong>'+esc(i.h)+'</strong><br>'+esc(i.d)+'</div></div>';
+                }).join('') +
+                '</div>';
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">❌ Server error. Make sure the backend is running.</div>';
+        }
     }
 
     // ===================== 2. META TAG ANALYZER =====================
@@ -351,45 +270,38 @@
         const url = document.getElementById('meta-url').value.trim();
         if (!url) return alert('Enter a URL');
         const out = document.getElementById('meta-output');
-        out.innerHTML = `<div class="tool-loading"><div class="spinner"></div><p>Analyzing meta tags...</p></div>`;
-        const html = await fetchHTML(url, out);
-        if (!html) return;
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const get = s => doc.querySelector(s)?.content || '';
-        const title = doc.querySelector('title')?.textContent || '';
-        const desc = get('meta[name="description"]');
-        const canonical = doc.querySelector('link[rel="canonical"]')?.href || '';
-        const robots = get('meta[name="robots"]) || 'Not set';
-        const viewport = get('meta[name="viewport"]') || 'Missing';
-        const lang = doc.querySelector('html')?.getAttribute('lang') || 'Missing';
-
-        const badge = (ok) => ok ? '<span style="color:#10b981;font-weight:700;">✓ Optimal</span>' : '<span style="color:#f59e0b;font-weight:700;">⚠ Check</span>';
-
-        out.innerHTML = `
-            <h3>🏷️ Meta Tag Analysis</h3>
-            <div class="google-preview">
-                <div class="gp-title">${title||'No title'}</div>
-                <div class="gp-url">${url}</div>
-                <div class="gp-desc">${desc||'No meta description'}</div>
-            </div>
-            <div class="meta-grid">
-                <div class="meta-box"><label>Title Tag (${title.length} chars)</label><div class="val">${title||'Missing'}</div>${badge(title.length>=30&&title.length<=60)}</div>
-                <div class="meta-box"><label>Meta Description (${desc.length} chars)</label><div class="val">${desc||'Missing'}</div>${badge(desc.length>=120&&desc.length<=160)}</div>
-                <div class="meta-box"><label>Canonical</label><div class="val">${canonical||'Missing'}</div></div>
-                <div class="meta-box"><label>Robots</label><div class="val">${robots}</div></div>
-                <div class="meta-box"><label>Viewport</label><div class="val">${viewport}</div></div>
-                <div class="meta-box"><label>Language</label><div class="val">${lang}</div></div>
-            </div>
-            <div class="schema-section" style="margin-top:24px;"><h4>Open Graph Tags</h4>
-            ${['og:title','og:description','og:image','og:type','og:url'].map(p=>{
-                const v = doc.querySelector(`meta[property="${p}"]`)?.content;
-                return `<div class="tag-row${v?'':' miss'}"><strong>${p}:</strong> ${v||'Missing'}</div>`;
-            }).join('')}</div>
-            <div class="schema-section"><h4>Twitter Cards</h4>
-            ${['twitter:card','twitter:title','twitter:description','twitter:image'].map(p=>{
-                const v = doc.querySelector(`meta[name="${p}"]`)?.content;
-                return `<div class="tag-row${v?'':' miss'}"><strong>${p}:</strong> ${v||'Missing'}</div>`;
-            }).join('')}</div>`;
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Analyzing meta tags...</p></div>';
+        try {
+            const res = await fetch(API + '/api/meta?url=' + encodeURIComponent(url));
+            const d = await res.json();
+            if (d.error) { out.innerHTML = '<div class="issue-item issue-fail">❌ ' + esc(d.error) + '</div>'; return; }
+            var badge = function(ok) { return ok ? '<span style="color:#10b981;font-weight:700;">✓ Optimal</span>' : '<span style="color:#f59e0b;font-weight:700;">⚠ Check</span>'; };
+            var ogKeys = ['og:title','og:description','og:image','og:type','og:url'];
+            var twKeys = ['twitter:card','twitter:title','twitter:description','twitter:image'];
+            out.innerHTML =
+                '<h3>🏷️ Meta Tag Analysis</h3>' +
+                '<div class="google-preview">' +
+                    '<div class="gp-title">'+esc(d.title||'No title')+'</div>' +
+                    '<div class="gp-url">'+esc(d.url)+'</div>' +
+                    '<div class="gp-desc">'+esc(d.description||'No meta description')+'</div>' +
+                '</div>' +
+                '<div class="meta-grid">' +
+                    '<div class="meta-box"><label>Title Tag ('+d.titleLen+' chars)</label><div class="val">'+esc(d.title||'Missing')+'</div>'+badge(d.titleLen>=30&&d.titleLen<=60)+'</div>' +
+                    '<div class="meta-box"><label>Meta Description ('+d.descLen+' chars)</label><div class="val">'+esc(d.description||'Missing')+'</div>'+badge(d.descLen>=120&&d.descLen<=160)+'</div>' +
+                    '<div class="meta-box"><label>Canonical</label><div class="val">'+esc(d.canonical||'Missing')+'</div></div>' +
+                    '<div class="meta-box"><label>Robots</label><div class="val">'+esc(d.robots)+'</div></div>' +
+                    '<div class="meta-box"><label>Viewport</label><div class="val">'+esc(d.viewport)+'</div></div>' +
+                    '<div class="meta-box"><label>Language</label><div class="val">'+esc(d.lang)+'</div></div>' +
+                '</div>' +
+                '<div class="schema-section" style="margin-top:24px;"><h4>Open Graph Tags</h4>' +
+                ogKeys.map(function(p){ var v = d.ogTags[p]; return '<div class="tag-row'+(v?'':' miss')+'"><strong>'+p+':</strong> '+esc(v||'Missing')+'</div>'; }).join('') + '</div>' +
+                '<div class="schema-section"><h4>Twitter Cards</h4>' +
+                twKeys.map(function(p){ var v = d.twitterTags[p]; return '<div class="tag-row'+(v?'':' miss')+'"><strong>'+p+':</strong> '+esc(v||'Missing')+'</div>'; }).join('') + '</div>' +
+                (d.schemas.length > 0 ? '<div class="schema-section"><h4>Structured Data Found</h4>' +
+                d.schemas.map(function(s){ return '<div class="tag-row"><strong>'+esc(s['@type']||'Unknown')+'</strong></div>'; }).join('') + '</div>' : '');
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">❌ Server error. Make sure the backend is running.</div>';
+        }
     }
 
     // ===================== 3. HEADING CHECKER =====================
@@ -397,39 +309,32 @@
         const url = document.getElementById('head-url').value.trim();
         if (!url) return alert('Enter a URL');
         const out = document.getElementById('head-output');
-        out.innerHTML = `<div class="tool-loading"><div class="spinner"></div><p>Checking heading structure...</p></div>`;
-        const html = await fetchHTML(url, out);
-        if (!html) return;
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const headings = [];
-        for (let i=1;i<=6;i++) doc.querySelectorAll('h'+i).forEach(h=>headings.push({lv:i,text:h.textContent.trim()}));
-        const counts = [0,0,0,0,0,0];
-        headings.forEach(h=>counts[h.lv-1]++);
-
-        const issues = [];
-        if (counts[0]===0) issues.push({t:'fail',h:'No H1 tag',d:'Every page needs exactly one H1.'});
-        else if (counts[0]===1) issues.push({t:'pass',h:'One H1 tag',d:'Correct.'});
-        else issues.push({t:'fail',h:counts[0]+' H1 tags',d:'Use exactly one H1.'});
-
-        if (headings.length===0) issues.push({t:'fail',h:'No headings found',d:'Add headings for structure.'});
-        else {
-            let skip=false, prev=0;
-            headings.forEach(h=>{if(h.lv>prev+1&&prev>0)skip=true;prev=h.lv;});
-            if(skip) issues.push({t:'warn',h:'Skipped heading levels',d:'Maintain H1→H2→H3 hierarchy.'});
-            else issues.push({t:'pass',h:'Proper hierarchy',d:'Headings are properly nested.'});
-            const empty=headings.filter(h=>!h.text).length;
-            if(empty>0) issues.push({t:'fail',h:empty+' empty headings',d:'All headings need text.'});
+        out.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Checking heading structure...</p></div>';
+        try {
+            const res = await fetch(API + '/api/headings?url=' + encodeURIComponent(url));
+            const d = await res.json();
+            if (d.error) { out.innerHTML = '<div class="issue-item issue-fail">❌ ' + esc(d.error) + '</div>'; return; }
+            var labels = ['H1','H2','H3','H4','H5','H6'];
+            var gridHtml = labels.map(function(h,i){
+                return '<div style="text-align:center;padding:16px;background:var(--white);border-radius:var(--radius);"><div style="font-size:24px;font-weight:900;color:var(--primary);">'+d.counts[i]+'</div><div style="font-size:12px;color:var(--gray-1);">'+h+'</div></div>';
+            }).join('');
+            var treeHtml = d.headings.length===0 ? '<p style="color:var(--gray-1);">No headings found.</p>' :
+                d.headings.map(function(h){
+                    var cls = h.level>=2 ? ' lv'+h.level : '';
+                    return '<div class="heading-item'+cls+'"><span class="htag">H'+h.level+'</span><span>'+esc(h.text||'(empty)')+'</span></div>';
+                }).join('');
+            out.innerHTML =
+                '<h3>📑 Heading Structure</h3>' +
+                '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:24px;">'+gridHtml+'</div>' +
+                '<h4 style="margin-bottom:12px;font-weight:700;">Heading Tree</h4>' + treeHtml +
+                '<div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Issues</h4>' +
+                d.issues.map(function(i){
+                    var icon = i.t==='pass'?'✅':i.t==='warn'?'⚠️':'❌';
+                    return '<div class="issue-item issue-'+i.t+'">'+icon+' <div><strong>'+esc(i.h)+'</strong><br>'+esc(i.d)+'</div></div>';
+                }).join('') + '</div>';
+        } catch(e) {
+            out.innerHTML = '<div class="issue-item issue-fail">❌ Server error. Make sure the backend is running.</div>';
         }
-
-        out.innerHTML = `
-            <h3>📑 Heading Structure</h3>
-            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:24px;">
-                ${['H1','H2','H3','H4','H5','H6'].map((h,i)=>`<div style="text-align:center;padding:16px;background:var(--white);border-radius:var(--radius);"><div style="font-size:24px;font-weight:900;color:var(--primary);">${counts[i]}</div><div style="font-size:12px;color:var(--gray-1);">${h}</div></div>`).join('')}
-            </div>
-            <h4 style="margin-bottom:12px;font-weight:700;">Heading Tree</h4>
-            ${headings.length===0?'<p style="color:var(--gray-1);">No headings found.</p>':headings.map(h=>`<div class="heading-item${h.lv>=2?' lv'+h.lv:''}"><span class="htag">H${h.lv}</span><span>${h.text||'(empty)'}</span></div>`).join('')}
-            <div style="margin-top:24px;"><h4 style="margin-bottom:12px;font-weight:700;">Issues</h4>
-            ${issues.map(i=>`<div class="issue-item issue-${i.t}">${i.t==='pass'?'✅':i.t==='warn'?'⚠️':'❌'} <div><strong>${i.h}</strong><br>${i.d}</div></div>`).join('')}</div>`;
     }
 
     // ===================== 4. SCHEMA GENERATOR =====================
@@ -464,8 +369,8 @@
         form.innerHTML = fields.map(f=>{
             const isLong = f==='description'||f==='answer1'||f==='answer2';
             return isLong ?
-                `<div class="full"><label>${schemaLabels[f]||f}</label><textarea id="sf-${f}" rows="3" placeholder="${schemaLabels[f]||f}"></textarea></div>` :
-                `<div><label>${schemaLabels[f]||f}</label><input id="sf-${f}" placeholder="${schemaLabels[f]||f}"></div>`;
+                '<div class="full"><label>'+(schemaLabels[f]||f)+'</label><textarea id="sf-'+f+'" rows="3" placeholder="'+(schemaLabels[f]||f)+'"></textarea></div>' :
+                '<div><label>'+(schemaLabels[f]||f)+'</label><input id="sf-'+f+'" placeholder="'+(schemaLabels[f]||f)+'"></div>';
         }).join('');
     }
 
@@ -487,7 +392,6 @@
         } else if (currentSchemaType==='Person') {
             schema = {"@context":"https://schema.org","@type":"Person",name:data.name,jobTitle:data.jobTitle,url:data.url,image:data.image,sameAs:data.sameAs?[data.sameAs]:undefined};
         }
-        // Clean undefined
         Object.keys(schema).forEach(k=>{if(schema[k]===undefined)delete schema[k];});
         const json = JSON.stringify(schema, null, 2);
         document.getElementById('schema-pre').textContent = json;
@@ -503,10 +407,8 @@
         });
     }
 
-    // Init schema form
     renderSchemaForm();
 
-    // Mobile menu
     document.querySelector('.mobile-menu-btn')?.addEventListener('click', function() {
         document.querySelector('.nav-links').classList.toggle('active');
     });
