@@ -153,6 +153,33 @@
         .ab-rect{width:40px;border-radius:6px 6px 0 0;transition:height 1s ease;min-height:4px}
         .ab-val{font-size:14px;font-weight:700}
         .ab-lbl{font-size:11px;color:var(--gray-1);text-align:center;max-width:60px}
+        .seo-term{position:relative;cursor:help;border-bottom:1px dotted var(--primary);color:inherit;font-weight:inherit}
+        .seo-term:hover{color:var(--primary)}
+        .seo-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:12px 16px;border-radius:var(--radius);font-size:13px;line-height:1.5;width:280px;z-index:1000;pointer-events:none;opacity:0;transition:opacity 0.2s;box-shadow:0 4px 20px rgba(0,0,0,0.2);font-weight:400;text-align:left;direction:rtl}
+        .seo-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--dark)}
+        .seo-term:hover .seo-tooltip{opacity:1;pointer-events:auto}
+        .chat-fab{position:fixed;bottom:24px;right:24px;width:60px;height:60px;background:var(--primary);color:white;border:none;border-radius:50%;font-size:28px;cursor:pointer;box-shadow:0 4px 20px rgba(37,99,235,0.4);z-index:9999;transition:var(--transition);display:flex;align-items:center;justify-content:center}
+        .chat-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,99,235,0.5)}
+        .chat-fab .chat-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:white;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+        .chat-window{position:fixed;bottom:100px;right:24px;width:380px;max-height:520px;background:var(--white);border-radius:var(--radius-lg);box-shadow:0 8px 40px rgba(0,0,0,0.15);z-index:9998;display:none;flex-direction:column;overflow:hidden;border:1px solid var(--gray-4)}
+        .chat-window.open{display:flex}
+        .chat-header{background:var(--primary);color:white;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+        .chat-header h4{margin:0;font-size:16px;font-weight:700}
+        .chat-header .chat-sub{font-size:12px;opacity:0.8}
+        .chat-close{background:none;border:none;color:white;font-size:20px;cursor:pointer;padding:0 4px}
+        .chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;max-height:340px}
+        .chat-msg{padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.5;max-width:85%;word-wrap:break-word}
+        .chat-msg.bot{background:var(--gray-5);align-self:flex-start;border-bottom-left-radius:4px}
+        .chat-msg.user{background:var(--primary);color:white;align-self:flex-end;border-bottom-right-radius:4px}
+        .chat-input-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--gray-4);background:var(--white)}
+        .chat-input{flex:1;padding:10px 14px;border:2px solid var(--gray-4);border-radius:100px;font-size:14px;font-family:inherit;outline:none}
+        .chat-input:focus{border-color:var(--primary)}
+        .chat-send{width:38px;height:38px;background:var(--primary);color:white;border:none;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .chat-send:hover{background:var(--primary-dark)}
+        .chat-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px;border-top:1px solid var(--gray-4)}
+        .chat-suggestion{padding:6px 12px;background:var(--gray-5);border:1px solid var(--gray-4);border-radius:100px;font-size:12px;cursor:pointer;transition:var(--transition)}
+        .chat-suggestion:hover{background:var(--primary);color:white;border-color:var(--primary)}
+        @media(max-width:480px){.chat-window{width:calc(100% - 16px);right:8px;bottom:90px;max-height:70vh}.seo-tooltip{width:220px;left:auto;right:-20px;transform:none}}
     </style>
 </head><body>
     <header class="header">
@@ -399,6 +426,31 @@
             </div>
         </div>
     </footer>
+
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <div>
+                <h4>SEO Assistant</h4>
+                <div class="chat-sub">Ask me anything about SEO</div>
+            </div>
+            <button class="chat-close" onclick="toggleChat()">&times;</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-msg bot">Hi! I'm your SEO assistant. Ask me about any SEO term, tool, or how to improve your website ranking.</div>
+        </div>
+        <div class="chat-suggestions" id="chatSuggestions">
+            <div class="chat-suggestion" onclick="sendChatSuggestion(this)">What is SEO?</div>
+            <div class="chat-suggestion" onclick="sendChatSuggestion(this)">How to improve speed?</div>
+            <div class="chat-suggestion" onclick="sendChatSuggestion(this)">What are Meta Tags?</div>
+            <div class="chat-suggestion" onclick="sendChatSuggestion(this)">How to get E-E-A-T?</div>
+            <div class="chat-suggestion" onclick="sendChatSuggestion(this)">How to use these tools?</div>
+        </div>
+        <div class="chat-input-row">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Type your question..." onkeypress="if(event.key==='Enter')sendChatMsg()">
+            <button class="chat-send" onclick="sendChatMsg()">&#10148;</button>
+        </div>
+    </div>
+    <button class="chat-fab" id="chatFab" onclick="toggleChat()" style="display:none">&#128172;<span class="chat-badge" id="chatBadge" style="display:flex">1</span></button>
 
     <script src="js/main.js"></script>    <script>
     // =====================================================
@@ -1980,5 +2032,219 @@
         if (target) target.classList.add('active');
         btn.classList.add('active');
     }
+    // =====================================================
+    // SEO GLOSSARY TOOLTIPS
+    // =====================================================
+    var seoGlossary = {
+        'SEO': 'Search Engine Optimization - Optimizing your website to rank higher in search engines',
+        'meta tag': 'HTML element that provides metadata about a page to search engines',
+        'title tag': 'The title shown in search results and browser tab - keep it 30-60 characters',
+        'meta description': 'Description shown under the title in search results - keep it 120-160 characters',
+        'canonical': 'The preferred version of a page to avoid duplicate content issues',
+        'H1': 'Main heading of the page - use only one H1 per page',
+        'H2': 'Secondary heading - divides content into main sections',
+        'H3': 'Sub-heading - details within sections',
+        'schema': 'Structured data (JSON-LD) that helps search engines understand your content',
+        'structured data': 'Same as Schema - code that describes your content for search engines',
+        'Open Graph': 'Metadata that controls how your page appears when shared on social media',
+        'viewport': 'Meta tag that makes your site mobile-friendly',
+        'responsive': 'Design that adapts to all screen sizes',
+        'HTTPS': 'Secure protocol - encrypted connection between browser and server',
+        'SSL': 'Security certificate that encrypts data in transit',
+        'HSTS': 'Forces browsers to always use HTTPS',
+        'robots meta': 'Tag that controls search engine behavior on a page',
+        'noindex': 'Tells search engines not to include this page in search results',
+        'nofollow': 'Tells search engines not to follow links on this page',
+        'crawl': 'The process of search engine bots scanning your website content',
+        'indexing': 'The process of adding pages to a search engine database',
+        'backlink': 'A link from another website pointing to your site',
+        'internal link': 'A link between pages on the same website',
+        'external link': 'A link to a different website',
+        'anchor text': 'The clickable text in a hyperlink',
+        'alt text': 'Alternative text describing an image for search engines and accessibility',
+        'lazy loading': 'Loading images and content only when they appear in the viewport',
+        'Core Web Vitals': 'Google metrics for user experience: LCP, INP, CLS',
+        'LCP': 'Largest Contentful Paint - measures loading speed (should be under 2.5s)',
+        'CLS': 'Cumulative Layout Shift - measures unexpected layout changes',
+        'INP': 'Interaction to Next Paint - measures response time to user interactions',
+        'TTFB': 'Time to First Byte - time to receive the first byte from the server',
+        'Flesch Reading': 'Flesch Reading Ease score - higher means easier to read',
+        'E-E-A-T': 'Experience, Expertise, Authority, Trust - Google quality guidelines',
+        'Flesch-Kincaid': 'Readability grade level metric',
+        'Gunning Fog': 'Index measuring academic text complexity',
+        'keyword density': 'Percentage of times a keyword appears vs total words',
+        'bigram': 'Two consecutive words (e.g. "search engine")',
+        'readability': 'How easy text is to read and understand',
+        'FCP': 'First Contentful Paint - first visible content appears',
+        'speed': 'How fast your page loads and responds',
+        'CDN': 'Content Delivery Network - servers distributed geographically',
+        'compression': 'File size reduction (gzip, brotli) for faster loading',
+        'cache': 'Local storage of files to speed up future loads',
+        'render blocking': 'CSS/JS files that prevent content from showing until loaded'
+    };
+
+    function initGlossary() {
+        var terms = Object.keys(seoGlossary).sort(function(a, b) { return b.length - a.length; });
+        var selectors = [
+            '.meta-box label', '.score-row .score-label', '.issue-item',
+            '.audit-metric .am-label', '.audit-section h4', '.report-section h4',
+            '.heading-item', '.tag-row', '.compare-box h4', '.audit-rec',
+            '.metric-row .metric-label', '.recommendation', '.score-card .label',
+            '.score-row .score-val', '.audit-badge', '.status-badge',
+            '.issue-list li', '.bar-label'
+        ];
+        for (var s = 0; s < selectors.length; s++) {
+            var els = document.querySelectorAll(selectors[s]);
+            for (var e = 0; e < els.length; e++) {
+                processNodeForGlossary(els[e], terms);
+            }
+        }
+    }
+
+    function processNodeForGlossary(el, terms) {
+        if (!el.childNodes || el.childNodes.length === 0) return;
+        var children = Array.prototype.slice.call(el.childNodes);
+        for (var n = 0; n < children.length; n++) {
+            var node = children[n];
+            if (node.nodeType === 3) {
+                var text = node.textContent;
+                for (var i = 0; i < terms.length; i++) {
+                    var term = terms[i];
+                    var escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    var regex = new RegExp('\\b(' + escaped + ')\\b', 'i');
+                    if (regex.test(text)) {
+                        var parts = text.split(regex);
+                        var frag = document.createDocumentFragment();
+                        for (var p = 0; p < parts.length; p++) {
+                            if (p % 2 === 1) {
+                                var span = document.createElement('span');
+                                span.className = 'seo-term';
+                                span.textContent = parts[p];
+                                var tip = document.createElement('span');
+                                tip.className = 'seo-tooltip';
+                                tip.textContent = seoGlossary[parts[p]] || seoGlossary[term] || '';
+                                span.appendChild(tip);
+                                frag.appendChild(span);
+                            } else if (parts[p]) {
+                                frag.appendChild(document.createTextNode(parts[p]));
+                            }
+                        }
+                        node.parentNode.replaceChild(frag, node);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    var glossaryObserver = new MutationObserver(function() {
+        setTimeout(initGlossary, 200);
+    });
+    var toolOutputs = document.querySelectorAll('.tool-output');
+    for (var go = 0; go < toolOutputs.length; go++) {
+        glossaryObserver.observe(toolOutputs[go], { childList: true, subtree: true });
+    }
+
+    // =====================================================
+    // SEO AI CHAT ASSISTANT
+    // =====================================================
+    var chatKB = [
+        {q:['seo','what is seo','what does seo mean','how does seo work'], a:'<b>SEO</b> = Search Engine Optimization. It\'s the practice of improving your website to rank higher in Google and other search engines. Key areas: <b>Technical</b> (speed, mobile), <b>Content</b> (quality, keywords), <b>Links</b> (backlinks, internal links).<br><br>Try our <b>Full Audit</b> tool to analyze your site!'},
+        {q:['meta','meta tag','meta tags','meta description','title tag','title'], a:'<b>Meta Tags</b> are HTML elements that describe your page:<br><br>- <b>Title Tag</b>: Shows in search results & browser tab (30-60 chars)<br>- <b>Meta Description</b>: Text under the title in search results (120-160 chars)<br>- <b>Viewport</b>: Makes site mobile-friendly<br><br>Use our <b>Meta</b> tool to analyze them!'},
+        {q:['speed','fast','slow','loading','performance','core web vitals','lcp','cls','inp','ttfb','page speed'], a:'<b>Page Speed</b> is a ranking factor. Key metrics:<br><br>- <b>LCP</b> (loading): under 2.5s<br>- <b>INP</b> (interaction): under 200ms<br>- <b>CLS</b> (stability): under 0.1<br><br>Quick wins: compress images, use lazy loading, minimize CSS/JS, enable caching & compression (gzip/brotli).'},
+        {q:['e-e-a-t','eeat','experience','expertise','authority','trust','trustworth'], a:'<b>E-E-A-T</b> = Experience, Expertise, Authority, Trust<br><br>- <b>Experience</b>: Share personal experience<br>- <b>Expertise</b>: Show your credentials<br>- <b>Authority</b>: Earn mentions & backlinks<br>- <b>Trust</b>: Be accurate & transparent<br><br>Google uses this to assess content quality, especially for YMYL topics.'},
+        {q:['heading','headings','h1','h2','h3','h4','title tag structure'], a:'<b>Headings</b> help structure content:<br><br>- <b>H1</b>: ONE main heading per page<br>- <b>H2</b>: Major sections<br>- <b>H3</b>: Sub-sections<br>- <b>H4-H6</b>: Further details<br><br>Use our <b>Headings</b> tool to check your heading hierarchy.'},
+        {q:['schema','structured data','json-ld','rich results','rich snippet'], a:'<b>Schema markup</b> is JSON-LD code that helps Google understand your content. It enables <b>Rich Snippets</b> (star ratings, prices, FAQs in search results).<br><br>Common types: Organization, Article, Product, FAQ, LocalBusiness.<br><br>Use our <b>Schema Generator</b> to create it!'},
+        {q:['image','images','img','photo','picture','alt','alt text'], a:'<b>Image Optimization</b>:<br><br>- <b>Alt Text</b>: Descriptive text for every image (required!)<br>- <b>Dimensions</b>: Set width/height to prevent layout shift<br>- <b>Lazy Loading</b>: Load images on scroll<br>- <b>Format</b>: Use WebP over PNG/JPG<br>- <b>Compression</b>: Compress without losing quality<br><br>Use our <b>Images</b> tool to audit your images!'},
+        {q:['link','links','backlink','backlinks','internal link','external link','anchor text'], a:'<b>Links</b> are crucial for SEO:<br><br>- <b>Internal Links</b>: Connect your own pages<br>- <b>Backlinks</b>: Links from other sites = authority<br>- <b>External Links</b>: Link to trusted sources<br>- <b>Anchor Text</b>: The clickable text<br><br>Use our <b>Links</b> tool to analyze your link profile!'},
+        {q:['keyword','keywords','keyword research','search term','query'], a:'<b>Keywords</b> are what people search for:<br><br>1. Research with Google Keyword Planner<br>2. Focus on long-tail keywords (3+ words)<br>3. Place in: title, H1, meta description, first paragraph<br>4. Use naturally - don\'t stuff!<br><br>Use our <b>Keywords</b> tool to extract keywords from any page!'},
+        {q:['content','writing','blog','article','blog post','content quality'], a:'<b>Great Content</b>:<br><br>- Length: 300+ words min, 1000+ ideal<br>- Original & valuable<br>- Well-structured (headings, lists)<br>- Updated regularly<br>- Matches search intent<br><br>Use our <b>Content</b> tool to analyze readability & quality!'},
+        {q:['readability','reading','flesch','gunning','easy to read','simple'], a:'<b>Readability</b> = How easy text is to read:<br><br>- <b>Flesch Reading Ease</b>: 60-70 = good<br>- <b>Gunning Fog</b>: 7-8 = good, 12+ = hard<br><br>Tips: short sentences, simple words, bullet points, short paragraphs.'},
+        {q:['technical seo','technical','audit','site audit','checkup'], a:'<b>Technical SEO</b> covers:<br><br>- HTTPS & security<br>- Mobile-friendliness<br>- Page speed<br>- Crawlability (robots.txt, sitemap)<br>- Canonical tags<br>- No broken links (404s)<br><br>Use our <b>Audit</b> tool for a quick check, or <b>Full Audit</b> for a comprehensive analysis!'},
+        {q:['404','broken','not found','page not found','error page'], a:'<b>404 errors</b> = page not found. Fix them:<br><br>1. Find broken links with our <b>Links</b> tool<br>2. Set up 301 redirects for moved pages<br>3. Update old links<br>4. Create a helpful custom 404 page'},
+        {q:['mobile','responsive','phone','tablet','mobile-friendly'], a:'<b>Mobile SEO</b> is critical (Google uses mobile-first indexing):<br><br>- Responsive design<br>- Viewport meta tag<br>- Font size 16px minimum<br>- Tap targets large enough<br>- No horizontal scrolling<br>- Fast loading on mobile'},
+        {q:['robots','robots.txt','crawler','bot'], a:'<b>Robots.txt</b> tells search engine bots which pages to crawl:<br><br>- User-agent: which bot<br>- Disallow: blocked pages<br>- Allow: permitted pages<br>- Sitemap: link to your sitemap<br><br>Use our <b>Robots</b> tool to generate one!'},
+        {q:['sitemap','xml sitemap','site map'], a:'<b>XML Sitemap</b> lists all pages for search engines:<br><br>- Speeds up indexing<br>- Shows site structure<br>- Sets priorities<br><br>Use our <b>Sitemap</b> tool to generate one!'},
+        {q:['competitor','competition','compare','rival','benchmark'], a:'<b>Competitor Analysis</b> helps you understand what works:<br><br>1. Compare titles & descriptions<br>2. Analyze their content length<br>3. Check their keywords<br>4. Study their backlinks<br><br>Use our <b>Competitor</b> tool to compare two sites side by side!'},
+        {q:['report','full report','full audit','comprehensive','summary'], a:'Get a complete picture with our tools:<br><br>- <b>Report</b>: Quick SEO overview<br>- <b>Full Audit</b>: Comprehensive dashboard with scores, E-E-A-T, AI detection, and a 4-week action plan!<br><br>Start with <b>Full Audit</b> for the most detailed analysis.'},
+        {q:['tool','tools','how to use','what can i do','how do i'], a:'Our free SEO tools:<br><br>- <b>Score</b>: Overall SEO score<br>- <b>Meta</b>: Meta tag analysis<br>- <b>Headings</b>: Heading structure<br>- <b>Schema</b>: Generate structured data<br>- <b>Audit</b>: Technical check<br>- <b>Speed</b>: Performance test<br>- <b>Content</b>: Content analysis<br>- <b>Keywords</b>: Extract keywords<br>- <b>Images</b>: Image audit<br>- <b>Links</b>: Link analysis<br>- <b>Full Audit</b>: Everything in one dashboard!<br><br>Just paste any URL and click Analyze!'},
+        {q:['local seo','local','google maps','google my business','near me'], a:'<b>Local SEO</b> helps nearby customers find you:<br><br>1. Create Google Business Profile<br>2. Add NAP (Name, Address, Phone)<br>3. Get customer reviews<br>4. Ensure consistent info everywhere<br>5. Create local content'},
+        {q:['conversion','sale','roi','revenue','goal'], a:'<b>Conversion</b> = achieving your goal (purchase, signup, etc.)<br><br>SEO brings targeted traffic. To convert:<br>- Clear CTAs<br>- Fast pages<br>- Compelling content<br>- Trust signals (reviews, guarantees)'},
+        {q:['redirect','301','302','redirect chain'], a:'<b>Redirects</b>:<br><br>- <b>301</b>: Permanent redirect (passes link equity)<br>- <b>302</b>: Temporary redirect<br>- Avoid redirect chains (A->B->C)<br><br>Use 301 when permanently moving a page.'},
+        {q:['cache','caching','browser cache'], a:'<b>Caching</b> stores files locally to speed up loading:<br><br>- Browser cache: stores files on user\'s device<br>- Server cache: pre-generated pages<br>- CDN cache: distributed globally<br><br>Set Cache-Control headers for optimal caching.'},
+        {q:['index','indexed','indexing','not indexed','deindexed'], a:'<b>Indexing</b> = search engines storing your page:<br><br>- Check in Google Search Console<br>- noindex tag prevents indexing<br>- Robots.txt can block crawling<br>- Quality content gets indexed faster'}
+    ];
+
+    function toggleChat() {
+        var w = document.getElementById('chatWindow');
+        var b = document.getElementById('chatBadge');
+        if (w.classList.contains('open')) {
+            w.classList.remove('open');
+        } else {
+            w.classList.add('open');
+            if (b) b.style.display = 'none';
+            document.getElementById('chatInput').focus();
+        }
+    }
+
+    function sendChatSuggestion(el) {
+        document.getElementById('chatInput').value = el.textContent;
+        sendChatMsg();
+    }
+
+    function sendChatMsg() {
+        var input = document.getElementById('chatInput');
+        var msg = input.value.trim();
+        if (!msg) return;
+        input.value = '';
+        addChatMessage(esc(msg), 'user');
+        setTimeout(function() {
+            var response = getSmartResponse(msg);
+            addChatMessage(response, 'bot');
+        }, 400);
+    }
+
+    function addChatMessage(text, type) {
+        var container = document.getElementById('chatMessages');
+        var div = document.createElement('div');
+        div.className = 'chat-msg ' + type;
+        div.innerHTML = text;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function getSmartResponse(msg) {
+        var lower = msg.toLowerCase();
+        var bestMatch = null;
+        var bestScore = 0;
+        for (var i = 0; i < chatKB.length; i++) {
+            var entry = chatKB[i];
+            var score = 0;
+            for (var j = 0; j < entry.q.length; j++) {
+                var keyword = entry.q[j].toLowerCase();
+                var words = lower.split(/\s+/);
+                for (var w = 0; w < words.length; w++) {
+                    if (words[w].indexOf(keyword) !== -1 || keyword.indexOf(words[w]) !== -1) {
+                        score += words[w].length;
+                    }
+                }
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = entry;
+            }
+        }
+        if (bestMatch && bestScore > 3) {
+            return bestMatch.a;
+        }
+        return 'Great question! I don\'t have a specific answer for "' + esc(msg) + '" yet. Try:<br><br>- Use our <b>Full Audit</b> tool to analyze any website<br>- Ask about specific SEO terms like "schema", "speed", "meta tags", "E-E-A-T"<br>- Or search Google for "<b>' + esc(msg) + '</b>"';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            var fab = document.getElementById('chatFab');
+            if (fab) fab.style.display = 'flex';
+        }, 2000);
+    });
     </script></body>
 </html>
