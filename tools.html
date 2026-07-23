@@ -6,6 +6,7 @@
     <title>Free SEO Tools - SEOHUB</title>
     <meta name="description" content="Free online SEO tools: Score Calculator, Meta Tag Analyzer, Heading Checker, Schema Generator, Technical Audit, Speed Test, Content Analysis, and more.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
         .tools-hero{padding:120px 0 30px;background:linear-gradient(180deg,var(--gray-5) 0%,var(--white) 100%);text-align:center}
@@ -180,6 +181,8 @@
         .chat-suggestion{padding:6px 12px;background:var(--gray-5);border:1px solid var(--gray-4);border-radius:100px;font-size:12px;cursor:pointer;transition:var(--transition)}
         .chat-suggestion:hover{background:var(--primary);color:white;border-color:var(--primary)}
         @media(max-width:480px){.chat-window{width:calc(100% - 16px);right:8px;bottom:90px;max-height:70vh}.seo-tooltip{width:220px;left:auto;right:-20px;transform:none}}
+        .lang-toggle{padding:6px 14px;border:2px solid var(--gray-4);border-radius:100px;background:var(--white);font-weight:700;cursor:pointer;font-size:13px;transition:var(--transition);margin-left:8px}
+        .lang-toggle:hover{border-color:var(--primary);color:var(--primary)}
     </style>
 </head><body>
     <header class="header">
@@ -190,12 +193,13 @@
                     <span class="logo-text">SEO<span class="logo-accent">HUB</span></span>
                 </a>
                 <ul class="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="tools.html" class="active">Tools</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="blog.html">Blog</a></li>
+                    <li><a href="index.html" data-i18n="nav_home">Home</a></li>
+                    <li><a href="tools.html" class="active" data-i18n="nav_tools">Tools</a></li>
+                    <li><a href="about.html" data-i18n="nav_about">About</a></li>
+                    <li><a href="blog.html" data-i18n="nav_blog">Blog</a></li>
                 </ul>
                 <div class="nav-cta">
+                    <button class="lang-toggle" onclick="toggleLang()" id="langBtn">AR</button>
                     <a href="index.html" class="btn btn-primary">Home</a>
                 </div>
                 <button class="mobile-menu-btn" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -205,24 +209,24 @@
 
     <section class="tools-hero">
         <div class="container">
-            <h1>Free SEO Tools</h1>
-            <p>Analyze any website instantly. No signup, no API keys — just paste a URL and get results.</p>
+            <h1 data-i18n="hero_title">Free SEO Tools</h1>
+            <p data-i18n="hero_desc">Analyze any website instantly. No signup, no API keys — just paste a URL and get results.</p>
             <div class="tool-tabs">
-                <button class="tool-tab active" onclick="showTab('score',this)"><span class="tool-tab-icon">&#128202;</span> Score</button>
-                <button class="tool-tab" onclick="showTab('meta',this)"><span class="tool-tab-icon">&#127991;</span> Meta</button>
-                <button class="tool-tab" onclick="showTab('headings',this)"><span class="tool-tab-icon">&#128209;</span> Headings</button>
-                <button class="tool-tab" onclick="showTab('schema',this)"><span class="tool-tab-icon">&#128295;</span> Schema</button>
-                <button class="tool-tab" onclick="showTab('audit',this)"><span class="tool-tab-icon">&#128269;</span> Audit</button>
-                <button class="tool-tab" onclick="showTab('speed',this)"><span class="tool-tab-icon">&#9889;</span> Speed</button>
-                <button class="tool-tab" onclick="showTab('content',this)"><span class="tool-tab-icon">&#128221;</span> Content</button>
-                <button class="tool-tab" onclick="showTab('keywords',this)"><span class="tool-tab-icon">&#128273;</span> Keywords</button>
-                <button class="tool-tab" onclick="showTab('images',this)"><span class="tool-tab-icon">&#128444;</span> Images</button>
-                <button class="tool-tab" onclick="showTab('links',this)"><span class="tool-tab-icon">&#128279;</span> Links</button>
-                <button class="tool-tab" onclick="showTab('robots',this)"><span class="tool-tab-icon">&#129302;</span> Robots</button>
-                <button class="tool-tab" onclick="showTab('sitemap',this)"><span class="tool-tab-icon">&#128506;</span> Sitemap</button>
-                <button class="tool-tab" onclick="showTab('competitor',this)"><span class="tool-tab-icon">&#127919;</span> Competitor</button>
-                <button class="tool-tab" onclick="showTab('audit-full',this)"><span class="tool-tab-icon">&#128200;</span> Full Audit</button>
-                <button class="tool-tab" onclick="showTab('report',this)"><span class="tool-tab-icon">&#128196;</span> Report</button>
+                <button class="tool-tab active" onclick="showTab('score',this)"><span class="tool-tab-icon">&#128202;</span> <span data-i18n="tab_score">Score</span></button>
+                <button class="tool-tab" onclick="showTab('meta',this)"><span class="tool-tab-icon">&#127991;</span> <span data-i18n="tab_meta">Meta</span></button>
+                <button class="tool-tab" onclick="showTab('headings',this)"><span class="tool-tab-icon">&#128209;</span> <span data-i18n="tab_headings">Headings</span></button>
+                <button class="tool-tab" onclick="showTab('schema',this)"><span class="tool-tab-icon">&#128295;</span> <span data-i18n="tab_schema">Schema</span></button>
+                <button class="tool-tab" onclick="showTab('audit',this)"><span class="tool-tab-icon">&#128269;</span> <span data-i18n="tab_audit">Audit</span></button>
+                <button class="tool-tab" onclick="showTab('speed',this)"><span class="tool-tab-icon">&#9889;</span> <span data-i18n="tab_speed">Speed</span></button>
+                <button class="tool-tab" onclick="showTab('content',this)"><span class="tool-tab-icon">&#128221;</span> <span data-i18n="tab_content">Content</span></button>
+                <button class="tool-tab" onclick="showTab('keywords',this)"><span class="tool-tab-icon">&#128273;</span> <span data-i18n="tab_keywords">Keywords</span></button>
+                <button class="tool-tab" onclick="showTab('images',this)"><span class="tool-tab-icon">&#128444;</span> <span data-i18n="tab_images">Images</span></button>
+                <button class="tool-tab" onclick="showTab('links',this)"><span class="tool-tab-icon">&#128279;</span> <span data-i18n="tab_links">Links</span></button>
+                <button class="tool-tab" onclick="showTab('robots',this)"><span class="tool-tab-icon">&#129302;</span> <span data-i18n="tab_robots">Robots</span></button>
+                <button class="tool-tab" onclick="showTab('sitemap',this)"><span class="tool-tab-icon">&#128506;</span> <span data-i18n="tab_sitemap">Sitemap</span></button>
+                <button class="tool-tab" onclick="showTab('competitor',this)"><span class="tool-tab-icon">&#127919;</span> <span data-i18n="tab_competitor">Competitor</span></button>
+                <button class="tool-tab" onclick="showTab('audit-full',this)"><span class="tool-tab-icon">&#128200;</span> <span data-i18n="tab_fullaudit">Full Audit</span></button>
+                <button class="tool-tab" onclick="showTab('report',this)"><span class="tool-tab-icon">&#128196;</span> <span data-i18n="tab_report">Report</span></button>
             </div>
         </div>
     </section>    <section class="tools-body">
@@ -230,28 +234,28 @@
             <div class="tool-panel active" id="tab-score">
                 <div class="tool-input-row">
                     <input type="url" id="score-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runScore()">
-                    <button class="tool-go-btn" onclick="runScore()">Analyze</button>
+                    <button class="tool-go-btn" onclick="runScore()" data-i18n="btn_analyze">Analyze</button>
                 </div>
-                <div class="tool-output" id="score-output"><div class="tool-loading"><p>Paste a URL above and click Analyze</p></div></div>
+                <div class="tool-output" id="score-output"><div class="tool-loading"><p data-i18n="load_score">Paste a URL above and click Analyze</p></div></div>
             </div>
             <div class="tool-panel" id="tab-meta">
                 <div class="tool-input-row">
                     <input type="url" id="meta-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runMeta()">
-                    <button class="tool-go-btn" onclick="runMeta()">Analyze Meta Tags</button>
+                    <button class="tool-go-btn" onclick="runMeta()" data-i18n="btn_analyze_meta">Analyze Meta Tags</button>
                 </div>
-                <div class="tool-output" id="meta-output"><div class="tool-loading"><p>Paste a URL above and click Analyze</p></div></div>
+                <div class="tool-output" id="meta-output"><div class="tool-loading"><p data-i18n="load_meta">Paste a URL above and click Analyze</p></div></div>
             </div>
             <div class="tool-panel" id="tab-headings">
                 <div class="tool-input-row">
                     <input type="url" id="head-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runHeadings()">
-                    <button class="tool-go-btn" onclick="runHeadings()">Check Headings</button>
+                    <button class="tool-go-btn" onclick="runHeadings()" data-i18n="btn_check_headings">Check Headings</button>
                 </div>
-                <div class="tool-output" id="head-output"><div class="tool-loading"><p>Paste a URL above and click Check Headings</p></div></div>
+                <div class="tool-output" id="head-output"><div class="tool-loading"><p data-i18n="load_head">Paste a URL above and click Check Headings</p></div></div>
             </div>
             <div class="tool-panel" id="tab-schema">
                 <div class="tool-output" id="schema-output">
-                    <h3>&#128295; Schema Generator</h3>
-                    <p style="color:var(--gray-1);margin-bottom:20px;">Select a type and fill in the fields to generate JSON-LD structured data.</p>
+                    <h3 data-i18n="schema_title">&#128295; Schema Generator</h3>
+                    <p style="color:var(--gray-1);margin-bottom:20px;" data-i18n="schema_desc">Select a type and fill in the fields to generate JSON-LD structured data.</p>
                     <div class="schema-type-select">
                         <button class="schema-btn active" onclick="setSchemaType('Organization',this)">Organization</button>
                         <button class="schema-btn" onclick="setSchemaType('Article',this)">Article</button>
@@ -262,9 +266,9 @@
                         <button class="schema-btn" onclick="setSchemaType('BreadcrumbList',this)">BreadcrumbList</button>
                     </div>
                     <div class="schema-form" id="schema-form"></div>
-                    <button class="tool-go-btn" onclick="generateSchema()" style="margin-bottom:20px;">Generate JSON-LD</button>
+                    <button class="tool-go-btn" onclick="generateSchema()" style="margin-bottom:20px;" data-i18n="schema_gen_btn">Generate JSON-LD</button>
                     <div class="schema-output-code" id="schema-code" style="display:none;">
-                        <button class="copy-btn" onclick="copySchema()">Copy</button>
+                        <button class="copy-btn" onclick="copySchema()" data-i18n="schema_copy">Copy</button>
                         <pre id="schema-pre"></pre>
                     </div>
                 </div>
@@ -272,65 +276,65 @@
             <div class="tool-panel" id="tab-audit">
                 <div class="tool-input-row">
                     <input type="url" id="audit-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runAudit()">
-                    <button class="tool-go-btn" onclick="runAudit()">Run Audit</button>
+                    <button class="tool-go-btn" onclick="runAudit()" data-i18n="btn_run_audit">Run Audit</button>
                 </div>
-                <div class="tool-output" id="audit-output"><div class="tool-loading"><p>Paste a URL above and click Run Audit</p></div></div>
+                <div class="tool-output" id="audit-output"><div class="tool-loading"><p data-i18n="load_audit">Paste a URL above and click Run Audit</p></div></div>
             </div>
             <div class="tool-panel" id="tab-speed">
                 <div class="tool-input-row">
                     <input type="url" id="speed-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runSpeed()">
-                    <button class="tool-go-btn" onclick="runSpeed()">Test Speed</button>
+                    <button class="tool-go-btn" onclick="runSpeed()" data-i18n="btn_test_speed">Test Speed</button>
                 </div>
-                <div class="tool-output" id="speed-output"><div class="tool-loading"><p>Paste a URL above and click Test Speed</p></div></div>
+                <div class="tool-output" id="speed-output"><div class="tool-loading"><p data-i18n="load_speed">Paste a URL above and click Test Speed</p></div></div>
             </div>
             <div class="tool-panel" id="tab-content">
                 <div class="tool-input-row">
                     <input type="url" id="content-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runContent()">
-                    <button class="tool-go-btn" onclick="runContent()">Analyze Content</button>
+                    <button class="tool-go-btn" onclick="runContent()" data-i18n="btn_analyze_content">Analyze Content</button>
                 </div>
-                <div class="tool-output" id="content-output"><div class="tool-loading"><p>Paste a URL above and click Analyze Content</p></div></div>
+                <div class="tool-output" id="content-output"><div class="tool-loading"><p data-i18n="load_content">Paste a URL above and click Analyze Content</p></div></div>
             </div>
             <div class="tool-panel" id="tab-keywords">
                 <div class="tool-input-row">
                     <input type="url" id="kw-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runKeywords()">
-                    <button class="tool-go-btn" onclick="runKeywords()">Extract Keywords</button>
+                    <button class="tool-go-btn" onclick="runKeywords()" data-i18n="btn_extract_kw">Extract Keywords</button>
                 </div>
-                <div class="tool-output" id="kw-output"><div class="tool-loading"><p>Paste a URL above and click Extract Keywords</p></div></div>
+                <div class="tool-output" id="kw-output"><div class="tool-loading"><p data-i18n="load_kw">Paste a URL above and click Extract Keywords</p></div></div>
             </div>
             <div class="tool-panel" id="tab-images">
                 <div class="tool-input-row">
                     <input type="url" id="img-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runImages()">
-                    <button class="tool-go-btn" onclick="runImages()">Check Images</button>
+                    <button class="tool-go-btn" onclick="runImages()" data-i18n="btn_check_images">Check Images</button>
                 </div>
-                <div class="tool-output" id="img-output"><div class="tool-loading"><p>Paste a URL above and click Check Images</p></div></div>
+                <div class="tool-output" id="img-output"><div class="tool-loading"><p data-i18n="load_img">Paste a URL above and click Check Images</p></div></div>
             </div>
             <div class="tool-panel" id="tab-links">
                 <div class="tool-input-row">
                     <input type="url" id="link-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runLinks()">
-                    <button class="tool-go-btn" onclick="runLinks()">Analyze Links</button>
+                    <button class="tool-go-btn" onclick="runLinks()" data-i18n="btn_analyze_links">Analyze Links</button>
                 </div>
-                <div class="tool-output" id="link-output"><div class="tool-loading"><p>Paste a URL above and click Analyze Links</p></div></div>
+                <div class="tool-output" id="link-output"><div class="tool-loading"><p data-i18n="load_link">Paste a URL above and click Analyze Links</p></div></div>
             </div>
             <div class="tool-panel" id="tab-robots">
                 <div class="tool-output" id="robots-output">
-                    <h3>&#129302; Robots.txt Generator</h3>
-                    <p style="color:var(--gray-1);margin-bottom:20px;">Configure rules and generate a downloadable robots.txt file.</p>
+                    <h3 data-i18n="robots_title">&#129302; Robots.txt Generator</h3>
+                    <p style="color:var(--gray-1);margin-bottom:20px;" data-i18n="robots_desc">Configure rules and generate a downloadable robots.txt file.</p>
                     <div class="robots-form">
-                        <div class="robots-row"><label for="robots-site">Site URL</label><input type="text" id="robots-site" placeholder="https://example.com"></div>
-                        <div class="robots-row"><label for="robots-sitemap">Sitemap URL</label><input type="text" id="robots-sitemap" placeholder="https://example.com/sitemap.xml"></div>
-                        <div class="robots-row"><label for="robots-delay">Crawl-delay</label><select id="robots-delay"><option value="">None</option><option value="1">1 second</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="30">30 seconds</option></select></div>
-                        <div class="robots-row"><label for="robots-admin">Block /admin?</label><select id="robots-admin"><option value="yes">Yes - Disallow /admin</option><option value="no" selected>No</option></select></div>
-                        <div class="robots-row"><label for="robots-private">Block /private?</label><select id="robots-private"><option value="yes">Yes - Disallow /private</option><option value="no" selected>No</option></select></div>
-                        <div class="robots-row"><label for="robots-tmp">Block /tmp?</label><select id="robots-tmp"><option value="yes">Yes - Disallow /tmp</option><option value="no" selected>No</option></select></div>
-                        <div class="robots-row"><label for="robots-custom">Custom Disallow</label><input type="text" id="robots-custom" placeholder="/path/to/block"></div>
-                        <div><button class="tool-go-btn" onclick="generateRobots()">Generate Robots.txt</button></div>
+                        <div class="robots-row"><label for="robots-site" data-i18n="robots_site">Site URL</label><input type="text" id="robots-site" placeholder="https://example.com"></div>
+                        <div class="robots-row"><label for="robots-sitemap" data-i18n="robots_sitemap">Sitemap URL</label><input type="text" id="robots-sitemap" placeholder="https://example.com/sitemap.xml"></div>
+                        <div class="robots-row"><label for="robots-delay" data-i18n="robots_delay">Crawl-delay</label><select id="robots-delay"><option value="">None</option><option value="1">1 second</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="30">30 seconds</option></select></div>
+                        <div class="robots-row"><label for="robots-admin" data-i18n="robots_admin">Block /admin?</label><select id="robots-admin"><option value="yes">Yes - Disallow /admin</option><option value="no" selected>No</option></select></div>
+                        <div class="robots-row"><label for="robots-private" data-i18n="robots_private">Block /private?</label><select id="robots-private"><option value="yes">Yes - Disallow /private</option><option value="no" selected>No</option></select></div>
+                        <div class="robots-row"><label for="robots-tmp" data-i18n="robots_tmp">Block /tmp?</label><select id="robots-tmp"><option value="yes">Yes - Disallow /tmp</option><option value="no" selected>No</option></select></div>
+                        <div class="robots-row"><label for="robots-custom" data-i18n="robots_custom">Custom Disallow</label><input type="text" id="robots-custom" placeholder="/path/to/block"></div>
+                        <div><button class="tool-go-btn" onclick="generateRobots()" data-i18n="robots_generate">Generate Robots.txt</button></div>
                     </div>
                     <div id="robots-result" style="display:none;margin-top:24px;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                            <h4 style="margin:0;">Generated robots.txt</h4>
+                            <h4 style="margin:0;" data-i18n="robots_generated">Generated robots.txt</h4>
                             <div style="display:flex;gap:8px;">
-                                <button class="tool-go-btn" onclick="copyRobots()" style="padding:8px 16px;font-size:13px;">Copy</button>
-                                <button class="tool-go-btn" onclick="downloadRobots()" style="padding:8px 16px;font-size:13px;background:#10b981;">Download</button>
+                                <button class="tool-go-btn" onclick="copyRobots()" style="padding:8px 16px;font-size:13px;" data-i18n="robots_copy">Copy</button>
+                                <button class="tool-go-btn" onclick="downloadRobots()" style="padding:8px 16px;font-size:13px;background:#10b981;" data-i18n="robots_download">Download</button>
                             </div>
                         </div>
                         <div class="schema-output-code"><pre id="robots-pre"></pre></div>
@@ -340,40 +344,40 @@
             <div class="tool-panel" id="tab-sitemap">
                 <div class="tool-input-row">
                     <input type="url" id="sm-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runSitemap()">
-                    <button class="tool-go-btn" onclick="runSitemap()">Generate Sitemap</button>
+                    <button class="tool-go-btn" onclick="runSitemap()" data-i18n="btn_generate_sitemap">Generate Sitemap</button>
                 </div>
-                <div class="tool-output" id="sm-output"><div class="tool-loading"><p>Paste a URL above and click Generate Sitemap</p></div></div>
+                <div class="tool-output" id="sm-output"><div class="tool-loading"><p data-i18n="load_sitemap">Paste a URL above and click Generate Sitemap</p></div></div>
             </div>
             <div class="tool-panel" id="tab-competitor">
                 <div class="tool-input-row" style="flex-wrap:wrap;">
-                    <input type="url" id="comp-url1" class="tool-input" placeholder="Your URL" style="flex:1;min-width:200px;">
-                    <input type="url" id="comp-url2" class="tool-input" placeholder="Competitor URL" style="flex:1;min-width:200px;">
-                    <button class="tool-go-btn" onclick="runCompetitor()">Compare</button>
+                    <input type="url" id="comp-url1" class="tool-input" data-i18n-ph="load_comp1" placeholder="Your URL" style="flex:1;min-width:200px;">
+                    <input type="url" id="comp-url2" class="tool-input" data-i18n-ph="load_comp2" placeholder="Competitor URL" style="flex:1;min-width:200px;">
+                    <button class="tool-go-btn" onclick="runCompetitor()" data-i18n="btn_compare">Compare</button>
                 </div>
-                <div class="tool-output" id="comp-output"><div class="tool-loading"><p>Enter two URLs above and click Compare</p></div></div>
+                <div class="tool-output" id="comp-output"><div class="tool-loading"><p data-i18n="load_comp">Enter two URLs above and click Compare</p></div></div>
             </div>
             <div class="tool-panel" id="tab-report">
                 <div class="tool-input-row">
                     <input type="url" id="rpt-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runReport()">
-                    <button class="tool-go-btn" onclick="runReport()">Generate Report</button>
+                    <button class="tool-go-btn" onclick="runReport()" data-i18n="btn_generate_report">Generate Report</button>
                 </div>
-                <div class="tool-output" id="rpt-output"><div class="tool-loading"><p>Paste a URL above and click Generate Report</p></div></div>
+                <div class="tool-output" id="rpt-output"><div class="tool-loading"><p data-i18n="load_rpt">Paste a URL above and click Generate Report</p></div></div>
             </div>
             <div class="tool-panel" id="tab-audit-full">
                 <div class="tool-input-row">
                     <input type="url" id="auditfull-url" class="tool-input" placeholder="https://example.com" onkeypress="if(event.key==='Enter')runFullAudit()">
-                    <button class="tool-go-btn" onclick="runFullAudit()" style="background:#ef4444;">&#128200; Run Full Audit</button>
+                    <button class="tool-go-btn" onclick="runFullAudit()" style="background:#ef4444;" data-i18n="btn_full_audit">&#128200; Run Full Audit</button>
                 </div>
-                <div class="tool-output" id="auditfull-output"><div class="tool-loading"><p>Paste a URL above and click Run Full Audit for a comprehensive analysis</p></div></div>
+                <div class="tool-output" id="auditfull-output"><div class="tool-loading"><p data-i18n="load_fullaudit">Paste a URL above and click Run Full Audit for a comprehensive analysis</p></div></div>
             </div>
         </div>
     </section>    <section class="cta-section">
         <div class="container">
-            <h2>Need Deeper Analysis?</h2>
-            <p>Check out our Python SEO tools for complete automation</p>
+            <h2 data-i18n="cta_title">Need Deeper Analysis?</h2>
+            <p data-i18n="cta_desc">Check out our Python SEO tools for complete automation</p>
             <div class="cta-buttons">
-                <a href="about.html" class="btn btn-white btn-lg">About Us</a>
-                <a href="blog.html" class="btn btn-outline-white btn-lg">Read Blog</a>
+                <a href="about.html" class="btn btn-white btn-lg" data-i18n="cta_about">About Us</a>
+                <a href="blog.html" class="btn btn-outline-white btn-lg" data-i18n="cta_blog">Read Blog</a>
             </div>
         </div>
     </section>
@@ -386,7 +390,7 @@
                         <span class="logo-icon">S</span>
                         <span class="logo-text">SEO<span class="logo-accent">HUB</span></span>
                     </a>
-                    <p>Professional SEO tools built with Python. Open source, free, and powerful.</p>
+                    <p data-i18n="footer_desc">Professional SEO tools built with Python. Open source, free, and powerful.</p>
                     <div class="social-links">
                         <a href="#" aria-label="GitHub"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
                         <a href="#" aria-label="LinkedIn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>
@@ -394,35 +398,35 @@
                     </div>
                 </div>
                 <div class="footer-links">
-                    <h4>Tools</h4>
+                    <h4 data-i18n="footer_tools">Tools</h4>
                     <ul>
-                        <li><a href="tools.html">All Tools</a></li>
-                        <li><a href="tools.html">SEO Score Calculator</a></li>
-                        <li><a href="tools.html">Schema Generator</a></li>
-                        <li><a href="tools.html">Meta Tag Analyzer</a></li>
+                        <li><a href="tools.html" data-i18n="footer_all_tools">All Tools</a></li>
+                        <li><a href="tools.html" data-i18n="footer_score">SEO Score Calculator</a></li>
+                        <li><a href="tools.html" data-i18n="footer_schema_link">Schema Generator</a></li>
+                        <li><a href="tools.html" data-i18n="footer_meta_link">Meta Tag Analyzer</a></li>
                     </ul>
                 </div>
                 <div class="footer-links">
-                    <h4>Resources</h4>
+                    <h4 data-i18n="footer_resources">Resources</h4>
                     <ul>
-                        <li><a href="blog.html">Blog</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="#">Documentation</a></li>
-                        <li><a href="#">GitHub</a></li>
+                        <li><a href="blog.html" data-i18n="footer_blog">Blog</a></li>
+                        <li><a href="about.html" data-i18n="footer_about_link">About</a></li>
+                        <li><a href="#" data-i18n="footer_docs">Documentation</a></li>
+                        <li><a href="#" data-i18n="footer_github">GitHub</a></li>
                     </ul>
                 </div>
                 <div class="footer-links">
-                    <h4>Connect</h4>
+                    <h4 data-i18n="footer_connect">Connect</h4>
                     <ul>
-                        <li><a href="#">LinkedIn</a></li>
-                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#" data-i18n="footer_linkedin">LinkedIn</a></li>
+                        <li><a href="#" data-i18n="footer_twitter">Twitter</a></li>
                         <li><a href="#">GitHub</a></li>
                         <li><a href="mailto:mmetwily1@gmail.com">Email</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 SEOHUB. Built by Mohamed Metwily.</p>
+                <p data-i18n="footer_copy">&copy; 2026 SEOHUB. Built by Mohamed Metwily.</p>
             </div>
         </div>
     </footer>
@@ -430,23 +434,23 @@
     <div class="chat-window" id="chatWindow">
         <div class="chat-header">
             <div>
-                <h4>SEO Assistant</h4>
-                <div class="chat-sub">Ask me anything about SEO</div>
+                <h4 data-i18n-custom="chat_name">SEO Assistant</h4>
+                <div class="chat-sub" data-i18n="chat_sub">Ask me anything about SEO</div>
             </div>
             <button class="chat-close" onclick="toggleChat()">&times;</button>
         </div>
         <div class="chat-messages" id="chatMessages">
-            <div class="chat-msg bot">Hi! I'm your SEO assistant. Ask me about any SEO term, tool, or how to improve your website ranking.</div>
+            <div class="chat-msg bot" data-i18n="chat_welcome">Hi! I'm your SEO assistant. Ask me about any SEO term, tool, or how to improve your website ranking.</div>
         </div>
         <div class="chat-suggestions" id="chatSuggestions">
-            <div class="chat-suggestion" onclick="sendChatSuggestion(this)">What is SEO?</div>
-            <div class="chat-suggestion" onclick="sendChatSuggestion(this)">How to improve speed?</div>
-            <div class="chat-suggestion" onclick="sendChatSuggestion(this)">What are Meta Tags?</div>
-            <div class="chat-suggestion" onclick="sendChatSuggestion(this)">How to get E-E-A-T?</div>
-            <div class="chat-suggestion" onclick="sendChatSuggestion(this)">How to use these tools?</div>
+            <div class="chat-suggestion" onclick="sendChatSuggestion(this)" data-i18n="chat_sug1">What is SEO?</div>
+            <div class="chat-suggestion" onclick="sendChatSuggestion(this)" data-i18n="chat_sug2">How to improve speed?</div>
+            <div class="chat-suggestion" onclick="sendChatSuggestion(this)" data-i18n="chat_sug3">What are Meta Tags?</div>
+            <div class="chat-suggestion" onclick="sendChatSuggestion(this)" data-i18n="chat_sug4">How to get E-E-A-T?</div>
+            <div class="chat-suggestion" onclick="sendChatSuggestion(this)" data-i18n="chat_sug5">How to use these tools?</div>
         </div>
         <div class="chat-input-row">
-            <input type="text" class="chat-input" id="chatInput" placeholder="Type your question..." onkeypress="if(event.key==='Enter')sendChatMsg()">
+            <input type="text" class="chat-input" id="chatInput" data-i18n-ph="chat_placeholder" placeholder="Type your question..." onkeypress="if(event.key==='Enter')sendChatMsg()">
             <button class="chat-send" onclick="sendChatMsg()">&#10148;</button>
         </div>
     </div>
@@ -2240,7 +2244,146 @@
         return 'Great question! I don\'t have a specific answer for "' + esc(msg) + '" yet. Try:<br><br>- Use our <b>Full Audit</b> tool to analyze any website<br>- Ask about specific SEO terms like "schema", "speed", "meta tags", "E-E-A-T"<br>- Or search Google for "<b>' + esc(msg) + '</b>"';
     }
 
+    // =====================================================
+    // BILINGUAL SUPPORT - ENGLISH/ARABIC
+    // =====================================================
+    var currentLang = localStorage.getItem('seohub_lang') || 'en';
+
+    var translations = {
+        en: {
+            nav_home: 'Home', nav_tools: 'Tools', nav_about: 'About', nav_blog: 'Blog',
+            hero_title: 'Free SEO Tools', hero_desc: 'Analyze any website instantly. No signup, no API keys \u2014 just paste a URL and get results.',
+            tab_score: 'Score', tab_meta: 'Meta', tab_headings: 'Headings', tab_schema: 'Schema',
+            tab_audit: 'Audit', tab_speed: 'Speed', tab_content: 'Content', tab_keywords: 'Keywords',
+            tab_images: 'Images', tab_links: 'Links', tab_robots: 'Robots', tab_sitemap: 'Sitemap',
+            tab_competitor: 'Competitor', tab_fullaudit: 'Full Audit', tab_report: 'Report',
+            btn_analyze: 'Analyze', btn_analyze_meta: 'Analyze Meta Tags', btn_check_headings: 'Check Headings',
+            btn_run_audit: 'Run Audit', btn_test_speed: 'Test Speed', btn_analyze_content: 'Analyze Content',
+            btn_extract_kw: 'Extract Keywords', btn_check_images: 'Check Images', btn_analyze_links: 'Analyze Links',
+            btn_generate_sitemap: 'Generate Sitemap', btn_compare: 'Compare', btn_full_audit: 'Run Full Audit',
+            btn_generate_report: 'Generate Report',
+            load_score: 'Paste a URL above and click Analyze', load_meta: 'Paste a URL above and click Analyze Meta Tags',
+            load_head: 'Paste a URL above and click Check Headings', load_audit: 'Paste a URL above and click Run Audit',
+            load_speed: 'Paste a URL above and click Test Speed', load_content: 'Paste a URL above and click Analyze Content',
+            load_kw: 'Paste a URL above and click Extract Keywords', load_img: 'Paste a URL above and click Check Images',
+            load_link: 'Paste a URL above and click Analyze Links', load_sitemap: 'Paste a URL above and click Generate Sitemap',
+            load_comp1: 'Your URL', load_comp2: 'Competitor URL',
+            load_comp: 'Enter two URLs above and click Compare',
+            load_rpt: 'Paste a URL above and click Generate Report',
+            load_fullaudit: 'Paste a URL above and click Run Full Audit for a comprehensive analysis',
+            schema_title: 'Schema Generator', schema_desc: 'Select a type and fill in the fields to generate JSON-LD structured data.',
+            schema_gen_btn: 'Generate JSON-LD', schema_copy: 'Copy',
+            robots_title: 'Robots.txt Generator', robots_desc: 'Configure rules and generate a downloadable robots.txt file.',
+            robots_site: 'Site URL', robots_sitemap: 'Sitemap URL', robots_delay: 'Crawl-delay',
+            robots_admin: 'Block /admin?', robots_private: 'Block /private?', robots_tmp: 'Block /tmp?',
+            robots_custom: 'Custom Disallow', robots_generate: 'Generate Robots.txt',
+            robots_copy: 'Copy', robots_download: 'Download', robots_generated: 'Generated robots.txt',
+            robots_yes: 'Yes - Disallow', robots_no: 'No',
+            sm_btn: 'Generate Sitemap',
+            cta_title: 'Need Deeper Analysis?', cta_desc: 'Check out our Python SEO tools for complete automation',
+            cta_about: 'About Us', cta_blog: 'Read Blog',
+            footer_desc: 'Professional SEO tools built with Python. Open source, free, and powerful.',
+            footer_tools: 'Tools', footer_all_tools: 'All Tools', footer_score: 'SEO Score Calculator', footer_schema_link: 'Schema Generator', footer_meta_link: 'Meta Tag Analyzer',
+            footer_resources: 'Resources', footer_blog: 'Blog', footer_about_link: 'About', footer_docs: 'Documentation', footer_github: 'GitHub',
+            footer_connect: 'Connect', footer_linkedin: 'LinkedIn', footer_twitter: 'Twitter',
+            footer_copy: '2026 SEOHUB. Built by Mohamed Metwily.',
+            chat_name: 'Metwily', chat_sub: 'Ask me anything about SEO', chat_placeholder: 'Type your question...',
+            chat_welcome: 'Hi! I\'m Metwily, your SEO assistant. Ask me about any SEO term, tool, or how to improve your website ranking.',
+            chat_sug1: 'What is SEO?', chat_sug2: 'How to improve speed?', chat_sug3: 'What are Meta Tags?',
+            chat_sug4: 'How to get E-E-A-T?', chat_sug5: 'How to use these tools?',
+            lang_btn: 'AR'
+        },
+        ar: {
+            nav_home: '\u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629', nav_tools: '\u0627\u0644\u0623\u062f\u0648\u0627\u062a', nav_about: '\u0645\u0646 \u0646\u062d\u0646', nav_blog: '\u0627\u0644\u0645\u062f\u0648\u0646\u0629',
+            hero_title: '\u0623\u062f\u0648\u0627\u062a SEO \u0645\u062c\u0627\u0646\u064a\u0629', hero_desc: '\u062d\u0644\u0651\u0644 \u0623\u064a \u0645\u0648\u0642\u0639 \u0641\u0648\u0631\u0627\u064b. \u0644\u0627 \u062d\u0627\u062c\u0629 \u0644\u062a\u0633\u062c\u064a\u0644 \u0623\u0648 \u0645\u0641\u0627\u062a\u064a\u062d API \u2014 \u0641\u0642\u0637 \u0627\u0644\u0635\u0642 \u0627\u0644\u0631\u0627\u0628\u0637 \u0648\u0627\u062d\u0635\u0644 \u0639\u0644\u0649 \u0627\u0644\u0646\u062a\u0627\u0626\u062c.',
+            tab_score: '\u0627\u0644\u0646\u062a\u064a\u062c\u0629', tab_meta: '\u0627\u0644\u0648\u0633\u0648\u0645', tab_headings: '\u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646', tab_schema: '\u0627\u0644\u0647\u064a\u0643\u0644',
+            tab_audit: '\u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629', tab_speed: '\u0627\u0644\u0633\u0631\u0639\u0629', tab_content: '\u0627\u0644\u0645\u062d\u062a\u0648\u0649', tab_keywords: '\u0627\u0644\u0643\u0644\u0645\u0627\u062a',
+            tab_images: '\u0627\u0644\u0635\u0648\u0631', tab_links: '\u0627\u0644\u0631\u0648\u0627\u0628\u0637', tab_robots: '\u0627\u0644\u0628\u0648\u062a', tab_sitemap: '\u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639',
+            tab_competitor: '\u0627\u0644\u0645\u0646\u0627\u0641\u0633', tab_fullaudit: '\u062a\u062d\u0644\u064a\u0644 \u0634\u0627\u0645\u0644', tab_report: '\u0627\u0644\u062a\u0642\u0631\u064a\u0631',
+            btn_analyze: '\u062a\u062d\u0644\u064a\u0644', btn_analyze_meta: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0648\u0633\u0648\u0645', btn_check_headings: '\u0641\u062d\u0635 \u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646',
+            btn_run_audit: '\u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629', btn_test_speed: '\u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0644\u0633\u0631\u0639\u0629', btn_analyze_content: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649',
+            btn_extract_kw: '\u0627\u0633\u062a\u062e\u0631\u0627\u062c \u0627\u0644\u0643\u0644\u0645\u0627\u062a', btn_check_images: '\u0641\u062d\u0635 \u0627\u0644\u0635\u0648\u0631', btn_analyze_links: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0631\u0648\u0627\u0628\u0637',
+            btn_generate_sitemap: '\u062a\u0648\u0644\u064a\u062f \u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639', btn_compare: '\u0645\u0639\u0627\u0631\u0641\u0629', btn_full_audit: '\u062a\u062d\u0644\u064a\u0644 \u0634\u0627\u0645\u0644',
+            btn_generate_report: '\u062a\u0648\u0644\u064a\u062f \u0627\u0644\u062a\u0642\u0631\u064a\u0631',
+            load_score: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u062d\u0644\u064a\u0644', load_meta: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0648\u0633\u0648\u0645',
+            load_head: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0641\u062d\u0635 \u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646', load_audit: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629',
+            load_speed: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0644\u0633\u0631\u0639\u0629', load_content: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649',
+            load_kw: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0627\u0633\u062a\u062e\u0631\u0627\u062c \u0627\u0644\u0643\u0644\u0645\u0627\u062a', load_img: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0641\u062d\u0635 \u0627\u0644\u0635\u0648\u0631',
+            load_link: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0631\u0648\u0627\u0628\u0637', load_sitemap: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u0648\u0644\u064a\u062f \u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639',
+            load_comp1: '\u0631\u0627\u0628\u0637 \u0645\u0648\u0642\u0639\u0643', load_comp2: '\u0631\u0627\u0628\u0637 \u0627\u0644\u0645\u0646\u0627\u0641\u0633',
+            load_comp: '\u0623\u062f\u062e\u0644 \u0631\u0627\u0628\u0637\u064a\u0646 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0645\u0639\u0627\u0631\u0641\u0629',
+            load_rpt: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u0648\u0644\u064a\u062f \u0627\u0644\u062a\u0642\u0631\u064a\u0631',
+            load_fullaudit: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0627\u0644\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0634\u0627\u0645\u0644 \u0644\u0644\u062d\u0635\u0648\u0644 \u0639\u0644\u0649 \u062a\u062d\u0644\u064a\u0644 \u0645\u0641\u0635\u0644',
+            schema_title: '\u0645\u0648\u0644\u062f \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0645\u0646\u0638\u0645\u0629', schema_desc: '\u0627\u062e\u062a\u0631 \u0627\u0644\u0646\u0648\u0639 \u0648\u0627\u0645\u0644\u0623 \u0627\u0644\u062d\u0642\u0648\u0644 \u0644\u062a\u0648\u0644\u064a\u062f \u0628\u064a\u0627\u0646\u0627\u062a JSON-LD \u0645\u0646\u0638\u0645\u0629.',
+            schema_gen_btn: '\u062a\u0648\u0644\u064a\u062f JSON-LD', schema_copy: '\u0646\u0633\u062e',
+            robots_title: '\u0645\u0648\u0644\u062f robots.txt', robots_desc: '\u0639\u062f\u0651\u0644 \u0627\u0644\u0642\u0648\u0627\u0639\u062f \u0648\u0623\u0646\u0634\u0626 \u0645\u0644\u0641 robots.txt \u0642\u0627\u0628\u0644 \u0644\u0644\u062a\u062d\u0645\u064a\u0644.',
+            robots_site: '\u0631\u0627\u0628\u0637 \u0627\u0644\u0645\u0648\u0642\u0639', robots_sitemap: '\u0631\u0627\u0628\u0637 \u0627\u0644\u062e\u0631\u064a\u0637\u0629', robots_delay: '\u0627\u0644\u062a\u0623\u062e\u064a\u0631',
+            robots_admin: '\u062d\u062c\u0628 /admin\u061f', robots_private: '\u062d\u062c\u0628 /private\u061f', robots_tmp: '\u062d\u062c\u0628 /tmp\u061f',
+            robots_custom: '\u062d\u062c\u0628 \u0645\u062e\u0635\u0635', robots_generate: '\u062a\u0648\u0644\u064a\u062f robots.txt',
+            robots_copy: '\u0646\u0633\u062e', robots_download: '\u062a\u062d\u0645\u064a\u0644', robots_generated: 'robots.txt \u0627\u0644\u0645\u0648\u0644\u062f',
+            robots_yes: '\u0646\u0639\u0645 - \u062d\u062c\u0628', robots_no: '\u0644\u0627',
+            sm_btn: '\u062a\u0648\u0644\u064a\u062f \u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639',
+            cta_title: '\u062a\u062d\u062a\u0627\u062c \u062a\u062d\u0644\u064a\u0644 \u0623\u0639\u0645\u0642\u061f', cta_desc: '\u062c\u0631\u0651\u0628 \u0623\u062f\u0648\u0627\u062a Python \u0627\u0644\u062e\u0627\u0635\u0629 \u0628\u0646\u0627 \u0644\u0644\u0623\u062a\u0645\u062a\u0629 \u0627\u0644\u0643\u0627\u0645\u0644\u0629',
+            cta_about: '\u0645\u0646 \u0646\u062d\u0646', cta_blog: '\u0627\u0642\u0631\u0623 \u0627\u0644\u0645\u062f\u0648\u0646\u0629',
+            footer_desc: '\u0623\u062f\u0648\u0627\u062a SEO \u0627\u062d\u062a\u0631\u0627\u0641\u064a\u0629 \u0645\u0628\u0646\u064a\u0629 \u0628\u0627\u0644\u0645\u0641\u062a\u0648\u062d\u0629. \u0645\u0641\u062a\u0648\u062d\u0629 \u0627\u0644\u0645\u0635\u062f\u0631 \u0648\u0645\u062c\u0627\u0646\u064a\u0629 \u0648\u0642\u0648\u064a\u0629.',
+            footer_tools: '\u0627\u0644\u0623\u062f\u0648\u0627\u062a', footer_all_tools: '\u062c\u0645\u064a\u0639 \u0627\u0644\u0623\u062f\u0648\u0627\u062a', footer_score: '\u062d\u0627\u0633\u0628\u0629 \u0646\u062a\u064a\u062c\u0629 SEO', footer_schema_link: '\u0645\u0648\u0644\u062f \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a', footer_meta_link: '\u0645\u062d\u0644\u0651\u0644 \u0627\u0644\u0648\u0633\u0648\u0645',
+            footer_resources: '\u0627\u0644\u0645\u0648\u0627\u0631\u062f', footer_blog: '\u0627\u0644\u0645\u062f\u0648\u0646\u0629', footer_about_link: '\u0645\u0646 \u0646\u062d\u0646', footer_docs: '\u0627\u0644\u062a\u0648\u062b\u064a\u0642', footer_github: 'GitHub',
+            footer_connect: '\u062a\u0648\u0627\u0635\u0644', footer_linkedin: 'LinkedIn', footer_twitter: 'Twitter',
+            footer_copy: '2026 SEOHUB. \u0628\u0646\u0627\u0647 \u0645\u062d\u0645\u062f \u0645\u062a\u0648\u0644\u064a.',
+            chat_name: '\u0645\u062a\u0648\u0644\u064a', chat_sub: '\u0627\u0633\u0623\u0644\u0646\u064a \u0639\u0646 \u0623\u064a \u0634\u064a\u0621 \u0641\u064a SEO', chat_placeholder: '\u0627\u0643\u062a\u0628 \u0633\u0624\u0627\u0644\u0643 \u0647\u0646\u0627...',
+            chat_welcome: '\u0645\u0631\u062d\u0628\u064b\u0627! \u0623\u0646\u0627 \u0645\u062a\u0648\u0644\u064a\u060c \u0645\u0639\u0627\u0635\u062f SEO \u0627\u0644\u062e\u0627\u0635 \u0628\u0643. \u0627\u0633\u0623\u0644\u0646\u064a \u0639\u0646 \u0623\u064a \u0645\u0635\u0637\u0644\u062d \u0623\u0648 \u0623\u062f\u0627\u0629 \u0623\u0648 \u0643\u064a\u0641\u064a\u0629 \u062a\u062d\u0633\u064a\u0646 \u062a\u0631\u062a\u064a\u0628 \u0645\u0648\u0642\u0639\u0643.',
+            chat_sug1: '\u0645\u0627 \u0647\u0648 SEO\u061f', chat_sug2: '\u0643\u064a\u0641 \u0623\u062d\u0633\u0646 \u0633\u0631\u0639\u0629 \u0645\u0648\u0642\u0639\u064a\u061f', chat_sug3: '\u0645\u0627 \u0647\u064a Meta Tags\u061f',
+            chat_sug4: '\u0643\u064a\u0641 \u0623\u062d\u0642\u0642 E-E-A-T\u061f', chat_sug5: '\u0643\u064a\u0641 \u0623\u0633\u062a\u062e\u062f\u0645 \u0647\u0630\u0647 \u0627\u0644\u0623\u062f\u0648\u0627\u062a\u061f',
+            lang_btn: 'EN'
+        }
+    };
+
+    function toggleLang() {
+        currentLang = (currentLang === 'en') ? 'ar' : 'en';
+        localStorage.setItem('seohub_lang', currentLang);
+        applyLang();
+    }
+
+    function applyLang() {
+        var t = translations[currentLang];
+        var html = document.documentElement;
+        var body = document.body;
+
+        if (currentLang === 'ar') {
+            html.setAttribute('dir', 'rtl');
+            html.setAttribute('lang', 'ar');
+            body.style.fontFamily = "'Cairo', 'Segoe UI', sans-serif";
+        } else {
+            html.setAttribute('dir', 'ltr');
+            html.setAttribute('lang', 'en');
+            body.style.fontFamily = '';
+        }
+
+        document.getElementById('langBtn').textContent = t.lang_btn;
+
+        var els = document.querySelectorAll('[data-i18n]');
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            var key = el.getAttribute('data-i18n');
+            if (t[key]) {
+                el.textContent = t[key];
+            }
+        }
+
+        var phEls = document.querySelectorAll('[data-i18n-ph]');
+        for (var j = 0; j < phEls.length; j++) {
+            var phKey = phEls[j].getAttribute('data-i18n-ph');
+            if (t[phKey]) {
+                phEls[j].setAttribute('placeholder', t[phKey]);
+            }
+        }
+
+        var chatNameEl = document.querySelector('.chat-header h4');
+        if (chatNameEl) chatNameEl.textContent = t.chat_name;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        applyLang();
         setTimeout(function() {
             var fab = document.getElementById('chatFab');
             if (fab) fab.style.display = 'flex';
