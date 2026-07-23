@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEOHUB - Professional SEO Tools & Automation</title>
+    <meta name="description" content="20+ Python-powered SEO tools for technical audits, content analysis, link building, and automation. Free online SEO tools.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">S</span>
+                    <span class="logo-text">SEO<span class="logo-accent">HUB</span></span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="tools.html">Tools</a></li>
+                    <li><a href="tools/seo-score-calculator.html">Free Tools</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="blog.html">Blog</a></li>
+                </ul>
+                <div class="nav-cta">
+                    <a href="tools.html" class="btn btn-primary">Explore Tools</a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">Python-Powered SEO Automation</div>
+                <h1>SEO Tools That <span class="gradient-text">Actually Work</span></h1>
+                <p class="hero-subtitle">20+ professional SEO tools built with Python. Technical audits, content analysis, link building, and automation — all in one place.</p>
+                <div class="hero-cta">
+                    <a href="tools.html" class="btn btn-primary btn-lg">Explore All Tools</a>
+                    <a href="tools/seo-score-calculator.html" class="btn btn-outline btn-lg">Free SEO Score</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">20+</span>
+                        <span class="stat-label">SEO Tools</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Open Source</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">Free</span>
+                        <span class="stat-label">Online Tools</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="code-title">seo_audit.py</span>
+                    </div>
+                    <pre class="code-content"><code><span class="keyword">import</span> requests
+<span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup
+
+<span class="keyword">def</span> <span class="function">analyze_site</span>(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text)
+    
+    <span class="comment"># Extract SEO signals</span>
+    title = soup.find(<span class="string">'title'</span>)
+    meta = soup.find(<span class="string">'meta'</span>, attrs={<span class="string">'name'</span>: <span class="string">'description'</span>})
+    h1s = soup.find_all(<span class="string">'h1'</span>)
+    
+    <span class="keyword">return</span> {
+        <span class="string">'title'</span>: title.text <span class="keyword">if</span> title <span class="keyword">else</span> <span class="string">None</span>,
+        <span class="string">'meta'</span>: meta[<span class="string">'content'</span>] <span class="keyword">if</span> meta <span class="keyword">else</span> <span class="string">None</span>,
+        <span class="string">'h1_count'</span>: len(h1s)
+    }</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why SEOHUB?</h2>
+                <p>Built by an SEO professional, for SEO professionals</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    </div>
+                    <h3>Python-Powered</h3>
+                    <p>Built with Python for accuracy, speed, and reliability. No guesswork, just data.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    </div>
+                    <h3>Real-Time Analysis</h3>
+                    <p>Get instant results. No waiting, no queues. Analyze any website in seconds.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    </div>
+                    <h3>Comprehensive Reports</h3>
+                    <p>Detailed reports with actionable insights. Know exactly what to fix and why.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    </div>
+                    <h3>Open Source</h3>
+                    <p>View the code, modify it, contribute. Full transparency in how tools work.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <h3>No API Keys Needed</h3>
+                    <p>Most tools work without external API keys. Just run and analyze.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    </div>
+                    <h3>Modular Design</h3>
+                    <p>Use individual tools or combine them for complete SEO automation pipelines.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Preview Section -->
+    <section class="tools-preview">
+        <div class="container">
+            <div class="section-header">
+                <h2>Our SEO Tools</h2>
+                <p>Professional tools for every aspect of SEO</p>
+            </div>
+            <div class="tools-categories">
+                <button class="category-btn active" data-category="all">All Tools</button>
+                <button class="category-btn" data-category="technical">Technical SEO</button>
+                <button class="category-btn" data-category="content">Content SEO</button>
+                <button class="category-btn" data-category="offpage">Off-Page SEO</button>
+                <button class="category-btn" data-category="automation">Automation</button>
+            </div>
+            <div class="tools-grid" id="toolsGrid">
+                <!-- Tools will be populated by JS -->
+            </div>
+            <div class="tools-cta">
+                <a href="tools.html" class="btn btn-primary btn-lg">View All 20+ Tools</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Free Tools Section -->
+    <section class="free-tools">
+        <div class="container">
+            <div class="section-header">
+                <h2>Free Online SEO Tools</h2>
+                <p>Try our tools directly in your browser — no installation required</p>
+            </div>
+            <div class="free-tools-grid">
+                <a href="tools/seo-score-calculator.html" class="free-tool-card">
+                    <div class="free-tool-icon">📊</div>
+                    <h3>SEO Score Calculator</h3>
+                    <p>Get a comprehensive SEO score for any website in seconds</p>
+                    <span class="free-badge">Free Online</span>
+                </a>
+                <a href="tools/schema-generator.html" class="free-tool-card">
+                    <div class="free-tool-icon">🔧</div>
+                    <h3>Schema Generator</h3>
+                    <p>Generate JSON-LD structured data for rich search results</p>
+                    <span class="free-badge">Free Online</span>
+                </a>
+                <a href="tools/meta-tag-analyzer.html" class="free-tool-card">
+                    <div class="free-tool-icon">🏷️</div>
+                    <h3>Meta Tag Analyzer</h3>
+                    <p>Analyze title tags, meta descriptions, and Open Graph data</p>
+                    <span class="free-badge">Free Online</span>
+                </a>
+                <a href="tools/heading-structure.html" class="free-tool-card">
+                    <div class="free-tool-icon">📑</div>
+                    <h3>Heading Structure Checker</h3>
+                    <p>Analyze H1-H6 heading hierarchy and identify issues</p>
+                    <span class="free-badge">Free Online</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Case Study Section -->
+    <section class="case-study">
+        <div class="container">
+            <div class="case-study-content">
+                <div class="case-study-text">
+                    <span class="case-study-badge">Case Study</span>
+                    <h2>How We Analyzed a Saudi E-Commerce Store</h2>
+                    <p>Complete SEO audit of xy-ksa.com using our Python tools. Technical analysis, content optimization, speed testing, and competitor comparison — all automated.</p>
+                    <div class="case-study-results">
+                        <div class="result">
+                            <span class="result-score">71</span>
+                            <span class="result-label">Technical Score</span>
+                        </div>
+                        <div class="result">
+                            <span class="result-score">74</span>
+                            <span class="result-label">Content Score</span>
+                        </div>
+                        <div class="result">
+                            <span class="result-score">94</span>
+                            <span class="result-label">Health Score</span>
+                        </div>
+                    </div>
+                    <a href="blog/xy-ksa-case-study.html" class="btn btn-primary">Read Full Case Study</a>
+                </div>
+                <div class="case-study-visual">
+                    <div class="score-circle">
+                        <svg viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" class="score-bg"></circle>
+                            <circle cx="50" cy="50" r="45" class="score-fill" style="stroke-dashoffset: 95"></circle>
+                        </svg>
+                        <div class="score-text">
+                            <span class="score-number">66</span>
+                            <span class="score-grade">Grade B</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Improve Your SEO?</h2>
+            <p>Start with our free tools or explore our complete Python SEO suite</p>
+            <div class="cta-buttons">
+                <a href="tools/seo-score-calculator.html" class="btn btn-white btn-lg">Get Free SEO Score</a>
+                <a href="tools.html" class="btn btn-outline-white btn-lg">Explore All Tools</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <span class="logo-icon">S</span>
+                        <span class="logo-text">SEO<span class="logo-accent">HUB</span></span>
+                    </a>
+                    <p>Professional SEO tools built with Python. Open source, free, and powerful.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="GitHub">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        </a>
+                        <a href="#" aria-label="LinkedIn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </a>
+                        <a href="#" aria-label="Twitter">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Tools</h4>
+                    <ul>
+                        <li><a href="tools.html">All Tools</a></li>
+                        <li><a href="tools/seo-score-calculator.html">SEO Score Calculator</a></li>
+                        <li><a href="tools/schema-generator.html">Schema Generator</a></li>
+                        <li><a href="tools/meta-tag-analyzer.html">Meta Tag Analyzer</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">GitHub</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <ul>
+                        <li><a href="#">LinkedIn</a></li>
+                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#">GitHub</a></li>
+                        <li><a href="mailto:mmetwily1@gmail.com">Email</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 SEOHUB. Built by Mohamed Metwily.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

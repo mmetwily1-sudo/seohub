@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free SEO Score Calculator - SEOHUB</title>
+    <meta name="description" content="Get a comprehensive SEO score for any website. Free online tool - no signup required.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .tool-hero { padding: 140px 0 60px; background: linear-gradient(180deg, var(--gray-5) 0%, var(--white) 100%); }
+        .tool-hero h1 { font-size: 48px; font-weight: 900; margin-bottom: 16px; }
+        .tool-hero p { font-size: 18px; color: var(--gray-1); max-width: 600px; }
+        .tool-container { padding: 60px 0 100px; }
+        .tool-layout { display: grid; grid-template-columns: 400px 1fr; gap: 40px; }
+        .tool-sidebar { position: sticky; top: 100px; height: fit-content; }
+        .tool-input-card { padding: 32px; background: var(--white); border: 1px solid var(--gray-4); border-radius: var(--radius-lg); }
+        .tool-input-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--gray-4);
+            border-radius: var(--radius);
+            font-size: 16px;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+        }
+        .analyze-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .analyze-btn:hover { background: var(--primary-dark); }
+        .analyze-btn:disabled { background: var(--gray-3); cursor: not-allowed; }
+        .results-area { min-height: 500px; }
+        .results-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 500px;
+            background: var(--white);
+            border: 2px dashed var(--gray-4);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            color: var(--gray-1);
+        }
+        .results-placeholder .icon { font-size: 64px; margin-bottom: 20px; }
+        .results-placeholder h3 { font-size: 24px; color: var(--dark); margin-bottom: 8px; }
+        .results-placeholder p { font-size: 15px; }
+        
+        /* Results Styles */
+        .results-card { display: none; background: var(--white); border: 1px solid var(--gray-4); border-radius: var(--radius-lg); overflow: hidden; }
+        .results-header { padding: 32px; border-bottom: 1px solid var(--gray-4); display: flex; justify-content: space-between; align-items: center; }
+        .results-url { font-size: 14px; color: var(--gray-1); }
+        .results-score-badge { padding: 8px 20px; border-radius: 100px; font-size: 18px; font-weight: 800; }
+        .score-excellent { background: rgba(16,185,129,0.1); color: var(--success); }
+        .score-good { background: rgba(59,130,246,0.1); color: var(--primary); }
+        .score-fair { background: rgba(245,158,11,0.1); color: var(--warning); }
+        .score-poor { background: rgba(239,68,68,0.1); color: var(--danger); }
+        
+        .score-overview { padding: 32px; border-bottom: 1px solid var(--gray-4); }
+        .score-circle-container { display: flex; align-items: center; gap: 40px; }
+        .score-circle-lg { position: relative; width: 150px; height: 150px; flex-shrink: 0; }
+        .score-circle-lg svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .score-bg-lg { fill: none; stroke: var(--gray-4); stroke-width: 10; }
+        .score-fill-lg { fill: none; stroke-width: 10; stroke-linecap: round; stroke-dasharray: 377; transition: stroke-dashoffset 1s ease; }
+        .score-text-lg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .score-number-lg { display: block; font-size: 48px; font-weight: 900; }
+        .score-label-lg { font-size: 14px; color: var(--gray-1); }
+        .score-breakdown { flex: 1; }
+        .breakdown-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gray-5); }
+        .breakdown-item:last-child { border-bottom: none; }
+        .breakdown-label { font-weight: 500; }
+        .breakdown-score { font-weight: 700; }
+        .breakdown-bar { width: 100px; height: 6px; background: var(--gray-4); border-radius: 3px; overflow: hidden; margin-left: 12px; }
+        .breakdown-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+        
+        .issues-section { padding: 32px; }
+        .issues-section h3 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+        .issue-item { padding: 16px; margin-bottom: 12px; border-radius: var(--radius); display: flex; align-items: flex-start; gap: 12px; }
+        .issue-critical { background: rgba(239,68,68,0.1); border-left: 4px solid var(--danger); }
+        .issue-warning { background: rgba(245,158,11,0.1); border-left: 4px solid var(--warning); }
+        .issue-pass { background: rgba(16,185,129,0.1); border-left: 4px solid var(--success); }
+        .issue-icon { font-size: 20px; flex-shrink: 0; }
+        .issue-content h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .issue-content p { font-size: 13px; color: var(--gray-1); }
+        
+        .meta-info { padding: 32px; border-top: 1px solid var(--gray-4); }
+        .meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .meta-item { padding: 16px; background: var(--gray-5); border-radius: var(--radius); }
+        .meta-item label { display: block; font-size: 12px; color: var(--gray-1); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .meta-item .value { font-weight: 600; font-size: 14px; }
+        .meta-item .value.too-long { color: var(--warning); }
+        .meta-item .value.missing { color: var(--danger); }
+        .meta-item .value.good { color: var(--success); }
+        
+        .loading-spinner { display: none; text-align: center; padding: 60px; }
+        .spinner { width: 48px; height: 48px; border: 4px solid var(--gray-4); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        @media (max-width: 1024px) {
+            .tool-layout { grid-template-columns: 1fr; }
+            .tool-sidebar { position: static; }
+            .score-circle-container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="../index.html" class="logo">
+                    <span class="logo-icon">S</span>
+                    <span class="logo-text">SEO<span class="logo-accent">HUB</span></span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../tools.html">Tools</a></li>
+                    <li><a href="seo-score-calculator.html" class="active">Free Tools</a></li>
+                    <li><a href="../about.html">About</a></li>
+                    <li><a href="../blog.html">Blog</a></li>
+                </ul>
+                <div class="nav-cta">
+                    <a href="../tools.html" class="btn btn-primary">Explore Tools</a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <section class="tool-hero">
+        <div class="container">
+            <h1>SEO Score Calculator</h1>
+            <p>Analyze any website and get a comprehensive SEO score with actionable insights. Free, instant, no signup required.</p>
+        </div>
+    </section>
+
+    <section class="tool-container">
+        <div class="container">
+            <div class="tool-layout">
+                <div class="tool-sidebar">
+                    <div class="tool-input-card">
+                        <h3>Analyze Website</h3>
+                        <div class="input-group">
+                            <label for="url-input">Website URL</label>
+                            <input type="url" id="url-input" placeholder="https://example.com" value="">
+                        </div>
+                        <button class="analyze-btn" id="analyze-btn" onclick="analyzeURL()">
+                            Analyze Website
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="results-area">
+                    <div class="results-placeholder" id="placeholder">
+                        <div class="icon">📊</div>
+                        <h3>Enter a URL to analyze</h3>
+                        <p>We'll check technical SEO, content, meta tags, headings, and more</p>
+                    </div>
+                    
+                    <div class="loading-spinner" id="loading">
+                        <div class="spinner"></div>
+                        <p>Analyzing website...</p>
+                    </div>
+                    
+                    <div class="results-card" id="results">
+                        <div class="results-header">
+                            <span class="results-url" id="result-url"></span>
+                            <span class="results-score-badge" id="result-badge"></span>
+                        </div>
+                        
+                        <div class="score-overview">
+                            <div class="score-circle-container">
+                                <div class="score-circle-lg">
+                                    <svg viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="45" class="score-bg-lg"></circle>
+                                        <circle cx="50" cy="50" r="45" class="score-fill-lg" id="score-circle"></circle>
+                                    </svg>
+                                    <div class="score-text-lg">
+                                        <span class="score-number-lg" id="score-number">0</span>
+                                        <span class="score-label-lg">Overall Score</span>
+                                    </div>
+                                </div>
+                                <div class="score-breakdown" id="score-breakdown">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="meta-info" id="meta-info">
+                            <!-- Populated by JS -->
+                        </div>
+                        
+                        <div class="issues-section" id="issues-section">
+                            <h3>Issues Found</h3>
+                            <div id="issues-list">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Need More Power?</h2>
+            <p>Try our Python tools for deeper analysis and automation</p>
+            <div class="cta-buttons">
+                <a href="../tools.html" class="btn btn-white btn-lg">View All Tools</a>
+                <a href="../about.html" class="btn btn-outline-white btn-lg">Contact Us</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 SEOHUB. Built by Mohamed Metwily.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    // SEO Score Calculator - Client-side Analysis
+    async function analyzeURL() {
+        const urlInput = document.getElementById('url-input');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const placeholder = document.getElementById('placeholder');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        
+        let url = urlInput.value.trim();
+        if (!url) {
+            alert('Please enter a URL');
+            return;
+        }
+        
+        // Add protocol if missing
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+            urlInput.value = url;
+        }
+        
+        // Validate URL
+        try {
+            new URL(url);
+        } catch {
+            alert('Please enter a valid URL');
+            return;
+        }
+        
+        // Show loading
+        placeholder.style.display = 'none';
+        loading.style.display = 'block';
+        results.style.display = 'none';
+        analyzeBtn.disabled = true;
+        analyzeBtn.textContent = 'Analyzing...';
+        
+        try {
+            // Use CORS proxy for fetching
+            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+            const response = await fetch(proxyUrl);
+            const html = await response.text();
+            
+            // Parse HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Analyze
+            const analysis = analyzeDocument(doc, url);
+            
+            // Display results
+            displayResults(analysis, url);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            // Still show results with what we can detect
+            const analysis = analyzeFromURL(url);
+            displayResults(analysis, url);
+        }
+        
+        loading.style.display = 'none';
+        results.style.display = 'block';
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = 'Analyze Website';
+    }
+    
+    function analyzeDocument(doc, url) {
+        let score = 0;
+        const issues = [];
+        const meta = {};
+        
+        // 1. Title Tag (15 points)
+        const title = doc.querySelector('title');
+        if (title && title.textContent.trim()) {
+            const titleLen = title.textContent.trim().length;
+            meta.title = { value: title.textContent.trim(), length: titleLen };
+            if (titleLen >= 30 && titleLen <= 60) {
+                score += 15;
+                issues.push({ type: 'pass', title: 'Title tag optimized', desc: `Title is ${titleLen} characters (ideal: 30-60)` });
+            } else if (titleLen < 30) {
+                score += 8;
+                issues.push({ type: 'warning', title: 'Title tag too short', desc: `Title is ${titleLen} characters. Aim for 30-60 characters.` });
+            } else {
+                score += 5;
+                issues.push({ type: 'warning', title: 'Title tag too long', desc: `Title is ${titleLen} characters. Aim for 30-60 characters.` });
+            }
+        } else {
+            meta.title = { value: 'Missing', length: 0 };
+            issues.push({ type: 'critical', title: 'Missing title tag', desc: 'Every page needs a unique title tag (30-60 characters).' });
+        }
+        
+        // 2. Meta Description (15 points)
+        const metaDesc = doc.querySelector('meta[name="description"]');
+        if (metaDesc && metaDesc.content) {
+            const descLen = metaDesc.content.length;
+            meta.description = { value: metaDesc.content, length: descLen };
+            if (descLen >= 120 && descLen <= 160) {
+                score += 15;
+                issues.push({ type: 'pass', title: 'Meta description optimized', desc: `Description is ${descLen} characters (ideal: 120-160)` });
+            } else if (descLen < 120) {
+                score += 8;
+                issues.push({ type: 'warning', title: 'Meta description too short', desc: `Description is ${descLen} characters. Aim for 120-160 characters.` });
+            } else {
+                score += 10;
+                issues.push({ type: 'warning', title: 'Meta description too long', desc: `Description is ${descLen} characters. Aim for 120-160 characters.` });
+            }
+        } else {
+            meta.description = { value: 'Missing', length: 0 };
+            issues.push({ type: 'critical', title: 'Missing meta description', desc: 'Add a compelling meta description (120-160 characters).' });
+        }
+        
+        // 3. H1 Tag (15 points)
+        const h1s = doc.querySelectorAll('h1');
+        meta.h1Count = h1s.length;
+        if (h1s.length === 1) {
+            score += 15;
+            meta.h1Text = h1s[0].textContent.trim().substring(0, 100);
+            issues.push({ type: 'pass', title: 'Single H1 tag found', desc: 'Perfect! One H1 per page is ideal.' });
+        } else if (h1s.length === 0) {
+            issues.push({ type: 'critical', title: 'Missing H1 tag', desc: 'Every page needs exactly one H1 tag.' });
+        } else {
+            score += 5;
+            issues.push({ type: 'warning', title: 'Multiple H1 tags found', desc: `Found ${h1s.length} H1 tags. Use only one H1 per page.` });
+        }
+        
+        // 4. Heading Structure (10 points)
+        const h2s = doc.querySelectorAll('h2');
+        const h3s = doc.querySelectorAll('h3');
+        meta.h2Count = h2s.length;
+        meta.h3Count = h3s.length;
+        if (h2s.length >= 2 && h2s.length <= 10) {
+            score += 10;
+            issues.push({ type: 'pass', title: 'Good heading structure', desc: `Found ${h2s.length} H2 tags and ${h3s.length} H3 tags.` });
+        } else if (h2s.length === 0) {
+            issues.push({ type: 'warning', title: 'No H2 tags found', desc: 'Add H2 tags to structure your content.' });
+        } else {
+            score += 5;
+        }
+        
+        // 5. Images with Alt Text (10 points)
+        const images = doc.querySelectorAll('img');
+        meta.totalImages = images.length;
+        let imagesWithAlt = 0;
+        images.forEach(img => {
+            if (img.alt && img.alt.trim()) imagesWithAlt++;
+        });
+        meta.imagesWithAlt = imagesWithAlt;
+        
+        if (images.length === 0) {
+            score += 5;
+            issues.push({ type: 'warning', title: 'No images found', desc: 'Add relevant images to improve engagement.' });
+        } else if (imagesWithAlt === images.length) {
+            score += 10;
+            issues.push({ type: 'pass', title: 'All images have alt text', desc: `${images.length}/${images.length} images have alt text.` });
+        } else {
+            score += Math.round((imagesWithAlt / images.length) * 10);
+            issues.push({ type: 'warning', title: 'Some images missing alt text', desc: `${imagesWithAlt}/${images.length} images have alt text.` });
+        }
+        
+        // 6. Open Graph Tags (10 points)
+        const ogTitle = doc.querySelector('meta[property="og:title"]');
+        const ogDesc = doc.querySelector('meta[property="og:description"]');
+        const ogImage = doc.querySelector('meta[property="og:image"]');
+        let ogScore = 0;
+        if (ogTitle) ogScore += 3;
+        if (ogDesc) ogScore += 3;
+        if (ogImage) ogScore += 4;
+        score += ogScore;
+        meta.ogTags = { title: !!ogTitle, description: !!ogDesc, image: !!ogImage };
+        
+        if (ogScore === 10) {
+            issues.push({ type: 'pass', title: 'Open Graph tags complete', desc: 'All OG tags present for social sharing.' });
+        } else if (ogScore === 0) {
+            issues.push({ type: 'warning', title: 'No Open Graph tags', desc: 'Add OG tags for better social media sharing.' });
+        } else {
+            issues.push({ type: 'warning', title: 'Incomplete Open Graph tags', desc: 'Add missing OG tags for better social sharing.' });
+        }
+        
+        // 7. Canonical Tag (5 points)
+        const canonical = doc.querySelector('link[rel="canonical"]');
+        if (canonical) {
+            score += 5;
+            issues.push({ type: 'pass', title: 'Canonical tag present', desc: 'Good! Canonical tags prevent duplicate content issues.' });
+        } else {
+            issues.push({ type: 'warning', title: 'No canonical tag', desc: 'Add a canonical tag to prevent duplicate content.' });
+        }
+        
+        // 8. Language Tag (5 points)
+        const lang = doc.querySelector('html').getAttribute('lang');
+        if (lang) {
+            score += 5;
+            meta.language = lang;
+            issues.push({ type: 'pass', title: 'Language attribute set', desc: `Language: ${lang}` });
+        } else {
+            issues.push({ type: 'warning', title: 'No language attribute', desc: 'Add lang attribute to HTML tag.' });
+        }
+        
+        // 9. Robots Meta (5 points)
+        const robots = doc.querySelector('meta[name="robots"]');
+        if (robots) {
+            score += 5;
+            meta.robots = robots.content;
+        } else {
+            meta.robots = 'Not set (defaults to index, follow)';
+        }
+        
+        // 10. Word Count (10 points)
+        const bodyText = doc.body ? doc.body.textContent : '';
+        const wordCount = bodyText.split(/\s+/).filter(w => w.length > 0).length;
+        meta.wordCount = wordCount;
+        if (wordCount >= 300) {
+            score += 10;
+            issues.push({ type: 'pass', title: 'Good content length', desc: `${wordCount} words found.` });
+        } else if (wordCount >= 100) {
+            score += 5;
+            issues.push({ type: 'warning', title: 'Content could be longer', desc: `${wordCount} words. Aim for 300+ words.` });
+        } else {
+            issues.push({ type: 'critical', title: 'Very thin content', desc: `Only ${wordCount} words. Add more valuable content.` });
+        }
+        
+        return { score: Math.min(score, 100), issues, meta };
+    }
+    
+    function analyzeFromURL(url) {
+        // Basic analysis from URL only
+        let score = 30;
+        const issues = [];
+        const meta = {};
+        
+        try {
+            const urlObj = new URL(url);
+            meta.domain = urlObj.hostname;
+            
+            // Check HTTPS
+            if (urlObj.protocol === 'https:') {
+                score += 10;
+                issues.push({ type: 'pass', title: 'HTTPS enabled', desc: 'Site uses secure connection.' });
+            } else {
+                issues.push({ type: 'critical', title: 'No HTTPS', desc: 'Site should use HTTPS for security.' });
+            }
+            
+            // Check URL structure
+            if (urlObj.pathname.length < 75) {
+                score += 5;
+            }
+            
+        } catch {}
+        
+        issues.push({ type: 'warning', title: 'Limited analysis', desc: 'Full analysis requires server access. Try our Python tools for complete audit.' });
+        
+        return { score, issues, meta };
+    }
+    
+    function displayResults(analysis, url) {
+        const { score, issues, meta } = analysis;
+        
+        // Set URL
+        document.getElementById('result-url').textContent = url;
+        
+        // Set score badge
+        const badge = document.getElementById('result-badge');
+        badge.textContent = `Score: ${score}/100`;
+        badge.className = 'results-score-badge ' + getScoreClass(score);
+        
+        // Animate score circle
+        const circle = document.getElementById('score-circle');
+        const circumference = 283;
+        const offset = circumference - (score / 100) * circumference;
+        circle.style.strokeDashoffset = offset;
+        circle.style.stroke = getScoreColor(score);
+        
+        // Set score number
+        document.getElementById('score-number').textContent = score;
+        document.getElementById('score-number').style.color = getScoreColor(score);
+        
+        // Breakdown
+        const breakdown = document.getElementById('score-breakdown');
+        const categories = [
+            { name: 'Title Tag', score: meta.title ? (meta.title.length >= 30 && meta.title.length <= 60 ? 15 : 8) : 0, max: 15 },
+            { name: 'Meta Description', score: meta.description ? (meta.description.length >= 120 && meta.description.length <= 160 ? 15 : 8) : 0, max: 15 },
+            { name: 'H1 Tag', score: meta.h1Count === 1 ? 15 : 0, max: 15 },
+            { name: 'Headings', score: meta.h2Count >= 2 ? 10 : 5, max: 10 },
+            { name: 'Images Alt', score: meta.totalImages > 0 ? Math.round((meta.imagesWithAlt / meta.totalImages) * 10) : 5, max: 10 },
+            { name: 'Open Graph', score: meta.ogTags ? (meta.ogTags.title ? 3 : 0) + (meta.ogTags.description ? 3 : 0) + (meta.ogTags.image ? 4 : 0) : 0, max: 10 },
+        ];
+        
+        breakdown.innerHTML = categories.map(cat => `
+            <div class="breakdown-item">
+                <span class="breakdown-label">${cat.name}</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="breakdown-score" style="color:${getScoreColor(cat.score/cat.max*100)}">${cat.score}/${cat.max}</span>
+                    <div class="breakdown-bar">
+                        <div class="breakdown-fill" style="width:${(cat.score/cat.max)*100}%;background:${getScoreColor(cat.score/cat.max*100)}"></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Meta info
+        const metaInfo = document.getElementById('meta-info');
+        metaInfo.innerHTML = `
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <label>Title Tag</label>
+                    <div class="value ${meta.title ? (meta.title.length > 60 ? 'too-long' : meta.title.length < 30 ? 'too-long' : 'good') : 'missing'}">
+                        ${meta.title ? meta.title.value.substring(0, 80) + (meta.title.value.length > 80 ? '...' : '') : 'Missing'}
+                        ${meta.title ? ` (${meta.title.length} chars)` : ''}
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <label>Meta Description</label>
+                    <div class="value ${meta.description ? (meta.description.length > 160 ? 'too-long' : meta.description.length < 120 ? 'too-long' : 'good') : 'missing'}">
+                        ${meta.description ? meta.description.value.substring(0, 100) + (meta.description.value.length > 100 ? '...' : '') : 'Missing'}
+                        ${meta.description ? ` (${meta.description.length} chars)` : ''}
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <label>H1 Tags</label>
+                    <div class="value ${meta.h1Count === 1 ? 'good' : 'too-long'}">
+                        ${meta.h1Count || 0} found
+                        ${meta.h1Text ? `: "${meta.h1Text.substring(0, 50)}..."` : ''}
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <label>Word Count</label>
+                    <div class="value ${meta.wordCount >= 300 ? 'good' : meta.wordCount >= 100 ? 'too-long' : 'missing'}">
+                        ${meta.wordCount || 0} words
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <label>Images</label>
+                    <div class="value">${meta.totalImages || 0} total, ${meta.imagesWithAlt || 0} with alt text</div>
+                </div>
+                <div class="meta-item">
+                    <label>Language</label>
+                    <div class="value">${meta.language || 'Not set'}</div>
+                </div>
+            </div>
+        `;
+        
+        // Issues
+        const issuesList = document.getElementById('issues-list');
+        issuesList.innerHTML = issues.map(issue => `
+            <div class="issue-item issue-${issue.type}">
+                <span class="issue-icon">${issue.type === 'pass' ? '✅' : issue.type === 'warning' ? '⚠️' : '❌'}</span>
+                <div class="issue-content">
+                    <h4>${issue.title}</h4>
+                    <p>${issue.desc}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    function getScoreClass(score) {
+        if (score >= 80) return 'score-excellent';
+        if (score >= 60) return 'score-good';
+        if (score >= 40) return 'score-fair';
+        return 'score-poor';
+    }
+    
+    function getScoreColor(score) {
+        if (score >= 80) return '#10b981';
+        if (score >= 60) return '#2563eb';
+        if (score >= 40) return '#f59e0b';
+        return '#ef4444';
+    }
+    
+    // Mobile menu
+    document.querySelector('.mobile-menu-btn')?.addEventListener('click', function() {
+        document.querySelector('.nav-links').classList.toggle('active');
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - SEOHUB</title>
+    <meta name="description" content="SEO insights, case studies, and tutorials from SEOHUB.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .blog-hero { padding: 140px 0 60px; background: linear-gradient(180deg, var(--gray-5) 0%, var(--white) 100%); text-align: center; }
+        .blog-hero h1 { font-size: 48px; font-weight: 900; margin-bottom: 16px; }
+        .blog-hero p { font-size: 18px; color: var(--gray-1); max-width: 600px; margin: 0 auto; }
+        .blog-content { padding: 60px 0 100px; }
+        .blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+        .blog-card { background: var(--white); border: 1px solid var(--gray-4); border-radius: var(--radius-lg); overflow: hidden; transition: var(--transition); }
+        .blog-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .blog-card-image { height: 200px; background: var(--gradient-1); display: flex; align-items: center; justify-content: center; font-size: 64px; }
+        .blog-card-content { padding: 24px; }
+        .blog-card-meta { display: flex; gap: 12px; margin-bottom: 12px; }
+        .blog-card-tag { padding: 4px 12px; background: rgba(37,99,235,0.1); color: var(--primary); border-radius: 100px; font-size: 12px; font-weight: 600; }
+        .blog-card-date { font-size: 13px; color: var(--gray-1); }
+        .blog-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+        .blog-card p { font-size: 14px; color: var(--gray-1); margin-bottom: 16px; line-height: 1.6; }
+        .blog-card-link { color: var(--primary); font-weight: 600; font-size: 14px; }
+        .featured-post { grid-column: span 2; }
+        .featured-post .blog-card-image { height: 300px; }
+        @media (max-width: 1024px) { .blog-grid { grid-template-columns: 1fr; } .featured-post { grid-column: span 1; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">S</span>
+                    <span class="logo-text">SEO<span class="logo-accent">HUB</span></span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="tools.html">Tools</a></li>
+                    <li><a href="tools/seo-score-calculator.html">Free Tools</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="blog.html" class="active">Blog</a></li>
+                </ul>
+                <div class="nav-cta">
+                    <a href="tools.html" class="btn btn-primary">Explore Tools</a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <section class="blog-hero">
+        <div class="container">
+            <h1>Blog & Case Studies</h1>
+            <p>SEO insights, technical deep dives, and real-world case studies from our work.</p>
+        </div>
+    </section>
+
+    <section class="blog-content">
+        <div class="container">
+            <div class="blog-grid">
+                <div class="blog-card featured-post">
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #10b981, #06b6d4);">📊</div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span class="blog-card-tag">Case Study</span>
+                            <span class="blog-card-date">July 23, 2026</span>
+                        </div>
+                        <h3>Complete SEO Audit of xy-ksa.com: A Saudi E-Commerce Store</h3>
+                        <p>We analyzed a Korean beauty products store on Salla platform using our Python SEO tools. Here's what we found: Technical score 71/100, Content 74/100, Speed 42/100, and an overall Grade B. Key issues include H1 duplication, thin content, missing gzip compression, and zero backlinks.</p>
+                        <a href="blog/xy-ksa-case-study.html" class="blog-card-link">Read Full Case Study →</a>
+                    </div>
+                </div>
+
+                <div class="blog-card">
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">🐍</div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span class="blog-card-tag">Tutorial</span>
+                            <span class="blog-card-date">July 20, 2026</span>
+                        </div>
+                        <h3>How I Built 20 SEO Tools with Python</h3>
+                        <p>A complete walkthrough of building technical SEO audit tools, content analyzers, and automation scripts using Python and BeautifulSoup.</p>
+                        <a href="#" class="blog-card-link">Read More →</a>
+                    </div>
+                </div>
+
+                <div class="blog-card">
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">🤖</div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span class="blog-card-tag">AI SEO</span>
+                            <span class="blog-card-date">July 18, 2026</span>
+                        </div>
+                        <h3>AI SEO vs Traditional SEO: What Works in 2026</h3>
+                        <p>The rise of AI overviews and LLM search is changing SEO. Here's how to optimize for both Google and AI platforms.</p>
+                        <a href="#" class="blog-card-link">Read More →</a>
+                    </div>
+                </div>
+
+                <div class="blog-card">
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">🔍</div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span class="blog-card-tag">Technical SEO</span>
+                            <span class="blog-card-date">July 15, 2026</span>
+                        </div>
+                        <h3>Core Web Vitals 2026: What You Need to Know</h3>
+                        <p>The latest CWV thresholds and how to optimize LCP, INP, and CLS for better rankings.</p>
+                        <a href="#" class="blog-card-link">Read More →</a>
+                    </div>
+                </div>
+
+                <div class="blog-card">
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #10b981, #059669);">🔑</div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span class="blog-card-tag">Keyword Research</span>
+                            <span class="blog-card-date">July 12, 2026</span>
+                        </div>
+                        <h3>Long-Tail Keyword Strategy: A Complete Guide</h3>
+                        <p>Why long-tail keywords are the fastest path to rankings, and how to find them using free tools.</p>
+                        <a href="#" class="blog-card-link">Read More →</a>
+                    </div>
+                </div>
+
+                <div class="blog-card">
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #ec4899, #8b5cf6);">📱</div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span class="blog-card-tag">Local SEO</span>
+                            <span class="blog-card-date">July 10, 2026</span>
+                        </div>
+                        <h3>Local SEO for Saudi Businesses: A Complete Guide</h3>
+                        <p>How to optimize your Google Business Profile, build local citations, and rank in Saudi Arabia.</p>
+                        <a href="#" class="blog-card-link">Read More →</a>
+                    </div>
+                </div>
+
+                <div class="blog-card">
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">🔧</div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span class="blog-card-tag">Tools</span>
+                            <span class="blog-card-date">July 8, 2026</span>
+                        </div>
+                        <h3>Free Online SEO Tools: What We Built</h3>
+                        <p>An overview of our free SEO tools: Score Calculator, Schema Generator, Meta Tag Analyzer, and Heading Structure Checker.</p>
+                        <a href="#" class="blog-card-link">Read More →</a>
+                    </div>
+                </div>
+
+                <div class="blog-card">
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #f59e0b, #d97706);">📚</div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span class="blog-card-tag">Learning</span>
+                            <span class="blog-card-date">July 5, 2026</span>
+                        </div>
+                        <h3>Joe Davies SEO Framework: Key Takeaways</h3>
+                        <p>What I learned from Joe's Ultimate SEO Notion Doc: keyword clustering, content briefs, and link building strategies.</p>
+                        <a href="#" class="blog-card-link">Read More →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Have a Topic Suggestion?</h2>
+            <p>We'd love to hear what SEO topics you want us to cover</p>
+            <div class="cta-buttons">
+                <a href="mailto:mmetwily1@gmail.com" class="btn btn-white btn-lg">Suggest a Topic</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 SEOHUB. Built by Mohamed Metwily.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    document.querySelector('.mobile-menu-btn')?.addEventListener('click', function() {
+        document.querySelector('.nav-links').classList.toggle('active');
+    });
+    </script>
+</body>
+</html>

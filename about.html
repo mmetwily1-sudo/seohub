@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - SEOHUB</title>
+    <meta name="description" content="About Mohamed Metwily - SEO specialist, Python developer, and automation expert.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .about-hero { padding: 140px 0 80px; background: linear-gradient(180deg, var(--gray-5) 0%, var(--white) 100%); text-align: center; }
+        .about-hero h1 { font-size: 48px; font-weight: 900; margin-bottom: 16px; }
+        .about-hero p { font-size: 18px; color: var(--gray-1); max-width: 600px; margin: 0 auto; }
+        .about-content { padding: 80px 0; }
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+        .about-image { position: relative; }
+        .about-image-box { width: 100%; aspect-ratio: 1; background: var(--gradient-1); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; font-size: 120px; color: white; }
+        .about-text h2 { font-size: 36px; font-weight: 800; margin-bottom: 20px; }
+        .about-text p { color: var(--gray-1); margin-bottom: 16px; line-height: 1.8; }
+        .about-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 40px 0; }
+        .about-stat { text-align: center; padding: 24px; background: var(--gray-5); border-radius: var(--radius); }
+        .about-stat .number { display: block; font-size: 36px; font-weight: 900; color: var(--primary); }
+        .about-stat .label { font-size: 14px; color: var(--gray-1); }
+        .skills-section { padding: 80px 0; background: var(--gray-5); }
+        .skills-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        .skill-card { padding: 32px; background: var(--white); border-radius: var(--radius-lg); text-align: center; border: 1px solid var(--gray-4); }
+        .skill-icon { font-size: 48px; margin-bottom: 16px; }
+        .skill-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .skill-card p { font-size: 14px; color: var(--gray-1); }
+        .timeline-section { padding: 80px 0; }
+        .timeline { max-width: 800px; margin: 0 auto; }
+        .timeline-item { display: flex; gap: 32px; margin-bottom: 40px; position: relative; }
+        .timeline-item::before { content: ''; position: absolute; left: 20px; top: 48px; bottom: -40px; width: 2px; background: var(--gray-4); }
+        .timeline-item:last-child::before { display: none; }
+        .timeline-dot { width: 42px; height: 42px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; flex-shrink: 0; z-index: 1; }
+        .timeline-content h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .timeline-content .date { font-size: 14px; color: var(--primary); font-weight: 600; margin-bottom: 8px; }
+        .timeline-content p { color: var(--gray-1); font-size: 15px; }
+        .contact-section { padding: 80px 0; background: var(--dark); color: white; text-align: center; }
+        .contact-section h2 { font-size: 36px; font-weight: 800; margin-bottom: 16px; }
+        .contact-section p { color: var(--gray-2); margin-bottom: 32px; }
+        .contact-links { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+        .contact-link { display: flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--dark-2); border-radius: var(--radius); color: white; font-weight: 500; transition: var(--transition); }
+        .contact-link:hover { background: var(--primary); }
+        @media (max-width: 1024px) { .about-grid { grid-template-columns: 1fr; } .skills-grid { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">S</span>
+                    <span class="logo-text">SEO<span class="logo-accent">HUB</span></span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="tools.html">Tools</a></li>
+                    <li><a href="tools/seo-score-calculator.html">Free Tools</a></li>
+                    <li><a href="about.html" class="active">About</a></li>
+                    <li><a href="blog.html">Blog</a></li>
+                </ul>
+                <div class="nav-cta">
+                    <a href="tools.html" class="btn btn-primary">Explore Tools</a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <section class="about-hero">
+        <div class="container">
+            <h1>About SEOHUB</h1>
+            <p>Built by an SEO professional who believes in automation, data-driven decisions, and open source.</p>
+        </div>
+    </section>
+
+    <section class="about-content">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-image">
+                    <div class="about-image-box">M</div>
+                </div>
+                <div class="about-text">
+                    <h2>Hi, I'm Mohamed Metwily</h2>
+                    <p>I'm an SEO specialist and Python developer based in Egypt, specializing in the Saudi e-commerce market. I've spent years learning SEO, building automation tools, and analyzing websites to understand what works.</p>
+                    <p>SEOHUB is my project to make professional SEO tools accessible to everyone. All tools are built with Python, tested on real websites, and many are available as free online tools.</p>
+                    <p>My approach: data over opinions, automation over manual work, and results over theories.</p>
+                    <div class="about-stats">
+                        <div class="about-stat">
+                            <span class="number">20+</span>
+                            <span class="label">SEO Tools Built</span>
+                        </div>
+                        <div class="about-stat">
+                            <span class="number">110</span>
+                            <span class="label">Modules Studied</span>
+                        </div>
+                        <div class="about-stat">
+                            <span class="number">4</span>
+                            <span class="label">Sites Analyzed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="skills-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Core Skills</h2>
+                <p>Technical expertise across SEO, development, and automation</p>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-icon">🔍</div>
+                    <h3>Technical SEO</h3>
+                    <p>Core Web Vitals, schema markup, crawlability, indexing, site architecture</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">📝</div>
+                    <h3>Content SEO</h3>
+                    <p>Keyword research, content strategy, E-E-A-T, AI content optimization</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🐍</div>
+                    <h3>Python Development</h3>
+                    <p>Web scraping, data analysis, API integration, automation scripts</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🤖</div>
+                    <h3>AI & Automation</h3>
+                    <p>AI content detection, GEO, automated SEO pipelines, LLM optimization</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🔗</div>
+                    <h3>Link Building</h3>
+                    <p>Outreach strategies, anchor text optimization, backlink analysis</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">📊</div>
+                    <h3>Analytics</h3>
+                    <p>Google Analytics 4, Search Console, data visualization, reporting</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🛒</div>
+                    <h3>E-Commerce SEO</h3>
+                    <p>Product page optimization, category structure, Salla/WooCommerce</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🌍</div>
+                    <h3>Local SEO</h3>
+                    <p>Google Business Profile, NAP consistency, local citations, Arabic SEO</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="timeline-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Journey</h2>
+                <p>Key milestones in my SEO career</p>
+            </div>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot">1</div>
+                    <div class="timeline-content">
+                        <div class="date">2024 - Present</div>
+                        <h3>SEO Specialist & Automation Developer</h3>
+                        <p>Building Python SEO tools, analyzing Saudi e-commerce websites, and creating automated SEO solutions. Focus on technical SEO and data-driven optimization.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">2</div>
+                    <div class="timeline-content">
+                        <div class="date">2025</div>
+                        <h3>Completed 110-Module SEO Masterclass</h3>
+                        <p>Comprehensive study covering Technical SEO, Content SEO, Off-Page SEO, AI & Automation, Machine Learning, Emerging Technologies, and Career Development.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">3</div>
+                    <div class="timeline-content">
+                        <div class="date">2026</div>
+                        <h3>Built 20+ Python SEO Tools</h3>
+                        <p>Created a complete suite of SEO automation tools including technical audits, content analysis, speed testing, backlink analysis, and more.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">4</div>
+                    <div class="timeline-content">
+                        <div class="date">2026</div>
+                        <h3>Launched SEOHUB</h3>
+                        <p>Created SEOHUB to make professional SEO tools accessible to everyone through free online tools and open source Python scripts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact-section">
+        <div class="container">
+            <h2>Let's Connect</h2>
+            <p>Interested in working together or have questions about SEO?</p>
+            <div class="contact-links">
+                <a href="mailto:mmetwily1@gmail.com" class="contact-link">
+                    📧 Email
+                </a>
+                <a href="https://www.linkedin.com/in/mohamed-metwily" class="contact-link" target="_blank">
+                    💼 LinkedIn
+                </a>
+                <a href="https://github.com/mmetwily1-sudo" class="contact-link" target="_blank">
+                    🐙 GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 SEOHUB. Built by Mohamed Metwily.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    document.querySelector('.mobile-menu-btn')?.addEventListener('click', function() {
+        document.querySelector('.nav-links').classList.toggle('active');
+    });
+    </script>
+</body>
+</html>
