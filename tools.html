@@ -356,8 +356,6 @@
     // =====================================================
     // CLIENT-SIDE SEO TOOLS - CORS PROXY
     // =====================================================
-    const PROXY = 'https://api.allorigins.win/get?url=';
-
     function esc(s) {
         if (!s) return '';
         var d = document.createElement('div');
@@ -373,12 +371,35 @@
     }
 
     async function fetchHTML(url) {
-        var u = PROXY + encodeURIComponent(url);
-        var res = await fetch(u);
-        if (!res.ok) throw new Error('Failed to fetch: ' + res.status);
-        var json = await res.json();
-        if (!json.contents) throw new Error('Empty response from proxy');
-        return json.contents;
+        var proxies = [
+            { url: 'https://api.allorigins.win/get?url=', type: 'json' },
+            { url: 'https://corsproxy.io/?', type: 'text' },
+            { url: 'https://api.codetabs.com/v1/proxy?quest=', type: 'text' }
+        ];
+        var lastError;
+        for (var i = 0; i < proxies.length; i++) {
+            var p = proxies[i];
+            var u = p.url + encodeURIComponent(url);
+            try {
+                var controller = new AbortController();
+                var timer = setTimeout(function() { controller.abort(); }, 15000);
+                var res = await fetch(u, { signal: controller.signal });
+                clearTimeout(timer);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                if (p.type === 'json') {
+                    var json = await res.json();
+                    if (!json.contents) throw new Error('Empty response');
+                    return json.contents;
+                } else {
+                    var text = await res.text();
+                    if (!text || text.length < 50) throw new Error('Empty or too short response');
+                    return text;
+                }
+            } catch (e) {
+                lastError = e;
+            }
+        }
+        throw new Error('All proxies failed. Last error: ' + (lastError ? lastError.message : 'unknown'));
     }
 
     function parseHTML(html) {
