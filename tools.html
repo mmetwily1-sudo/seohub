@@ -2134,21 +2134,50 @@
             '.rpt-htag{padding:2px 8px;background:#2563eb;color:#fff;border-radius:4px;font-size:10px;font-weight:700;font-family:monospace;min-width:28px;text-align:center;letter-spacing:.5px}' +
             '.rpt-heading span:last-child{color:#334155;font-weight:500}' +
 
-            '.rpt-table{width:100%;border-collapse:collapse;font-size:13px}' +
+            '.rpt-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}' +
             '.rpt-table th{padding:10px 12px;text-align:left;background:#f1f5f9;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;font-weight:700}' +
             '.rpt-table td{padding:10px 12px;border-bottom:1px solid #f1f5f9}' +
             '.rpt-table tr:last-child td{border-bottom:none}' +
+            '.rpt-table tr:hover{background:#f8fafc}' +
+
+            '.rpt-kw-bar{height:6px;background:#e2e8f0;border-radius:3px;margin-top:4px;overflow:hidden}' +
+            '.rpt-kw-fill{height:100%;border-radius:3px;background:#2563eb}' +
+
+            '.rpt-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}' +
+            '.rpt-stat-card{padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #e2e8f0;text-align:center}' +
+            '.rpt-stat-num{font-size:22px;font-weight:800;line-height:1}' +
+            '.rpt-stat-label{font-size:11px;color:#64748b;font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}' +
+
+            '.rpt-link-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:10px}' +
+            '.rpt-link-seg{height:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
+
+            '.rpt-eeat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}' +
+            '.rpt-eeat-item{padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #e2e8f0;display:flex;align-items:center;gap:10px}' +
+            '.rpt-eeat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}' +
+            '.rpt-eeat-name{font-size:13px;font-weight:700;color:#1e293b}' +
+            '.rpt-eeat-status{font-size:11px;font-weight:600;margin-top:2px}' +
+
+            '.rpt-img-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}' +
+            '.rpt-img-stat{padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #e2e8f0;text-align:center}' +
+            '.rpt-img-stat .num{font-size:22px;font-weight:800}' +
+            '.rpt-img-stat .lbl{font-size:11px;color:#64748b;font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}' +
+            '.rpt-img-bar{height:6px;background:#e2e8f0;border-radius:3px;margin-top:8px;overflow:hidden}' +
+            '.rpt-img-bar-fill{height:100%;border-radius:3px}' +
+
+            '.rpt-ai-warn{padding:16px 20px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border-radius:10px;border:1px solid #fde68a;border-left:4px solid #f59e0b;margin-top:12px}' +
+            '.rpt-ai-warn-title{font-size:14px;font-weight:700;color:#92400e;margin-bottom:6px}' +
+            '.rpt-ai-warn-text{font-size:13px;color:#78350f;line-height:1.6}' +
+
+            '.rpt-week{margin-bottom:20px;padding:16px 20px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;page-break-inside:avoid}' +
+            '.rpt-week-title{font-size:15px;font-weight:700;color:#2563eb;margin-bottom:10px}' +
+            '.rpt-task{padding:6px 0 6px 20px;font-size:13px;position:relative;color:#334155}' +
+            '.rpt-task::before{content:"\\2022";position:absolute;left:4px;color:#2563eb;font-weight:700}' +
 
             '.rpt-chart{display:flex;align-items:flex-end;justify-content:space-around;height:160px;padding:10px 10px 0;border-bottom:2px solid #e2e8f0}' +
             '.rpt-chart-item{display:flex;flex-direction:column;align-items:center;gap:4px}' +
             '.rpt-chart-val{font-size:13px;font-weight:700}' +
             '.rpt-chart-bar{width:40px;border-radius:6px 6px 0 0;min-height:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
             '.rpt-chart-lbl{font-size:11px;color:#64748b;text-align:center;max-width:60px;margin-top:4px}' +
-
-            '.rpt-week{margin-bottom:20px;padding:16px 20px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;page-break-inside:avoid}' +
-            '.rpt-week-title{font-size:15px;font-weight:700;color:#2563eb;margin-bottom:10px}' +
-            '.rpt-task{padding:6px 0 6px 20px;font-size:13px;position:relative;color:#334155}' +
-            '.rpt-task::before{content:"\\2022";position:absolute;left:4px;color:#2563eb;font-weight:700}' +
 
             '.rpt-footer{padding:24px 40px;background:#f1f5f9;text-align:center;border-top:1px solid #e2e8f0}' +
             '.rpt-footer p{font-size:11px;color:#94a3b8;line-height:1.6}' +
@@ -2162,7 +2191,7 @@
                 '.rpt-header{padding:32px 24px;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}' +
                 '.rpt-body{padding:24px}' +
                 '.rpt-footer{padding:16px 24px}' +
-                '.rpt-cat,.rpt-score-hero,.rpt-card,.rpt-week{break-inside:avoid}' +
+                '.rpt-cat,.rpt-score-hero,.rpt-card,.rpt-week,.rpt-stat-card,.rpt-img-stat,.rpt-eeat-item{break-inside:avoid}' +
             '}' +
             '@media(max-width:768px){' +
                 '.rpt-cat-grid{grid-template-columns:repeat(2,1fr)}' +
@@ -2381,7 +2410,185 @@
             if (tcId === 'af-overview') continue;
             var icon = sectionIcons[tcId] || ['\uD83D\uDCCB', '#f1f5f9'];
             var title = sectionTitles[tcId] || tcId;
-            var html = transformHTML(tc.innerHTML, tcId);
+            var html = '';
+
+            if (tcId === 'af-content') {
+                /* --- Build Content section from DOM data --- */
+                var contentCards = tc.querySelectorAll('.audit-section');
+                var contentIssues = '';
+                var readabilityMetrics = '';
+                var eeatHtml = '';
+                var aiWarnHtml = '';
+                var kwTableHtml = '';
+
+                for (var ci2 = 0; ci2 < contentCards.length; ci2++) {
+                    var cardTitle = '';
+                    var cardH4 = contentCards[ci2].querySelector('h4');
+                    if (cardH4) cardTitle = cardH4.textContent.trim();
+
+                    if (cardTitle.indexOf('Content Analysis') !== -1) {
+                        /* Issue items */
+                        var issues = contentCards[ci2].querySelectorAll('.audit-issue');
+                        for (var ii = 0; ii < issues.length; ii++) {
+                            var iCls = issues[ii].className.indexOf('ai-warn') !== -1 ? 'rpt-warn' : issues[ii].className.indexOf('ai-fail') !== -1 ? 'rpt-fail' : 'rpt-pass';
+                            contentIssues += '<div class="rpt-issue ' + iCls + '">' + issues[ii].innerHTML + '</div>';
+                        }
+                    } else if (cardTitle === 'Readability Metrics') {
+                        var metrics = contentCards[ci2].querySelectorAll('.audit-metric');
+                        var metricCards = '';
+                        for (var mi = 0; mi < metrics.length; mi++) {
+                            var mLabel = metrics[mi].querySelector('.am-label');
+                            var mVal = metrics[mi].querySelector('.am-val');
+                            if (mLabel && mVal) {
+                                metricCards += '<div class="rpt-stat-card"><div class="rpt-stat-num" style="color:#2563eb;">' + mVal.textContent + '</div><div class="rpt-stat-label">' + mLabel.textContent + '</div></div>';
+                            }
+                        }
+                        readabilityMetrics = '<div class="rpt-card"><div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e2e8f0;color:#1e293b;">Readability Metrics</div><div class="rpt-stat-grid">' + metricCards + '</div></div>';
+                    } else if (cardTitle === 'E-E-A-T Signals') {
+                        var eatItems = contentCards[ci2].querySelectorAll('.audit-metric');
+                        var eatCards = '';
+                        var eatIcons = { 'Experience': '\uD83C\uDFAF', 'Expertise': '\uD83C\uDF1F', 'Authority': '\uD83D\uDC51', 'Trust': '\uD83D\uDD12' };
+                        var eatColors = { 'Experience': '#8b5cf6', 'Expertise': '#2563eb', 'Authority': '#f59e0b', 'Trust': '#10b981' };
+                        for (var ei = 0; ei < eatItems.length; ei++) {
+                            var eLabel = eatItems[ei].querySelector('.am-label');
+                            var eVal = eatItems[ei].querySelector('.am-val');
+                            if (eLabel && eVal) {
+                                var eName = eLabel.textContent.trim();
+                                var hasBadge = eVal.querySelector('.audit-badge.ab-green');
+                                var found = hasBadge ? true : false;
+                                var statusColor = found ? '#10b981' : '#ef4444';
+                                var statusText = found ? eVal.textContent.trim() : 'None';
+                                eatCards += '<div class="rpt-eeat-item"><div class="rpt-eeat-icon" style="background:' + (eatColors[eName] || '#64748b') + '15;color:' + (eatColors[eName] || '#64748b') + ';">' + (eatIcons[eName] || '\u2714') + '</div><div><div class="rpt-eeat-name">' + eName + '</div><div class="rpt-eeat-status" style="color:' + statusColor + ';">' + statusText + '</div></div></div>';
+                            }
+                        }
+                        eeatHtml = '<div class="rpt-card"><div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e2e8f0;color:#1e293b;">E-E-A-T Signals</div><div class="rpt-eeat">' + eatCards + '</div></div>';
+                    }
+                }
+
+                /* AI warning */
+                var aiWarn = tc.querySelector('.audit-issue.ai-warn');
+                if (aiWarn) {
+                    aiWarnHtml = '<div class="rpt-ai-warn"><div class="rpt-ai-warn-title">\u26A0\uFE0F AI Writing Pattern Detection</div><div class="rpt-ai-warn-text">' + aiWarn.innerHTML + '</div></div>';
+                }
+
+                /* Keyword table */
+                var kwTable = tc.querySelector('.keyword-table');
+                if (kwTable) {
+                    var kwRows = kwTable.querySelectorAll('tbody tr');
+                    var maxKwCount = 0;
+                    for (var ki = 0; ki < kwRows.length; ki++) {
+                        var kCount = parseInt(kwRows[ki].querySelectorAll('td')[2].textContent, 10) || 0;
+                        if (kCount > maxKwCount) maxKwCount = kCount;
+                    }
+                    var newKwRows = '';
+                    for (var kj = 0; kj < kwRows.length; kj++) {
+                        var cells = kwRows[kj].querySelectorAll('td');
+                        if (cells.length >= 4) {
+                            var kwCount = parseInt(cells[2].textContent, 10) || 0;
+                            var kwPct = maxKwCount > 0 ? Math.round(kwCount / maxKwCount * 100) : 0;
+                            newKwRows += '<tr><td>' + cells[0].textContent + '</td><td><strong>' + cells[1].textContent + '</strong></td><td>' + cells[2].textContent + '</td><td>' + cells[3].textContent + '</td></tr>';
+                        }
+                    }
+                    kwTableHtml = '<div class="rpt-card"><div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e2e8f0;color:#1e293b;">Keyword Frequency</div><table class="rpt-table"><thead><tr><th>#</th><th>Keyword</th><th>Count</th><th>Density</th></tr></thead><tbody>' + newKwRows + '</tbody></table></div>';
+                }
+
+                html = (contentIssues ? '<div class="rpt-card"><div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e2e8f0;color:#1e293b;">Content Analysis</div>' + contentIssues + '</div>' : '') +
+                       readabilityMetrics + eeatHtml + aiWarnHtml + kwTableHtml;
+
+            } else if (tcId === 'af-links') {
+                /* --- Build Links section from DOM data --- */
+                var linksCards = tc.querySelectorAll('.audit-section');
+                var linksIssues = '';
+                var linksStatsHtml = '';
+
+                for (var li2 = 0; li2 < linksCards.length; li2++) {
+                    var lCardH4 = linksCards[li2].querySelector('h4');
+                    var lTitle = lCardH4 ? lCardH4.textContent.trim() : '';
+                    if (lTitle.indexOf('Link Analysis') !== -1) {
+                        var lIssues = linksCards[li2].querySelectorAll('.audit-issue');
+                        for (var lji = 0; lji < lIssues.length; lji++) {
+                            var lCls = lIssues[lji].className.indexOf('ai-warn') !== -1 ? 'rpt-warn' : lIssues[lji].className.indexOf('ai-fail') !== -1 ? 'rpt-fail' : 'rpt-pass';
+                            linksIssues += '<div class="rpt-issue ' + lCls + '">' + lIssues[lji].innerHTML + '</div>';
+                        }
+                    } else if (lTitle === 'Link Statistics') {
+                        var lMetrics = linksCards[li2].querySelectorAll('.audit-metric');
+                        var lStatCards = '';
+                        var lInternal = 0, lExternal = 0, lNofollow = 0, lBroken = 0;
+                        for (var lmi = 0; lmi < lMetrics.length; lmi++) {
+                            var lml = lMetrics[lmi].querySelector('.am-label');
+                            var lmv = lMetrics[lmi].querySelector('.am-val');
+                            if (lml && lmv) {
+                                var lblText = lml.textContent.trim();
+                                var valNum = parseInt(lmv.textContent, 10) || 0;
+                                var cardColor = '#2563eb';
+                                if (lblText.indexOf('Internal') !== -1) { cardColor = '#10b981'; lInternal = valNum; }
+                                else if (lblText.indexOf('External') !== -1) { cardColor = '#8b5cf6'; lExternal = valNum; }
+                                else if (lblText.indexOf('Nofollow') !== -1) { cardColor = '#f59e0b'; lNofollow = valNum; }
+                                else if (lblText.indexOf('Broken') !== -1) { cardColor = '#ef4444'; lBroken = valNum; }
+                                lStatCards += '<div class="rpt-stat-card"><div class="rpt-stat-num" style="color:' + cardColor + ';">' + valNum + '</div><div class="rpt-stat-label">' + lblText + '</div></div>';
+                            }
+                        }
+                        var lTotal = lInternal + lExternal;
+                        var lIntPct = lTotal > 0 ? Math.round(lInternal / lTotal * 100) : 0;
+                        var lExtPct = lTotal > 0 ? 100 - lIntPct : 0;
+                        var lBar = '<div class="rpt-link-bar">' +
+                            '<div class="rpt-link-seg" style="width:' + lIntPct + '%;background:#10b981;"></div>' +
+                            '<div class="rpt-link-seg" style="width:' + lExtPct + '%;background:#8b5cf6;"></div></div>' +
+                            '<div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-top:4px;"><span>\uD83D\uDD35 Internal ' + lIntPct + '%</span><span>\uD83D\uDD34 External ' + lExtPct + '%</span></div>';
+                        linksStatsHtml = '<div class="rpt-card"><div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e2e8f0;color:#1e293b;">Link Statistics</div><div class="rpt-stat-grid">' + lStatCards + '</div>' + lBar + '</div>';
+                    }
+                }
+                html = (linksIssues ? '<div class="rpt-card"><div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e2e8f0;color:#1e293b;">Link Analysis</div>' + linksIssues + '</div>' : '') + linksStatsHtml;
+
+            } else if (tcId === 'af-images') {
+                /* --- Build Images section from DOM data --- */
+                var imgCards = tc.querySelectorAll('.audit-section');
+                var imgIssues = '';
+                var imgStatsHtml = '';
+
+                for (var imi = 0; imi < imgCards.length; imi++) {
+                    var imCardH4 = imgCards[imi].querySelector('h4');
+                    var imTitle = imCardH4 ? imCardH4.textContent.trim() : '';
+                    if (imTitle.indexOf('Image Analysis') !== -1) {
+                        var imIssues = imgCards[imi].querySelectorAll('.audit-issue');
+                        for (var imji = 0; imji < imIssues.length; imji++) {
+                            var imCls = imIssues[imji].className.indexOf('ai-warn') !== -1 ? 'rpt-warn' : imIssues[imji].className.indexOf('ai-fail') !== -1 ? 'rpt-fail' : 'rpt-pass';
+                            imgIssues += '<div class="rpt-issue ' + imCls + '">' + imIssues[imji].innerHTML + '</div>';
+                        }
+                    } else if (imTitle === 'Image Statistics') {
+                        var imMetrics = imgCards[imi].querySelectorAll('.audit-metric');
+                        var imStatCards = '';
+                        var imTotal = 0, imWithAlt = 0;
+                        for (var imj = 0; imj < imMetrics.length; imj++) {
+                            var imLabel = imMetrics[imj].querySelector('.am-label');
+                            var imVal = imMetrics[imj].querySelector('.am-val');
+                            if (imLabel && imVal) {
+                                var imLabelText = imLabel.textContent.trim();
+                                var imValNum = parseInt(imVal.textContent, 10) || 0;
+                                var imCardColor = '#2563eb';
+                                if (imLabelText === 'Total Images') { imTotal = imValNum; imCardColor = '#1e293b'; }
+                                else if (imLabelText.indexOf('With Alt') !== -1) { imWithAlt = imValNum; imCardColor = '#10b981'; }
+                                else if (imLabelText.indexOf('Missing Alt') !== -1) { imCardColor = '#ef4444'; }
+                                else if (imLabelText.indexOf('Lazy') !== -1) { imCardColor = '#8b5cf6'; }
+                                else if (imLabelText.indexOf('With Dim') !== -1) { imCardColor = '#2563eb'; }
+                                else if (imLabelText.indexOf('Missing Dim') !== -1) { imCardColor = '#f59e0b'; }
+                                imStatCards += '<div class="rpt-img-stat"><div class="num" style="color:' + imCardColor + ';">' + imValNum + '</div><div class="lbl">' + imLabelText + '</div></div>';
+                            }
+                        }
+                        var altPctVal = imTotal > 0 ? Math.round(imWithAlt / imTotal * 100) : 0;
+                        var altBarColor = altPctVal >= 80 ? '#10b981' : altPctVal >= 50 ? '#f59e0b' : '#ef4444';
+                        var altBar = '<div style="margin-top:12px;"><div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;">Alt Text Coverage</div>' +
+                            '<div class="rpt-img-bar"><div class="rpt-img-bar-fill" style="width:' + altPctVal + '%;background:' + altBarColor + ';"></div></div>' +
+                            '<div style="font-size:11px;color:#94a3b8;margin-top:3px;">' + imWithAlt + ' / ' + imTotal + ' images (' + altPctVal + '%)</div></div>';
+                        imgStatsHtml = '<div class="rpt-card"><div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e2e8f0;color:#1e293b;">Image Statistics</div><div class="rpt-img-grid">' + imStatCards + '</div>' + altBar + '</div>';
+                    }
+                }
+                html = (imgIssues ? '<div class="rpt-card"><div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e2e8f0;color:#1e293b;">Image Analysis</div>' + imgIssues + '</div>' : '') + imgStatsHtml;
+
+            } else {
+                /* --- Fallback: regex transform for other sections --- */
+                html = transformHTML(tc.innerHTML, tcId);
+            }
 
             sectionsHtml +=
                 '<div class="rpt-section">' +
