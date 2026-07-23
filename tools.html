@@ -182,8 +182,23 @@
         .chat-close{background:none;border:none;color:white;font-size:20px;cursor:pointer;padding:0 4px}
         .chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;max-height:340px}
         .chat-msg{padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.5;max-width:85%;word-wrap:break-word}
-        .chat-msg.bot{background:var(--gray-5);align-self:flex-start;border-bottom-left-radius:4px}
-        .chat-msg.user{background:var(--primary);color:white;align-self:flex-end;border-bottom-right-radius:4px}
+        .chat-msg.bot{background:var(--gray-5);border-bottom-left-radius:4px}
+        .chat-msg.user{background:var(--primary);color:white;border-bottom-right-radius:4px}
+        .chat-msg-wrap{display:flex;gap:8px;align-items:flex-end}
+        .chat-msg-wrap.user{flex-direction:row-reverse}
+        .chat-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:var(--gray-5);border:1px solid var(--gray-4)}
+        .chat-msg-wrap.user .chat-avatar{background:var(--primary-dark);font-size:12px}
+        .chat-bubble-wrap{display:flex;flex-direction:column;max-width:80%}
+        .chat-time{font-size:10px;color:var(--gray-2);margin-top:3px;padding:0 4px}
+        .chat-msg-wrap.user .chat-time{text-align:right}
+        .chat-msg.typing{padding:12px 16px;display:flex;gap:4px;align-items:center}
+        .chat-msg.typing .dot{width:7px;height:7px;background:var(--gray-2);border-radius:50%;animation:chatDot 1.2s ease-in-out infinite}
+        .chat-msg.typing .dot:nth-child(2){animation-delay:.2s}
+        .chat-msg.typing .dot:nth-child(3){animation-delay:.4s}
+        @keyframes chatDot{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-6px);opacity:1}}
+        .chat-followup-label{font-size:11px;color:var(--gray-2);margin-bottom:6px;font-weight:600}
+        .chat-followup-btn{display:inline-block;padding:5px 10px;background:var(--white);border:1px solid var(--primary);border-radius:100px;font-size:12px;color:var(--primary);cursor:pointer;transition:var(--transition);margin:2px 4px 2px 0;font-weight:500}
+        .chat-followup-btn:hover{background:var(--primary);color:white}
         .chat-input-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--gray-4);background:var(--white)}
         .chat-input{flex:1;padding:10px 14px;border:2px solid var(--gray-4);border-radius:100px;font-size:14px;font-family:inherit;outline:none}
         .chat-input:focus{border-color:var(--primary)}
@@ -452,7 +467,12 @@
             <button class="chat-close" onclick="toggleChat()">&times;</button>
         </div>
         <div class="chat-messages" id="chatMessages">
-            <div class="chat-msg bot" data-i18n="chat_welcome">Hi! I'm your SEO assistant. Ask me about any SEO term, tool, or how to improve your website ranking.</div>
+            <div class="chat-msg-wrap bot">
+                <div class="chat-avatar">\uD83E\uDD16</div>
+                <div class="chat-bubble-wrap">
+                    <div class="chat-msg bot" data-i18n="chat_welcome">Hi! I'm Metwily, your SEO assistant. Ask me about any SEO term, tool, or how to improve your website ranking.</div>
+                </div>
+            </div>
         </div>
         <div class="chat-suggestions" id="chatSuggestions">
             <div class="chat-suggestion" onclick="sendChatSuggestion(this)" data-i18n="chat_sug1">What is SEO?</div>
@@ -2926,19 +2946,103 @@
         if (!msg) return;
         input.value = '';
         addChatMessage(esc(msg), 'user');
+        var container = document.getElementById('chatMessages');
+        var typing = document.createElement('div');
+        typing.className = 'chat-msg bot typing';
+        typing.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+        container.appendChild(typing);
+        container.scrollTop = container.scrollHeight;
         setTimeout(function() {
+            if (typing.parentNode) typing.parentNode.removeChild(typing);
             var response = getSmartResponse(msg);
             addChatMessage(response, 'bot');
-        }, 400);
+            var followUp = getFollowUp(msg);
+            if (followUp) {
+                setTimeout(function() { addChatFollowUp(followUp); }, 200);
+            }
+        }, 600 + Math.random() * 400);
     }
 
     function addChatMessage(text, type) {
         var container = document.getElementById('chatMessages');
-        var div = document.createElement('div');
-        div.className = 'chat-msg ' + type;
-        div.innerHTML = text;
-        container.appendChild(div);
+        var wrap = document.createElement('div');
+        wrap.className = 'chat-msg-wrap ' + type;
+        var avatar = document.createElement('div');
+        avatar.className = 'chat-avatar';
+        avatar.innerHTML = type === 'bot' ? '\uD83E\uDD16' : '\uD83D\uDC64';
+        var bubble = document.createElement('div');
+        bubble.className = 'chat-msg ' + type;
+        bubble.innerHTML = text;
+        var time = document.createElement('div');
+        time.className = 'chat-time';
+        var now = new Date();
+        time.textContent = now.getHours().toString().replace(/^(\d)$/, '0$1') + ':' + now.getMinutes().toString().replace(/^(\d)$/, '0$1');
+        wrap.appendChild(avatar);
+        var rightSide = document.createElement('div');
+        rightSide.className = 'chat-bubble-wrap';
+        rightSide.appendChild(bubble);
+        rightSide.appendChild(time);
+        wrap.appendChild(rightSide);
+        container.appendChild(wrap);
         container.scrollTop = container.scrollHeight;
+    }
+
+    function addChatFollowUp(suggestions) {
+        var container = document.getElementById('chatMessages');
+        var wrap = document.createElement('div');
+        wrap.className = 'chat-msg-wrap bot';
+        var avatar = document.createElement('div');
+        avatar.className = 'chat-avatar';
+        avatar.innerHTML = '\uD83E\uDD16';
+        var bubbleWrap = document.createElement('div');
+        bubbleWrap.className = 'chat-bubble-wrap';
+        var label = document.createElement('div');
+        label.className = 'chat-followup-label';
+        label.textContent = currentLang === 'ar' ? '\u062C\u0631\u0628 \u0623\u064A\u0636\u0627:' : 'You might also ask:';
+        bubbleWrap.appendChild(label);
+        for (var fi = 0; fi < suggestions.length; fi++) {
+            var sugBtn = document.createElement('div');
+            sugBtn.className = 'chat-followup-btn';
+            sugBtn.textContent = suggestions[fi];
+            sugBtn.onclick = (function(text) {
+                return function() {
+                    document.getElementById('chatInput').value = text;
+                    sendChatMsg();
+                };
+            })(suggestions[fi]);
+            bubbleWrap.appendChild(sugBtn);
+        }
+        wrap.appendChild(avatar);
+        wrap.appendChild(bubbleWrap);
+        container.appendChild(wrap);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function getFollowUp(msg) {
+        var lower = msg.toLowerCase();
+        if (lower.indexOf('seo') !== -1 || lower.indexOf('\u0633\u064a\u0648') !== -1) {
+            return currentLang === 'ar' ?
+                ['\u0643\u064A\u0641 \u0623\u062D\u0633\u0646 \u062A\u0631\u062A\u064A\u0628 \u0645\u0648\u0642\u0639\u064A\u061F', '\u0645\u0627 \u0647\u064A \u062D\u0633\u0627\u0628\u0627\u062A \u0627\u0644\u0631\u0628\u0637 \u0627\u0644\u062E\u0644\u0641\u064A\u0629\u061F', '\u0643\u064A\u0641 \u0623\u0643\u062A\u0628 \u0645\u0642\u0627\u0644\u0627\u064B \u0645\u0641\u062A\u0627\u062D\u064A\u0629\u061F'] :
+                ['How to improve speed?', 'What are Meta Tags?', 'How to get E-E-A-T?'];
+        }
+        if (lower.indexOf('speed') !== -1 || lower.indexOf('\u0633\u0631\u0639\u0629') !== -1 || lower.indexOf('lcp') !== -1 || lower.indexOf('cls') !== -1) {
+            return currentLang === 'ar' ?
+                ['\u0645\u0627 \u0647\u064A Core Web Vitals\u061F', '\u0643\u064A\u0641 \u0623\u0633\u062A\u062E\u062F\u0645 CDN\u061F', '\u0645\u0627 \u0647\u064A PageSpeed Insights\u061F'] :
+                ['What is CDN?', 'How to use PageSpeed Insights?', 'What are Core Web Vitals?'];
+        }
+        if (lower.indexOf('link') !== -1 || lower.indexOf('\u0631\u0627\u0628\u0637') !== -1 || lower.indexOf('backlink') !== -1) {
+            return currentLang === 'ar' ?
+                ['\u0645\u0627 \u0647\u064A \u0628\u0646\u0627\u0621 \u0627\u0644\u0631\u0648\u0627\u0628\u0637\u061F', '\u0643\u064A\u0641 \u0623\u062A\u062D\u0631\u062E \u0645\u0646 \u0627\u0644\u0631\u0648\u0627\u0628\u0637 \u0627\u0644\u0636\u0627\u0631\u0629\u061F', '\u0627\u0644\u0631\u0648\u0627\u0628\u0637 \u0627\u0644\u062F\u0627\u062E\u0644\u064A\u0629 \u0644\u0645\u0627\u0630\u0627\u061F'] :
+                ['What is link building?', 'How to disavow toxic links?', 'Why are internal links important?'];
+        }
+        if (lower.indexOf('keyword') !== -1 || lower.indexOf('\u0643\u0644\u0645\u0629') !== -1 || lower.indexOf('\u0643\u0644\u0645\u0627\u062A') !== -1) {
+            return currentLang === 'ar' ?
+                ['\u0645\u0627 \u0647\u064A \u0628\u062D\u062B \u0627\u0644\u0643\u0644\u0645\u0627\u062A \u0627\u0644\u0645\u0641\u062A\u0627\u062D\u064A\u0629\u061F', '\u0645\u0627 \u0647\u064A \u0646\u064A\u0629 \u0627\u0644\u0628\u062D\u062B\u061F', '\u0643\u064A\u0641 \u0623\u0633\u062A\u062E\u062F\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062A \u0627\u0644\u062F\u0644\u0627\u0644\u064A\u0629\u061F'] :
+                ['How to do keyword research?', 'What is search intent?', 'How to use LSI keywords?'];
+        }
+        return currentLang === 'ar' ?
+            ['\u0643\u064A\u0641 \u0623\u062D\u0633\u0646 \u062A\u0631\u062A\u064A\u0628 \u0645\u0648\u0642\u0639\u064A\u061F', '\u0645\u0627 \u0647\u0640 \u0623\u062F\u0627\u062A SEO\u061F', '\u0643\u064A\u0641 \u0623\u0633\u062A\u062E\u062F\u0645 \u0627\u0644\u062A\u062D\u0644\u064A\u0644 \u0627\u0644\u0634\u0627\u0645\u0644\u061F'] :
+            ['How to improve my site?', 'What are the best SEO tools?', 'How to use Full Audit?'];
     }
 
     function getSmartResponse(msg) {
@@ -2966,7 +3070,7 @@
             return currentLang === 'ar' ? (bestMatch.a_ar || bestMatch.a_en) : bestMatch.a_en;
         }
         if (currentLang === 'ar') {
-            return '???? ?????! ?? ???? ????? ????? ????? "<b>' + esc(msg) + '</b>" ??????. ??? ???:<br><br>- ?????? ???? <b>??????? ??????</b> ?????? ?? ????<br>- ???? ?? ??????? ??? "schema" ?? "speed" ?? "meta tags" ?? "E-E-A-T"<br>- ?? ???? ?? ???? ?? "<b>' + esc(msg) + '</b>"';
+            return '\u0633\u0624\u0644 \u062C\u064A\u062F! \u0644\u0645 \u064A\u0639\u0646\u062F\u0646\u064A \u062C\u0627\u0648\u0627\u0628 \u0645\u062E\u0635\u0635 \u0644\u0644\u0633\u0624\u0644 "<b>' + esc(msg) + '</b>" \u0628\u0639\u062F. \u062C\u0631\u0628 \u0627\u0644\u062C\u0631\u0628 \u0628\u0623\u062D\u062F \u0647\u0630\u0647:<br><br>- \u0627\u0633\u062A\u062E\u062F\u0645 \u0623\u062F\u0627\u0629 <b>\u0627\u0644\u062A\u062D\u0644\u064A\u0644 \u0627\u0644\u0634\u0627\u0645\u0644</b> \u0644\u062A\u062D\u0644\u064A\u0644 \u0623\u064A \u0645\u0648\u0642\u0639<br>- \u0627\u0633\u0623\u0644 \u0639\u0646 \u0645\u0635\u0637\u0644\u062D\u0627\u062A SEO \u0643\u0645\u062B\u0644 "schema" \u0623\u0648 "speed" \u0623\u0648 "meta tags" \u0623\u0648 "E-E-A-T"<br>- \u0623\u0648 \u0628\u062D\u062B \u0639\u0646 "<b>' + esc(msg) + '</b>" \u0639\u0644\u0649 Google';
         }
         return 'Great question! I don\'t have a specific answer for "<b>' + esc(msg) + '</b>" yet. Try:<br><br>- Use our <b>Full Audit</b> tool to analyze any website<br>- Ask about SEO terms like "schema", "speed", "meta tags", "E-E-A-T"<br>- Or search Google for "<b>' + esc(msg) + '</b>"';
     }
