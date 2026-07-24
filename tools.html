@@ -776,8 +776,6 @@
         var proxies = [
             { url: 'https://seohub-proxy.mmetwily1.workers.dev/?url=', type: 'json' },
             { url: 'http://localhost:3001/proxy?url=', type: 'json', local: true },
-            { url: 'https://api.allorigins.win/get?url=', type: 'json' },
-            { url: 'https://api.allorigins.win/raw?url=', type: 'text' },
             { url: 'https://corsproxy.io/?url=', type: 'text' },
             { url: 'https://api.codetabs.com/v1/proxy?quest=', type: 'text' },
             { url: 'https://api.cors.lol/?url=', type: 'text' }
@@ -826,8 +824,6 @@
         var proxies = [
             { url: 'https://seohub-proxy.mmetwily1.workers.dev/?url=', type: 'json' },
             { url: 'http://localhost:3001/proxy?url=', type: 'json', local: true },
-            { url: 'https://api.allorigins.win/get?url=', type: 'json' },
-            { url: 'https://api.allorigins.win/raw?url=', type: 'text' },
             { url: 'https://corsproxy.io/?url=', type: 'text' },
             { url: 'https://api.codetabs.com/v1/proxy?quest=', type: 'text' },
             { url: 'https://api.cors.lol/?url=', type: 'text' }
@@ -4701,7 +4697,7 @@
         var params = 'client=firefox&q=' + encodeURIComponent(query);
         if (lang) params += '&hl=' + lang;
         if (country) params += '&gl=' + country;
-        return fetchJSON(base + '?' + params, { timeout: 6000, retries: 0, proxyLimit: 2 })
+        return fetchJSON(base + '?' + params, { timeout: 8000, retries: 0, proxyLimit: 5 })
             .then(function(data) { return data[1] || []; })
             .catch(function() { return []; });
     }
@@ -5523,7 +5519,7 @@
 
     function krFetchWikipediaKeywords(seed) {
         var url = 'https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(seed);
-        return fetchJSON(url, { timeout: 8000, retries: 1, proxyLimit: 2 }).then(function(data) {
+        return fetchJSON(url, { timeout: 10000, retries: 1, proxyLimit: 5 }).then(function(data) {
             var keywords = [];
             if (data.extract) {
                 var text = data.extract.toLowerCase();
@@ -5548,7 +5544,7 @@
 
     function krFetchRedditKeywords(seed) {
         var url = 'https://www.reddit.com/search.json?q=' + encodeURIComponent(seed) + '&limit=25&sort=relevance&t=month';
-        return fetchJSON(url, { timeout: 10000, retries: 1, proxyLimit: 2 }).then(function(data) {
+        return fetchJSON(url, { timeout: 10000, retries: 1, proxyLimit: 5 }).then(function(data) {
             var keywords = [];
             if (data && data.data && data.data.children) {
                 var children = data.data.children;
