@@ -1,12 +1,15 @@
-// SEOHUB Local CORS Proxy Server
-// Usage: node proxy-server.js
-// Then use the crawler in browser - it auto-detects localhost:3001
-
 var http = require('http');
 var https = require('https');
 var url = require('url');
 
 var PORT = 3001;
+
+process.on('uncaughtException', function(e) {
+    console.error('Uncaught (kept alive):', e.message);
+});
+process.on('unhandledRejection', function(e) {
+    console.error('Unhandled rejection (kept alive):', e);
+});
 
 var server = http.createServer(function(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,6 +23,7 @@ var server = http.createServer(function(req, res) {
     }
 
     var parsed = url.parse(req.url, true);
+
     if (parsed.pathname === '/proxy') {
         var target = parsed.query.url;
         if (!target) {
@@ -36,34 +40,54 @@ var server = http.createServer(function(req, res) {
             return;
         }
 
+        var responded = false;
+        function safeEnd(code, body) {
+            if (responded) return;
+            responded = true;
+            try {
+                res.writeHead(code, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(body));
+            } catch(e) {}
+        }
+
         var mod = target.indexOf('https') === 0 ? https : http;
-        var proxyReq = mod.get(target, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'ar,en;q=0.5'
-            },
-            timeout: 15000
-        }, function(proxyRes) {
-            var body = '';
-            proxyRes.setEncoding('utf8');
-            proxyRes.on('data', function(chunk) { body += chunk; });
-            proxyRes.on('end', function() {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ contents: body, status: proxyRes.statusCode }));
+        var proxyReq;
+        try {
+            proxyReq = mod.get(target, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'ar,en;q=0.5'
+                },
+                timeout: 30000
+            }, function(proxyRes) {
+                if (responded) return;
+                var body = '';
+                proxyRes.setEncoding('utf8');
+                proxyRes.on('data', function(chunk) { body += chunk; });
+                proxyRes.on('end', function() {
+                    safeEnd(200, { contents: body, status: proxyRes.statusCode });
+                });
             });
-        });
+        } catch(e) {
+            safeEnd(502, { error: e.message });
+            return;
+        }
 
         proxyReq.on('error', function(e) {
-            res.writeHead(502, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: e.message }));
+            safeEnd(502, { error: e.message });
         });
 
         proxyReq.on('timeout', function() {
-            proxyReq.destroy();
-            res.writeHead(504, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Request timeout' }));
+            try { proxyReq.destroy(); } catch(e) {}
+            safeEnd(504, { error: 'Request timeout after 30s' });
         });
+
+        req.on('close', function() {
+            try { proxyReq.destroy(); } catch(e) {}
+            responded = true;
+        });
+
     } else if (parsed.pathname === '/status') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'ok', proxy: 'SEOHub Local Proxy', port: PORT }));

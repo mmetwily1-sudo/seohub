@@ -581,7 +581,7 @@
                 var u = p.url + encodeURIComponent(url);
                 try {
                     var controller = new AbortController();
-                    var timer = setTimeout(function() { controller.abort(); }, p.local ? 20000 : timeout);
+                    var timer = setTimeout(function() { controller.abort(); }, p.local ? 35000 : timeout);
                     var res = await fetch(u, { signal: controller.signal });
                     clearTimeout(timer);
                     if (!res.ok) throw new Error('HTTP ' + res.status);
