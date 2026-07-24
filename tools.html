@@ -838,7 +838,18 @@
                     var timer = setTimeout(function() { controller.abort(); }, p.local ? 60000 : timeout);
                     var res = await fetch(u, { signal: controller.signal });
                     clearTimeout(timer);
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    if (!res.ok) {
+                        var errBody = '';
+                        try { errBody = await res.text(); } catch(_) {}
+                        var errJson = null;
+                        try { errJson = JSON.parse(errBody); } catch(_) {}
+                        if (errJson && errJson.error) {
+                            lastError = new Error(errJson.error);
+                            _blocked = true;
+                            break;
+                        }
+                        throw new Error('HTTP ' + res.status);
+                    }
                     var text;
                     if (p.type === 'json') {
                         var json = await res.json();
@@ -871,7 +882,7 @@
                 await new Promise(function(r) { setTimeout(r, 1500 * (attempt + 1)); });
             }
         }
-        throw new Error('All proxies failed. Last error: ' + (lastError ? lastError.message : 'unknown'));
+        throw new Error(lastError ? lastError.message : 'All proxies failed');
     }
 
     function parseHTML(html) {
