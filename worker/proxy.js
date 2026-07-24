@@ -23,13 +23,36 @@ export default {
       });
     }
 
+    const isGoogle = target.includes('google.com');
+    const isReddit = target.includes('reddit.com');
+    const isWikipedia = target.includes('wikipedia.org');
+    const isTrends = target.includes('trends.google.com');
+
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+      'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
+    };
+
+    if (isGoogle && !isTrends) {
+      headers['Referer'] = 'https://www.google.com/';
+      headers['Origin'] = 'https://www.google.com';
+      headers['Accept'] = '*/*';
+    } else if (isTrends) {
+      headers['Referer'] = 'https://trends.google.com/';
+      headers['Origin'] = 'https://trends.google.com';
+      headers['Accept'] = 'application/json, text/plain, */*';
+    } else if (isReddit) {
+      headers['Accept'] = 'application/json';
+      headers['User-Agent'] = 'Mozilla/5.0 (compatible; SEOHUB/1.0; +https://mmetwily1-sudo.github.io/seohub/)';
+    } else if (isWikipedia) {
+      headers['Accept'] = 'application/json';
+    } else {
+      headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+    }
+
     try {
       const resp = await fetch(target, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-        },
+        headers: headers,
         redirect: 'follow',
       });
 
