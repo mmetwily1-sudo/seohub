@@ -725,6 +725,55 @@
         throw new Error('All proxies failed. Last error: ' + (lastError ? lastError.message : 'unknown') + hint);
     }
 
+    async function fetchJSON(url, opts) {
+        var timeout = (opts && opts.timeout) || 12000;
+        var retries = (opts && opts.retries) || 0;
+        var attempt = 0;
+        var lastError;
+        var proxies = [
+            { url: 'http://localhost:3001/proxy?url=', type: 'json', local: true },
+            { url: 'https://api.allorigins.win/get?url=', type: 'json' },
+            { url: 'https://api.allorigins.win/raw?url=', type: 'text' },
+            { url: 'https://corsproxy.io/?url=', type: 'text' },
+            { url: 'https://api.codetabs.com/v1/proxy?quest=', type: 'text' },
+            { url: 'https://api.cors.lol/?url=', type: 'text' }
+        ];
+        var proxyLimit = (opts && opts.proxyLimit) || proxies.length;
+        var localAvailable = _localProxyAvailable === true;
+        if (!localAvailable) proxies = proxies.filter(function(p) { return !p.local; });
+        while (attempt <= retries) {
+            for (var i = 0; i < proxyLimit; i++) {
+                if (i >= proxies.length) break;
+                var p = proxies[i];
+                var u = p.url + encodeURIComponent(url);
+                try {
+                    var controller = new AbortController();
+                    var timer = setTimeout(function() { controller.abort(); }, p.local ? 60000 : timeout);
+                    var res = await fetch(u, { signal: controller.signal });
+                    clearTimeout(timer);
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    var text;
+                    if (p.type === 'json') {
+                        var json = await res.json();
+                        text = json.contents || '';
+                    } else {
+                        text = await res.text();
+                    }
+                    if (!text || text.length < 5) throw new Error('Empty response');
+                    var cleaned = text.replace(/^\)\]\}'/, '').replace(/^for\s*\(\s*;;\s*\)/, '');
+                    return JSON.parse(cleaned);
+                } catch (e) {
+                    lastError = e;
+                }
+            }
+            attempt++;
+            if (attempt <= retries) {
+                await new Promise(function(r) { setTimeout(r, 1000 * attempt); });
+            }
+        }
+        throw new Error('All proxies failed. Last error: ' + (lastError ? lastError.message : 'unknown'));
+    }
+
     function parseHTML(html) {
         var parser = new DOMParser();
         return parser.parseFromString(html, 'text/html');
@@ -4554,8 +4603,7 @@
         var params = 'client=firefox&q=' + encodeURIComponent(query);
         if (lang) params += '&hl=' + lang;
         if (country) params += '&gl=' + country;
-        return fetch(base + '?' + params)
-            .then(function(r) { return r.json(); })
+        return fetchJSON(base + '?' + params, { timeout: 15000, retries: 1, proxyLimit: 3 })
             .then(function(data) { return data[1] || []; })
             .catch(function() { return []; });
     }
@@ -4756,10 +4804,8 @@
     function krFetchTrends(country, lang) {
         var geo = country || '';
         var url = 'https://trends.google.com/trends/api/dailytrends?hl=' + (lang || 'en') + '&tz=-480&geo=' + geo + '&ns=15';
-        return fetchHTML(url, { timeout: 15000, retries: 1, proxyLimit: 3 })
-            .then(function(text) {
-                var cleaned = text.replace(/^\)\]\}'/, '').replace(/^for\s*\(\s*;;\s*\)/, '');
-                var data = JSON.parse(cleaned);
+        return fetchJSON(url, { timeout: 15000, retries: 1, proxyLimit: 3 })
+            .then(function(data) {
                 var trending = [];
                 if (data.default && data.default.trendingSearchesDays) {
                     var days = data.default.trendingSearchesDays;
