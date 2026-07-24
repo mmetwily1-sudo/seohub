@@ -563,6 +563,7 @@
         var attempt = 0;
         var lastError;
         var proxies = [
+            { url: 'http://localhost:3001/proxy?url=', type: 'json', local: true },
             { url: 'https://api.allorigins.win/get?url=', type: 'json' },
             { url: 'https://api.allorigins.win/raw?url=', type: 'text' },
             { url: 'https://corsproxy.io/?url=', type: 'text' },
@@ -570,13 +571,20 @@
             { url: 'https://api.cors.lol/?url=', type: 'text' }
         ];
         var proxyLimit = (opts && opts.proxyLimit) || proxies.length;
+        var localAvailable = false;
+        try {
+            var lr = await fetch('http://localhost:3001/status', { signal: AbortSignal.timeout(1500) });
+            if (lr.ok) localAvailable = true;
+        } catch(e) {}
+        if (!localAvailable) proxies = proxies.filter(function(p) { return !p.local; });
         while (attempt <= retries) {
             for (var i = 0; i < proxyLimit; i++) {
+                if (i >= proxies.length) break;
                 var p = proxies[i];
                 var u = p.url + encodeURIComponent(url);
                 try {
                     var controller = new AbortController();
-                    var timer = setTimeout(function() { controller.abort(); }, timeout);
+                    var timer = setTimeout(function() { controller.abort(); }, p.local ? 20000 : timeout);
                     var res = await fetch(u, { signal: controller.signal });
                     clearTimeout(timer);
                     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -598,7 +606,8 @@
                 await new Promise(function(r) { setTimeout(r, 1000 * attempt); });
             }
         }
-        throw new Error('All proxies failed. Last error: ' + (lastError ? lastError.message : 'unknown'));
+        var hint = localAvailable ? '' : ' <span style="color:#f59e0b;">Tip: Run <code>node proxy-server.js</code> for best results.</span>';
+        throw new Error('All proxies failed. Last error: ' + (lastError ? lastError.message : 'unknown') + hint);
     }
 
     function parseHTML(html) {
@@ -3308,12 +3317,16 @@
                 _crawlRunning = false;
                 out.innerHTML = '<div class="tool-loading"><p style="color:#ef4444;font-weight:700;">No product URLs found.</p>' +
                     '<p style="font-size:13px;color:var(--gray-1);margin-top:8px;">Possible reasons:</p>' +
-                    '<ul style="font-size:13px;color:var(--gray-1);text-align:left;max-width:400px;margin:8px auto;">' +
-                    '<li>The store may block proxy requests</li>' +
+                    '<ul style="font-size:13px;color:var(--gray-1);text-align:left;max-width:450px;margin:8px auto;">' +
+                    '<li>All CORS proxies are blocked by this store</li>' +
                     '<li>The store has no sitemap.xml</li>' +
                     '<li>Select the correct platform manually</li>' +
                     '</ul>' +
-                    '<p style="font-size:12px;color:var(--gray-2);">Tip: Try opening the store URL directly in a new tab to check if it loads.</p></div>';
+                    '<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-top:12px;max-width:450px;text-align:left;">' +
+                    '<p style="font-size:13px;font-weight:700;color:#92400e;margin:0 0 6px;">&#9889; Best Solution: Run Local Proxy</p>' +
+                    '<p style="font-size:12px;color:#78350f;margin:0;">Open terminal and run:<br><code style="background:#fff;padding:2px 6px;border-radius:4px;border:1px solid #f59e0b;">node proxy-server.js</code><br>Then keep it running and try again.</p>' +
+                    '</div>' +
+                    '<p style="font-size:12px;color:var(--gray-2);margin-top:10px;">Tip: Or paste sitemap XML / product URLs in the section below.</p></div>';
                 return;
             }
 
