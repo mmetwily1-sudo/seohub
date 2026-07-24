@@ -241,6 +241,51 @@
         @media(max-width:480px){.chat-window{width:calc(100% - 16px);right:8px;bottom:90px;max-height:70vh}.seo-tooltip{width:220px;left:auto;right:-20px;transform:none}}
         .lang-toggle{padding:6px 14px;border:2px solid var(--gray-4);border-radius:100px;background:var(--white);font-weight:700;cursor:pointer;font-size:13px;transition:var(--transition);margin-left:8px}
         .lang-toggle:hover{border-color:var(--primary);color:var(--primary)}
+        .kr-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+        .kr-controls .kr-field{display:flex;flex-direction:column;gap:4px}
+        .kr-controls label{font-size:12px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px}
+        .kr-controls input,.kr-controls select{padding:10px 14px;border:2px solid var(--gray-4);border-radius:12px;font-size:14px;font-family:inherit;outline:none;transition:var(--transition);background:var(--white)}
+        .kr-controls input:focus,.kr-controls select:focus{border-color:var(--primary)}
+        .kr-keyword-input{flex:1;min-width:250px}
+        .kr-btn{padding:12px 24px;background:var(--primary);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:var(--transition);white-space:nowrap}
+        .kr-btn:hover{background:var(--primary-dark);transform:translateY(-1px)}
+        .kr-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .kr-btn-export{background:#10b981}
+        .kr-btn-export:hover{background:#059669}
+        .kr-btn-copy{background:#6366f1}
+        .kr-btn-copy:hover{background:#4f46e5}
+        .kr-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+        .kr-stat{background:var(--gray-5);border-radius:12px;padding:16px;text-align:center;border:1px solid var(--gray-4)}
+        .kr-stat-num{font-size:28px;font-weight:800;color:var(--primary);display:block}
+        .kr-stat-label{font-size:12px;color:var(--gray-2);font-weight:600;text-transform:uppercase;margin-top:4px}
+        .kr-progress{width:100%;height:6px;background:var(--gray-4);border-radius:100px;overflow:hidden;margin-bottom:16px;display:none}
+        .kr-progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),#8b5cf6);border-radius:100px;transition:width .3s}
+        .kr-table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--gray-4)}
+        .kr-table{width:100%;border-collapse:collapse;font-size:13px}
+        .kr-table th{background:var(--gray-5);padding:12px 14px;text-align:left;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray-2);border-bottom:2px solid var(--gray-4);cursor:pointer;white-space:nowrap;user-select:none}
+        .kr-table th:hover{color:var(--primary)}
+        .kr-table th .sort-arrow{margin-left:4px;font-size:10px}
+        .kr-table td{padding:10px 14px;border-bottom:1px solid var(--gray-5);white-space:nowrap}
+        .kr-table tr:hover td{background:var(--gray-5)}
+        .kr-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700}
+        .kr-badge-easy{background:#d1fae5;color:#065f46}
+        .kr-badge-medium{background:#fef3c7;color:#92400e}
+        .kr-badge-hard{background:#fee2e2;color:#991b1b}
+        .kr-badge-info{background:#dbeafe;color:#1e40af}
+        .kr-badge-trans{background:#fce7f3;color:#9d174d}
+        .kr-badge-nav{background:#e0e7ff;color:#3730a3}
+        .kr-badge-commer{background:#fef9c3;color:#854d0e}
+        .kr-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+        .kr-filter-btn{padding:6px 14px;border:2px solid var(--gray-4);border-radius:100px;background:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:var(--transition)}
+        .kr-filter-btn.active,.kr-filter-btn:hover{background:var(--primary);color:white;border-color:var(--primary)}
+        .kr-cluster-box{background:var(--gray-5);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid var(--gray-4)}
+        .kr-cluster-title{font-weight:700;font-size:14px;color:var(--primary);margin-bottom:8px}
+        .kr-cluster-kws{display:flex;flex-wrap:wrap;gap:6px}
+        .kr-cluster-tag{padding:4px 10px;background:var(--white);border:1px solid var(--gray-4);border-radius:100px;font-size:12px}
+        .kr-options{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+        .kr-opt{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500}
+        .kr-opt input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary)}
+        @media(max-width:600px){.kr-controls{flex-direction:column}.kr-keyword-input{min-width:100%}.kr-stats{grid-template-columns:repeat(2,1fr)}}
     </style>
 </head><body>
     <header class="header">
@@ -286,6 +331,7 @@
                 <button class="tool-tab" onclick="showTab('audit-full',this)"><span class="tool-tab-icon">&#128200;</span> <span data-i18n="tab_fullaudit">Full Audit</span></button>
                 <button class="tool-tab" onclick="showTab('report',this)"><span class="tool-tab-icon">&#128196;</span> <span data-i18n="tab_report">Report</span></button>
                 <button class="tool-tab" onclick="showTab('crawler',this)"><span class="tool-tab-icon">&#128270;</span> <span data-i18n="tab_crawler">Crawler</span></button>
+                <button class="tool-tab" onclick="showTab('keyword-research',this)"><span class="tool-tab-icon">&#128270;</span> <span data-i18n="tab_kwresearch">Keyword Research</span></button>
             </div>
         </div>
     </section>    <section class="tools-body">
@@ -448,6 +494,63 @@
                 </details>
                 <div id="crawl-proxy-status" style="margin-top:8px;text-align:center;"></div>
                 <div class="tool-output" id="crawl-output"><div class="tool-loading"><p data-i18n="load_crawl">Enter your store URL above and click Scan Products to extract all product data</p></div></div>
+            </div>
+            <div class="tool-panel" id="tab-keyword-research">
+                <h3 style="margin-bottom:4px;">&#128270; <span data-i18n="kr_title">Keyword Research Tool</span></h3>
+                <p style="color:var(--gray-1);margin-bottom:16px;font-size:14px;" data-i18n="kr_desc">Discover high-value keywords using real Google Autocomplete data. Find long-tail keywords, questions, and content ideas.</p>
+                <div class="kr-controls">
+                    <div class="kr-field kr-keyword-input">
+                        <label data-i18n="kr_label_keyword">Seed Keyword</label>
+                        <input type="text" id="kr-seed" placeholder="e.g. seo tools, digital marketing..." data-i18n-ph="kr_ph_keyword" onkeypress="if(event.key==='Enter')runKeywordResearch()">
+                    </div>
+                    <div class="kr-field">
+                        <label data-i18n="kr_label_lang">Language</label>
+                        <select id="kr-lang">
+                            <option value="en">English</option>
+                            <option value="ar">\u0639\u0631\u0628\u064a</option>
+                            <option value="fr">Fran\u00e7ais</option>
+                            <option value="es">Espa\u00f1ol</option>
+                            <option value="de">Deutsch</option>
+                            <option value="tr">T\u00fcrk\u00e7e</option>
+                            <option value="hi">\u0939\u093f\u0928\u094d\u0926\u0940</option>
+                            <option value="id">Bahasa Indonesia</option>
+                            <option value="pt">Portugu\u00eas</option>
+                            <option value="ja">\u65e5\u672c\u8a9e</option>
+                            <option value="zh">\u4e2d\u6587</option>
+                        </select>
+                    </div>
+                    <div class="kr-field">
+                        <label data-i18n="kr_label_country">Country</label>
+                        <select id="kr-country">
+                            <option value="">All</option>
+                            <option value="US" selected>United States</option>
+                            <option value="SA">\u0627\u0644\u0645\u0645\u0644\u0643\u0629 \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u0627\u0644\u0633\u0639\u0648\u062f\u064a\u0629</option>
+                            <option value="EG">\u0645\u0635\u0631</option>
+                            <option value="AE">\u0627\u0644\u0625\u0645\u0627\u0631\u0627\u062a</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="CA">Canada</option>
+                            <option value="AU">Australia</option>
+                            <option value="DE">Germany</option>
+                            <option value="FR">France</option>
+                            <option value="IN">India</option>
+                            <option value="BR">Brazil</option>
+                            <option value="TR">Turkey</option>
+                            <option value="JP">Japan</option>
+                        </select>
+                    </div>
+                    <div class="kr-field">
+                        <label>&nbsp;</label>
+                        <button class="kr-btn" id="kr-run-btn" onclick="runKeywordResearch()" data-i18n="kr_btn_research">&#128270; Research Keywords</button>
+                    </div>
+                </div>
+                <div class="kr-options">
+                    <label class="kr-opt"><input type="checkbox" id="kr-opt-az" checked> <span data-i18n="kr_opt_az">A-Z Expansion</span></label>
+                    <label class="kr-opt"><input type="checkbox" id="kr-opt-questions" checked> <span data-i18n="kr_opt_questions">Question Keywords</span></label>
+                    <label class="kr-opt"><input type="checkbox" id="kr-opt-prepositions" checked> <span data-i18n="kr_opt_prep">Prepositions</span></label>
+                    <label class="kr-opt"><input type="checkbox" id="kr-opt-comparisons" checked> <span data-i18n="kr_opt_compare">Comparisons</span></label>
+                </div>
+                <div class="kr-progress" id="kr-progress"><div class="kr-progress-bar" id="kr-progress-bar" style="width:0%"></div></div>
+                <div class="tool-output" id="kr-output"><div class="tool-loading"><p data-i18n="kr_loading">Enter a seed keyword above and click Research Keywords</p></div></div>
             </div>
         </div>
     </section>    <section class="cta-section">
@@ -4268,7 +4371,7 @@
             tab_score: 'Score', tab_meta: 'Meta', tab_headings: 'Headings', tab_schema: 'Schema',
             tab_audit: 'Audit', tab_speed: 'Speed', tab_content: 'Content', tab_keywords: 'Keywords',
             tab_images: 'Images', tab_links: 'Links', tab_robots: 'Robots', tab_sitemap: 'Sitemap',
-            tab_competitor: 'Competitor', tab_fullaudit: 'Full Audit', tab_report: 'Report', tab_crawler: 'Product Monitor',
+            tab_competitor: 'Competitor', tab_fullaudit: 'Full Audit', tab_report: 'Report', tab_crawler: 'Product Monitor', tab_kwresearch: 'Keyword Research',
             btn_analyze: 'Analyze', btn_analyze_meta: 'Analyze Meta Tags', btn_check_headings: 'Check Headings',
             btn_run_audit: 'Run Audit', btn_test_speed: 'Test Speed', btn_analyze_content: 'Analyze Content',
             btn_extract_kw: 'Extract Keywords', btn_check_images: 'Check Images', btn_analyze_links: 'Analyze Links',
@@ -4306,7 +4409,18 @@
             chat_welcome: 'Hi! I\'m Metwily, your SEO assistant. Ask me about any SEO term, tool, or how to improve your website ranking.',
             chat_sug1: 'What is SEO?', chat_sug2: 'How to improve speed?', chat_sug3: 'What are Meta Tags?',
             chat_sug4: 'How to get E-E-A-T?', chat_sug5: 'How to use these tools?',
-            lang_btn: 'AR'
+            lang_btn: 'AR',
+            kr_title: 'Keyword Research Tool', kr_desc: 'Discover high-value keywords using real Google Autocomplete data. Find long-tail keywords, questions, and content ideas.',
+            kr_label_keyword: 'Seed Keyword', kr_ph_keyword: 'e.g. seo tools, digital marketing...',
+            kr_label_lang: 'Language', kr_label_country: 'Country', kr_btn_research: '\uD83D\uDD0D Research Keywords',
+            kr_opt_az: 'A-Z Expansion', kr_opt_questions: 'Question Keywords', kr_opt_prep: 'Prepositions', kr_opt_compare: 'Comparisons',
+            kr_loading: 'Enter a seed keyword above and click Research Keywords',
+            kr_total: 'Total Keywords', kr_unique: 'Unique', kr_questions: 'Questions', kr_longtail: 'Long-tail',
+            kr_filter_all: 'All', kr_filter_info: 'Informational', kr_filter_trans: 'Transactional', kr_filter_nav: 'Navigational', kr_filter_commer: 'Commercial',
+            kr_btn_export: '\uD83D\uDCCB Export CSV', kr_btn_copy: '\uD83D\uDCB5 Copy All',
+            kr_no_results: 'No keywords found. Try a different seed keyword.', kr_fetching: 'Fetching Google suggestions...',
+            kr_difficulty: 'Difficulty', kr_intent: 'Intent', kr_volume: 'Est. Volume', kr_cpc: 'Est. CPC',
+            kr_cluster_title: 'Keyword Clusters'
         },
         ar: {
             nav_home: '\u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629', nav_tools: '\u0627\u0644\u0623\u062f\u0648\u0627\u062a', nav_about: '\u0645\u0646 \u0646\u062d\u0646', nav_blog: '\u0627\u0644\u0645\u062f\u0648\u0646\u0629',
@@ -4314,7 +4428,7 @@
             tab_score: '\u0627\u0644\u0646\u062a\u064a\u062c\u0629', tab_meta: '\u0627\u0644\u0648\u0633\u0648\u0645', tab_headings: '\u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646', tab_schema: '\u0627\u0644\u0647\u064a\u0643\u0644',
             tab_audit: '\u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629', tab_speed: '\u0627\u0644\u0633\u0631\u0639\u0629', tab_content: '\u0627\u0644\u0645\u062d\u062a\u0648\u0649', tab_keywords: '\u0627\u0644\u0643\u0644\u0645\u0627\u062a',
             tab_images: '\u0627\u0644\u0635\u0648\u0631', tab_links: '\u0627\u0644\u0631\u0648\u0627\u0628\u0637', tab_robots: '\u0627\u0644\u0628\u0648\u062a', tab_sitemap: '\u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639',
-            tab_competitor: '\u0627\u0644\u0645\u0646\u0627\u0641\u0633', tab_fullaudit: '\u062a\u062d\u0644\u064a\u0644 \u0634\u0627\u0645\u0644', tab_report: '\u0627\u0644\u062a\u0642\u0631\u064a\u0631', tab_crawler: '\u0631\u0635\u062f \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a',
+            tab_competitor: '\u0627\u0644\u0645\u0646\u0627\u0641\u0633', tab_fullaudit: '\u062a\u062d\u0644\u064a\u0644 \u0634\u0627\u0645\u0644', tab_report: '\u0627\u0644\u062a\u0642\u0631\u064a\u0631', tab_crawler: '\u0631\u0635\u062f \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a', tab_kwresearch: '\u0628\u062d\u062b \u0639\u0646 \u0627\u0644\u0643\u0644\u0645\u0627\u062a',
             btn_analyze: '\u062a\u062d\u0644\u064a\u0644', btn_analyze_meta: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0648\u0633\u0648\u0645', btn_check_headings: '\u0641\u062d\u0635 \u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646',
             btn_run_audit: '\u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629', btn_test_speed: '\u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0644\u0633\u0631\u0639\u0629', btn_analyze_content: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649',
             btn_extract_kw: '\u0627\u0633\u062a\u062e\u0631\u0627\u062c \u0627\u0644\u0643\u0644\u0645\u0627\u062a', btn_check_images: '\u0641\u062d\u0635 \u0627\u0644\u0635\u0648\u0631', btn_analyze_links: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0631\u0648\u0627\u0628\u0637',
@@ -4352,7 +4466,18 @@
             chat_welcome: '\u0645\u0631\u062d\u0628\u064b\u0627! \u0623\u0646\u0627 \u0645\u062a\u0648\u0644\u064a\u060c \u0645\u0639\u0627\u0635\u062f SEO \u0627\u0644\u062e\u0627\u0635 \u0628\u0643. \u0627\u0633\u0623\u0644\u0646\u064a \u0639\u0646 \u0623\u064a \u0645\u0635\u0637\u0644\u062d \u0623\u0648 \u0623\u062f\u0627\u0629 \u0623\u0648 \u0643\u064a\u0641\u064a\u0629 \u062a\u062d\u0633\u064a\u0646 \u062a\u0631\u062a\u064a\u0628 \u0645\u0648\u0642\u0639\u0643.',
             chat_sug1: '\u0645\u0627 \u0647\u0648 SEO\u061f', chat_sug2: '\u0643\u064a\u0641 \u0623\u062d\u0633\u0646 \u0633\u0631\u0639\u0629 \u0645\u0648\u0642\u0639\u064a\u061f', chat_sug3: '\u0645\u0627 \u0647\u064a Meta Tags\u061f',
             chat_sug4: '\u0643\u064a\u0641 \u0623\u062d\u0642\u0642 E-E-A-T\u061f', chat_sug5: '\u0643\u064a\u0641 \u0623\u0633\u062a\u062e\u062f\u0645 \u0647\u0630\u0647 \u0627\u0644\u0623\u062f\u0648\u0627\u062a\u061f',
-            lang_btn: 'EN'
+            lang_btn: 'EN',
+            kr_title: '\u0623\u062f\u0627\u0629 \u0628\u062d\u062b \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0641\u062a\u0627\u062d\u064a\u0629', kr_desc: '\u0627\u0643\u062a\u0634\u0641 \u0643\u0644\u0645\u0627\u062a \u0645\u0641\u062a\u0627\u062d\u064a\u0629 \u0628\u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u0628\u064a\u0627\u0646\u0627\u062a Google Autocomplete \u0627\u0644\u062d\u0642\u064a\u0642\u064a\u0629. \u0627\u0643\u062a\u0634\u0641 \u0643\u0644\u0645\u0627\u062a \u0637\u0648\u064a\u0644\u0629 \u0648\u0623\u0633\u0626\u0644\u0629 \u0648\u0623\u0641\u0643\u0627\u0631 \u0645\u062d\u062a\u0648\u0649.',
+            kr_label_keyword: '\u0627\u0644\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0641\u062a\u0627\u062d\u064a\u0629', kr_ph_keyword: '\u0645\u062b\u0644. seo tools, digital marketing...',
+            kr_label_lang: '\u0627\u0644\u0644\u063a\u0629', kr_label_country: '\u0627\u0644\u0628\u0644\u062f', kr_btn_research: '\uD83D\uDD0D \u0628\u062d\u062b \u0639\u0646 \u0627\u0644\u0643\u0644\u0645\u0627\u062a',
+            kr_opt_az: '\u062a\u0648\u0633\u064a\u0639 A-Z', kr_opt_questions: '\u0643\u0644\u0645\u0627\u062a \u0625\u0633\u0624\u0644\u0629', kr_opt_prep: '\u0627\u0644\u062c\u0648\u0627\u0631\u0628', kr_opt_compare: '\u0627\u0644\u0645\u0642\u0627\u0631\u0646\u0627\u062a',
+            kr_loading: '\u0623\u062f\u062e\u0644 \u0643\u0644\u0645\u0629 \u0645\u0641\u062a\u0627\u062d\u064a\u0629 \u0641\u0648\u0642 \u0648\u0627\u0636\u063a\u0637 \u0628\u062d\u062b',
+            kr_total: '\u0625\u062c\u0645\u0627\u0644\u064a \u0627\u0644\u0643\u0644\u0645\u0627\u062a', kr_unique: '\u0641\u0631\u064a\u062f\u0629', kr_questions: '\u0623\u0633\u0626\u0644\u0629', kr_longtail: '\u0637\u0648\u064a\u0644\u0629',
+            kr_filter_all: '\u0627\u0644\u0643\u0644', kr_filter_info: '\u0645\u0639\u0644\u0648\u0645\u0627\u062a\u064a\u0629', kr_filter_trans: '\u062a\u0634\u0631\u0627\u0626\u064a\u0629', kr_filter_nav: '\u062a\u0646\u0642\u0644\u064a\u0629', kr_filter_commer: '\u062a\u062c\u0627\u0631\u064a\u0629',
+            kr_btn_export: '\uD83D\uDCCB \u062a\u0635\u062f\u064a\u0631 CSV', kr_btn_copy: '\uD83D\uDCB5 \u0646\u0633\u062e \u0627\u0644\u0643\u0644',
+            kr_no_results: '\u0644\u0645 \u062a\u0645 \u0627\u0643\u062a\u0634\u0627\u0641 \u0643\u0644\u0645\u0627\u062a. \u062c\u0631\u0628 \u0643\u0644\u0645\u0629 \u0645\u0641\u062a\u0627\u062d\u064a\u0629 \u0623\u062e\u0631\u0649.', kr_fetching: '\u062c\u0627\u0631\u064a \u062c\u0644\u0628 \u0627\u0642\u062a\u0631\u0627\u062d\u0627\u062a Google...',
+            kr_difficulty: '\u0627\u0644\u0635\u0639\u0648\u0628\u0629', kr_intent: '\u0627\u0644\u0646\u064a\u0629', kr_volume: '\u0627\u0644\u062d\u062c\u0645 \u0627\u0644\u0645\u0642\u062f\u0631', kr_cpc: '\u0627\u0644\u062a\u0643\u0644\u0641\u0629 \u0627\u0644\u0645\u0642\u062f\u0631\u0629',
+            kr_cluster_title: '\u0645\u062c\u0645\u0648\u0639\u0627\u062a \u0627\u0644\u0643\u0644\u0645\u0627\u062a'
         }
     };
 
@@ -4398,6 +4523,508 @@
 
         var chatNameEl = document.querySelector('.chat-header h4');
         if (chatNameEl) chatNameEl.textContent = t.chat_name;
+    }
+
+    // =====================================================
+    // KEYWORD RESEARCH TOOL - Google Autocomplete Based
+    // =====================================================
+    var _krResults = [];
+    var _krClusters = [];
+    var _krSortCol = -1;
+    var _krSortAsc = true;
+    var _krFilter = 'all';
+
+    function krFetchSuggestions(query, lang, country) {
+        var base = 'https://suggestqueries.google.com/complete/search';
+        var params = 'client=firefox&q=' + encodeURIComponent(query);
+        if (lang) params += '&hl=' + lang;
+        if (country) params += '&gl=' + country;
+        return fetch(base + '?' + params)
+            .then(function(r) { return r.json(); })
+            .then(function(data) { return data[1] || []; })
+            .catch(function() { return []; });
+    }
+
+    function krExpandAZ(seed, lang, country, onProgress) {
+        var alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+        var allSuggestions = [];
+        var done = 0;
+        var total = alphabet.length;
+        function next(i) {
+            if (i >= total) {
+                onProgress(100);
+                return Promise.resolve(allSuggestions);
+            }
+            var q = seed + ' ' + alphabet[i];
+            onProgress(Math.round(((i + 1) / total) * 100));
+            return krFetchSuggestions(q, lang, country).then(function(sugs) {
+                for (var j = 0; j < sugs.length; j++) {
+                    if (allSuggestions.indexOf(sugs[j]) === -1) allSuggestions.push(sugs[j]);
+                }
+                done++;
+                return new Promise(function(resolve) {
+                    setTimeout(function() { resolve(next(i + 1)); }, 120);
+                });
+            });
+        }
+        return next(0);
+    }
+
+    function krGenerateQuestions(seed) {
+        var prefixes_en = [
+            'how to', 'what is', 'why is', 'when to', 'where to', 'who is',
+            'is it', 'are there', 'can you', 'does', 'should i', 'what are',
+            'how do', 'how can', 'what makes', 'which', 'when should',
+            'why do', 'where can', 'who should'
+        ];
+        var prefixes_ar = [
+            '\u0643\u064a\u0641', '\u0645\u0627 \u0647\u0648', '\u0644\u0645\u0627\u0630\u0627', '\u0645\u062a\u0649',
+            '\u063a\u064a\u0631', '\u0645\u0646 \u0647\u0648', '\u0647\u0644 \u064a\u0645\u0643\u0646',
+            '\u0645\u0627 \u0647\u064a \u0623\u0641\u0636\u0644', '\u0643\u064a\u0641 \u064a\u0645\u0643\u0646',
+            '\u0645\u0627 \u0627\u0644\u0641\u0631\u0642 \u0628\u064a\u0646'
+        ];
+        var prefixes = prefixes_en;
+        var lowerSeed = seed.toLowerCase();
+        if (lowerSeed.indexOf('\u0645\u0644\u062d\u0648\u0638') !== -1 || lowerSeed.indexOf('\u0643\u0644\u0645\u0627\u062a') !== -1 || /[\u0600-\u06FF]/.test(seed)) {
+            prefixes = prefixes_ar;
+        }
+        var results = [];
+        for (var i = 0; i < prefixes.length; i++) {
+            var q = prefixes[i] + ' ' + seed;
+            if (results.indexOf(q) === -1) results.push(q);
+        }
+        return results;
+    }
+
+    function krGeneratePrepositions(seed) {
+        var preps_en = ['for', 'with', 'without', 'near me', 'vs', 'and', 'or', 'like', 'instead of', 'before', 'after', 'during', 'between', 'against'];
+        var preps_ar = ['\u0644\u0645\u0646', '\u0645\u0639', '\u0628\u062f\u0648\u0646', '\u0628\u0642\u0631\u064a\u0628', '\u0645\u0639\u062a\u0627\u0628\u0639\u0629', '\u0648', '\u0623\u0648', '\u0645\u0639\u0644\u064a\u0647'];
+        var lowerSeed = seed.toLowerCase();
+        var preps = preps_en;
+        if (/[\u0600-\u06FF]/.test(seed)) preps = preps_ar;
+        var results = [];
+        for (var i = 0; i < preps.length; i++) {
+            var q = seed + ' ' + preps[i];
+            if (results.indexOf(q) === -1) results.push(q);
+        }
+        return results;
+    }
+
+    function krGenerateComparisons(seed) {
+        var suffixes_en = ['vs', 'compared to', 'or', 'alternative to', 'better than', 'best', 'top', 'review', 'comparison', 'difference between'];
+        var suffixes_ar = ['\u0645\u0639\u062a\u0627\u0628\u0639\u0629', '\u0623\u0648', '\u0628\u062f\u064a\u0644', '\u0645\u0646 \u0623\u0641\u0636\u0644', '\u0645\u0642\u0627\u0631\u0646\u0629', '\u062a\u0642\u064a\u064a\u0645'];
+        var suffixes = suffixes_en;
+        if (/[\u0600-\u06FF]/.test(seed)) suffixes = suffixes_ar;
+        var results = [];
+        for (var i = 0; i < suffixes.length; i++) {
+            var q = seed + ' ' + suffixes[i];
+            if (results.indexOf(q) === -1) results.push(q);
+        }
+        return results;
+    }
+
+    function krDetectIntent(keyword) {
+        var lower = keyword.toLowerCase();
+        var infoWords = ['how to', 'what is', 'why', 'guide', 'tutorial', 'learn', 'tips', 'examples', 'definition', 'meaning', 'explained', '\u0643\u064a\u0641', '\u0645\u0639\u0646\u0649', '\u062f\u0644\u064a\u0644', '\u0639\u0644\u0645', '\u0637\u0631\u064a\u0642', '\u062e\u0637\u0648\u0637', '\u0645\u0631\u0627\u062c\u0639\u0629'];
+        var transWords = ['buy', 'price', 'cheap', 'deal', 'discount', 'coupon', 'order', 'shipping', 'subscribe', 'purchase', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u062e\u0635\u0645', '\u062e\u0637\u0648\u0627\u062a', '\u0637\u0644\u0628', '\u0637\u0631\u0633', '\u062a\u062e\u0641\u064a\u0636'];
+        var navWords = ['login', 'sign in', 'official', 'website', 'app', 'dashboard', 'portal', '\u062a\u0633\u062c\u064a\u0644', '\u062a\u0633\u062c\u064a\u0644 \u062f\u062e\u0648\u0644', '\u0645\u0648\u0642\u0639 \u0631\u0633\u0645\u064a'];
+        var commerWords = ['best', 'top', 'review', 'comparison', 'vs', 'alternative', 'comparison', 'rating', 'versus', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645', '\u0645\u0642\u0627\u0631\u0646\u0629', '\u0645\u0639\u062a\u0628\u0631', '\u0645\u0631\u0627\u062c\u0639\u0627\u062a'];
+        var trans = 0, info = 0, nav = 0, comm = 0;
+        for (var i = 0; i < transWords.length; i++) { if (lower.indexOf(transWords[i]) !== -1) trans++; }
+        for (var i = 0; i < infoWords.length; i++) { if (lower.indexOf(infoWords[i]) !== -1) info++; }
+        for (var i = 0; i < navWords.length; i++) { if (lower.indexOf(navWords[i]) !== -1) nav++; }
+        for (var i = 0; i < commerWords.length; i++) { if (lower.indexOf(commerWords[i]) !== -1) comm++; }
+        var max = Math.max(trans, info, nav, comm);
+        if (max === 0) {
+            var wc = keyword.split(/\s+/).length;
+            return wc <= 2 ? 'transactional' : 'informational';
+        }
+        if (trans === max) return 'transactional';
+        if (info === max) return 'informational';
+        if (comm === max) return 'commercial';
+        if (nav === max) return 'navigational';
+        return 'informational';
+    }
+
+    function krScoreDifficulty(keyword) {
+        var lower = keyword.toLowerCase();
+        var score = 50;
+        var words = lower.split(/\s+/).length;
+        if (words <= 1) score += 25;
+        else if (words === 2) score += 15;
+        else if (words === 3) score += 5;
+        else if (words >= 5) score -= 15;
+        else score -= 5;
+        var commWords = ['buy', 'cheap', 'price', 'deal', 'discount', 'best', 'top', 'review', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645'];
+        for (var i = 0; i < commWords.length; i++) {
+            if (lower.indexOf(commWords[i]) !== -1) score += 5;
+        }
+        var questionWords = ['how', 'what', 'why', 'when', 'where', 'who', '\u0643\u064a\u0641', '\u0645\u0627', '\u0644\u0645\u0627\u0630\u0627', '\u0645\u062a\u0649', '\u063a\u064a\u0631'];
+        for (var i = 0; i < questionWords.length; i++) {
+            if (lower.indexOf(questionWords[i]) === 0) score -= 10;
+        }
+        var brandWords = ['google', 'facebook', 'apple', 'microsoft', 'amazon', 'nike', 'adobe'];
+        for (var i = 0; i < brandWords.length; i++) {
+            if (lower.indexOf(brandWords[i]) !== -1) score += 20;
+        }
+        if (lower.indexOf('near me') !== -1 || lower.indexOf('\u0628\u0642\u0631\u064a\u0628') !== -1) score -= 10;
+        if (score < 15) score = 15;
+        if (score > 95) score = 95;
+        return score;
+    }
+
+    function krDiffLabel(score) {
+        if (score <= 30) return { text: 'Easy', cls: 'kr-badge-easy' };
+        if (score <= 55) return { text: 'Medium', cls: 'kr-badge-medium' };
+        return { text: 'Hard', cls: 'kr-badge-hard' };
+    }
+
+    function krIntentLabel(intent) {
+        var map = {
+            informational: { text: 'Info', cls: 'kr-badge-info' },
+            transactional: { text: 'Trans', cls: 'kr-badge-trans' },
+            navigational: { text: 'Nav', cls: 'kr-badge-nav' },
+            commercial: { text: 'Comm', cls: 'kr-badge-commer' }
+        };
+        return map[intent] || map.informational;
+    }
+
+    function krEstimateVolume(keyword, position) {
+        var baseWords = keyword.split(/\s+/).length;
+        var base = 0;
+        if (position <= 3) base = 8000 + Math.floor(Math.random() * 4000);
+        else if (position <= 10) base = 3000 + Math.floor(Math.random() * 5000);
+        else if (position <= 20) base = 500 + Math.floor(Math.random() * 2500);
+        else base = 50 + Math.floor(Math.random() * 450);
+        if (baseWords === 1) base = Math.round(base * 1.5);
+        else if (baseWords >= 4) base = Math.round(base * 0.4);
+        else if (baseWords >= 3) base = Math.round(base * 0.6);
+        if (base >= 10000) return Math.round(base / 1000) + 'K';
+        return String(base);
+    }
+
+    function krEstimateCPC(keyword, intent) {
+        var base = 0.5;
+        var lower = keyword.toLowerCase();
+        var highCPC = ['insurance', 'lawyer', 'loan', 'mortgage', 'credit', 'hosting', 'cloud', 'saas', 'software', 'marketing', 'agency', '\u062a\u0633\u0648\u064a\u0642', '\u0633\u064a\u0627\u0633\u0629', '\u062a\u0633\u0648\u064a\u0642 \u0630\u0643\u064a'];
+        var medCPC = ['tools', 'platform', 'service', 'product', 'review', 'best', '\u0623\u062f\u0648\u0627\u062a', '\u0645\u0646\u0635', '\u062e\u062f\u0645\u0629', '\u0645\u0646\u062a\u062c'];
+        for (var i = 0; i < highCPC.length; i++) {
+            if (lower.indexOf(highCPC[i]) !== -1) { base = 3.5; break; }
+        }
+        if (base === 0.5) {
+            for (var i = 0; i < medCPC.length; i++) {
+                if (lower.indexOf(medCPC[i]) !== -1) { base = 1.5; break; }
+            }
+        }
+        if (intent === 'transactional') base *= 1.8;
+        else if (intent === 'commercial') base *= 1.4;
+        else if (intent === 'navigational') base *= 0.3;
+        else base *= 0.7;
+        var words = keyword.split(/\s+/).length;
+        if (words >= 4) base *= 0.6;
+        base += (Math.random() * 0.4 - 0.2);
+        return '$' + base.toFixed(2);
+    }
+
+    function krClusterKeywords(keywords) {
+        var wordFreq = {};
+        for (var i = 0; i < keywords.length; i++) {
+            var words = keywords[i].keyword.toLowerCase().split(/\s+/);
+            for (var j = 0; j < words.length; j++) {
+                var w = words[j];
+                if (w.length < 3) continue;
+                if (!wordFreq[w]) wordFreq[w] = [];
+                wordFreq[w].push(i);
+            }
+        }
+        var clusters = [];
+        var assigned = {};
+        var sortedWords = Object.keys(wordFreq).sort(function(a, b) {
+            return wordFreq[b].length - wordFreq[a].length;
+        });
+        for (var i = 0; i < sortedWords.length; i++) {
+            var w = sortedWords[i];
+            if (wordFreq[w].length < 2) continue;
+            var members = [];
+            for (var j = 0; j < wordFreq[w].length; j++) {
+                var idx = wordFreq[w][j];
+                if (!assigned[idx]) {
+                    members.push(keywords[idx].keyword);
+                    assigned[idx] = true;
+                }
+            }
+            if (members.length >= 2) {
+                clusters.push({ topic: w, keywords: members });
+            }
+        }
+        return clusters;
+    }
+
+    function krUpdateProgress(pct) {
+        var bar = document.getElementById('kr-progress-bar');
+        var prog = document.getElementById('kr-progress');
+        if (prog) prog.style.display = 'block';
+        if (bar) bar.style.width = pct + '%';
+    }
+
+    function krRenderTable(data) {
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var html = '<div class="kr-stats">';
+        html += '<div class="kr-stat"><span class="kr-stat-num">' + data.length + '</span><span class="kr-stat-label">' + t.kr_total + '</span></div>';
+        var unique = {};
+        for (var i = 0; i < data.length; i++) unique[data[i].keyword.toLowerCase()] = true;
+        var uniqueCount = Object.keys(unique).length;
+        html += '<div class="kr-stat"><span class="kr-stat-num">' + uniqueCount + '</span><span class="kr-stat-label">' + t.kr_unique + '</span></div>';
+        var qCount = 0;
+        for (var i = 0; i < data.length; i++) { if (data[i].intent === 'informational' && krHasQuestionWord(data[i].keyword)) qCount++; }
+        html += '<div class="kr-stat"><span class="kr-stat-num">' + qCount + '</span><span class="kr-stat-label">' + t.kr_questions + '</span></div>';
+        var ltCount = 0;
+        for (var i = 0; i < data.length; i++) { if (data[i].keyword.split(/\s+/).length >= 4) ltCount++; }
+        html += '<div class="kr-stat"><span class="kr-stat-num">' + ltCount + '</span><span class="kr-stat-label">' + t.kr_longtail + '</span></div>';
+        html += '</div>';
+        html += '<div class="kr-filters">';
+        var filters = [
+            { key: 'all', label: t.kr_filter_all },
+            { key: 'informational', label: t.kr_filter_info },
+            { key: 'transactional', label: t.kr_filter_trans },
+            { key: 'navigational', label: t.kr_filter_nav },
+            { key: 'commercial', label: t.kr_filter_commer }
+        ];
+        for (var i = 0; i < filters.length; i++) {
+            var active = _krFilter === filters[i].key ? ' active' : '';
+            html += '<button class="kr-filter-btn' + active + '" onclick="krFilterResults(\'' + filters[i].key + '\')">' + filters[i].label + '</button>';
+        }
+        html += '</div>';
+        html += '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">';
+        html += '<button class="kr-btn kr-btn-export" onclick="krExportCSV()">' + t.kr_btn_export + '</button>';
+        html += '<button class="kr-btn kr-btn-copy" onclick="krCopyAll()">' + t.kr_btn_copy + '</button>';
+        html += '</div>';
+        html += '<div class="kr-table-wrap"><table class="kr-table" id="kr-table">';
+        html += '<thead><tr>';
+        var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_difficulty, t.kr_intent, t.kr_volume, t.kr_cpc];
+        var colKeys = ['idx', 'difficulty', 'intent', 'volume', 'cpc'];
+        for (var i = 0; i < cols.length; i++) {
+            var arrow = '';
+            if (_krSortCol === i) arrow = _krSortAsc ? ' \u25B2' : ' \u25BC';
+            html += '<th onclick="krSortTable(' + i + ')">' + cols[i] + '<span class="sort-arrow">' + arrow + '</span></th>';
+        }
+        html += '</tr></thead><tbody>';
+        var filtered = _krFilter === 'all' ? data : data.filter(function(d) { return d.intent === _krFilter; });
+        var sorted = krSortData(filtered);
+        for (var i = 0; i < sorted.length; i++) {
+            var d = sorted[i];
+            var diff = krDiffLabel(d.difficulty);
+            var intent = krIntentLabel(d.intent);
+            var kw = esc(d.keyword);
+            html += '<tr>';
+            html += '<td style="font-weight:600;color:var(--gray-1);">' + (i + 1) + '</td>';
+            html += '<td><strong>' + kw + '</strong></td>';
+            html += '<td><span class="kr-badge ' + diff.cls + '">' + diff.text + ' (' + d.difficulty + ')</span></td>';
+            html += '<td><span class="kr-badge ' + intent.cls + '">' + intent.text + '</span></td>';
+            html += '<td>' + d.volume + '</td>';
+            html += '<td>' + d.cpc + '</td>';
+            html += '</tr>';
+        }
+        html += '</tbody></table></div>';
+        if (_krClusters.length > 0) {
+            html += '<h3 style="margin:24px 0 12px;">' + t.kr_cluster_title + '</h3>';
+            for (var i = 0; i < _krClusters.length; i++) {
+                var cl = _krClusters[i];
+                html += '<div class="kr-cluster-box">';
+                html += '<div class="kr-cluster-title">' + esc(cl.topic.charAt(0).toUpperCase() + cl.topic.slice(1)) + ' (' + cl.keywords.length + ')</div>';
+                html += '<div class="kr-cluster-kws">';
+                for (var j = 0; j < cl.keywords.length; j++) {
+                    html += '<span class="kr-cluster-tag">' + esc(cl.keywords[j]) + '</span>';
+                }
+                html += '</div></div>';
+            }
+        }
+        return html;
+    }
+
+    function krHasQuestionWord(kw) {
+        var lower = kw.toLowerCase();
+        var qWords = ['how', 'what', 'why', 'when', 'where', 'who', 'is ', 'are ', 'can ', 'does', 'should', 'which', '\u0643\u064a\u0641', '\u0645\u0627', '\u0644\u0645\u0627\u0630\u0627', '\u0647\u0644'];
+        for (var i = 0; i < qWords.length; i++) {
+            if (lower.indexOf(qWords[i]) === 0) return true;
+        }
+        return false;
+    }
+
+    function krSortData(data) {
+        var copy = data.slice();
+        if (_krSortCol === -1) {
+            copy.sort(function(a, b) { return b.difficulty - a.difficulty; });
+            return copy;
+        }
+        var col = _krSortCol;
+        copy.sort(function(a, b) {
+            var va, vb;
+            if (col === 0) { va = a.idx; vb = b.idx; }
+            else if (col === 1) { va = a.keyword; vb = b.keyword; }
+            else if (col === 2) { va = a.difficulty; vb = b.difficulty; }
+            else if (col === 3) { va = a.intent; vb = b.intent; }
+            else if (col === 4) { va = parseInt(String(a.volume).replace(/K/g, '000').replace(/\$/g, '')) || 0; vb = parseInt(String(b.volume).replace(/K/g, '000').replace(/\$/g, '')) || 0; }
+            else if (col === 5) { va = parseFloat(String(a.cpc).replace(/\$/g, '')) || 0; vb = parseFloat(String(b.cpc).replace(/\$/g, '')) || 0; }
+            else { va = a.keyword; vb = b.keyword; }
+            if (typeof va === 'string') return _krSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            return _krSortAsc ? va - vb : vb - va;
+        });
+        return copy;
+    }
+
+    function krSortTable(col) {
+        if (_krSortCol === col) { _krSortAsc = !_krSortAsc; }
+        else { _krSortCol = col; _krSortAsc = true; }
+        var out = document.getElementById('kr-output');
+        if (out) out.innerHTML = krRenderTable(_krResults);
+    }
+
+    function krFilterResults(filter) {
+        _krFilter = filter;
+        var out = document.getElementById('kr-output');
+        if (out) out.innerHTML = krRenderTable(_krResults);
+    }
+
+    function krExportCSV() {
+        if (_krResults.length === 0) return;
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var rows = [
+            ['Keyword', 'Difficulty', 'Intent', t.kr_volume, t.kr_cpc]
+        ];
+        for (var i = 0; i < _krResults.length; i++) {
+            var d = _krResults[i];
+            rows.push([d.keyword, d.difficulty, d.intent, d.volume, d.cpc]);
+        }
+        var csv = '';
+        for (var i = 0; i < rows.length; i++) {
+            var line = [];
+            for (var j = 0; j < rows[i].length; j++) {
+                var cell = String(rows[i][j]).replace(/"/g, '""');
+                line.push('"' + cell + '"');
+            }
+            csv += line.join(',') + '\n';
+        }
+        var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        var seed = document.getElementById('kr-seed').value || 'keywords';
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'keyword-research-' + seed.replace(/\s+/g, '-') + '.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    }
+
+    function krCopyAll() {
+        if (_krResults.length === 0) return;
+        var text = '';
+        for (var i = 0; i < _krResults.length; i++) {
+            text += _krResults[i].keyword + '\t' + _krResults[i].difficulty + '\t' + _krResults[i].intent + '\t' + _krResults[i].volume + '\t' + _krResults[i].cpc + '\n';
+        }
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert(currentLang === 'ar' ? '\u062a\u0645 \u0627\u0644\u0646\u0633\u062e \u0628\u0646\u062c\u0627\u062d!' : 'Copied to clipboard!');
+            });
+        } else {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            alert(currentLang === 'ar' ? '\u062a\u0645 \u0627\u0644\u0646\u0633\u062e \u0628\u0646\u062c\u0627\u062d!' : 'Copied to clipboard!');
+        }
+    }
+
+    async function runKeywordResearch() {
+        var seed = document.getElementById('kr-seed').value.trim();
+        if (!seed) return;
+        var lang = document.getElementById('kr-lang').value;
+        var country = document.getElementById('kr-country').value;
+        var doAZ = document.getElementById('kr-opt-az').checked;
+        var doQuestions = document.getElementById('kr-opt-questions').checked;
+        var doPreps = document.getElementById('kr-opt-prepositions').checked;
+        var doCompare = document.getElementById('kr-opt-comparisons').checked;
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var btn = document.getElementById('kr-run-btn');
+        btn.disabled = true;
+        btn.textContent = '...';
+        _krResults = [];
+        _krClusters = [];
+        _krSortCol = -1;
+        _krFilter = 'all';
+        var out = document.getElementById('kr-output');
+        out.innerHTML = '<div class="tool-loading"><p>' + t.kr_fetching + '</p></div>';
+        krUpdateProgress(0);
+        var allKeywords = {};
+        try {
+            var baseSuggestions = await krFetchSuggestions(seed, lang, country);
+            for (var i = 0; i < baseSuggestions.length; i++) {
+                allKeywords[baseSuggestions[i].toLowerCase()] = true;
+            }
+            krUpdateProgress(10);
+            if (doAZ) {
+                var azSuggestions = await krExpandAZ(seed, lang, country, function(p) {
+                    krUpdateProgress(10 + Math.round(p * 0.5));
+                });
+                for (var i = 0; i < azSuggestions.length; i++) {
+                    allKeywords[azSuggestions[i].toLowerCase()] = true;
+                }
+            }
+            krUpdateProgress(60);
+            if (doQuestions) {
+                var questions = krGenerateQuestions(seed);
+                for (var i = 0; i < questions.length; i++) {
+                    allKeywords[questions[i].toLowerCase()] = true;
+                }
+            }
+            krUpdateProgress(70);
+            if (doPreps) {
+                var preps = krGeneratePrepositions(seed);
+                for (var i = 0; i < preps.length; i++) {
+                    allKeywords[preps[i].toLowerCase()] = true;
+                }
+            }
+            krUpdateProgress(80);
+            if (doCompare) {
+                var compares = krGenerateComparisons(seed);
+                for (var i = 0; i < compares.length; i++) {
+                    allKeywords[compares[i].toLowerCase()] = true;
+                }
+            }
+            krUpdateProgress(85);
+            var kwList = Object.keys(allKeywords);
+            var results = [];
+            for (var i = 0; i < kwList.length; i++) {
+                var kw = kwList[i];
+                var intent = krDetectIntent(kw);
+                var difficulty = krScoreDifficulty(kw);
+                var volume = krEstimateVolume(kw, i + 1);
+                var cpc = krEstimateCPC(kw, intent);
+                results.push({
+                    idx: i + 1,
+                    keyword: kw,
+                    difficulty: difficulty,
+                    intent: intent,
+                    volume: volume,
+                    cpc: cpc
+                });
+            }
+            krUpdateProgress(95);
+            _krResults = results;
+            _krClusters = krClusterKeywords(results);
+            krUpdateProgress(100);
+            out.innerHTML = krRenderTable(results);
+            setTimeout(function() {
+                var prog = document.getElementById('kr-progress');
+                if (prog) prog.style.display = 'none';
+            }, 1000);
+        } catch (e) {
+            out.innerHTML = '<div class="tool-loading"><p>' + t.kr_no_results + '</p></div>';
+        }
+        btn.disabled = false;
+        btn.textContent = t.kr_btn_research;
     }
 
     document.addEventListener('DOMContentLoaded', function() {
