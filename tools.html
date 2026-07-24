@@ -2997,58 +2997,96 @@
                 platform = detectPlatform(mainHtml, url);
             }
 
-            // Step 2: Fetch sitemaps
-            out.innerHTML = '<div class="tool-loading"><p>Fetching sitemaps...</p></div>';
-            var sitemapUrls = getSitemapUrls(url, platform);
+            // Step 2: Fetch sitemaps - smart approach: start with main sitemap only
+            out.innerHTML = '<div class="tool-loading"><p>Fetching sitemap...</p></div>';
+            var smUrl = url.replace(/\/$/, '') + '/sitemap.xml';
+            var allSubSitemaps = [];
+            var proxyBroken = false;
 
-            for (var si = 0; si < sitemapUrls.length; si++) {
-                if (_crawlAbort) break;
-                var smName = sitemapUrls[si].split('/').pop();
-                crawlUpdateUI(0, 0, 'Fetching ' + smName + '...');
-                try {
-                    var smText = await fetchHTML(sitemapUrls[si], { timeout: 20000, retries: 1 });
-                    if (smText && smText.indexOf('<urlset') !== -1) {
-                        var smUrls = parseSitemapUrls(smText);
-                        for (var ui = 0; ui < smUrls.length; ui++) {
-                            if (isProductUrl(smUrls[ui], platform)) {
-                                productUrls.push(smUrls[ui]);
-                            }
-                            allUrls.push(smUrls[ui]);
-                        }
-                    } else if (smText && smText.indexOf('<sitemapindex') !== -1) {
-                        // Sub-sitemaps
-                        var subUrls = parseSitemapUrls(smText);
-                        for (var subi = 0; subi < subUrls.length; subi++) {
-                            if (_crawlAbort) break;
-                            var subName = subUrls[subi].split('/').pop();
-                            crawlUpdateUI(0, 0, 'Fetching sub-sitemap: ' + subName + '...');
-                            try {
-                                var subText = await fetchHTML(subUrls[subi], { timeout: 20000, retries: 1 });
-                                if (subText) {
-                                    var subParsed = parseSitemapUrls(subText);
-                                    for (var spi = 0; spi < subParsed.length; spi++) {
-                                        if (isProductUrl(subParsed[spi], platform)) {
-                                            productUrls.push(subParsed[spi]);
-                                        }
-                                        allUrls.push(subParsed[spi]);
-                                    }
-                                }
-                            } catch(e) {
-                                crawlUpdateUI(0, 0, 'Skipping ' + subUrls[subi].split('/').pop() + ' (timeout) - continuing...');
-                                await new Promise(function(r) { setTimeout(r, 500); });
-                            }
-                        }
+            // Phase 1: Try main sitemap
+            crawlUpdateUI(0, 0, 'Fetching sitemap.xml...');
+            try {
+                var smText = await fetchHTML(smUrl, { timeout: 20000, retries: 0 });
+                if (smText && smText.indexOf('<urlset') !== -1) {
+                    var smUrls = parseSitemapUrls(smText);
+                    for (var ui = 0; ui < smUrls.length; ui++) {
+                        if (isProductUrl(smUrls[ui], platform)) productUrls.push(smUrls[ui]);
+                        allUrls.push(smUrls[ui]);
                     }
-                } catch(e) {
-                    crawlUpdateUI(0, 0, 'Skipping ' + sitemapUrls[si].split('/').pop() + ' (timeout) - continuing...');
-                    await new Promise(function(r) { setTimeout(r, 500); });
+                } else if (smText && smText.indexOf('<sitemapindex') !== -1) {
+                    allSubSitemaps = parseSitemapUrls(smText);
+                }
+            } catch(e) {
+                crawlUpdateUI(0, 0, 'sitemap.xml failed - trying fallback...');
+                proxyBroken = true;
+            }
+
+            // Phase 2: If sitemap index found, fetch product-related sub-sitemaps
+            if (allSubSitemaps.length > 0) {
+                var prodSubSitemaps = [];
+                for (var ssi = 0; ssi < allSubSitemaps.length; ssi++) {
+                    var sn = allSubSitemaps[ssi].toLowerCase();
+                    if (sn.indexOf('product') !== -1 || sn.indexOf('/p/') !== -1 ||
+                        (platform === 'zid' && sn.indexOf('categor') === -1 && sn.indexOf('page') === -1) ||
+                        sn.indexOf('post') !== -1 || sn.indexOf('item') !== -1) {
+                        prodSubSitemaps.push(allSubSitemaps[ssi]);
+                    }
+                }
+                // If no product-specific sub-sitemaps, try first 3 only
+                if (prodSubSitemaps.length === 0) {
+                    prodSubSitemaps = allSubSitemaps.slice(0, 3);
+                }
+                // Limit to 10 max
+                if (prodSubSitemaps.length > 10) prodSubSitemaps = prodSubSitemaps.slice(0, 10);
+
+                for (var subi = 0; subi < prodSubSitemaps.length; subi++) {
+                    if (_crawlAbort || proxyBroken) break;
+                    var subName = prodSubSitemaps[subi].split('/').pop();
+                    crawlUpdateUI(0, 0, 'Fetching sub-sitemap: ' + subName + ' (' + (subi + 1) + '/' + prodSubSitemaps.length + ')...');
+                    try {
+                        var subText = await fetchHTML(prodSubSitemaps[subi], { timeout: 20000, retries: 0 });
+                        if (subText) {
+                            var subParsed = parseSitemapUrls(subText);
+                            for (var spi = 0; spi < subParsed.length; spi++) {
+                                if (isProductUrl(subParsed[spi], platform)) productUrls.push(subParsed[spi]);
+                                allUrls.push(subParsed[spi]);
+                            }
+                        }
+                        await new Promise(function(r) { setTimeout(r, 300); });
+                    } catch(e) {
+                        crawlUpdateUI(0, 0, 'Skipping ' + subName + ' (failed) - continuing...');
+                        await new Promise(function(r) { setTimeout(r, 500); });
+                    }
                 }
             }
 
-            // Step 3: If no sitemap, crawl main page links
+            // Phase 3: If main sitemap failed and no products found, try alternate paths
+            if (productUrls.length === 0 && proxyBroken) {
+                var fallbacks = [url.replace(/\/$/, '') + '/sitemap_index.xml'];
+                if (platform === 'shopify') fallbacks.push(url.replace(/\/$/, '') + '/sitemap.xml');
+                if (platform === 'woocommerce') fallbacks.push(url.replace(/\/$/, '') + '/wp-sitemap.xml');
+
+                for (var fi = 0; fi < fallbacks.length; fi++) {
+                    if (_crawlAbort) break;
+                    crawlUpdateUI(0, 0, 'Trying fallback: ' + fallbacks[fi].split('/').pop() + '...');
+                    try {
+                        var fbText = await fetchHTML(fallbacks[fi], { timeout: 20000, retries: 0 });
+                        if (fbText) {
+                            var fbUrls = parseSitemapUrls(fbText);
+                            for (var fbi = 0; fbi < fbUrls.length; fbi++) {
+                                if (isProductUrl(fbUrls[fbi], platform)) productUrls.push(fbUrls[fbi]);
+                            }
+                        }
+                    } catch(e) {}
+                }
+            }
+
+            // Step 3: If no sitemap, crawl main page and category links
             if (productUrls.length === 0 && mainHtml) {
+                crawlUpdateUI(0, 0, 'No sitemap found. Crawling page links...');
                 var tmpDoc = parseHTML(mainHtml);
                 var links = tmpDoc.querySelectorAll('a[href]');
+                var catUrls = [];
                 for (var li = 0; li < links.length; li++) {
                     var href = links[li].getAttribute('href');
                     if (href) {
@@ -3059,7 +3097,39 @@
                         if (fullUrl.indexOf(url.replace(/\/$/, '')) === 0 && isProductUrl(fullUrl, platform)) {
                             productUrls.push(fullUrl);
                         }
+                        // Also collect category pages to crawl for product links
+                        var lHref = fullUrl.toLowerCase();
+                        if (fullUrl.indexOf(url.replace(/\/$/, '')) === 0 &&
+                            (lHref.indexOf('/c/') !== -1 || lHref.indexOf('/category') !== -1 || lHref.indexOf('/collection') !== -1 || lHref.indexOf('/cat/') !== -1)) {
+                            catUrls.push(fullUrl);
+                        }
                     }
+                }
+                // Crawl up to 5 category pages for product links
+                var maxCat = Math.min(catUrls.length, 5);
+                for (var ci = 0; ci < maxCat; ci++) {
+                    if (_crawlAbort) break;
+                    crawlUpdateUI(0, 0, 'Crawling category ' + (ci + 1) + '/' + maxCat + '...');
+                    try {
+                        var catHtml = await fetchHTML(catUrls[ci], { timeout: 15000, retries: 0 });
+                        if (catHtml) {
+                            var catDoc = parseHTML(catHtml);
+                            var catLinks = catDoc.querySelectorAll('a[href]');
+                            for (var cli = 0; cli < catLinks.length; cli++) {
+                                var catHref = catLinks[cli].getAttribute('href');
+                                if (catHref) {
+                                    var catFull = catHref;
+                                    if (catHref.indexOf('http') !== 0) {
+                                        try { catFull = new URL(catHref, catUrls[ci]).href; } catch(e) { catFull = url.replace(/\/$/, '') + '/' + catHref.replace(/^\//, ''); }
+                                    }
+                                    if (catFull.indexOf(url.replace(/\/$/, '')) === 0 && isProductUrl(catFull, platform)) {
+                                        productUrls.push(catFull);
+                                    }
+                                }
+                            }
+                        }
+                        await new Promise(function(r) { setTimeout(r, 300); });
+                    } catch(e) {}
                 }
             }
 
@@ -3074,13 +3144,20 @@
 
             if (productUrls.length === 0) {
                 _crawlRunning = false;
-                out.innerHTML = '<div class="tool-loading"><p style="color:#ef4444;">No product URLs found. Make sure the URL is a valid store and try selecting the correct platform.</p></div>';
+                out.innerHTML = '<div class="tool-loading"><p style="color:#ef4444;font-weight:700;">No product URLs found.</p>' +
+                    '<p style="font-size:13px;color:var(--gray-1);margin-top:8px;">Possible reasons:</p>' +
+                    '<ul style="font-size:13px;color:var(--gray-1);text-align:left;max-width:400px;margin:8px auto;">' +
+                    '<li>The store may block proxy requests</li>' +
+                    '<li>The store has no sitemap.xml</li>' +
+                    '<li>Select the correct platform manually</li>' +
+                    '</ul>' +
+                    '<p style="font-size:12px;color:var(--gray-2);">Tip: Try opening the store URL directly in a new tab to check if it loads.</p></div>';
                 return;
             }
 
             // Step 4: Fetch each product page
             var total = productUrls.length;
-            var batch = 5;
+            var batch = 3;
             for (var bi = 0; bi < total; bi += batch) {
                 if (_crawlAbort) break;
                 var end = Math.min(bi + batch, total);
@@ -3090,7 +3167,7 @@
                 for (var pi = bi; pi < end; pi++) {
                     (function(idx) {
                         promises.push(
-                            fetchHTML(productUrls[idx])
+                            fetchHTML(productUrls[idx], { timeout: 15000, retries: 0 })
                                 .then(function(html) {
                                     var doc = parseHTML(html);
                                     var data = extractProductData(doc, productUrls[idx]);
@@ -3103,6 +3180,7 @@
                     })(pi);
                 }
                 await Promise.all(promises);
+                await new Promise(function(r) { setTimeout(r, 500); });
 
                 // Update progress
                 var okCount = 0;
