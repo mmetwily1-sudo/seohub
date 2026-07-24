@@ -623,9 +623,11 @@
                 <div class="kr-progress" id="kr-progress"><div class="kr-progress-bar" id="kr-progress-bar" style="width:0%"></div></div>
                 <div class="tool-output" id="kr-output"><div class="tool-loading"><p data-i18n="kr_loading">Enter a seed keyword above and click Research Keywords</p></div></div>
                 <div id="kr-topic-view" style="display:none;"></div>
+                <div id="kr-gap-view" style="display:none;"></div>
                 <div id="kr-plan-view" style="display:none;"></div>
                 <div id="kr-internal-view" style="display:none;"></div>
                 <div id="kr-roadmap-view" style="display:none;"></div>
+                <div id="kr-lists-view" style="display:none;"></div>
             </div>
         </div>
     </section>    <section class="cta-section">
@@ -4842,11 +4844,16 @@
     function krEstimateVolume(keyword, position, sourceType, expansionCount) {
         var base = 0;
         var wc = keyword.split(/\s+/).length;
+        var lower = keyword.toLowerCase();
         if (sourceType === 'trending') {
-            base = 50000 + Math.floor(Math.random() * 100000);
+            base = 50000 + Math.floor(Math.random() * 150000);
+        } else if (sourceType === 'serp-features') {
+            if (position <= 3) base = 15000 + Math.floor(Math.random() * 85000);
+            else if (position <= 7) base = 8000 + Math.floor(Math.random() * 22000);
+            else base = 3000 + Math.floor(Math.random() * 7000);
         } else if (sourceType === 'google-autocomplete') {
             if (position <= 3) base = 10000 + Math.floor(Math.random() * 90000);
-            else if (position <= 7) base = 5000 + Math.floor(Math.random() * 10000);
+            else if (position <= 7) base = 5000 + Math.floor(Math.random() * 15000);
             else if (position <= 12) base = 1000 + Math.floor(Math.random() * 4000);
             else base = 200 + Math.floor(Math.random() * 800);
         } else {
@@ -4854,18 +4861,26 @@
             else if (position <= 7) base = 1000 + Math.floor(Math.random() * 2000);
             else base = 100 + Math.floor(Math.random() * 900);
         }
-        if (expansionCount && expansionCount >= 5) base = Math.round(base * 1.4);
-        else if (expansionCount && expansionCount >= 3) base = Math.round(base * 1.2);
+        if (expansionCount && expansionCount >= 5) base = Math.round(base * 1.5);
+        else if (expansionCount && expansionCount >= 3) base = Math.round(base * 1.25);
+        else if (expansionCount && expansionCount >= 2) base = Math.round(base * 1.1);
         if (wc === 1) base = Math.round(base * 1.8);
         else if (wc === 2) base = Math.round(base * 1.2);
         else if (wc === 3) base = Math.round(base * 0.7);
         else if (wc >= 5) base = Math.round(base * 0.35);
         else if (wc >= 4) base = Math.round(base * 0.5);
-        if (base >= 100000) return { volume: Math.round(base / 1000) + 'K+', level: 'very-high' };
-        if (base >= 10000) return { volume: Math.round(base / 1000) + 'K', level: 'high' };
-        if (base >= 1000) return { volume: (base / 1000).toFixed(1) + 'K', level: 'medium' };
-        if (base >= 300) return { volume: String(base), level: 'low' };
-        return { volume: String(base), level: 'very-low' };
+        var highIntent = ['buy', 'price', 'cost', 'deal', 'discount', 'order', 'subscribe', 'hire', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u062a\u062e\u0635\u0635', '\u0627\u0633\u062a\u062b\u0645\u0627\u0631'];
+        for (var i = 0; i < highIntent.length; i++) {
+            if (lower.indexOf(highIntent[i]) !== -1) { base = Math.round(base * 1.3); break; }
+        }
+        if (lower.indexOf('near me') !== -1 || lower.indexOf('\u0628\u0642\u0631\u064a\u0628') !== -1) base = Math.round(base * 0.8);
+        base = Math.max(base, 10);
+        var raw = base;
+        if (raw >= 100000) return { volume: Math.round(raw / 1000) + 'K+', level: 'very-high' };
+        if (raw >= 10000) return { volume: Math.round(raw / 1000) + 'K', level: 'high' };
+        if (raw >= 1000) return { volume: (raw / 1000).toFixed(1) + 'K', level: 'medium' };
+        if (raw >= 300) return { volume: String(raw), level: 'low' };
+        return { volume: String(raw), level: 'very-low' };
     }
 
     function krVolumeBadge(vol) {
@@ -4907,7 +4922,7 @@
         var hl = (lang || 'en').toLowerCase();
         var url = 'https://www.google.com/search?q=' + encodeURIComponent(keyword) + '&hl=' + hl + '&gl=' + gl + '&num=10';
         return fetchHTML(url).then(function(html) {
-            var result = { paa: [], related: [], featured: false, knowledgePanel: false, serpFeatures: 0 };
+            var result = { paa: [], related: [], topDomains: [], featured: false, knowledgePanel: false, serpFeatures: 0, resultCount: 0 };
             if (!html || typeof html !== 'string') return result;
             var paaMatch = html.match(/People also ask/i);
             if (paaMatch) result.serpFeatures++;
@@ -4962,6 +4977,26 @@
                     result.related.push(relatedCandidates[r]);
                 }
             }
+            var domainRegex = /https?:\/\/(?:www\.)?([^/"\s<>]+)\//g;
+            var domainMatch;
+            var domainCounts = {};
+            var organicBlock = html.indexOf('organic');
+            var searchResults = html;
+            if (organicBlock !== -1) searchResults = html.substring(organicBlock);
+            while ((domainMatch = domainRegex.exec(searchResults)) !== null) {
+                var domain = domainMatch[1].toLowerCase();
+                if (domain.indexOf('google.') === -1 && domain.indexOf('youtube.com') === -1 && domain.indexOf('gstatic') === -1 && domain.indexOf('googleapis') === -1 && domain.length > 3) {
+                    domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+                }
+            }
+            var sortedDomains = [];
+            var dKeys = Object.keys(domainCounts);
+            for (var d = 0; d < dKeys.length; d++) {
+                sortedDomains.push({ domain: dKeys[d], count: domainCounts[dKeys[d]] });
+            }
+            sortedDomains.sort(function(a, b) { return b.count - a.count; });
+            result.topDomains = sortedDomains.slice(0, 10);
+            result.resultCount = sortedDomains.length;
             var seenPaa = {};
             var cleanPaa = [];
             for (var p = 0; p < result.paa.length; p++) {
@@ -4972,7 +5007,7 @@
             result.related = result.related.slice(0, 8);
             return result;
         }).catch(function() {
-            return { paa: [], related: [], featured: false, knowledgePanel: false, serpFeatures: 0 };
+            return { paa: [], related: [], topDomains: [], featured: false, knowledgePanel: false, serpFeatures: 0, resultCount: 0 };
         });
     }
 
@@ -5029,6 +5064,125 @@
         if (total >= 3) return { icon: '\u27A1\uFE0F', text: currentLang === 'ar' ? '\u0633\u0627\u0626\u0639' : 'Stable', cls: 'kr-badge-trend-stable' };
         if (serpData.featured) return { icon: '\uD83C\uDFC6', text: currentLang === 'ar' ? '\u062a\u0631\u0636\u064a\u0646' : 'Featured', cls: 'kr-badge-trend-up' };
         return { icon: '', text: '', cls: '' };
+    }
+
+    function krExplainDifficulty(keyword, difficulty, serpData) {
+        var lower = keyword.toLowerCase();
+        var factors = [];
+        var words = lower.split(/\s+/).length;
+        if (words === 1) factors.push({ icon: '\u26A0\uFE0F', text: currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0645\u0641\u0631\u062f\u0629 - \u0645\u0646\u0627\u0641\u0633\u0629 \u0627\u0644\u062a\u0646\u0627\u0641\u0633' : 'Single word - high competition', weight: '+25' });
+        else if (words >= 4) factors.push({ icon: '\u2705', text: currentLang === 'ar' ? '\u0639\u0628\u0627\u0631\u0629 \u0637\u0648\u064a\u0644\u0629 - \u0641\u0631\u0635 \u062a\u0646\u0627\u0641\u0633 \u0623\u0642\u0644' : 'Long-tail - lower competition', weight: '-15' });
+        else factors.push({ icon: '\u26AA', text: currentLang === 'ar' ? words + ' \u0643\u0644\u0645\u0627\u062a - \u0645\u0633\u062a\u0648\u0649 \u0645\u062a\u0648\u0633\u0637' : words + ' words - medium level', weight: '+5' });
+        var brandWords = ['google', 'facebook', 'apple', 'microsoft', 'amazon', 'nike', 'adobe', 'samsung', 'huawei', 'noon', 'jarir', 'extra', 'stc', 'zain', 'tamara', 'tabby', 'careem', 'uber', 'netflix', 'chatgpt', 'openai'];
+        var hasBrand = false;
+        for (var i = 0; i < brandWords.length; i++) {
+            if (lower.indexOf(brandWords[i]) !== -1) { hasBrand = true; break; }
+        }
+        if (hasBrand) factors.push({ icon: '\u26A0\uFE0F', text: currentLang === 'ar' ? '\u064a\u062d\u062a\u0648\u064a \u0639\u0644\u0649 \u0639\u0644\u0627\u0645\u0629 \u062a\u062c\u0627\u0631\u064a\u0629 - \u0636\u0639\u064a\u0641' : 'Contains brand name - harder', weight: '+20' });
+        var questionWords = ['how', 'what', 'why', 'when', 'where', 'who', 'which', 'does', 'can', 'should', '\u0643\u064a\u0641', '\u0645\u0627', '\u0644\u0645\u0627\u0630\u0627', '\u0645\u062a\u0649', '\u063a\u064a\u0631', '\u0647\u0644'];
+        var isQuestion = false;
+        for (var i = 0; i < questionWords.length; i++) {
+            if (lower.indexOf(questionWords[i]) === 0) { isQuestion = true; break; }
+        }
+        if (isQuestion) factors.push({ icon: '\u2705', text: currentLang === 'ar' ? '\u0633\u0624\u0627\u0644 - \u0645\u064a\u0644 \u0625\u0634\u0639\u0627\u0631\u064a\u0629 \u0623\u0642\u0644' : 'Question keyword - easier', weight: '-10' });
+        var commWords = ['buy', 'cheap', 'price', 'deal', 'discount', 'best', 'top', 'review', 'free', 'online', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645', '\u062a\u0633\u0648\u064a\u0642', '\u062d\u0635\u0645'];
+        var commCount = 0;
+        for (var i = 0; i < commWords.length; i++) {
+            if (lower.indexOf(commWords[i]) !== -1) commCount++;
+        }
+        if (commCount > 0) factors.push({ icon: '\uD83D\uDCCA', text: (currentLang === 'ar' ? '\u062a\u0639\u0631\u064a\u0641\u0627\u062a \u062a\u062c\u0627\u0631\u064a\u0629: ' : 'Commercial words: ') + commCount, weight: '+' + (commCount * 3) });
+        if (serpData) {
+            if (serpData.featured) factors.push({ icon: '\u2B50', text: currentLang === 'ar' ? '\u0645\u0646\u0635\u0629 \u0645\u0645\u064a\u0632\u0629 - \u062a\u0646\u0627\u0641\u0633 \u0645\u062a\u0643\u0644\u0641' : 'Featured Snippet present - more competitive', weight: '+10' });
+            if (serpData.paa && serpData.paa.length > 0) factors.push({ icon: '\u2753', text: (currentLang === 'ar' ? 'PAA: ' : 'People Also Ask: ') + serpData.paa.length, weight: '' });
+            if (serpData.topDomains && serpData.topDomains.length > 5) factors.push({ icon: '\uD83D\uDD17', text: (currentLang === 'ar' ? '\u0645\u0648\u0627\u0642\u0639 \u0645\u062e\u062a\u0644\u0641\u0629: ' : 'Unique domains: ') + serpData.topDomains.length, weight: '' });
+        }
+        if (lower.indexOf('near me') !== -1 || lower.indexOf('\u0628\u0642\u0631\u064a\u0628') !== -1) factors.push({ icon: '\uD83D\uDCCD', text: currentLang === 'ar' ? '\u0628\u062d\u062b \u0645\u062c\u0627\u0644\u064a - \u0645\u0646\u0627\u0641\u0633' : 'Local intent - easier', weight: '-10' });
+        if (lower.indexOf('2024') !== -1 || lower.indexOf('2025') !== -1 || lower.indexOf('2026') !== -1) factors.push({ icon: '\uD83D\uDCC5', text: currentLang === 'ar' ? '\u0633\u0646\u0629 \u0645\u062d\u062f\u062f\u0629 - \u0645\u0646\u0627\u0641\u0633' : 'Year specified - easier', weight: '-5' });
+        if (lower.indexOf('free') !== -1 || lower.indexOf('\u0645\u062c\u0627\u0646\u064a') !== -1) factors.push({ icon: '\uD83D\uDCB0', text: currentLang === 'ar' ? '\u0645\u062c\u0627\u0646\u064a - \u0645\u0646\u0627\u0641\u0633' : 'Free keyword - easier', weight: '-5' });
+        var level = difficulty <= 35 ? 'easy' : difficulty <= 60 ? 'medium' : 'hard';
+        var levelLabel = level === 'easy' ? (currentLang === 'ar' ? '\u0633\u0647\u0644' : 'Easy') : level === 'medium' ? (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637' : 'Medium') : (currentLang === 'ar' ? '\u0635\u0639\u0628' : 'Hard');
+        return { level: level, levelLabel: levelLabel, score: difficulty, factors: factors };
+    }
+
+    function krGenerateBrief(keyword, intent, serpData) {
+        var brief = { title: '', metaDesc: '', headings: [], paaToAnswer: [], wordCount: '', keyPoints: [] };
+        var upperKw = keyword.charAt(0).toUpperCase() + keyword.slice(1);
+        if (intent === 'informational') {
+            brief.title = upperKw + ' - ' + (currentLang === 'ar' ? '\u062f\u0644\u064a\u0644 \u0634\u0627\u0645\u0644' : 'Complete Guide');
+            brief.metaDesc = currentLang === 'ar' ? '\u062a\u0639\u0631\u0641 \u0639\u0644\u0649 ' + keyword + ' \u0628\u0634\u0643\u0644 \u0645\u0648\u0633\u0639. \u062f\u0644\u064a\u0644 \u0634\u0627\u0645\u0644 \u064a\u062c\u064a\u0628 \u0627\u0644\u0639\u0631\u0641.' : 'Learn everything about ' + keyword + ' in this comprehensive guide.';
+            brief.headings = ['What is ' + keyword + '?', 'How does ' + keyword + ' work?', 'Benefits of ' + keyword, 'Best practices', 'FAQ'];
+            brief.wordCount = '1,500 - 2,500';
+        } else if (intent === 'transactional') {
+            brief.title = 'Best ' + upperKw + ' - ' + (currentLang === 'ar' ? '\u0623\u0641\u0636\u0644 \u0627\u0644\u0639\u0631\u0648\u0636 2025' : 'Top Deals 2025');
+            brief.metaDesc = (currentLang === 'ar' ? '\u0642\u0627\u0631\u0646 ' : 'Compare ') + keyword + (currentLang === 'ar' ? ' \u0648\u0627\u062d\u0635\u0644 \u0639\u0644\u0649 \u0623\u0641\u0636\u0644 \u0627\u0644\u0639\u0631\u0648\u0636 \u0648\u0627\u0644\u062e\u0635\u0645\u0627\u062a.' : ' and find the best deals and discounts.');
+            brief.headings = ['Top ' + keyword + ' Options', 'Price Comparison', 'Features & Specs', 'Customer Reviews', 'Where to Buy'];
+            brief.wordCount = '1,000 - 2,000';
+        } else if (intent === 'commercial') {
+            brief.title = upperKw + ' - ' + (currentLang === 'ar' ? '\u0645\u0642\u0627\u064a\u064a\u0633 \u0648\u0645\u0631\u0627\u062c\u0639\u0627\u062a 2025' : 'Reviews & Comparisons 2025');
+            brief.metaDesc = (currentLang === 'ar' ? '\u0645\u0642\u0627\u064a\u064a\u0633 \u0634\u0627\u0645\u0644 \u0644\u0644' : 'Comprehensive review of ') + keyword + (currentLang === 'ar' ? '. \u0627\u0644\u0645\u0642\u0627\u0631\u0646\u0629 \u0628\u064a\u0646 \u0627\u0644\u062e\u0635\u0645 \u0648\u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0627\u062a.' : '. Price comparison and alternatives.');
+            brief.headings = ['What is ' + keyword + '?', 'Key Features', 'Pros & Cons', 'Pricing', 'Alternatives', 'Verdict'];
+            brief.wordCount = '1,500 - 2,500';
+        } else {
+            brief.title = upperKw + ' - ' + (currentLang === 'ar' ? '\u0627\u0644\u062f\u0644\u064a\u0644 \u0627\u0644\u0631\u0633\u0645\u064a' : 'Official Information');
+            brief.metaDesc = (currentLang === 'ar' ? '\u062c\u0645\u064a\u0639 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a \u0627\u0644\u0631\u0633\u0645\u064a\u0629 \u0639\u0646 ' : 'Official information about ') + keyword;
+            brief.headings = [upperKw + ' Overview', 'Features', 'How to Access', 'Support'];
+            brief.wordCount = '800 - 1,500';
+        }
+        if (serpData && serpData.paa && serpData.paa.length > 0) {
+            brief.paaToAnswer = serpData.paa.slice(0, 5);
+            for (var p = 0; p < brief.paaToAnswer.length; p++) {
+                brief.headings.push(brief.paaToAnswer[p]);
+            }
+        }
+        if (serpData && serpData.featured) {
+            brief.keyPoints.push(currentLang === 'ar' ? '\u0627\u0643\u062a\u0628 \u062c\u0648\u0627\u0628 \u0645\u0645\u064a\u0632\u0627\u064b \u0645\u0628\u0634\u0631\u062d \u0641\u064a \u0623\u0648\u0644 200 \u062d\u0631\u0641' : 'Write a direct answer in the first 200 words');
+        }
+        if (serpData && serpData.paa && serpData.paa.length > 0) {
+            brief.keyPoints.push(currentLang === 'ar' ? '\u0623\u062c\u0628 \u0627\u0644\u0623\u0633\u0626\u0644\u0629 \u0627\u0644\u062a\u064a \u062a\u0638\u0647\u0631 PAA \u0628\u0633\u064a\u0637\u0631 \u0641\u0631\u064a\u0636\u064a\u0646 H2/H3' : 'Answer PAA questions with dedicated H2/H3 sections');
+        }
+        brief.keyPoints.push(currentLang === 'ar' ? '\u0623\u0636\u0641 \u0642\u0627\u0626\u0645\u0629 \u0628\u0635\u0648\u0631 \u0645\u0631\u062a\u0628\u0637\u0629 \u0648\u062c\u062f\u0648\u0644 \u0623\u0643\u0633\u064a\u0646\u064a\u0629' : 'Add relevant images with alt text');
+        brief.keyPoints.push(currentLang === 'ar' ? '\u0627\u0633\u062a\u062e\u062f\u0645 \u0642\u0627\u0626\u0645\u0629 \u0628\u062d\u0627\u0644\u0643 \u0645\u0639\u062a\u0645\u0631\u0636\u0629' : 'Use structured data markup');
+        return brief;
+    }
+
+    function krKeywordGap(seed, keywords) {
+        var seedWords = seed.toLowerCase().split(/\s+/);
+        var gap = { common: [], longTail: [], questions: [], easyWins: [] };
+        for (var i = 0; i < keywords.length; i++) {
+            var kw = keywords[i].keyword.toLowerCase();
+            var wc = kw.split(/\s+/).length;
+            if (wc >= 4) gap.longTail.push(keywords[i]);
+            if (keywords[i].intent === 'informational' && krHasQuestionWord(kw)) gap.questions.push(keywords[i]);
+            if (keywords[i].difficulty <= 35 && keywords[i].volumeLevel !== 'very-low') gap.easyWins.push(keywords[i]);
+        }
+        gap.easyWins.sort(function(a, b) { return b.difficulty < a.difficulty ? 1 : -1; });
+        gap.longTail = gap.longTail.slice(0, 10);
+        gap.questions = gap.questions.slice(0, 10);
+        gap.easyWins = gap.easyWins.slice(0, 10);
+        return gap;
+    }
+
+    function krSaveKeywordList(name, data) {
+        try {
+            var lists = JSON.parse(localStorage.getItem('seohub_kw_lists') || '{}');
+            lists[name] = { data: data, savedAt: new Date().toISOString() };
+            localStorage.setItem('seohub_kw_lists', JSON.stringify(lists));
+            return true;
+        } catch(e) { return false; }
+    }
+
+    function krLoadKeywordLists() {
+        try {
+            return JSON.parse(localStorage.getItem('seohub_kw_lists') || '{}');
+        } catch(e) { return {}; }
+    }
+
+    function krDeleteKeywordList(name) {
+        try {
+            var lists = JSON.parse(localStorage.getItem('seohub_kw_lists') || '{}');
+            delete lists[name];
+            localStorage.setItem('seohub_kw_lists', JSON.stringify(lists));
+        } catch(e) {}
     }
 
     function krVerifyKeywords(keywords, lang, country, onProgress) {
@@ -5577,22 +5731,253 @@
         return html;
     }
 
+    function krRenderGapAnalysis(results) {
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var gap = krKeywordGap(document.getElementById('kr-seed').value, results);
+        var html = '';
+        html += '<div style="background:linear-gradient(135deg,#eff6ff,#f0f9ff);border:2px solid #3b82f6;border-radius:16px;padding:20px;margin-bottom:20px;">';
+        html += '<h3 style="margin:0 0 16px;color:#1d4ed8;font-size:18px;">&#9878; ' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064a\u0644 \u0641\u062c\u0631\u0629 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Keyword Gap Analysis') + '</h3>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">';
+        var sections = [
+            { title: '\u{1F3AF} ' + (currentLang === 'ar' ? '\u0627\u0644\u0641\u0631\u0635 \u0627\u0644\u0633\u0647\u0644\u0629' : 'Easy Wins'), items: gap.easyWins, color: '#059669', desc: currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a \u0645\u0641\u062a\u0648\u062d\u0629 \u0628\u0633\u0647\u0648\u0644\u0629 \u0627\u0644\u062a\u0646\u0627\u0641\u0633' : 'Low KD + Decent Volume' },
+            { title: '\u{1F4DD} ' + (currentLang === 'ar' ? '\u0639\u0628\u0627\u0631\u0629 \u0637\u0648\u064a\u0644\u0629' : 'Long-Tail'), items: gap.longTail, color: '#8b5cf6', desc: currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a \u0645\u0631\u0643\u0628\u0629 \u0628\u0627\u0644\u062a\u0641\u0635\u064a\u0644 \u0627\u0644\u0639\u0645\u064a\u0642' : '4+ word phrases' },
+            { title: '\u2753 ' + (currentLang === 'ar' ? '\u0623\u0633\u0626\u0644\u0629 \u0645\u0639\u0631\u0641\u0629' : 'Questions'), items: gap.questions, color: '#f59e0b', desc: currentLang === 'ar' ? '\u064a\u0645\u0643\u0646 \u0625\u062c\u0627\u0628\u062a\u0647\u0627 \u0628\u0645\u0642\u0627\u0644\u0627\u062a PAA' : 'Can answer with PAA content' }
+        ];
+        for (var s = 0; s < sections.length; s++) {
+            var sec = sections[s];
+            html += '<div style="background:white;border-radius:12px;padding:16px;border:1px solid #e2e8f0;">';
+            html += '<h4 style="margin:0 0 8px;color:' + sec.color + ';">' + sec.title + '</h4>';
+            html += '<p style="margin:0 0 10px;font-size:12px;color:#64748b;">' + sec.desc + '</p>';
+            if (sec.items.length === 0) {
+                html += '<p style="color:#94a3b8;font-size:13px;">' + (currentLang === 'ar' ? '\u0644\u0627 \u062a\u0648\u062c\u062f \u0646\u062a\u0627\u0626\u062c' : 'No results found') + '</p>';
+            } else {
+                for (var i = 0; i < sec.items.length; i++) {
+                    var it = sec.items[i];
+                    var dLabel = krDiffLabel(it.difficulty);
+                    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;">';
+                    html += '<span style="font-size:13px;font-weight:600;">' + esc(it.keyword) + '</span>';
+                    html += '<span><span class="kr-badge ' + dLabel.cls + '" style="font-size:10px;">' + dLabel.text + ' ' + it.difficulty + '</span> ';
+                    html += '<span style="font-size:11px;color:#059669;font-weight:600;">' + it.volume + '</span></span>';
+                    html += '</div>';
+                }
+            }
+            html += '</div>';
+        }
+        html += '</div></div>';
+        var topDomainsMap = {};
+        for (var i = 0; i < results.length; i++) {
+            if (results[i].topDomains) {
+                for (var d = 0; d < results[i].topDomains.length; d++) {
+                    var dm = results[i].topDomains[d].domain;
+                    topDomainsMap[dm] = (topDomainsMap[dm] || 0) + 1;
+                }
+            }
+        }
+        var domList = [];
+        var dKeys = Object.keys(topDomainsMap);
+        for (var i = 0; i < dKeys.length; i++) domList.push({ domain: dKeys[i], count: topDomainsMap[dKeys[i]] });
+        domList.sort(function(a, b) { return b.count - a.count; });
+        if (domList.length > 0) {
+            html += '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:16px;">';
+            html += '<h4 style="margin:0 0 12px;color:#1e293b;">&#127760; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0627\u0642\u0639 \u0627\u0644\u0630\u0627\u062a \u0623\u0643\u062b\u0631 \u062a\u0631\u0636\u064a\u0646\u0627\u064b \u0641\u064a SERPs' : 'Most Frequent SERP Competitors') + '</h4>';
+            html += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+            for (var i = 0; i < Math.min(domList.length, 15); i++) {
+                html += '<span style="background:#f1f5f9;padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;color:#334155;">' + esc(domList[i].domain) + ' <span style="color:#8b5cf6;">' + domList[i].count + '</span></span>';
+            }
+            html += '</div></div>';
+        }
+        return html;
+    }
+
+    function krRenderKeywordLists(results) {
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var lists = krLoadKeywordLists();
+        var html = '';
+        html += '<div style="background:linear-gradient(135deg,#fef3c7,#fffbeb);border:2px solid #f59e0b;border-radius:16px;padding:20px;margin-bottom:20px;">';
+        html += '<h3 style="margin:0 0 16px;color:#b45309;">&#128278; ' + (currentLang === 'ar' ? '\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u062d\u0641\u0648\u0638\u0629' : 'Saved Keyword Lists') + '</h3>';
+        html += '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">';
+        html += '<button onclick="krSaveCurrentList()" style="padding:8px 16px;border-radius:100px;border:2px solid #f59e0b;background:#f59e0b;color:white;font-weight:700;cursor:pointer;font-size:13px;">' + (currentLang === 'ar' ? '\uD83D\uDCBE \u062d\u0641\u0638 \u0627\u0644\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u062d\u0627\u0644\u064a\u0629' : 'Save Current Results') + '</button>';
+        html += '<button onclick="krExportAllLists()" style="padding:8px 16px;border-radius:100px;border:2px solid #94a3b8;background:white;color:#334155;font-weight:600;cursor:pointer;font-size:13px;">' + (currentLang === 'ar' ? '\uD83D\uDCCB \u062a\u0635\u062f\u064a\u0631 \u062c\u0645\u064a\u0639 \u0627\u0644\u0642\u0648\u0627\u0626\u0645' : 'Export All Lists') + '</button>';
+        html += '</div>';
+        var listNames = Object.keys(lists);
+        if (listNames.length === 0) {
+            html += '<p style="color:#92400e;font-size:14px;text-align:center;padding:20px;">' + (currentLang === 'ar' ? '\u0644\u0645 \u062a\u062d\u0641\u0638\u0638 \u0642\u0648\u0627\u0626\u0645 \u0639\u0646\u0648\u0627\u0636 \u0628\u0639\u062f. \u0627\u0633\u062a\u062e\u062f\u0645 \u0632\u0631 \u0627\u0644\u0646\u062a\u0627\u0626\u062c \u0623\u0648\u0644\u0627\u064b \u0639\u0646\u062f \u0627\u0644\u0628\u062d\u062b \u0648\u0627\u062d\u0641\u0638 \u0647\u0646\u0627.' : 'No saved lists yet. Run a search first, then save results.') + '</p>';
+        } else {
+            for (var n = 0; n < listNames.length; n++) {
+                var name = listNames[n];
+                var listData = lists[name];
+                var kCount = listData.data ? listData.data.length : 0;
+                var savedDate = listData.savedAt ? new Date(listData.savedAt).toLocaleDateString() : '';
+                html += '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">';
+                html += '<div><strong style="font-size:14px;color:#1e293b;">' + esc(name) + '</strong>';
+                html += '<br><span style="font-size:12px;color:#64748b;">' + kCount + ' keywords &middot; ' + savedDate + '</span></div>';
+                html += '<div style="display:flex;gap:6px;">';
+                html += '<button onclick="krLoadList(\'' + esc(name) + '\')" style="padding:4px 12px;border-radius:100px;border:1px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;">' + (currentLang === 'ar' ? '\u062a\u062d\u0645\u064a\u0644' : 'Load') + '</button>';
+                html += '<button onclick="krDeleteKeywordList(\'' + esc(name) + '\');krRefreshListsView();" style="padding:4px 12px;border-radius:100px;border:1px solid #ef4444;background:#fef2f2;color:#dc2626;font-size:12px;font-weight:600;cursor:pointer;">' + (currentLang === 'ar' ? '\u062d\u0630\u0641' : 'Delete') + '</button>';
+                html += '</div></div>';
+            }
+        }
+        html += '</div>';
+        return html;
+    }
+
+    function krSaveCurrentList() {
+        var name = prompt(currentLang === 'ar' ? '\u0623\u062f\u062e\u0644 \u0627\u0633\u0645 \u0644\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0643\u0644\u0645\u0627\u062a:' : 'Enter keyword list name:');
+        if (!name || !name.trim()) return;
+        var exportData = _krResults.map(function(r) {
+            return { keyword: r.keyword, volume: r.volume, difficulty: r.difficulty, intent: r.intent, cpc: r.cpc, kei: r.kei };
+        });
+        if (krSaveKeywordList(name.trim(), exportData)) {
+            alert(currentLang === 'ar' ? '\u2714 \u062a\u0645 \u062d\u0641\u0638 \u0627\u0644\u0642\u0627\u0626\u0645\u0629 \u0628\u0646\u062c\u0627\u062d!' : 'List saved successfully!');
+            var listsView = document.getElementById('kr-lists-view');
+            if (listsView) listsView.innerHTML = krRenderKeywordLists(_krResults);
+        }
+    }
+
+    function krLoadList(name) {
+        var lists = krLoadKeywordLists();
+        if (!lists[name]) return;
+        alert(currentLang === 'ar' ? '\u2714 \u062a\u0645 \u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u0642\u0627\u0626\u0645\u0629: ' + name : 'Loaded list: ' + name);
+    }
+
+    function krRefreshListsView() {
+        var listsView = document.getElementById('kr-lists-view');
+        if (listsView && _krResults.length > 0) listsView.innerHTML = krRenderKeywordLists(_krResults);
+    }
+
+    function krExportAllLists() {
+        var lists = krLoadKeywordLists();
+        var allData = {};
+        var listNames = Object.keys(lists);
+        for (var i = 0; i < listNames.length; i++) {
+            allData[listNames[i]] = lists[listNames[i]];
+        }
+        var blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'seohub-keyword-lists.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function krShowKDExplanation(idx) {
+        var sorted = krSortData(_krFilter === 'all' ? _krResults : _krResults.filter(function(d) { return d.intent === _krFilter; }));
+        var d = sorted[idx];
+        if (!d) return;
+        var explanation = krExplainDifficulty(d.keyword, d.difficulty, d.topDomains ? { featured: d.featured, paa: d.paa || [], topDomains: d.topDomains || [], serpFeatures: d.serpFeatures } : null);
+        var panel = document.getElementById('kr-kd-panel');
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.id = 'kr-kd-panel';
+            panel.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border-radius:16px;padding:24px;box-shadow:0 25px 50px rgba(0,0,0,0.25);z-index:10000;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;';
+            document.body.appendChild(panel);
+        }
+        var overlay = document.getElementById('kr-kd-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'kr-kd-overlay';
+            overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;';
+            overlay.onclick = function() { panel.style.display = 'none'; overlay.style.display = 'none'; };
+            document.body.appendChild(overlay);
+        }
+        var levelColors = { easy: '#059669', medium: '#f59e0b', hard: '#ef4444' };
+        var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
+        html += '<h3 style="margin:0;color:#1e293b;">' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064a\u0644 \u0635\u0639\u0648\u0628\u0629 \u0627\u0644\u062a\u0646\u0627\u0641\u0633' : 'Difficulty Breakdown') + '</h3>';
+        html += '<button onclick="document.getElementById(\'kr-kd-panel\').style.display=\'none\';document.getElementById(\'kr-kd-overlay\').style.display=\'none\';" style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;">&times;</button>';
+        html += '</div>';
+        html += '<div style="text-align:center;margin-bottom:16px;">';
+        html += '<div style="width:80px;height:80px;border-radius:50%;background:' + (levelColors[explanation.level] || '#94a3b8') + ';color:white;display:inline-flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;">' + explanation.score + '</div>';
+        html += '<br><span style="font-size:16px;font-weight:700;color:' + (levelColors[explanation.level] || '#94a3b8') + ';">' + explanation.levelLabel + '</span>';
+        html += '<br><span style="font-size:13px;color:#64748b;">' + esc(d.keyword) + '</span>';
+        html += '</div>';
+        html += '<div style="background:#f8fafc;border-radius:12px;padding:12px;">';
+        for (var f = 0; f < explanation.factors.length; f++) {
+            var factor = explanation.factors[f];
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #e2e8f0;">';
+            html += '<span style="font-size:13px;">' + factor.icon + ' ' + esc(factor.text) + '</span>';
+            if (factor.weight) html += '<span style="font-size:12px;font-weight:700;color:#64748b;">' + factor.weight + '</span>';
+            html += '</div>';
+        }
+        html += '</div>';
+        html += '<button onclick="krShowContentBrief(\'' + esc(d.keyword) + '\',\'' + d.intent + '\')" style="display:block;width:100%;margin-top:16px;padding:10px;border-radius:100px;border:2px solid #3b82f6;background:#3b82f6;color:white;font-weight:700;cursor:pointer;font-size:14px;">&#128196; ' + (currentLang === 'ar' ? '\u062a\u0648\u0644\u064a\u062f \u0645\u062d\u062a\u0648\u0627\u0647 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'Generate Content Brief') + '</button>';
+        panel.innerHTML = html;
+        panel.style.display = 'block';
+        overlay.style.display = 'block';
+    }
+
+    function krShowContentBrief(keyword, intent) {
+        var kwSerp = null;
+        for (var i = 0; i < _krResults.length; i++) {
+            if (_krResults[i].keyword === keyword) {
+                kwSerp = { featured: _krResults[i].featured, paa: _krResults[i].paa || [], topDomains: _krResults[i].topDomains || [], serpFeatures: _krResults[i].serpFeatures };
+                break;
+            }
+        }
+        var brief = krGenerateBrief(keyword, intent, kwSerp);
+        var panel = document.getElementById('kr-kd-panel');
+        if (!panel) return;
+        var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
+        html += '<h3 style="margin:0;color:#1e293b;">' + (currentLang === 'ar' ? '\uD83D\uDCC4 \u062a\u0648\u0644\u064a\u062f \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'Content Brief') + '</h3>';
+        html += '<button onclick="document.getElementById(\'kr-kd-panel\').style.display=\'none\';document.getElementById(\'kr-kd-overlay\').style.display=\'none\';" style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;">&times;</button>';
+        html += '</div>';
+        html += '<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:16px;margin-bottom:12px;">';
+        html += '<label style="font-size:11px;font-weight:700;color:#0369a1;text-transform:uppercase;">' + (currentLang === 'ar' ? '\u0627\u0644\u0639\u0646\u0648\u0627\u0646' : 'Title') + '</label>';
+        html += '<p style="margin:4px 0 0;font-size:14px;font-weight:600;color:#1e293b;">' + esc(brief.title) + '</p>';
+        html += '</div>';
+        html += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px;margin-bottom:12px;">';
+        html += '<label style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;">' + (currentLang === 'ar' ? '\u0627\u0644\u0648\u0635\u0641 \u0627\u0644\u0645\u062a\u0631\u062c\u0645' : 'Meta Description') + '</label>';
+        html += '<p style="margin:4px 0 0;font-size:13px;color:#1e293b;">' + esc(brief.metaDesc) + '</p>';
+        html += '</div>';
+        html += '<div style="margin-bottom:12px;">';
+        html += '<label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">' + (currentLang === 'ar' ? '\u0627\u0644\u0641\u0642\u0631\u0627\u062a \u0627\u0644\u0645\u0642\u0635\u0648\u0631\u0629' : 'Suggested Word Count') + ': ' + brief.wordCount + '</label>';
+        html += '</div>';
+        html += '<div style="margin-bottom:12px;">';
+        html += '<label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px;display:block;">' + (currentLang === 'ar' ? '\u0627\u0644\u0641\u0642\u0631 \u0627\u0644\u0645\u0642\u0635\u0648\u0631\u0629 (H2/H3)' : 'Suggested Headings') + '</label>';
+        for (var h = 0; h < brief.headings.length; h++) {
+            html += '<div style="padding:6px 12px;margin-bottom:4px;background:#f8fafc;border-radius:8px;font-size:13px;color:#334155;">H' + (h < 3 ? (h + 2) : 3) + ': ' + esc(brief.headings[h]) + '</div>';
+        }
+        html += '</div>';
+        if (brief.keyPoints.length > 0) {
+            html += '<div style="margin-bottom:12px;">';
+            html += '<label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px;display:block;">&#128161; ' + (currentLang === 'ar' ? '\u0646\u0635\u0627\u0626\u062d' : 'Tips') + '</label>';
+            for (var k = 0; k < brief.keyPoints.length; k++) {
+                html += '<div style="padding:6px 12px;margin-bottom:4px;background:#fffbeb;border-radius:8px;font-size:13px;color:#92400e;">' + esc(brief.keyPoints[k]) + '</div>';
+            }
+            html += '</div>';
+        }
+        if (brief.paaToAnswer.length > 0) {
+            html += '<div style="margin-bottom:12px;">';
+            html += '<label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px;display:block;">&#10067; ' + (currentLang === 'ar' ? '\u0623\u0633\u0626\u0644\u0629 PAA \u0644\u0644\u0625\u062c\u0627\u0628\u0629' : 'PAA Questions to Answer') + '</label>';
+            for (var p = 0; p < brief.paaToAnswer.length; p++) {
+                html += '<div style="padding:6px 12px;margin-bottom:4px;background:#fef3c7;border-radius:8px;font-size:13px;color:#92400e;">' + esc(brief.paaToAnswer[p]) + '</div>';
+            }
+            html += '</div>';
+        }
+        html += '<button onclick="krShowKDExplanation(0)" style="display:block;width:100%;padding:8px;border-radius:100px;border:1px solid #94a3b8;background:white;color:#334155;font-weight:600;cursor:pointer;font-size:13px;">\u2190 ' + (currentLang === 'ar' ? '\u0639\u0648\u062f\u0629' : 'Back') + '</button>';
+        panel.innerHTML = html;
+    }
+
     function krSwitchView(view) {
         _krActiveView = view;
         var btns = document.querySelectorAll('.kr-view-btn');
         for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
-        var viewMap = { table: 0, topics: 1, plan: 2, links: 3, roadmap: 4 };
+        var viewMap = { table: 0, topics: 1, gap: 2, plan: 3, links: 4, roadmap: 5, lists: 6 };
         if (btns[viewMap[view]]) btns[viewMap[view]].classList.add('active');
         var output = document.getElementById('kr-output');
         var topicView = document.getElementById('kr-topic-view');
         var planView = document.getElementById('kr-plan-view');
         var linksView = document.getElementById('kr-internal-view');
         var roadmapView = document.getElementById('kr-roadmap-view');
+        var gapView = document.getElementById('kr-gap-view');
+        var listsView = document.getElementById('kr-lists-view');
         output.style.display = (view === 'table') ? '' : 'none';
         topicView.style.display = (view === 'topics') ? '' : 'none';
         planView.style.display = (view === 'plan') ? '' : 'none';
         linksView.style.display = (view === 'links') ? '' : 'none';
         roadmapView.style.display = (view === 'roadmap') ? '' : 'none';
+        if (gapView) gapView.style.display = (view === 'gap') ? '' : 'none';
+        if (listsView) listsView.style.display = (view === 'lists') ? '' : 'none';
         if (view === 'topics' && _krTopicTree.length > 0) {
             topicView.innerHTML = krRenderTopicView(_krTopicTree);
             _krActiveTopic = 0;
@@ -5603,6 +5988,10 @@
             linksView.innerHTML = krRenderInternalLinks(_krTopicTree);
         } else if (view === 'roadmap' && _krTopicTree.length > 0) {
             roadmapView.innerHTML = krRenderRoadmap(_krTopicTree);
+        } else if (view === 'gap' && _krResults.length > 0) {
+            if (gapView) gapView.innerHTML = krRenderGapAnalysis(_krResults);
+        } else if (view === 'lists' && _krResults.length > 0) {
+            if (listsView) listsView.innerHTML = krRenderKeywordLists(_krResults);
         }
     }
 
@@ -5717,7 +6106,7 @@
             html += '<td style="font-weight:600;color:var(--gray-1);">' + (i + 1) + '</td>';
             html += '<td><strong>' + kw + trendingBadge + srcBadge + srcBadge2 + '</strong></td>';
             html += '<td>' + volBadge + '</td>';
-            html += '<td><span class="kr-badge ' + diff.cls + '">' + diff.text + ' (' + d.difficulty + ')</span></td>';
+            html += '<td><span class="kr-badge ' + diff.cls + '" style="cursor:pointer;" onclick="krShowKDExplanation(' + i + ')" title="Click for explanation">' + diff.text + ' (' + d.difficulty + ')</span></td>';
             html += '<td><span style="color:' + keiColor + ';font-weight:700;font-size:12px;">' + keiVal + ' <span style="font-size:10px;">' + keiLabel + '</span></span></td>';
             html += '<td><span class="kr-badge ' + intent.cls + '">' + intent.text + '</span></td>';
             html += '<td>' + d.cpc + '</td>';
@@ -5933,6 +6322,10 @@
         if (planView) planView.style.display = 'none';
         if (linksView) linksView.style.display = 'none';
         if (roadmapView) roadmapView.style.display = 'none';
+        var gapView = document.getElementById('kr-gap-view');
+        var listsView = document.getElementById('kr-lists-view');
+        if (gapView) gapView.style.display = 'none';
+        if (listsView) listsView.style.display = 'none';
         out.innerHTML = '<div class="tool-loading"><p>' + t.kr_fetching + '</p></div>';
         krUpdateProgress(0);
 
@@ -6135,7 +6528,9 @@
                     serpFeatures: serpFeat,
                     trendDir: trendDir,
                     paa: kwSerp ? kwSerp.paa : [],
-                    related: kwSerp ? kwSerp.related : []
+                    related: kwSerp ? kwSerp.related : [],
+                    topDomains: kwSerp ? kwSerp.topDomains : [],
+                    featured: kwSerp ? kwSerp.featured : false
                 });
             }
             results.sort(function(a, b) {
@@ -6162,11 +6557,13 @@
                     '</div>';
             }
             var viewBar = '<div class="kr-view-bar">';
-            viewBar += '<button class="kr-view-btn active" onclick="krSwitchView(\'table\')">&#128202; ' + (currentLang === 'ar' ? '\u062c\u062f\u0648\u0644' : 'Table') + '</button>';
-            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'topics\')">&#128193; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0627\u0636\u064a\u0639 (' + _krTopicTree.length + ')' : 'Topics (' + _krTopicTree.length + ')') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'table\')">&#128202; ' + (currentLang === 'ar' ? '\u062c\u062f\u0648\u0644' : 'Table') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'topics\')">&#128193; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0627\u0636\u0639 (' + _krTopicTree.length + ')' : 'Topics (' + _krTopicTree.length + ')') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'gap\')">&#9878; ' + (currentLang === 'ar' ? '\u0627\u0644\u062a\u062d\u0644\u064a\u0644' : 'Gap Analysis') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'plan\')">&#128197; ' + (currentLang === 'ar' ? '\u062e\u0637\u0629 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'Content Plan') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'links\')">&#128279; ' + (currentLang === 'ar' ? '\u0627\u0644\u0631\u0628\u0637\u0627\u062a' : 'Links') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'roadmap\')">&#128640; ' + (currentLang === 'ar' ? '\u0627\u0644\u062e\u0637\u062a\u0629' : 'Roadmap') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'lists\')">&#128278; ' + (currentLang === 'ar' ? '\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Lists') + '</button>';
             viewBar += '</div>';
             out.innerHTML = proxyWarning + viewBar + krRenderTable(results);
             setTimeout(function() {
