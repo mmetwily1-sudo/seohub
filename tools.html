@@ -619,8 +619,10 @@
                     <label class="kr-opt"><input type="checkbox" id="kr-opt-prepositions" checked> <span data-i18n="kr_opt_prep">Prepositions</span></label>
                     <label class="kr-opt"><input type="checkbox" id="kr-opt-comparisons" checked> <span data-i18n="kr_opt_compare">Comparisons</span></label>
                     <button class="kr-btn" id="kr-test-btn" onclick="krTestProxy()" style="background:#6366f1;color:#fff;margin-left:8px;font-size:12px;padding:4px 10px;">&#9889; <span data-i18n="kr_test_proxy">Test Connection</span></button>
+                    <button class="kr-btn" onclick="krRunCompetitorLookup()" style="background:#f59e0b;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#127760; Competitor Lookup</button>
                 </div>
                 <div class="kr-progress" id="kr-progress"><div class="kr-progress-bar" id="kr-progress-bar" style="width:0%"></div></div>
+                <div id="kr-competitor-output" style="display:none;margin-bottom:16px;"></div>
                 <div class="tool-output" id="kr-output"><div class="tool-loading"><p data-i18n="kr_loading">Enter a seed keyword above and click Research Keywords</p></div></div>
                 <div id="kr-topic-view" style="display:none;"></div>
                 <div id="kr-gap-view" style="display:none;"></div>
@@ -4711,7 +4713,9 @@
             'how to', 'what is', 'why is', 'when to', 'where to', 'who is',
             'is it', 'are there', 'can you', 'does', 'should i', 'what are',
             'how do', 'how can', 'what makes', 'which', 'when should',
-            'why do', 'where can', 'who should'
+            'why do', 'where can', 'who should',
+            'how much', 'how long', 'how many', 'is there', 'what does',
+            'which is better', 'how to choose', 'what to look for'
         ];
         var prefixes_ar = [
             '\u0643\u064a\u0641', '\u0645\u0627 \u0647\u0648', '\u0644\u0645\u0627\u0630\u0627', '\u0645\u062a\u0649',
@@ -4725,6 +4729,11 @@
             '\u0643\u064a\u0641 \u064a\u0645\u0643\u0646 \u0627\u0633\u062a\u062e\u062f\u0627\u0645', '\u0643\u064a\u0641 \u064a\u0645\u0643\u0646 \u0634\u0631\u0627\u0621',
             '\u0645\u0627 \u0623\u0641\u0636\u0644 \u0637\u0631\u064a\u0642\u0629 \u0644\u0645\u0634\u0631\u0648\u0639', '\u0645\u0627 \u0623\u0641\u0636\u0644 \u0637\u0631\u064a\u0642\u0629 \u0644\u0644\u0645\u0646\u0635\u0629',
             '\u0643\u064a\u0641 \u062a\u0646\u0632\u064a\u0644', '\u0643\u064a\u0641 \u062a\u0631\u062a\u0628', '\u0643\u064a\u0641 \u062a\u0633\u062a\u062e\u062f\u0645 \u0633\u062a\u0627\u0631',
+            '\u0647\u0644 \u064a\u0645\u0643\u0646 \u062a\u062d\u0635\u064a\u0644 \u0645\u0646', '\u0647\u0644 \u064a\u0645\u0643\u0646 \u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u0641\u064a',
+            '\u0643\u064a\u0641 \u0623\u0633\u062a\u062e\u062f\u0645 \u0641\u064a', '\u0645\u0627 \u0647\u064a \u0627\u0644\u0641\u0631\u0642 \u0628\u064a\u0646 \u0627\u0644\u0623\u0633\u0639\u0627\u0631',
+            '\u0643\u064a\u0641 \u0623\u0633\u062a\u062e\u062f\u0645 \u0641\u064a', '\u0645\u0627 \u0647\u064a \u0623\u0641\u0636\u0644 \u0645\u0648\u0642\u0639 \u0644\u0644\u0645\u0648\u0633\u0648\u0639\u0629',
+            '\u0643\u064a\u0641 \u062a\u0633\u062a\u062e\u062f\u0645 \u0641\u064a', '\u0645\u0627 \u0647\u064a \u0623\u0631\u0636\u0644 \u0645\u0648\u0642\u0639 \u0644\u0644\u0645\u062c\u0627\u0644\u0629',
+            '\u0643\u064a\u0641 \u062a\u0631\u062a\u0628', '\u0643\u064a\u0641 \u062a\u0633\u062a\u062e\u062f\u0645 \u0633\u062a\u0627\u0631',
             '\u0647\u0644 \u064a\u0645\u0643\u0646 \u062a\u062d\u0635\u064a\u0644 \u0645\u0646', '\u0647\u0644 \u064a\u0645\u0643\u0646 \u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u0641\u064a'
         ];
         var prefixes = prefixes_en;
@@ -5066,6 +5075,212 @@
         return { icon: '', text: '', cls: '' };
     }
 
+    function krEstimateCTR(serpFeatures, position) {
+        var baseCTR = 31.7;
+        if (position === 1) baseCTR = 31.7;
+        else if (position === 2) baseCTR = 24.7;
+        else if (position === 3) baseCTR = 18.6;
+        else if (position <= 5) baseCTR = 10.5;
+        else if (position <= 10) baseCTR = 3.5;
+        else baseCTR = 1.2;
+        var reduction = 0;
+        if (serpFeatures >= 4) reduction = 45;
+        else if (serpFeatures >= 3) reduction = 35;
+        else if (serpFeatures >= 2) reduction = 22;
+        else if (serpFeatures >= 1) reduction = 12;
+        var estimatedCTR = Math.max(baseCTR * (1 - reduction / 100), 0.5);
+        var lostClicks = baseCTR - estimatedCTR;
+        return { estimatedCTR: Math.round(estimatedCTR * 10) / 10, lostClicks: Math.round(lostClicks * 10) / 10, reduction: reduction };
+    }
+
+    function krEstimateDA(topDomains, serpFeatures) {
+        if (!topDomains || topDomains.length === 0) return { score: 30, level: 'low', label: currentLang === 'ar' ? '\u0645\u0646\u062d\u0641\u0636' : 'Low' };
+        var totalDomains = topDomains.length;
+        var uniqueDomains = topDomains.length;
+        var bigBrandDomains = ['amazon', 'wikipedia', 'youtube', 'reddit', 'quora', 'medium', 'github', 'linkedin', 'twitter', 'facebook', 'apple', 'microsoft', 'google', 'tripadvisor', 'yelp', 'noon', 'jarir', 'extra', 'hag', 'amazon.sa', 'souq'];
+        var brandCount = 0;
+        var brandNames = [];
+        for (var i = 0; i < topDomains.length; i++) {
+            for (var b = 0; b < bigBrandDomains.length; b++) {
+                if (topDomains[i].domain.indexOf(bigBrandDomains[b]) !== -1) {
+                    brandCount++;
+                    if (brandNames.indexOf(bigBrandDomains[b]) === -1) brandNames.push(bigBrandDomains[b]);
+                    break;
+                }
+            }
+        }
+        var brandRatio = totalDomains > 0 ? brandCount / totalDomains : 0;
+        var concentration = 0;
+        if (topDomains.length > 0 && topDomains[0].count) {
+            concentration = topDomains[0].count / Math.max(totalDomains, 1);
+        }
+        var daScore = 50;
+        if (brandRatio > 0.5) daScore += 25;
+        else if (brandRatio > 0.3) daScore += 15;
+        else if (brandRatio > 0.1) daScore += 5;
+        if (serpFeatures >= 3) daScore += 10;
+        else if (serpFeatures >= 2) daScore += 5;
+        if (uniqueDomains >= 8) daScore -= 10;
+        else if (uniqueDomains <= 3) daScore += 10;
+        if (concentration > 0.5) daScore += 15;
+        if (daScore > 95) daScore = 95;
+        if (daScore < 15) daScore = 15;
+        var level = daScore >= 70 ? 'high' : daScore >= 45 ? 'medium' : 'low';
+        var label = level === 'high' ? (currentLang === 'ar' ? '\u0639\u0627\u0644\u064a' : 'High') : level === 'medium' ? (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637' : 'Medium') : (currentLang === 'ar' ? '\u0645\u0646\u062e\u0641\u0636' : 'Low');
+        return { score: daScore, level: level, label: label, brands: brandNames, brandRatio: Math.round(brandRatio * 100) };
+    }
+
+    function krDetectCannibalization(results) {
+        var groups = [];
+        var used = {};
+        for (var i = 0; i < results.length; i++) {
+            if (used[i]) continue;
+            var group = [results[i]];
+            used[i] = true;
+            var kw1 = results[i].keyword.toLowerCase().split(/\s+/);
+            for (var j = i + 1; j < results.length; j++) {
+                if (used[j]) continue;
+                var kw2 = results[j].keyword.toLowerCase().split(/\s+/);
+                var overlap = 0;
+                for (var a = 0; a < kw1.length; a++) {
+                    for (var b = 0; b < kw2.length; b++) {
+                        if (kw1[a] === kw2[b] && kw1[a].length > 2) overlap++;
+                    }
+                }
+                var minLen = Math.min(kw1.length, kw2.length);
+                if (minLen > 0 && overlap / minLen >= 0.6 && Math.abs(kw1.length - kw2.length) <= 2) {
+                    group.push(results[j]);
+                    used[j] = true;
+                }
+            }
+            if (group.length >= 2) groups.push(group);
+        }
+        return groups;
+    }
+
+    function krExportHTMLReport(results, seed) {
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var highCount = results.filter(function(d) { return d.volumeLevel === 'high' || d.volumeLevel === 'very-high'; }).length;
+        var easyCount = results.filter(function(d) { return d.difficulty <= 35; }).length;
+        var questionCount = results.filter(function(d) { return d.intent === 'informational' && krHasQuestionWord(d.keyword); }).length;
+        var cannibalGroups = krDetectCannibalization(results);
+        var html = '<!DOCTYPE html><html lang="' + (currentLang === 'ar' ? 'ar' : 'en') + '"><head>';
+        html += '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
+        html += '<title>SEOHub Keyword Report - ' + esc(seed) + '</title>';
+        html += '<style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;margin:40px;background:#f8fafc;color:#1e293b;line-height:1.6}';
+        html += '.header{background:linear-gradient(135deg,#0ea5e9,#3b82f6);color:white;padding:30px;border-radius:16px;margin-bottom:30px}';
+        html += '.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:30px}';
+        html += '.stat{background:white;padding:16px;border-radius:12px;text-align:center;border:1px solid #e2e8f0}';
+        html += '.stat-num{font-size:24px;font-weight:800;color:#0ea5e9;display:block}.stat-label{font-size:12px;color:#64748b}';
+        html += 'table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;margin-bottom:20px}';
+        html += 'th{background:#f1f5f9;padding:10px 12px;text-align:left;font-size:12px;font-weight:700;color:#475569}';
+        html += 'td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:13px}';
+        html += '.badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;color:white}';
+        html += '.easy{background:#059669}.medium{background:#f59e0b}.hard{background:#ef4444}';
+        html += '.info{background:#0ea5e9}.trans{background:#8b5cf6}.nav{background:#6366f1}.comm{background:#f59e0b}';
+        html += '.section{background:white;padding:20px;border-radius:12px;margin-bottom:20px;border:1px solid #e2e8f0}';
+        html += '.section h3{margin:0 0 12px;color:#1e293b;font-size:16px}';
+        html += '.footer{text-align:center;padding:20px;color:#94a3b8;font-size:12px}';
+        html += '</style></head><body>';
+        html += '<div class="header"><h1 style="margin:0;font-size:28px;">SEOHub Keyword Research Report</h1>';
+        html += '<p style="margin:8px 0 0;opacity:0.9;">Seed: <strong>' + esc(seed) + '</strong> | ' + results.length + ' keywords | ' + new Date().toLocaleDateString() + '</p></div>';
+        html += '<div class="stats">';
+        html += '<div class="stat"><span class="stat-num">' + results.length + '</span><span class="stat-label">' + t.kr_total + '</span></div>';
+        html += '<div class="stat"><span class="stat-num" style="color:#059669;">' + highCount + '</span><span class="stat-label">High Volume</span></div>';
+        html += '<div class="stat"><span class="stat-num" style="color:#10b981;">' + easyCount + '</span><span class="stat-label">Easy (KD&lt;35)</span></div>';
+        html += '<div class="stat"><span class="stat-num" style="color:#f59e0b;">' + questionCount + '</span><span class="stat-label">Questions</span></div>';
+        var totalSerp = 0;
+        var totalPaa = 0;
+        for (var i = 0; i < results.length; i++) { totalSerp += results[i].serpFeatures || 0; totalPaa += (results[i].paa || []).length; }
+        html += '<div class="stat"><span class="stat-num" style="color:#8b5cf6;">' + totalSerp + '</span><span class="stat-label">SERP Features</span></div>';
+        html += '<div class="stat"><span class="stat-num" style="color:#0ea5e9;">' + totalPaa + '</span><span class="stat-label">PAA Found</span></div>';
+        html += '</div>';
+        if (cannibalGroups.length > 0) {
+            html += '<div class="section" style="border-color:#fbbf24;">';
+            html += '<h3>\u26A0\uFE0F ' + (currentLang === 'ar' ? '\u062a\u0646\u0627\u0641\u0633 \u0645\u062a\u0634\u0627\u0628\u0647' : 'Cannibalization Detected') + '</h3>';
+            for (var g = 0; g < cannibalGroups.length; g++) {
+                html += '<div style="background:#fef3c7;padding:10px;border-radius:8px;margin-bottom:8px;font-size:13px;">';
+                html += '<strong>Group ' + (g + 1) + ':</strong> ';
+                for (var k = 0; k < cannibalGroups[g].length; k++) {
+                    html += '<span style="background:#fde68a;padding:2px 8px;border-radius:4px;margin:2px;display:inline-block;">' + esc(cannibalGroups[g][k].keyword) + '</span>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        html += '<table><thead><tr><th>#</th><th>Keyword</th><th>Volume</th><th>Difficulty</th><th>Intent</th><th>CPC</th><th>SERPs</th></tr></thead><tbody>';
+        for (var i = 0; i < results.length; i++) {
+            var d = results[i];
+            var diffCls = d.difficulty <= 35 ? 'easy' : d.difficulty <= 60 ? 'medium' : 'hard';
+            var intentCls = d.intent === 'informational' ? 'info' : d.intent === 'transactional' ? 'trans' : d.intent === 'navigational' ? 'nav' : 'comm';
+            html += '<tr><td>' + (i + 1) + '</td><td><strong>' + esc(d.keyword) + '</strong></td>';
+            html += '<td>' + d.volume + '</td>';
+            html += '<td><span class="badge ' + diffCls + '">' + d.difficulty + '</span></td>';
+            html += '<td><span class="badge ' + intentCls + '">' + d.intent + '</span></td>';
+            html += '<td>' + d.cpc + '</td>';
+            html += '<td>' + (d.serpFeatures || 0) + '</td></tr>';
+        }
+        html += '</tbody></table>';
+        html += '<div class="footer">Generated by SEOHub - Free SEO Tools | seohub.mmetwily1.workers.dev</div>';
+        html += '</body></html>';
+        var blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'keyword-report-' + seed.replace(/\s+/g, '-') + '.html';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    }
+
+    function krCompetitorLookup(domain, lang, country) {
+        var gl = (country || 'us').toLowerCase();
+        var hl = (lang || 'en').toLowerCase();
+        var url = 'https://www.google.com/search?q=site:' + encodeURIComponent(domain) + '&hl=' + hl + '&gl=' + gl + '&num=20';
+        return fetchHTML(url).then(function(html) {
+            var result = { domain: domain, keywords: [], titles: [], snippets: [] };
+            if (!html || typeof html !== 'string') return result;
+            var titleRegex = /<title[^>]*>(.*?)<\/title>/gi;
+            var titleMatch;
+            while ((titleMatch = titleRegex.exec(html)) !== null) {
+                var t = titleMatch[1].replace(/<[^>]+>/g, '').replace(/&[^;]+;/g, ' ').trim();
+                if (t && t.length > 3 && t.length < 200) result.titles.push(t);
+            }
+            var descRegex = /<meta\s+name="description"\s+content="([^"]+)"/gi;
+            var descMatch;
+            while ((descMatch = descRegex.exec(html)) !== null) {
+                var d = descMatch[1].replace(/<[^>]+>/g, '').replace(/&[^;]+;/g, ' ').trim();
+                if (d && d.length > 10) result.snippets.push(d);
+            }
+            var combined = result.titles.join(' ').toLowerCase() + ' ' + result.snippets.join(' ').toLowerCase();
+            var stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'it', 'this', 'that', 'are', 'was', 'be', 'has', 'had', 'have', 'will', 'can', 'our', 'your', 'we', 'you', 'not', 'all', 'from', 'more', 'best', 'top', 'new', 'official', '\u0645\u0646', '\u0641\u064a', '\u0639\u0644\u0649', '\u0627\u0644\u0630\u064a', '\u0647\u0630\u0627', '\u0647\u064a', '\u062a\u064a', '\u062e\u0635\u0648\u0635\u064a\u0627\u062a'];
+            var words = combined.split(/[\s,.\-!?;:()\[\]{}|\\/"]+/);
+            var freq = {};
+            for (var w = 0; w < words.length; w++) {
+                var word = words[w].trim();
+                if (word.length < 3 || word.length > 30) continue;
+                var isStop = false;
+                for (var s = 0; s < stopWords.length; s++) {
+                    if (word === stopWords[s]) { isStop = true; break; }
+                }
+                if (isStop) continue;
+                freq[word] = (freq[word] || 0) + 1;
+            }
+            var sorted = [];
+            var fKeys = Object.keys(freq);
+            for (var f = 0; f < fKeys.length; f++) {
+                sorted.push({ word: fKeys[f], count: freq[fKeys[f]] });
+            }
+            sorted.sort(function(a, b) { return b.count - a.count; });
+            for (var i = 0; i < Math.min(sorted.length, 30); i++) {
+                result.keywords.push(sorted[i].word);
+            }
+            return result;
+        }).catch(function() {
+            return { domain: domain, keywords: [], titles: [], snippets: [] };
+        });
+    }
+
     function krExplainDifficulty(keyword, difficulty, serpData) {
         var lower = keyword.toLowerCase();
         var factors = [];
@@ -5160,6 +5375,49 @@
         gap.questions = gap.questions.slice(0, 10);
         gap.easyWins = gap.easyWins.slice(0, 10);
         return gap;
+    }
+
+    function krRunCompetitorLookup() {
+        var domain = prompt(currentLang === 'ar' ? '\u0623\u062f\u062e\u0644 \u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u0645\u0646\u0627\u0641\u0633 (e.g. amazon.sa, jarir.com):' : 'Enter competitor domain (e.g. amazon.sa, jarir.com):');
+        if (!domain || !domain.trim()) return;
+        domain = domain.trim().replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/.*$/, '');
+        var lang = document.getElementById('kr-lang').value;
+        var country = document.getElementById('kr-country').value;
+        var out = document.getElementById('kr-competitor-output');
+        if (!out) return;
+        out.style.display = 'block';
+        out.innerHTML = '<div class="tool-loading"><p>\u23F3 ' + (currentLang === 'ar' ? '\u062c\u0627\u0631\u064d \u062a\u062d\u0644\u064a\u0644 ' + domain + '...' : 'Analyzing ' + domain + '...') + '</p></div>';
+        krCompetitorLookup(domain, lang, country).then(function(result) {
+            var html = '<div style="background:linear-gradient(135deg,#fef3c7,#fffbeb);border:2px solid #f59e0b;border-radius:16px;padding:20px;margin-bottom:16px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+            html += '<h3 style="margin:0;color:#b45309;">&#127760; ' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064a\u0644 ' : 'Competitor Analysis: ') + esc(domain) + '</h3>';
+            html += '<button onclick="document.getElementById(\'kr-competitor-output\').style.display=\'none\';" style="background:none;border:none;font-size:20px;cursor:pointer;color:#92400e;">&times;</button>';
+            html += '</div>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px;">';
+            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:24px;font-weight:800;color:#b45309;">' + result.titles.length + '</span><br><span style="font-size:12px;color:#64748b;">' + (currentLang === 'ar' ? '\u0635\u0641\u062d\u0627\u062a \u0645\u0641\u0631\u0648\u0636\u0629' : 'Indexed Pages') + '</span></div>';
+            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:24px;font-weight:800;color:#b45309;">' + result.keywords.length + '</span><br><span style="font-size:12px;color:#64748b;">' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a \u0645\u0641\u062a\u0627\u062d\u0629' : 'Keywords Found') + '</span></div>';
+            html += '</div>';
+            if (result.keywords.length > 0) {
+                html += '<h4 style="margin:0 0 8px;color:#92400e;">&#128269; ' + (currentLang === 'ar' ? '\u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0643\u0634\u0648\u0641\u0629:' : 'Discovered Keywords:') + '</h4>';
+                html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+                for (var i = 0; i < result.keywords.length; i++) {
+                    html += '<span style="background:white;padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid #fde68a;color:#92400e;">' + esc(result.keywords[i]) + '</span>';
+                }
+                html += '</div>';
+            }
+            if (result.titles.length > 0) {
+                html += '<h4 style="margin:12px 0 8px;color:#92400e;">&#128196; ' + (currentLang === 'ar' ? '\u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646:' : 'Page Titles:') + '</h4>';
+                html += '<div style="max-height:200px;overflow-y:auto;">';
+                for (var i = 0; i < Math.min(result.titles.length, 10); i++) {
+                    html += '<div style="background:white;padding:8px 12px;border-radius:8px;margin-bottom:4px;font-size:13px;border-left:3px solid #f59e0b;">' + esc(result.titles[i]) + '</div>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+            out.innerHTML = html;
+        }).catch(function() {
+            out.innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:12px;padding:16px;color:#991b1b;">' + (currentLang === 'ar' ? '\u2716 \u0641\u0634\u0644 \u0627\u0644\u062a\u062d\u0644\u064a\u0644' : 'Analysis failed') + '</div>';
+        });
     }
 
     function krSaveKeywordList(name, data) {
@@ -6048,9 +6306,14 @@
             if (data[i].kei && data[i].kei > 0) { totalKei += data[i].kei; keiCount++; }
         }
         var avgKei = keiCount > 0 ? Math.round(totalKei / keiCount) : 0;
+        var cannibalGroups = krDetectCannibalization(data);
+        var cannibalCount = cannibalGroups.length;
         html2 += '<div class="kr-stat" style="border-left:3px solid #8b5cf6;"><span class="kr-stat-num" style="color:#8b5cf6;">' + totalSerp + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? '\u0645\u064a\u0632\u0627\u0646\u064a\u0627\u062a SERP' : 'SERP Ftrs') + '</span></div>';
         html2 += '<div class="kr-stat" style="border-left:3px solid #0ea5e9;"><span class="kr-stat-num" style="color:#0ea5e9;">' + totalPaa + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? 'PAA' : 'PAA') + '</span></div>';
         html2 += '<div class="kr-stat" style="border-left:3px solid #059669;"><span class="kr-stat-num" style="color:#059669;">' + avgKei + '</span><span class="kr-stat-label">KEI</span></div>';
+        if (cannibalCount > 0) {
+            html2 += '<div class="kr-stat" style="border-left:3px solid #ef4444;"><span class="kr-stat-num" style="color:#ef4444;">' + cannibalCount + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? '\u062a\u0646\u0627\u0641\u0633' : 'Cannibal') + '</span></div>';
+        }
         html2 += '</div>';
         html += html2;
         html += '<div class="kr-filters">';
@@ -6069,6 +6332,7 @@
         html += '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">';
         html += '<button class="kr-btn kr-btn-export" onclick="krExportCSV()">' + t.kr_btn_export + '</button>';
         html += '<button class="kr-btn kr-btn-copy" onclick="krCopyAll()">' + t.kr_btn_copy + '</button>';
+        html += '<button class="kr-btn kr-btn-export" style="background:#3b82f6;color:white;border-color:#3b82f6;" onclick="krExportHTMLReport(_krResults, document.getElementById(\'kr-seed\').value)">&#128196; ' + (currentLang === 'ar' ? '\u062a\u0642\u0631\u064a\u0631 HTML' : 'HTML Report') + '</button>';
         html += '</div>';
         html += '<div class="kr-table-wrap"><table class="kr-table" id="kr-table">';
         html += '<thead><tr>';
@@ -6530,7 +6794,9 @@
                     paa: kwSerp ? kwSerp.paa : [],
                     related: kwSerp ? kwSerp.related : [],
                     topDomains: kwSerp ? kwSerp.topDomains : [],
-                    featured: kwSerp ? kwSerp.featured : false
+                    featured: kwSerp ? kwSerp.featured : false,
+                    ctr: krEstimateCTR(serpFeat, 1),
+                    da: krEstimateDA(kwSerp ? kwSerp.topDomains : [], serpFeat)
                 });
             }
             results.sort(function(a, b) {
