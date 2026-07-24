@@ -521,21 +521,36 @@
                     </div>
                     <div class="kr-field">
                         <label data-i18n="kr_label_country">Country</label>
-                        <select id="kr-country">
+                        <select id="kr-country" onchange="krAutoLang()">
                             <option value="">All</option>
-                            <option value="US" selected>United States</option>
-                            <option value="SA">\u0627\u0644\u0645\u0645\u0644\u0643\u0629 \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u0627\u0644\u0633\u0639\u0648\u062f\u064a\u0629</option>
+                            <option value="SA" selected>\u0627\u0644\u0645\u0645\u0644\u0643\u0629 \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u0627\u0644\u0633\u0639\u0648\u062f\u064a\u0629</option>
+                            <option value="AE">\u0627\u0644\u0625\u0645\u0627\u0631\u0627\u062a \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u0627\u0644\u0645\u062a\u062d\u062f\u0629</option>
+                            <option value="KW">\u0627\u0644\u0643\u0648\u064a\u062a</option>
+                            <option value="QA">\u0642\u0637\u0631</option>
+                            <option value="BH">\u0627\u0644\u0628\u062d\u0631\u064a\u0646</option>
+                            <option value="OM">\u0639\u064f\u0645\u0627\u0646</option>
+                            <option value="JO">\u0627\u0644\u0623\u0631\u062f\u0646</option>
+                            <option value="LB">\u0644\u0628\u0646\u0627\u0646</option>
+                            <option value="IQ">\u0627\u0644\u0639\u0631\u0627\u0642</option>
                             <option value="EG">\u0645\u0635\u0631</option>
-                            <option value="AE">\u0627\u0644\u0625\u0645\u0627\u0631\u0627\u062a</option>
+                            <option value="MA">\u0627\u0644\u0645\u063a\u0631\u0628</option>
+                            <option value="TN">\u062a\u0648\u0646\u0633</option>
+                            <option value="DZ">\u0627\u0644\u062c\u0632\u0627\u0626\u0631</option>
+                            <option value="LY">\u0644\u064a\u0628\u064a\u0627</option>
+                            <option value="SD">\u0627\u0644\u0633\u0648\u062f\u0627\u0646</option>
+                            <option value="PS">\u0641\u0644\u0633\u0637\u064a\u0646</option>
+                            <option value="SY">\u0633\u0648\u0631\u064a\u0627</option>
+                            <option value="YE">\u0627\u0644\u064a\u0645\u0646</option>
+                            <option value="MR">\u0645\u0648\u0631\u064a\u062a\u0627\u0646\u064a\u0627</option>
+                            <option value="DJ">\u062c\u064a\u0628\u0648\u062a\u064a</option>
+                            <option value="KM">\u062c\u0632\u0631 \u0627\u0644\u0642\u0645\u0631</option>
+                            <option value="SO">\u0627\u0644\u0635\u0648\u0645\u0627\u0644</option>
+                            <option value="UG">\u0623\u0648\u063a\u0646\u062f\u0627</option>
+                            <option value="US">United States</option>
                             <option value="GB">United Kingdom</option>
-                            <option value="CA">Canada</option>
-                            <option value="AU">Australia</option>
                             <option value="DE">Germany</option>
                             <option value="FR">France</option>
-                            <option value="IN">India</option>
-                            <option value="BR">Brazil</option>
                             <option value="TR">Turkey</option>
-                            <option value="JP">Japan</option>
                         </select>
                     </div>
                     <div class="kr-field">
@@ -4581,7 +4596,15 @@
             '\u0643\u064a\u0641', '\u0645\u0627 \u0647\u0648', '\u0644\u0645\u0627\u0630\u0627', '\u0645\u062a\u0649',
             '\u063a\u064a\u0631', '\u0645\u0646 \u0647\u0648', '\u0647\u0644 \u064a\u0645\u0643\u0646',
             '\u0645\u0627 \u0647\u064a \u0623\u0641\u0636\u0644', '\u0643\u064a\u0641 \u064a\u0645\u0643\u0646',
-            '\u0645\u0627 \u0627\u0644\u0641\u0631\u0642 \u0628\u064a\u0646'
+            '\u0645\u0627 \u0627\u0644\u0641\u0631\u0642 \u0628\u064a\u0646',
+            '\u0643\u064a\u0641 \u0623\u0633\u062a\u062e\u062f\u0645', '\u0643\u064a\u0641 \u0623\u0633\u062a\u0639\u0645\u0644',
+            '\u0645\u0627 \u0647\u064a \u0623\u0641\u0636\u0644 \u0645\u0648\u0642\u0639', '\u0645\u0627 \u0647\u064a \u0623\u0631\u0636\u0644 \u0645\u0648\u0642\u0639',
+            '\u0643\u064a\u0641 \u062a\u062d\u0635\u0644 \u0639\u0644\u0649', '\u0643\u064a\u0641 \u062a\u0633\u062a\u062e\u062f\u0645 \u0641\u064a',
+            '\u0645\u0646 \u0623\u0641\u0636\u0644 \u0645\u0648\u0642\u0639 \u0644\u0645\u0634\u0631\u0648\u0639', '\u0645\u0646 \u0623\u0641\u0636\u0644 \u0645\u0648\u0642\u0639 \u0644\u0632\u064a\u0627\u0631\u0629',
+            '\u0643\u064a\u0641 \u064a\u0645\u0643\u0646 \u0627\u0633\u062a\u062e\u062f\u0627\u0645', '\u0643\u064a\u0641 \u064a\u0645\u0643\u0646 \u0634\u0631\u0627\u0621',
+            '\u0645\u0627 \u0623\u0641\u0636\u0644 \u0637\u0631\u064a\u0642\u0629 \u0644\u0645\u0634\u0631\u0648\u0639', '\u0645\u0627 \u0623\u0641\u0636\u0644 \u0637\u0631\u064a\u0642\u0629 \u0644\u0644\u0645\u0646\u0635\u0629',
+            '\u0643\u064a\u0641 \u062a\u0646\u0632\u064a\u0644', '\u0643\u064a\u0641 \u062a\u0631\u062a\u0628', '\u0643\u064a\u0641 \u062a\u0633\u062a\u062e\u062f\u0645 \u0633\u062a\u0627\u0631',
+            '\u0647\u0644 \u064a\u0645\u0643\u0646 \u062a\u062d\u0635\u064a\u0644 \u0645\u0646', '\u0647\u0644 \u064a\u0645\u0643\u0646 \u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u0641\u064a'
         ];
         var prefixes = prefixes_en;
         var lowerSeed = seed.toLowerCase();
@@ -4598,7 +4621,7 @@
 
     function krGeneratePrepositions(seed) {
         var preps_en = ['for', 'with', 'without', 'near me', 'vs', 'and', 'or', 'like', 'instead of', 'before', 'after', 'during', 'between', 'against'];
-        var preps_ar = ['\u0644\u0645\u0646', '\u0645\u0639', '\u0628\u062f\u0648\u0646', '\u0628\u0642\u0631\u064a\u0628', '\u0645\u0639\u062a\u0627\u0628\u0639\u0629', '\u0648', '\u0623\u0648', '\u0645\u0639\u0644\u064a\u0647'];
+        var preps_ar = ['\u0644\u0645\u0646', '\u0645\u0639', '\u0628\u062f\u0648\u0646', '\u0628\u0642\u0631\u064a\u0628', '\u0645\u0639\u062a\u0627\u0628\u0639\u0629', '\u0648', '\u0623\u0648', '\u0645\u0639\u0644\u064a\u0647', '\u0645\u0646 \u0623\u0641\u0636\u0644', '\u0642\u0628\u0644', '\u0628\u0639\u062f', '\u0623\u062b\u0646\u0627\u0621', '\u0628\u064a\u0646', '\u0628\u062f\u0648\u0646', '\u0641\u064a', '\u0639\u0646', '\u062d\u0648\u0644', '\u0623\u0648\u0642\u0628', '\u0645\u0646 \u062e\u0644\u0627\u0644', '\u0628\u0645\u0631\u0627\u0641\u0642', '\u062a\u062d\u062a', '\u062a\u063a\u0637\u064a\u0627', '\u0644\u062d\u062b \u0639\u0646', '\u0627\u0633\u062a\u0639\u0645\u0627\u0644'];
         var lowerSeed = seed.toLowerCase();
         var preps = preps_en;
         if (/[\u0600-\u06FF]/.test(seed)) preps = preps_ar;
@@ -4612,7 +4635,7 @@
 
     function krGenerateComparisons(seed) {
         var suffixes_en = ['vs', 'compared to', 'or', 'alternative to', 'better than', 'best', 'top', 'review', 'comparison', 'difference between'];
-        var suffixes_ar = ['\u0645\u0639\u062a\u0627\u0628\u0639\u0629', '\u0623\u0648', '\u0628\u062f\u064a\u0644', '\u0645\u0646 \u0623\u0641\u0636\u0644', '\u0645\u0642\u0627\u0631\u0646\u0629', '\u062a\u0642\u064a\u064a\u0645'];
+        var suffixes_ar = ['\u0645\u0639\u062a\u0627\u0628\u0639\u0629', '\u0623\u0648', '\u0628\u062f\u064a\u0644', '\u0645\u0646 \u0623\u0641\u0636\u0644', '\u0645\u0642\u0627\u0631\u0646\u0629', '\u062a\u0642\u064a\u064a\u0645', '\u0623\u0641\u0636\u0644 \u0627\u0644\u0645\u0648\u0627\u0642\u0639', '\u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u0645\u0648\u0627\u0642\u0639', '\u0623\u0631\u0636\u0644 \u0627\u0644\u0645\u0648\u0627\u0642\u0639', '\u0645\u0631\u0627\u062c\u0639\u0627\u062a', '\u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u0633\u0639\u0631', '\u0639\u0646 \u062c\u0627\u0646\u0628', '\u064a\u0645\u064a\u0646\u0627', '\u0628\u062f\u064a\u0644', '\u0645\u0639 \u0636\u0648\u0636', '\u062c\u0648\u062f\u0629', '\u062c\u062f\u064a\u062f', '\u0633\u0644\u0633', '\u0623\u0646\u0638\u0631'];
         var suffixes = suffixes_en;
         if (/[\u0600-\u06FF]/.test(seed)) suffixes = suffixes_ar;
         var results = [];
@@ -4625,10 +4648,10 @@
 
     function krDetectIntent(keyword) {
         var lower = keyword.toLowerCase();
-        var infoWords = ['how to', 'what is', 'why', 'guide', 'tutorial', 'learn', 'tips', 'examples', 'definition', 'meaning', 'explained', '\u0643\u064a\u0641', '\u0645\u0639\u0646\u0649', '\u062f\u0644\u064a\u0644', '\u0639\u0644\u0645', '\u0637\u0631\u064a\u0642', '\u062e\u0637\u0648\u0637', '\u0645\u0631\u0627\u062c\u0639\u0629'];
-        var transWords = ['buy', 'price', 'cheap', 'deal', 'discount', 'coupon', 'order', 'shipping', 'subscribe', 'purchase', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u062e\u0635\u0645', '\u062e\u0637\u0648\u0627\u062a', '\u0637\u0644\u0628', '\u0637\u0631\u0633', '\u062a\u062e\u0641\u064a\u0636'];
-        var navWords = ['login', 'sign in', 'official', 'website', 'app', 'dashboard', 'portal', '\u062a\u0633\u062c\u064a\u0644', '\u062a\u0633\u062c\u064a\u0644 \u062f\u062e\u0648\u0644', '\u0645\u0648\u0642\u0639 \u0631\u0633\u0645\u064a'];
-        var commerWords = ['best', 'top', 'review', 'comparison', 'vs', 'alternative', 'comparison', 'rating', 'versus', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645', '\u0645\u0642\u0627\u0631\u0646\u0629', '\u0645\u0639\u062a\u0628\u0631', '\u0645\u0631\u0627\u062c\u0639\u0627\u062a'];
+        var infoWords = ['how to', 'what is', 'why', 'guide', 'tutorial', 'learn', 'tips', 'examples', 'definition', 'meaning', 'explained', 'ways to', 'steps to', 'methods', '\u0643\u064a\u0641', '\u0645\u0639\u0646\u0649', '\u062f\u0644\u064a\u0644', '\u0639\u0644\u0645', '\u0637\u0631\u064a\u0642', '\u062e\u0637\u0648\u0637', '\u0645\u0631\u0627\u062c\u0639\u0629', '\u0637\u0631\u0642', '\u0623\u0637\u0631\u0642', '\u0645\u0646\u0647\u062c', '\u0646\u0635\u0627\u0626\u062d', '\u0634\u0631\u062d', '\u0645\u0639\u0646\u0627', '\u064a\u0639\u0644\u064a\u0643', '\u0643\u064a\u0641 \u062a\u0639\u0645\u0644', '\u0643\u064a\u0641 \u062a\u0633\u062a\u062e\u062f\u0645', '\u0643\u064a\u0641 \u064a\u0633\u062a\u062e\u062f\u0645'];
+        var transWords = ['buy', 'price', 'cheap', 'deal', 'discount', 'coupon', 'order', 'shipping', 'subscribe', 'purchase', 'free shipping', 'cash on delivery', 'cod', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u062e\u0635\u0645', '\u062e\u0637\u0648\u0627\u062a', '\u0637\u0644\u0628', '\u0637\u0631\u0633', '\u062a\u062e\u0641\u064a\u0636', '\u0634\u0631\u0627\u0621 \u0627\u0644\u062a\u0643\u0627\u0644\u064a\u0641', '\u0634\u0631\u0627\u0621 \u0627\u0644\u0645\u0648\u0642\u0639', '\u0637\u0644\u0628 \u0627\u0644\u0645\u0648\u0642\u0639', '\u0645\u062a\u0646\u0627\u0632\u0644', '\u062a\u0633\u0648\u064a\u0642', '\u062a\u0642\u0636\u064a\u0645', '\u0639\u0631\u0648\u0636', '\u0623\u0633\u0639\u0627\u0631', '\u062e\u0635\u0645\u0627\u062a', '\u0639\u0631\u0648\u0636 \u0627\u0644\u0645\u0648\u0642\u0639', '\u062e\u0635\u0645 \u0639\u0644\u0649 \u0627\u0644\u0637\u0644\u0628'];
+        var navWords = ['login', 'sign in', 'official', 'website', 'app', 'dashboard', 'portal', 'account', 'download app', '\u062a\u0633\u062c\u064a\u0644', '\u062a\u0633\u062c\u064a\u0644 \u062f\u062e\u0648\u0644', '\u0645\u0648\u0642\u0639 \u0631\u0633\u0645\u064a', '\u0645\u0648\u0642\u0639 \u0627\u0644\u0631\u0633\u0645\u064a', '\u062a\u0633\u062c\u064a\u0644 \u062f\u062e\u0648\u0644', '\u0645\u0648\u0642\u0639 \u0627\u0644\u062a\u0633\u062c\u064a\u0644', '\u0631\u0627\u0628\u0637 \u0627\u0644\u0645\u0648\u0642\u0639', '\u0644\u0648\u062d\u0629 \u0627\u0644\u062a\u0633\u062c\u064a\u0644', '\u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u062a\u0637\u0628\u064a\u0642'];
+        var commerWords = ['best', 'top', 'review', 'comparison', 'vs', 'alternative', 'rating', 'versus', 'recommended', 'cheapest', 'most popular', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645', '\u0645\u0642\u0627\u0631\u0646\u0629', '\u0645\u0639\u062a\u0628\u0631', '\u0645\u0631\u0627\u062c\u0639\u0627\u062a', '\u0623\u0641\u0636\u0644 \u0645\u0648\u0627\u0642\u0639', '\u0623\u0631\u0636\u0644 \u0645\u0648\u0627\u0642\u0639', '\u062a\u0642\u064a\u064a\u0645 \u0645\u0648\u0627\u0642\u0639', '\u0645\u0646\u0635\u062d\u0648\u0628', '\u062c\u0648\u062f\u0629', '\u0645\u0645\u064a\u0632', '\u0627\u0644\u0623\u0641\u0636\u0644 \u0644\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u064a\u0646', '\u0627\u0644\u0623\u0631\u0636\u0644 \u0628\u0639\u064a\u062f', '\u0645\u0642\u0627\u0628\u0644 \u0627\u0644\u0633\u0639\u0631', '\u0623\u0631\u0636\u0644 \u0644\u0644\u0633\u0639\u0631'];
         var trans = 0, info = 0, nav = 0, comm = 0;
         for (var i = 0; i < transWords.length; i++) { if (lower.indexOf(transWords[i]) !== -1) trans++; }
         for (var i = 0; i < infoWords.length; i++) { if (lower.indexOf(infoWords[i]) !== -1) info++; }
@@ -4655,19 +4678,20 @@
         else if (words === 3) score += 5;
         else if (words >= 5) score -= 15;
         else score -= 5;
-        var commWords = ['buy', 'cheap', 'price', 'deal', 'discount', 'best', 'top', 'review', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645'];
+        var commWords = ['buy', 'cheap', 'price', 'deal', 'discount', 'best', 'top', 'review', 'free', 'online', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645', '\u0645\u062c\u0627\u0646\u064a', '\u062a\u0633\u0648\u064a\u0642', '\u062d\u0635\u0645', '\u0631\u0627\u0626\u0639', '\u062a\u0642\u0644\u064a\u0644', '\u0643\u064a\u0633', '\u0633\u0647\u0648\u0644', '\u0639\u0631\u0648\u0636', '\u062e\u0635\u0645\u0627\u062a', '\u0645\u0631\u0627\u062c\u0639\u0627\u062a', '\u0645\u0648\u0642\u0639', '\u0645\u062a\u0627\u0628\u0639', '\u062a\u062e\u0641\u064a\u0636'];
         for (var i = 0; i < commWords.length; i++) {
             if (lower.indexOf(commWords[i]) !== -1) score += 5;
         }
-        var questionWords = ['how', 'what', 'why', 'when', 'where', 'who', '\u0643\u064a\u0641', '\u0645\u0627', '\u0644\u0645\u0627\u0630\u0627', '\u0645\u062a\u0649', '\u063a\u064a\u0631'];
+        var questionWords = ['how', 'what', 'why', 'when', 'where', 'who', '\u0643\u064a\u0641', '\u0645\u0627', '\u0644\u0645\u0627\u0630\u0627', '\u0645\u062a\u0649', '\u063a\u064a\u0631', '\u0647\u0644', '\u0645\u0646', '\u0647\u0644 \u064a\u0645\u0643\u0646', '\u0643\u064a\u0641 \u0627\u0633\u062a\u062e\u062f\u0645'];
         for (var i = 0; i < questionWords.length; i++) {
             if (lower.indexOf(questionWords[i]) === 0) score -= 10;
         }
-        var brandWords = ['google', 'facebook', 'apple', 'microsoft', 'amazon', 'nike', 'adobe'];
+        var brandWords = ['google', 'facebook', 'apple', 'microsoft', 'amazon', 'nike', 'adobe', 'samsung', 'huawei', 'noon', 'jarir', 'extra', 'stc', 'zain', 'stc pay', 'tamara', 'tabby', 'noon', 'careem', 'hungry'];
         for (var i = 0; i < brandWords.length; i++) {
             if (lower.indexOf(brandWords[i]) !== -1) score += 20;
         }
-        if (lower.indexOf('near me') !== -1 || lower.indexOf('\u0628\u0642\u0631\u064a\u0628') !== -1) score -= 10;
+        if (lower.indexOf('near me') !== -1 || lower.indexOf('\u0628\u0642\u0631\u064a\u0628') !== -1 || lower.indexOf('\u0641\u064a \u0627\u0644\u0645\u0645\u0644\u0643\u0629') !== -1) score -= 10;
+        if (lower.indexOf('\u0623\u0631\u0636\u0644') !== -1 || lower.indexOf('\u0645\u0646\u0635\u062d') !== -1 || lower.indexOf('official') !== -1) score += 10;
         if (score < 15) score = 15;
         if (score > 95) score = 95;
         return score;
@@ -4706,8 +4730,10 @@
     function krEstimateCPC(keyword, intent) {
         var base = 0.5;
         var lower = keyword.toLowerCase();
-        var highCPC = ['insurance', 'lawyer', 'loan', 'mortgage', 'credit', 'hosting', 'cloud', 'saas', 'software', 'marketing', 'agency', '\u062a\u0633\u0648\u064a\u0642', '\u0633\u064a\u0627\u0633\u0629', '\u062a\u0633\u0648\u064a\u0642 \u0630\u0643\u064a'];
-        var medCPC = ['tools', 'platform', 'service', 'product', 'review', 'best', '\u0623\u062f\u0648\u0627\u062a', '\u0645\u0646\u0635', '\u062e\u062f\u0645\u0629', '\u0645\u0646\u062a\u062c'];
+        var country = document.getElementById('kr-country').value;
+        var isGulf = (country === 'SA' || country === 'AE' || country === 'KW' || country === 'QA' || country === 'BH' || country === 'OM');
+        var highCPC = ['insurance', 'lawyer', 'loan', 'mortgage', 'credit', 'hosting', 'cloud', 'saas', 'software', 'marketing', 'agency', 'real estate', 'property', 'investment', 'trading', 'crypto', '\u062a\u0623\u0645\u064a\u0646', '\u0633\u064a\u0627\u0633\u0629', '\u062a\u0633\u0648\u064a\u0642 \u0630\u0643\u064a', '\u0639\u0642\u0627\u0631', '\u0639\u0642\u0627\u0631\u0627\u062a', '\u062a\u062e\u0635\u0635', '\u0627\u0633\u062a\u062b\u0645\u0627\u0631', '\u0627\u0633\u062a\u063a\u0631\u0627\u0642', '\u0627\u0633\u062a\u0639\u0645\u0627\u0644', '\u062a\u0639\u0644\u064a\u0645', '\u0632\u0643\u0627\u0621', '\u0642\u0631\u0636', '\u062a\u0623\u0645\u064a\u0646 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a', '\u0645\u0633\u062a\u0634\u0627\u0631\u064a\u0629', '\u062a\u0633\u0648\u064a\u0642 \u0630\u0643\u064a', '\u0641\u0648\u0631\u0643\u0633'];
+        var medCPC = ['tools', 'platform', 'service', 'product', 'review', 'best', 'course', 'training', 'consulting', '\u0623\u062f\u0648\u0627\u062a', '\u0645\u0646\u0635', '\u062e\u062f\u0645\u0629', '\u0645\u0646\u062a\u062c', '\u062f\u0631\u0633\u0629', '\u062a\u062f\u0631\u064a\u0628', '\u0633\u062d\u0628', '\u0642\u0646\u0627\u0629', '\u0645\u0639\u0644\u0648\u0645\u0627\u062a', '\u062a\u0639\u0644\u064a\u0645', '\u0634\u0631\u0643\u0629', '\u0645\u0646\u0634\u0621', '\u062a\u0633\u0648\u064a\u0642 \u0645\u0648\u0642\u0639', '\u0645\u0634\u0631\u0648\u0639', '\u062e\u062f\u0645\u0629 \u0631\u0642\u0645\u064a\u0629'];
         for (var i = 0; i < highCPC.length; i++) {
             if (lower.indexOf(highCPC[i]) !== -1) { base = 3.5; break; }
         }
@@ -4723,6 +4749,10 @@
         var words = keyword.split(/\s+/).length;
         if (words >= 4) base *= 0.6;
         base += (Math.random() * 0.4 - 0.2);
+        if (isGulf) {
+            base = base * 3.75;
+            return '\u0631.\u0633 ' + base.toFixed(2);
+        }
         return '$' + base.toFixed(2);
     }
 
@@ -4844,7 +4874,7 @@
 
     function krHasQuestionWord(kw) {
         var lower = kw.toLowerCase();
-        var qWords = ['how', 'what', 'why', 'when', 'where', 'who', 'is ', 'are ', 'can ', 'does', 'should', 'which', '\u0643\u064a\u0641', '\u0645\u0627', '\u0644\u0645\u0627\u0630\u0627', '\u0647\u0644'];
+        var qWords = ['how', 'what', 'why', 'when', 'where', 'who', 'is ', 'are ', 'can ', 'does', 'should', 'which', 'do ', 'did ', 'will ', 'would ', '\u0643\u064a\u0641', '\u0645\u0627', '\u0644\u0645\u0627\u0630\u0627', '\u0647\u0644', '\u0645\u0646', '\u0645\u062a\u0649', '\u063a\u064a\u0631', '\u0643\u064a\u0641 \u064a\u0645\u0643\u0646', '\u0643\u064a\u0641 \u0627\u0633\u062a\u062e\u062f\u0645', '\u0643\u064a\u0641 \u062a\u0639\u0645\u0644', '\u0645\u0627 \u0647\u064a \u0623\u0641\u0636\u0644', '\u0623\u064a\u0646', '\u0643\u064a\u0641 \u0627\u0644\u0641\u0631\u0642'];
         for (var i = 0; i < qWords.length; i++) {
             if (lower.indexOf(qWords[i]) === 0) return true;
         }
@@ -4934,6 +4964,15 @@
             document.execCommand('copy');
             document.body.removeChild(ta);
             alert(currentLang === 'ar' ? '\u062a\u0645 \u0627\u0644\u0646\u0633\u062e \u0628\u0646\u062c\u0627\u062d!' : 'Copied to clipboard!');
+        }
+    }
+
+    function krAutoLang() {
+        var country = document.getElementById('kr-country').value;
+        var langEl = document.getElementById('kr-lang');
+        var arabCountries = ['SA','AE','KW','QA','BH','OM','JO','LB','IQ','EG','MA','TN','DZ','LY','SD','PS','SY','YE','MR','DJ','KM','SO'];
+        if (arabCountries.indexOf(country) !== -1) {
+            langEl.value = 'ar';
         }
     }
 
