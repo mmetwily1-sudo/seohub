@@ -4713,18 +4713,134 @@
         return map[intent] || map.informational;
     }
 
-    function krEstimateVolume(keyword, position) {
-        var baseWords = keyword.split(/\s+/).length;
+    function krEstimateVolume(keyword, position, sourceType, expansionCount) {
         var base = 0;
-        if (position <= 3) base = 8000 + Math.floor(Math.random() * 4000);
-        else if (position <= 10) base = 3000 + Math.floor(Math.random() * 5000);
-        else if (position <= 20) base = 500 + Math.floor(Math.random() * 2500);
-        else base = 50 + Math.floor(Math.random() * 450);
-        if (baseWords === 1) base = Math.round(base * 1.5);
-        else if (baseWords >= 4) base = Math.round(base * 0.4);
-        else if (baseWords >= 3) base = Math.round(base * 0.6);
-        if (base >= 10000) return Math.round(base / 1000) + 'K';
-        return String(base);
+        var wc = keyword.split(/\s+/).length;
+        if (sourceType === 'trending') {
+            base = 50000 + Math.floor(Math.random() * 100000);
+        } else if (sourceType === 'google-autocomplete') {
+            if (position <= 3) base = 10000 + Math.floor(Math.random() * 90000);
+            else if (position <= 7) base = 5000 + Math.floor(Math.random() * 10000);
+            else if (position <= 12) base = 1000 + Math.floor(Math.random() * 4000);
+            else base = 200 + Math.floor(Math.random() * 800);
+        } else {
+            if (position <= 3) base = 3000 + Math.floor(Math.random() * 7000);
+            else if (position <= 7) base = 1000 + Math.floor(Math.random() * 2000);
+            else base = 100 + Math.floor(Math.random() * 900);
+        }
+        if (expansionCount && expansionCount >= 5) base = Math.round(base * 1.4);
+        else if (expansionCount && expansionCount >= 3) base = Math.round(base * 1.2);
+        if (wc === 1) base = Math.round(base * 1.8);
+        else if (wc === 2) base = Math.round(base * 1.2);
+        else if (wc === 3) base = Math.round(base * 0.7);
+        else if (wc >= 5) base = Math.round(base * 0.35);
+        else if (wc >= 4) base = Math.round(base * 0.5);
+        if (base >= 100000) return { volume: Math.round(base / 1000) + 'K+', level: 'very-high' };
+        if (base >= 10000) return { volume: Math.round(base / 1000) + 'K', level: 'high' };
+        if (base >= 1000) return { volume: (base / 1000).toFixed(1) + 'K', level: 'medium' };
+        if (base >= 300) return { volume: String(base), level: 'low' };
+        return { volume: String(base), level: 'very-low' };
+    }
+
+    function krVolumeBadge(vol) {
+        var colors = { 'very-high': '#059669', 'high': '#10b981', 'medium': '#f59e0b', 'low': '#f97316', 'very-low': '#94a3b8' };
+        var labels = { 'very-high': 'VHigh', 'high': 'High', 'medium': 'Medium', 'low': 'Low', 'very-low': 'V.Low' };
+        if (currentLang === 'ar') {
+            labels = { 'very-high': '\u0639\u0627\u0644\u064a\u062c\u062f', 'high': '\u0645\u0639\u062a\u0644\u064a', 'medium': '\u0645\u062a\u0648\u0633\u0637', 'low': '\u0645\u0646\u062e\u0641\u0636', 'very-low': '\u0645\u0646\u062e\u0641\u0636 \u062c\u062f\u0627' };
+        }
+        var c = colors[vol.level] || '#94a3b8';
+        var l = labels[vol.level] || vol.level;
+        return '<span style="display:inline-block;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;color:white;background:' + c + ';">' + l + ' (' + vol.volume + ')</span>';
+    }
+
+    function krFetchTrends(country, lang) {
+        var geo = country || '';
+        var url = 'https://trends.google.com/trends/api/dailytrends?hl=' + (lang || 'en') + '&tz=-480&geo=' + geo + '&ns=15';
+        return fetchHTML(url, { timeout: 15000, retries: 1, proxyLimit: 3 })
+            .then(function(text) {
+                var cleaned = text.replace(/^\)\]\}'/, '').replace(/^for\s*\(\s*;;\s*\)/, '');
+                var data = JSON.parse(cleaned);
+                var trending = [];
+                if (data.default && data.default.trendingSearchesDays) {
+                    var days = data.default.trendingSearchesDays;
+                    for (var d = 0; d < Math.min(days.length, 2); d++) {
+                        var searches = days[d].trendingSearches || [];
+                        for (var i = 0; i < searches.length; i++) {
+                            var s = searches[i];
+                            var title = s.title && s.title.query ? s.title.query : '';
+                            var traffic = s.formattedTraffic || '';
+                            if (title) trending.push({ keyword: title.toLowerCase(), volume: traffic });
+                        }
+                    }
+                }
+                return trending;
+            })
+            .catch(function() { return []; });
+    }
+
+    function krVerifyKeywords(keywords, lang, country, onProgress) {
+        var verified = {};
+        var batch = 10;
+        var total = Math.min(keywords.length, 80);
+        var i = 0;
+        function nextBatch() {
+            if (i >= total) { onProgress(100); return Promise.resolve(verified); }
+            var end = Math.min(i + batch, total);
+            var promises = [];
+            for (var j = i; j < end; j++) {
+                (function(idx) {
+                    var kw = keywords[idx];
+                    var p = krFetchSuggestions(kw, lang, country).then(function(sugs) {
+                        if (sugs.length > 0) {
+                            verified[kw.toLowerCase()] = sugs.length;
+                        }
+                    }).catch(function() {});
+                    promises.push(p);
+                })(j);
+            }
+            i = end;
+            onProgress(Math.round((i / total) * 100));
+            return Promise.all(promises).then(function() {
+                return new Promise(function(resolve) {
+                    setTimeout(function() { resolve(nextBatch()); }, 150);
+                });
+            });
+        }
+        return nextBatch();
+    }
+
+    function krFilterQualityKeywords(keywords, trendKeywords) {
+        var trendMap = {};
+        for (var i = 0; i < trendKeywords.length; i++) {
+            trendMap[trendKeywords[i].keyword.toLowerCase()] = trendKeywords[i].volume;
+        }
+        var filtered = [];
+        var seen = {};
+        var stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', '\u0645\u0646', '\u0641\u064a', '\u0639\u0644\u0649', '\u0628\u064a\u0646'];
+        for (var i = 0; i < keywords.length; i++) {
+            var item = keywords[i];
+            var kw = (typeof item === 'string' ? item : item.keyword || '').toLowerCase().trim();
+            if (kw.length < 3) continue;
+            if (seen[kw]) continue;
+            var words = kw.split(/\s+/);
+            var allStop = true;
+            for (var w = 0; w < words.length; w++) {
+                if (stopWords.indexOf(words[w]) === -1) { allStop = false; break; }
+            }
+            if (allStop) continue;
+            var dup = false;
+            var keys = Object.keys(seen);
+            for (var k = 0; k < keys.length; k++) {
+                if (kw.indexOf(keys[k]) !== -1 || keys[k].indexOf(kw) !== -1) {
+                    if (Math.abs(kw.length - keys[k].length) < 3) { dup = true; break; }
+                }
+            }
+            if (dup) continue;
+            seen[kw] = true;
+            item.trending = trendMap[kw] || null;
+            filtered.push(item);
+        }
+        return filtered;
     }
 
     function krEstimateCPC(keyword, intent) {
@@ -4799,19 +4915,42 @@
 
     function krRenderTable(data) {
         var t = currentLang === 'ar' ? translations.ar : translations.en;
-        var html = '<div class="kr-stats">';
-        html += '<div class="kr-stat"><span class="kr-stat-num">' + data.length + '</span><span class="kr-stat-label">' + t.kr_total + '</span></div>';
+        var html = '';
+        var topKws = data.filter(function(d) { return d.volumeLevel === 'very-high' || d.volumeLevel === 'high'; });
+        if (topKws.length > 0) {
+            html += '<div style="background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border:2px solid #10b981;border-radius:16px;padding:20px;margin-bottom:20px;">';
+            html += '<h3 style="margin:0 0 12px;color:#059669;">\uD83C\uDFC6 ' + (currentLang === 'ar' ? '\u0623\u0641\u0636\u0644 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0641\u062a\u0627\u062d\u064a\u0629' : 'Top Keywords to Target') + '</h3>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;">';
+            for (var i = 0; i < Math.min(topKws.length, 12); i++) {
+                var kw = topKws[i];
+                var intent = krIntentLabel(kw.intent);
+                var diff = krDiffLabel(kw.difficulty);
+                html += '<div style="background:white;border-radius:12px;padding:12px 16px;border:1px solid #d1fae5;display:flex;justify-content:space-between;align-items:center;">';
+                html += '<div><strong style="font-size:14px;">' + esc(kw.keyword) + '</strong><br>';
+                html += '<span class="kr-badge ' + intent.cls + '" style="margin-top:4px;">' + intent.text + '</span> ';
+                html += '<span class="kr-badge ' + diff.cls + '">' + diff.text + '</span></div>';
+                html += '<div style="text-align:right;font-size:12px;color:#059669;font-weight:700;">' + kw.volume + '<br>' + kw.cpc + '</div>';
+                html += '</div>';
+            }
+            html += '</div></div>';
+        }
+        var highCount = data.filter(function(d) { return d.volumeLevel === 'high' || d.volumeLevel === 'very-high'; }).length;
+        var medCount = data.filter(function(d) { return d.volumeLevel === 'medium'; }).length;
+        var lowCount = data.filter(function(d) { return d.volumeLevel === 'low' || d.volumeLevel === 'very-low'; }).length;
+        var html2 = '<div class="kr-stats">';
+        html2 += '<div class="kr-stat"><span class="kr-stat-num">' + data.length + '</span><span class="kr-stat-label">' + t.kr_total + '</span></div>';
         var unique = {};
         for (var i = 0; i < data.length; i++) unique[data[i].keyword.toLowerCase()] = true;
         var uniqueCount = Object.keys(unique).length;
-        html += '<div class="kr-stat"><span class="kr-stat-num">' + uniqueCount + '</span><span class="kr-stat-label">' + t.kr_unique + '</span></div>';
+        html2 += '<div class="kr-stat"><span class="kr-stat-num">' + uniqueCount + '</span><span class="kr-stat-label">' + t.kr_unique + '</span></div>';
+        html2 += '<div class="kr-stat" style="border-left:3px solid #10b981;"><span class="kr-stat-num" style="color:#059669;">' + highCount + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? '\u0639\u0627\u0644\u064a' : 'High Vol.') + '</span></div>';
+        html2 += '<div class="kr-stat" style="border-left:3px solid #f59e0b;"><span class="kr-stat-num" style="color:#f59e0b;">' + medCount + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637' : 'Med Vol.') + '</span></div>';
+        html2 += '<div class="kr-stat" style="border-left:3px solid #94a3b8;"><span class="kr-stat-num" style="color:#94a3b8;">' + lowCount + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? '\u0645\u0646\u062e\u0641\u0636' : 'Low Vol.') + '</span></div>';
         var qCount = 0;
         for (var i = 0; i < data.length; i++) { if (data[i].intent === 'informational' && krHasQuestionWord(data[i].keyword)) qCount++; }
-        html += '<div class="kr-stat"><span class="kr-stat-num">' + qCount + '</span><span class="kr-stat-label">' + t.kr_questions + '</span></div>';
-        var ltCount = 0;
-        for (var i = 0; i < data.length; i++) { if (data[i].keyword.split(/\s+/).length >= 4) ltCount++; }
-        html += '<div class="kr-stat"><span class="kr-stat-num">' + ltCount + '</span><span class="kr-stat-label">' + t.kr_longtail + '</span></div>';
-        html += '</div>';
+        html2 += '<div class="kr-stat"><span class="kr-stat-num">' + qCount + '</span><span class="kr-stat-label">' + t.kr_questions + '</span></div>';
+        html2 += '</div>';
+        html += html2;
         html += '<div class="kr-filters">';
         var filters = [
             { key: 'all', label: t.kr_filter_all },
@@ -4831,8 +4970,7 @@
         html += '</div>';
         html += '<div class="kr-table-wrap"><table class="kr-table" id="kr-table">';
         html += '<thead><tr>';
-        var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_difficulty, t.kr_intent, t.kr_volume, t.kr_cpc];
-        var colKeys = ['idx', 'difficulty', 'intent', 'volume', 'cpc'];
+        var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_volume, t.kr_difficulty, t.kr_intent, t.kr_cpc];
         for (var i = 0; i < cols.length; i++) {
             var arrow = '';
             if (_krSortCol === i) arrow = _krSortAsc ? ' \u25B2' : ' \u25BC';
@@ -4846,12 +4984,15 @@
             var diff = krDiffLabel(d.difficulty);
             var intent = krIntentLabel(d.intent);
             var kw = esc(d.keyword);
+            var volBadge = krVolumeBadge({ volume: d.volume, level: d.volumeLevel });
+            var trendingBadge = d.trending ? ' <span style="font-size:10px;color:#ef4444;font-weight:700;">\uD83D\uDD25</span>' : '';
+            var srcBadge = d.source === 'trending' ? ' <span style="font-size:10px;color:#8b5cf6;font-weight:700;">TREND</span>' : '';
             html += '<tr>';
             html += '<td style="font-weight:600;color:var(--gray-1);">' + (i + 1) + '</td>';
-            html += '<td><strong>' + kw + '</strong></td>';
+            html += '<td><strong>' + kw + trendingBadge + srcBadge + '</strong></td>';
+            html += '<td>' + volBadge + '</td>';
             html += '<td><span class="kr-badge ' + diff.cls + '">' + diff.text + ' (' + d.difficulty + ')</span></td>';
             html += '<td><span class="kr-badge ' + intent.cls + '">' + intent.text + '</span></td>';
-            html += '<td>' + d.volume + '</td>';
             html += '<td>' + d.cpc + '</td>';
             html += '</tr>';
         }
@@ -4892,10 +5033,14 @@
             var va, vb;
             if (col === 0) { va = a.idx; vb = b.idx; }
             else if (col === 1) { va = a.keyword; vb = b.keyword; }
-            else if (col === 2) { va = a.difficulty; vb = b.difficulty; }
-            else if (col === 3) { va = a.intent; vb = b.intent; }
-            else if (col === 4) { va = parseInt(String(a.volume).replace(/K/g, '000').replace(/\$/g, '')) || 0; vb = parseInt(String(b.volume).replace(/K/g, '000').replace(/\$/g, '')) || 0; }
-            else if (col === 5) { va = parseFloat(String(a.cpc).replace(/\$/g, '')) || 0; vb = parseFloat(String(b.cpc).replace(/\$/g, '')) || 0; }
+            else if (col === 2) {
+                var order = { 'very-high': 0, 'high': 1, 'medium': 2, 'low': 3, 'very-low': 4 };
+                va = order[a.volumeLevel] !== undefined ? order[a.volumeLevel] : 5;
+                vb = order[b.volumeLevel] !== undefined ? order[b.volumeLevel] : 5;
+            }
+            else if (col === 3) { va = a.difficulty; vb = b.difficulty; }
+            else if (col === 4) { va = a.intent; vb = b.intent; }
+            else if (col === 5) { va = parseFloat(String(a.cpc).replace(/[^0-9.]/g, '')) || 0; vb = parseFloat(String(b.cpc).replace(/[^0-9.]/g, '')) || 0; }
             else { va = a.keyword; vb = b.keyword; }
             if (typeof va === 'string') return _krSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
             return _krSortAsc ? va - vb : vb - va;
@@ -4919,12 +5064,13 @@
     function krExportCSV() {
         if (_krResults.length === 0) return;
         var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var volLabel = t.kr_volume;
         var rows = [
-            ['Keyword', 'Difficulty', 'Intent', t.kr_volume, t.kr_cpc]
+            ['Keyword', volLabel, 'Volume Level', t.kr_difficulty, t.kr_intent, t.kr_cpc, 'Trending', 'Source']
         ];
         for (var i = 0; i < _krResults.length; i++) {
             var d = _krResults[i];
-            rows.push([d.keyword, d.difficulty, d.intent, d.volume, d.cpc]);
+            rows.push([d.keyword, d.volume, d.volumeLevel || '', d.difficulty, d.intent, d.cpc, d.trending ? 'Yes' : '', d.source || '']);
         }
         var csv = '';
         for (var i = 0; i < rows.length; i++) {
@@ -4948,9 +5094,10 @@
 
     function krCopyAll() {
         if (_krResults.length === 0) return;
-        var text = '';
+        var text = 'Keyword\tVolume\tLevel\tDifficulty\tIntent\tCPC\tTrending\n';
         for (var i = 0; i < _krResults.length; i++) {
-            text += _krResults[i].keyword + '\t' + _krResults[i].difficulty + '\t' + _krResults[i].intent + '\t' + _krResults[i].volume + '\t' + _krResults[i].cpc + '\n';
+            var d = _krResults[i];
+            text += d.keyword + '\t' + d.volume + '\t' + (d.volumeLevel || '') + '\t' + d.difficulty + '\t' + d.intent + '\t' + d.cpc + '\t' + (d.trending ? 'Yes' : '') + '\n';
         }
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(function() {
@@ -4976,6 +5123,16 @@
         }
     }
 
+    function krGenerateNumberExpansions(seed) {
+        var nums = ['2024', '2025', '2026', '1', '2', '3', '10', '50', '100'];
+        var results = [];
+        for (var i = 0; i < nums.length; i++) {
+            var q = seed + ' ' + nums[i];
+            if (results.indexOf(q) === -1) results.push(q);
+        }
+        return results;
+    }
+
     async function runKeywordResearch() {
         var seed = document.getElementById('kr-seed').value.trim();
         if (!seed) return;
@@ -4996,60 +5153,153 @@
         var out = document.getElementById('kr-output');
         out.innerHTML = '<div class="tool-loading"><p>' + t.kr_fetching + '</p></div>';
         krUpdateProgress(0);
-        var allKeywords = {};
+
+        var rawKeywords = {};
+        var kwSources = {};
+        var kwPosition = {};
+        var kwExpansionCount = {};
+        var trendKeywords = [];
+
         try {
+            out.innerHTML = '<div class="tool-loading"><p>\uD83D\uDD0D ' + (currentLang === 'ar' ? '\u062c\u0627\u0631\u064a \u0627\u0644\u062a\u0634\u0627\u0648\u0647\u0627\u062a \u0627\u0644\u0645\u0631\u062a\u0628\u0637\u0629...' : 'Fetching trending searches...') + '</p></div>';
+            var trending = await krFetchTrends(country, lang);
+            krUpdateProgress(10);
+            trendKeywords = trending;
+            for (var i = 0; i < trending.length; i++) {
+                var tk = trending[i].keyword.toLowerCase();
+                if (tk.indexOf(seed.toLowerCase()) !== -1 || seed.toLowerCase().indexOf(tk) !== -1) {
+                    rawKeywords[tk] = true;
+                    kwSources[tk] = 'trending';
+                    kwPosition[tk] = i + 1;
+                }
+            }
+
+            out.innerHTML = '<div class="tool-loading"><p>\uD83D\uDD0D ' + (currentLang === 'ar' ? '\u062c\u0627\u0631\u064a \u0627\u0642\u062a\u0631\u0627\u062d\u0627\u062a Google...' : 'Fetching Google suggestions...') + '</p></div>';
             var baseSuggestions = await krFetchSuggestions(seed, lang, country);
             for (var i = 0; i < baseSuggestions.length; i++) {
-                allKeywords[baseSuggestions[i].toLowerCase()] = true;
+                var sk = baseSuggestions[i].toLowerCase();
+                if (!rawKeywords[sk]) {
+                    rawKeywords[sk] = true;
+                    kwSources[sk] = 'google-autocomplete';
+                    kwPosition[sk] = i + 1;
+                    kwExpansionCount[sk] = 1;
+                }
             }
-            krUpdateProgress(10);
+            krUpdateProgress(25);
+
             if (doAZ) {
+                out.innerHTML = '<div class="tool-loading"><p>\uD83D\uDD0D ' + (currentLang === 'ar' ? '\u062a\u0648\u0633\u064a\u0639 A-Z \u0644\u0644\u0643\u0644\u0645\u0627\u062a...' : 'Expanding A-Z for keywords...') + '</p></div>';
                 var azSuggestions = await krExpandAZ(seed, lang, country, function(p) {
-                    krUpdateProgress(10 + Math.round(p * 0.5));
+                    krUpdateProgress(25 + Math.round(p * 0.35));
                 });
                 for (var i = 0; i < azSuggestions.length; i++) {
-                    allKeywords[azSuggestions[i].toLowerCase()] = true;
+                    var ak = azSuggestions[i].toLowerCase();
+                    if (!rawKeywords[ak]) {
+                        rawKeywords[ak] = true;
+                        kwSources[ak] = 'google-autocomplete';
+                        kwPosition[ak] = i + 1;
+                        kwExpansionCount[ak] = 1;
+                    } else {
+                        kwExpansionCount[ak] = (kwExpansionCount[ak] || 0) + 1;
+                    }
                 }
             }
             krUpdateProgress(60);
+
+            var templateKeywords = {};
             if (doQuestions) {
                 var questions = krGenerateQuestions(seed);
                 for (var i = 0; i < questions.length; i++) {
-                    allKeywords[questions[i].toLowerCase()] = true;
+                    var qk = questions[i].toLowerCase();
+                    templateKeywords[qk] = true;
+                    kwSources[qk] = 'template';
+                    kwPosition[qk] = i + 1;
                 }
             }
-            krUpdateProgress(70);
             if (doPreps) {
                 var preps = krGeneratePrepositions(seed);
                 for (var i = 0; i < preps.length; i++) {
-                    allKeywords[preps[i].toLowerCase()] = true;
+                    var pk = preps[i].toLowerCase();
+                    templateKeywords[pk] = true;
+                    kwSources[pk] = 'template';
+                    kwPosition[pk] = i + 1;
                 }
             }
-            krUpdateProgress(80);
             if (doCompare) {
                 var compares = krGenerateComparisons(seed);
                 for (var i = 0; i < compares.length; i++) {
-                    allKeywords[compares[i].toLowerCase()] = true;
+                    var ck = compares[i].toLowerCase();
+                    templateKeywords[ck] = true;
+                    kwSources[ck] = 'template';
+                    kwPosition[ck] = i + 1;
+                }
+            }
+            var numExpansions = krGenerateNumberExpansions(seed);
+            for (var i = 0; i < numExpansions.length; i++) {
+                var nk = numExpansions[i].toLowerCase();
+                templateKeywords[nk] = true;
+                kwSources[nk] = 'template';
+                kwPosition[nk] = i + 1;
+            }
+            krUpdateProgress(65);
+
+            out.innerHTML = '<div class="tool-loading"><p>\uD83D\uDD0D ' + (currentLang === 'ar' ? '\u062a\u062d\u0642\u0642 \u0645\u0646 Google... (' + Object.keys(templateKeywords).length + ')' : 'Verifying keywords with Google... (' + Object.keys(templateKeywords).length + ')') + '</p></div>';
+            var templateList = Object.keys(templateKeywords);
+            var verified = await krVerifyKeywords(templateList, lang, country, function(p) {
+                krUpdateProgress(65 + Math.round(p * 0.2));
+            });
+            var vk = Object.keys(verified);
+            for (var i = 0; i < vk.length; i++) {
+                if (!rawKeywords[vk[i]]) {
+                    rawKeywords[vk[i]] = true;
+                    kwPosition[vk[i]] = i + 1;
+                    kwExpansionCount[vk[i]] = verified[vk[i]];
                 }
             }
             krUpdateProgress(85);
-            var kwList = Object.keys(allKeywords);
-            var results = [];
-            for (var i = 0; i < kwList.length; i++) {
-                var kw = kwList[i];
-                var intent = krDetectIntent(kw);
-                var difficulty = krScoreDifficulty(kw);
-                var volume = krEstimateVolume(kw, i + 1);
-                var cpc = krEstimateCPC(kw, intent);
-                results.push({
-                    idx: i + 1,
-                    keyword: kw,
-                    difficulty: difficulty,
-                    intent: intent,
-                    volume: volume,
-                    cpc: cpc
+
+            var allKwList = Object.keys(rawKeywords);
+            var qualityResults = [];
+            for (var i = 0; i < allKwList.length; i++) {
+                qualityResults.push({
+                    keyword: allKwList[i],
+                    source: kwSources[allKwList[i]] || 'unknown',
+                    position: kwPosition[allKwList[i]] || i + 1,
+                    expansionCount: kwExpansionCount[allKwList[i]] || 0
                 });
             }
+            var filtered = krFilterQualityKeywords(qualityResults, trendKeywords);
+            krUpdateProgress(90);
+
+            var results = [];
+            for (var i = 0; i < filtered.length; i++) {
+                var kw = filtered[i];
+                var intent = krDetectIntent(kw.keyword);
+                var difficulty = krScoreDifficulty(kw.keyword);
+                var vol = krEstimateVolume(kw.keyword, kw.position, kw.source, kw.expansionCount);
+                var cpc = krEstimateCPC(kw.keyword, intent);
+                results.push({
+                    idx: i + 1,
+                    keyword: kw.keyword,
+                    difficulty: difficulty,
+                    intent: intent,
+                    volume: vol.volume,
+                    volumeLevel: vol.level,
+                    cpc: cpc,
+                    trending: kw.trending || null,
+                    source: kw.source
+                });
+            }
+            results.sort(function(a, b) {
+                var order = { 'very-high': 0, 'high': 1, 'medium': 2, 'low': 3, 'very-low': 4 };
+                var oa = order[a.volumeLevel] || 5;
+                var ob = order[b.volumeLevel] || 5;
+                if (oa !== ob) return oa - ob;
+                var intentOrder = { transactional: 0, commercial: 1, informational: 2, navigational: 3 };
+                return (intentOrder[a.intent] || 5) - (intentOrder[b.intent] || 5);
+            });
+            for (var i = 0; i < results.length; i++) results[i].idx = i + 1;
+
             krUpdateProgress(95);
             _krResults = results;
             _krClusters = krClusterKeywords(results);
@@ -5060,7 +5310,7 @@
                 if (prog) prog.style.display = 'none';
             }, 1000);
         } catch (e) {
-            out.innerHTML = '<div class="tool-loading"><p>' + t.kr_no_results + '</p></div>';
+            out.innerHTML = '<div class="tool-loading"><p>' + t.kr_no_results + ' (' + esc(e.message) + ')</p></div>';
         }
         btn.disabled = false;
         btn.textContent = t.kr_btn_research;
