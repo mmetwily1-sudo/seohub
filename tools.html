@@ -624,6 +624,16 @@
                 <details style="margin-top:8px;">
                     <summary style="cursor:pointer;font-size:12px;color:var(--gray-2);font-weight:600;">&#9881; <span data-i18n="kr_bulk_title">Bulk Keywords &amp; Advanced Options</span></summary>
                     <div style="margin-top:8px;">
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+                            <button onclick="krLoadEcommerceTemplate('categories')" style="background:#8b5cf6;color:white;border:none;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">&#128193; Categories</button>
+                            <button onclick="krLoadEcommerceTemplate('brands')" style="background:#ec4899;color:white;border:none;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">&#128085; Brands</button>
+                            <button onclick="krLoadEcommerceTemplate('products')" style="background:#f59e0b;color:white;border:none;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">&#128722; Products</button>
+                            <button onclick="krLoadEcommerceTemplate('modifiers')" style="background:#06b6d4;color:white;border:none;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">&#128295; Modifiers</button>
+                            <label style="background:#64748b;color:white;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                                &#128194; <input type="file" id="kr-import-file" accept=".txt,.csv" onchange="krImportFromFile(this)" style="display:none;"> Import
+                            </label>
+                            <button onclick="krImportFromClipboard()" style="background:#64748b;color:white;border:none;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">&#128203; Paste</button>
+                        </div>
                         <label style="font-size:12px;font-weight:600;color:var(--gray-2);display:block;margin-bottom:4px;" data-i18n="kr_bulk_label">Seed Keywords (one per line or comma-separated):</label>
                         <textarea id="kr-seed-multi" style="width:100%;min-height:80px;max-height:200px;padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-family:monospace;font-size:12px;resize:vertical;background:var(--card-bg);color:var(--text);" placeholder="seo tools&#10;digital marketing&#10;ecommerce seo&#10;..."></textarea>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center;">
@@ -647,6 +657,7 @@
                 <div id="kr-internal-view" style="display:none;"></div>
                 <div id="kr-roadmap-view" style="display:none;"></div>
                 <div id="kr-lists-view" style="display:none;"></div>
+                <div id="kr-intent-view" style="display:none;"></div>
             </div>
         </div>
     </section>    <section class="cta-section">
@@ -5628,6 +5639,139 @@
         });
     }
 
+    function krRenderIntentView(results) {
+        var groups = { transactional: [], commercial: [], informational: [], navigational: [] };
+        for (var i = 0; i < results.length; i++) {
+            var intent = results[i].intent || 'informational';
+            if (!groups[intent]) groups[intent] = [];
+            groups[intent].push(results[i]);
+        }
+        var icons = { transactional: '&#128722;', commercial: '&#128176;', informational: '&#128218;', navigational: '&#128205;' };
+        var colors = { transactional: '#10b981', commercial: '#f59e0b', informational: '#3b82f6', navigational: '#8b5cf6' };
+        var labels = {
+            transactional: currentLang === 'ar' ? '\u062a\u0639\u0627\u0645\u0644\u064a\u0629 (شراء)' : 'Transactional (Buy)',
+            commercial: currentLang === 'ar' ? '\u062a\u062c\u0627\u0631\u064a\u0629 (مقارنة)' : 'Commercial (Compare)',
+            informational: currentLang === 'ar' ? '\u062a\u0645\u0648\u0636\u064a\u0629 (معرفة)' : 'Informational (Learn)',
+            navigational: currentLang === 'ar' ? '\u062a\u0648\u0636\u064a\u0629 (علامة تجارية)' : 'Navigational (Brand)'
+        };
+        var html = '<div style="background:linear-gradient(135deg,#eff6ff,#f0f9ff);border:2px solid #3b82f6;border-radius:16px;padding:20px;">';
+        html += '<h3 style="margin:0 0 16px;color:#1e40af;">&#127919; ' + (currentLang === 'ar' ? '\u062a\u0635\u0646\u064a\u0641 \u0628\u0627\u0644\u0646\u064a\u0627\u062a' : 'Intent Segmentation') + '</h3>';
+        var total = results.length;
+        html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">';
+        var intentKeys = ['transactional', 'commercial', 'informational', 'navigational'];
+        for (var i = 0; i < intentKeys.length; i++) {
+            var key = intentKeys[i];
+            var count = groups[key].length;
+            var pct = total > 0 ? Math.round((count / total) * 100) : 0;
+            html += '<div style="background:white;border-radius:12px;padding:12px;text-align:center;border-top:3px solid ' + colors[key] + ';">';
+            html += '<div style="font-size:20px;">' + icons[key] + '</div>';
+            html += '<div style="font-size:22px;font-weight:800;color:' + colors[key] + ';">' + count + '</div>';
+            html += '<div style="font-size:11px;color:#64748b;">' + pct + '%</div>';
+            html += '<div style="font-size:11px;font-weight:600;color:#334155;margin-top:4px;">' + labels[key] + '</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+        for (var i = 0; i < intentKeys.length; i++) {
+            var key = intentKeys[i];
+            if (groups[key].length === 0) continue;
+            html += '<div style="margin-bottom:16px;">';
+            html += '<h4 style="margin:0 0 8px;color:' + colors[key] + ';">' + icons[key] + ' ' + labels[key] + ' (' + groups[key].length + ')</h4>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;">';
+            var sorted = groups[key].sort(function(a, b) { return b.volume - a.volume; });
+            for (var j = 0; j < Math.min(sorted.length, 20); j++) {
+                var kw = sorted[j];
+                var diff = krDiffLabel(kw.difficulty);
+                html += '<div style="background:white;border-radius:8px;padding:8px 12px;border-left:3px solid ' + colors[key] + ';display:flex;justify-content:space-between;align-items:center;">';
+                html += '<div><strong style="font-size:13px;">' + esc(kw.keyword) + '</strong><br>';
+                html += '<span style="font-size:11px;color:#64748b;">Vol: ' + kw.volume + ' | Diff: ' + kw.difficulty + '</span></div>';
+                html += '<span class="kr-badge ' + diff.cls + '">' + diff.text + '</span>';
+                html += '</div>';
+            }
+            if (groups[key].length > 20) {
+                html += '<div style="grid-column:1/-1;text-align:center;padding:8px;font-size:12px;color:#64748b;">+' + (groups[key].length - 20) + ' more...</div>';
+            }
+            html += '</div></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+
+    function krLoadEcommerceTemplate(type) {
+        var templates = {
+            categories: {
+                ar: ['\u0645\u0644\u0627\u0628\u0633', '\u0623\u062e\u0630\u0627\u0631\u0627\u062a', '\u0647\u0648\u0627\u062a\u0641', '\u062c\u0647\u0627\u0632\u0627\u062a', '\u0623\u0632\u064a\u0627\u0621', '\u0633\u064a\u0627\u0631\u0627\u062a', '\u0645\u0643\u0627\u0648\u0644\u0627\u062a', '\u0623\u062c\u0647\u0632\u0629 \u0645\u0646\u0632\u0639\u064a\u0629', '\u0623\u062c\u0647\u0632\u0629 \u0631\u064a\u0627\u0636\u064a\u0629', '\u062a\u0643\u0646\u0648\u0644\u0648\u062c\u064a\u0627\u062a', '\u062a\u0635\u0645\u064a\u0645 \u0627\u0644\u0645\u062a\u0627\u0628\u0639', '\u0643\u062a\u0628', '\u062d\u0632\u0627\u0645\u0627\u062a', '\u0623\u0644\u0639\u0627\u0628 \u0623\u0637\u0641\u0627\u0644', '\u0645\u0644\u0627\u0628\u0633 \u062a\u0631\u0641\u064a\u0647\u064a\u0629'],
+                en: ['laptops', 'smartphones', 'headphones', 'cameras', 'shoes', 'watches', 'bags', 'kitchen appliances', 'gaming accessories', 'electronics', 'home decor', 'furniture', 'skincare', 'toys', 'fitness equipment']
+            },
+            brands: {
+                ar: ['\u0627\u064f\u0646\u0633\u0646\u0631', '\u0633\u0627\u0645\u0633\u0648\u0646\u063a', '\u0622\u067e\u0644', '\u062d\u0633\u0627\u064a\u0628', '\u0646\u0648\u0646', '\u062c\u0627\u0631\u064a\u0631', '\u0627\u0643\u0633\u062a\u0631\u0627', '\u0632\u064a\u0646', '\u0633\u062a\u0633', '\u0643\u0627\u0632\u0628', '\u062a\u0627\u0628\u0639\u064a', '\u0646\u0648\u0632', '\u0645\u0627\u064a\u0632\u0648', '\u0633\u0648\u0646\u064a', '\u0644\u064a\u0646\u0643\u0648\u0633'],
+                en: ['samsung', 'apple', 'huawei', 'noon', 'jarir', 'extra', 'stc', 'zain', 'tabby', 'tamara', 'nike', 'adidas', 'sony', 'lg', 'bose']
+            },
+            products: {
+                ar: ['\u062c\u0648\u0627\u0644 iPhone', '\u062c\u0648\u0627\u0644 Samsung Galaxy', '\u0633\u064a\u0627\u0631\u0629 MacBook', '\u0633\u064a\u0627\u0631\u0629 PlayStation', '\u0633\u064a\u0627\u0631\u0629 Xbox', '\u0633\u064a\u0627\u0631\u0629 Nintendo', '\u062c\u0648\u0627\u0644 AirPods', '\u062c\u0648\u0627\u0644 iPad', '\u062c\u0648\u0627\u0644 Apple Watch', '\u062a\u064a\u0634\u0631\u062a Samsung', '\u062c\u0648\u0627\u0644 Sony WH', '\u062c\u0648\u0627\u0644 Air Fryer', '\u062c\u0648\u0627\u0644 Roomba', '\u062c\u0648\u0627\u0644 Echo Dot', '\u062c\u0648\u0627\u0644 Fire TV Stick'],
+                en: ['iPhone 16', 'Samsung Galaxy S25', 'MacBook Pro', 'PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'AirPods Pro', 'iPad Air', 'Apple Watch Ultra', 'Sony WH-1000XM5', 'Dyson V15', 'Roomba j7+', 'Echo Dot', 'Fire TV Stick', 'Kindle Paperwhite']
+            },
+            modifiers: {
+                ar: ['\u0623\u0631\u062e\u0635 \u0639\u0645\u0644\u0629', '\u0623\u0631\u062e\u0635 \u0633\u0639\u0631 \u0639\u0645\u0644', '\u0645\u0639\u0631\u0636 \u0639\u0645\u0644', '\u062e\u0635\u0645\u064a\u0627\u062a \u0643\u0631\u064a\u0645\u0629', '\u0623\u0641\u0636\u0644 \u0639\u0631\u0648\u0642 \u0645\u0631\u062a\u0628\u0637\u0629', '\u0645\u0642\u0627\u064a\u064a\u0633 \u0627\u0644\u0633\u0639\u0631\u0627\u062a', '\u0623\u0631\u062e\u0635 \u062a\u0648\u0636\u064a\u062d', '\u062e\u0627\u0644\u0635 \u0631\u0627\u0626\u0639', '\u062a\u0642\u0644\u064a\u0644 \u0627\u0644\u0623\u0633\u0639\u0627\u0631', '\u0628\u0631\u0646\u062f\u062c\u0627\u062a \u0627\u0644\u0623\u0633\u0639\u0627\u0631', '\u0645\u0643\u0648\u0646\u0627\u062a \u0623\u0633\u0639\u0627\u0631', '\u062e\u0635\u0645 \u0631\u063a\u0628', '\u0623\u0641\u0636\u0644 \u0639\u0631\u0648\u0642', '\u0645\u0642\u0627\u064a\u064a\u0633 \u0627\u0644\u0645\u0631\u0627\u062c\u0639', '\u0645\u0631\u0627\u062c\u0639 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u064a\u0646'],
+                en: ['best deal', 'cheap', 'affordable', 'premium', 'budget', 'review', 'vs', 'comparison', 'top 10', 'best 2025', 'buy online', 'free shipping', 'discount code', 'sale', 'refurbished']
+            }
+        };
+        var items = templates[type] ? templates[type][currentLang] || templates[type]['en'] : [];
+        var ta = document.getElementById('kr-seed-multi');
+        if (!ta) return;
+        var existing = ta.value.trim();
+        var newItems = [];
+        for (var i = 0; i < items.length; i++) {
+            if (existing.indexOf(items[i]) === -1) newItems.push(items[i]);
+        }
+        if (existing && newItems.length > 0) {
+            ta.value = existing + '\n' + newItems.join('\n');
+        } else if (newItems.length > 0) {
+            ta.value = newItems.join('\n');
+        }
+    }
+
+    function krImportFromClipboard() {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            navigator.clipboard.readText().then(function(text) {
+                if (text) {
+                    var ta = document.getElementById('kr-seed-multi');
+                    if (ta) {
+                        var existing = ta.value.trim();
+                        ta.value = existing ? existing + '\n' + text : text;
+                    }
+                }
+            }).catch(function() {
+                var text = prompt(currentLang === 'ar' ? '\u0627\u0644\u0635\u0642 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0647\u0646\u0627:' : 'Paste keywords here:');
+                if (text) {
+                    var ta = document.getElementById('kr-seed-multi');
+                    if (ta) {
+                        var existing = ta.value.trim();
+                        ta.value = existing ? existing + '\n' + text : text;
+                    }
+                }
+            });
+        }
+    }
+
+    function krImportFromFile(input) {
+        var file = input.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var text = e.target.result;
+            if (text) {
+                var ta = document.getElementById('kr-seed-multi');
+                if (ta) {
+                    var existing = ta.value.trim();
+                    var cleaned = text.replace(/[\r]+/g, '');
+                    ta.value = existing ? existing + '\n' + cleaned : cleaned;
+                }
+            }
+        };
+        reader.readAsText(file);
+        input.value = '';
+    }
+
     function krGetResearchHistory() {
         try { return JSON.parse(localStorage.getItem('seohub_kw_history') || '{}'); } catch(e) { return {}; }
     }
@@ -5875,6 +6019,7 @@
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'links\')">&#128279; ' + (currentLang === 'ar' ? '\u0627\u0644\u0631\u0628\u0637\u0627\u062a' : 'Links') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'roadmap\')">&#128640; ' + (currentLang === 'ar' ? '\u0627\u0644\u062e\u0637\u0629' : 'Roadmap') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'lists\')">&#128278; ' + (currentLang === 'ar' ? '\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Lists') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'intent\')">&#127919; ' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u064a\u0627\u062a' : 'By Intent') + '</button>';
             viewBar += '</div>';
 
             out.innerHTML = '<div style="background:#f0fdf4;border:2px solid #10b981;border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;">' +
@@ -6919,7 +7064,7 @@
         _krActiveView = view;
         var btns = document.querySelectorAll('.kr-view-btn');
         for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
-        var viewMap = { table: 0, topics: 1, gap: 2, plan: 3, links: 4, roadmap: 5, lists: 6 };
+        var viewMap = { table: 0, topics: 1, gap: 2, plan: 3, links: 4, roadmap: 5, lists: 6, intent: 7 };
         if (btns[viewMap[view]]) btns[viewMap[view]].classList.add('active');
         var output = document.getElementById('kr-output');
         var topicView = document.getElementById('kr-topic-view');
@@ -6928,6 +7073,7 @@
         var roadmapView = document.getElementById('kr-roadmap-view');
         var gapView = document.getElementById('kr-gap-view');
         var listsView = document.getElementById('kr-lists-view');
+        var intentView = document.getElementById('kr-intent-view');
         output.style.display = (view === 'table') ? '' : 'none';
         topicView.style.display = (view === 'topics') ? '' : 'none';
         planView.style.display = (view === 'plan') ? '' : 'none';
@@ -6935,6 +7081,7 @@
         roadmapView.style.display = (view === 'roadmap') ? '' : 'none';
         if (gapView) gapView.style.display = (view === 'gap') ? '' : 'none';
         if (listsView) listsView.style.display = (view === 'lists') ? '' : 'none';
+        if (intentView) intentView.style.display = (view === 'intent') ? '' : 'none';
         if (view === 'topics' && _krTopicTree.length > 0) {
             topicView.innerHTML = krRenderTopicView(_krTopicTree);
             _krActiveTopic = 0;
@@ -6949,6 +7096,8 @@
             if (gapView) gapView.innerHTML = krRenderGapAnalysis(_krResults);
         } else if (view === 'lists' && _krResults.length > 0) {
             if (listsView) listsView.innerHTML = krRenderKeywordLists(_krResults);
+        } else if (view === 'intent' && _krResults.length > 0) {
+            if (intentView) intentView.innerHTML = krRenderIntentView(_krResults);
         }
     }
 
@@ -7569,6 +7718,7 @@
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'links\')">&#128279; ' + (currentLang === 'ar' ? '\u0627\u0644\u0631\u0628\u0637\u0627\u062a' : 'Links') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'roadmap\')">&#128640; ' + (currentLang === 'ar' ? '\u0627\u0644\u062e\u0637\u062a\u0629' : 'Roadmap') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'lists\')">&#128278; ' + (currentLang === 'ar' ? '\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Lists') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'intent\')">&#127919; ' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u064a\u0627\u062a' : 'By Intent') + '</button>';
             viewBar += '</div>';
             var exportBtns = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
                 '<button onclick="krExportCSV(_krResults)" style="background:#10b981;color:white;border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">&#128229; CSV</button>' +
