@@ -2117,7 +2117,7 @@
             '.rpt-cat-label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px}' +
             '.rpt-cat-score{font-size:28px;font-weight:900;line-height:1}' +
             '.rpt-cat-bar{height:5px;background:#e2e8f0;border-radius:3px;margin-top:10px;overflow:hidden}' +
-            '.rpt-cat-fill{height:100%;border-radius:3px}' +
+            '.rpt-cat-fill{height:100%;border-radius:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
 
             '.rpt-section{margin-bottom:28px;page-break-inside:avoid}' +
             '.rpt-section-title{font-size:18px;font-weight:800;color:#1e293b;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e2e8f0;display:flex;align-items:center;gap:10px}' +
@@ -2182,7 +2182,7 @@
             '.rpt-img-stat .num{font-size:22px;font-weight:800}' +
             '.rpt-img-stat .lbl{font-size:11px;color:#64748b;font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}' +
             '.rpt-img-bar{height:6px;background:#e2e8f0;border-radius:3px;margin-top:8px;overflow:hidden}' +
-            '.rpt-img-bar-fill{height:100%;border-radius:3px}' +
+            '.rpt-img-bar-fill{height:100%;border-radius:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
 
             '.rpt-ai-warn{padding:16px 20px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border-radius:10px;border:1px solid #fde68a;border-left:4px solid #f59e0b;margin-top:12px}' +
             '.rpt-ai-warn-title{font-size:14px;font-weight:700;color:#92400e;margin-bottom:6px}' +
@@ -2204,6 +2204,7 @@
             '.rpt-footer a{color:#2563eb;text-decoration:none;font-weight:600}' +
 
             '@media print{' +
+                '@page{margin:12mm 10mm}' +
                 'html,body{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important}' +
                 'body{padding:0;background:#fff}' +
                 '.report-wrap{box-shadow:none;border:none;max-width:100%}' +
@@ -2211,7 +2212,11 @@
                 '.rpt-header{padding:32px 24px;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}' +
                 '.rpt-body{padding:24px}' +
                 '.rpt-footer{padding:16px 24px}' +
+                '.rpt-cat-grid{grid-template-columns:repeat(3,1fr);gap:10px}' +
                 '.rpt-cat,.rpt-score-hero,.rpt-card,.rpt-week,.rpt-stat-card,.rpt-img-stat,.rpt-eeat-item{break-inside:avoid}' +
+                '.rpt-score-hero{page-break-after:always}' +
+                '.rpt-section-title{page-break-after:avoid}' +
+                '.rpt-link-bar,.rpt-img-bar,.rpt-cat-bar,.rpt-chart{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}' +
             '}' +
             '@media(max-width:768px){' +
                 '.rpt-cat-grid{grid-template-columns:repeat(2,1fr)}' +
@@ -2361,9 +2366,11 @@
 
             if (tabId === 'af-actionplan') {
                 /* Convert action plan week wrapper h4s */
-                h = h.replace(/<div style="margin-bottom:\s*20px;"><h4 style="[^"]*">([\s\S]*?)<\/h4>/gi,
-                    '<div class="rpt-week"><div class="rpt-week-title">$1</div>');
+                h = h.replace(/<div style="margin-bottom:\s*20px;"><h4 style="([^"]*)">([\s\S]*?)<\/h4>/gi,
+                    '<div class="rpt-week"><div class="rpt-week-title" style="$1">$2</div>');
                 h = h.replace(/class="audit-issue ai-pass">/g, 'class="rpt-task">');
+                h = h.replace(/var\(--primary\)/g, '#2563eb');
+                h = h.replace(/var\(--gray-1\)/g, '#64748b');
             }
 
             /* Global transforms */
