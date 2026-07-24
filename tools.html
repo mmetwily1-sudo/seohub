@@ -770,16 +770,13 @@
     }
 
     async function fetchHTML(url, opts) {
-        var timeout = (opts && opts.timeout) || 12000;
-        var retries = (opts && opts.retries) || 0;
+        var timeout = (opts && opts.timeout) || 15000;
+        var retries = (opts && opts.retries) || 2;
         var attempt = 0;
         var lastError;
         var proxies = [
             { url: 'https://seohub-proxy.mmetwily1.workers.dev/?url=', type: 'json' },
-            { url: 'http://localhost:3001/proxy?url=', type: 'json', local: true },
-            { url: 'https://corsproxy.io/?url=', type: 'text' },
-            { url: 'https://api.codetabs.com/v1/proxy?quest=', type: 'text' },
-            { url: 'https://api.cors.lol/?url=', type: 'text' }
+            { url: 'http://localhost:3001/proxy?url=', type: 'json', local: true }
         ];
         var proxyLimit = (opts && opts.proxyLimit) || proxies.length;
         var localAvailable = _localProxyAvailable === true;
@@ -810,24 +807,21 @@
             }
             attempt++;
             if (attempt <= retries) {
-                await new Promise(function(r) { setTimeout(r, 1000 * attempt); });
+                await new Promise(function(r) { setTimeout(r, 1500 * (attempt + 1)); });
             }
         }
-        var hint = localAvailable ? '' : ' <span style="color:#f59e0b;">Tip: Run <code>node proxy-server.js</code> for best results.</span>';
-        throw new Error('All proxies failed. Last error: ' + (lastError ? lastError.message : 'unknown') + hint);
+        var hint = localAvailable ? '' : ' <span style="color:#f59e0b;">Tip: Run <code>node proxy-server.js</code> locally for best results.</span>';
+        throw new Error('Proxy failed. Last error: ' + (lastError ? lastError.message : 'unknown') + hint);
     }
 
     async function fetchJSON(url, opts) {
-        var timeout = (opts && opts.timeout) || 12000;
-        var retries = (opts && opts.retries) || 0;
+        var timeout = (opts && opts.timeout) || 15000;
+        var retries = (opts && opts.retries) || 2;
         var attempt = 0;
         var lastError;
         var proxies = [
             { url: 'https://seohub-proxy.mmetwily1.workers.dev/?url=', type: 'json' },
-            { url: 'http://localhost:3001/proxy?url=', type: 'json', local: true },
-            { url: 'https://corsproxy.io/?url=', type: 'text' },
-            { url: 'https://api.codetabs.com/v1/proxy?quest=', type: 'text' },
-            { url: 'https://api.cors.lol/?url=', type: 'text' }
+            { url: 'http://localhost:3001/proxy?url=', type: 'json', local: true }
         ];
         var proxyLimit = (opts && opts.proxyLimit) || proxies.length;
         var localAvailable = _localProxyAvailable === true;
@@ -859,7 +853,7 @@
             }
             attempt++;
             if (attempt <= retries) {
-                await new Promise(function(r) { setTimeout(r, 1000 * attempt); });
+                await new Promise(function(r) { setTimeout(r, 1500 * (attempt + 1)); });
             }
         }
         throw new Error('All proxies failed. Last error: ' + (lastError ? lastError.message : 'unknown'));
@@ -4698,7 +4692,7 @@
         var params = 'client=firefox&q=' + encodeURIComponent(query);
         if (lang) params += '&hl=' + lang;
         if (country) params += '&gl=' + country;
-        return fetchJSON(base + '?' + params, { timeout: 8000, retries: 0, proxyLimit: 5 })
+        return fetchJSON(base + '?' + params, { timeout: 10000, retries: 1, proxyLimit: 2 })
             .then(function(data) { return data[1] || []; })
             .catch(function() { return []; });
     }
@@ -4707,7 +4701,7 @@
         var alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
         var allSuggestions = [];
         var total = alphabet.length;
-        var batchSize = 8;
+        var batchSize = 4;
         var batchesDone = 0;
         var totalBatches = Math.ceil(total / batchSize);
         function runBatch(start) {
@@ -4726,7 +4720,9 @@
             batchesDone++;
             onProgress(Math.round((batchesDone / totalBatches) * 100));
             return Promise.all(promises).then(function() {
-                if (end < total) return runBatch(end);
+                if (end < total) {
+                    return new Promise(function(r) { setTimeout(r, 400); }).then(function() { return runBatch(end); });
+                }
                 return allSuggestions;
             });
         }
@@ -4931,7 +4927,7 @@
     function krFetchTrends(country, lang) {
         var geo = country || '';
         var url = 'https://trends.google.com/trends/api/dailytrends?hl=' + (lang || 'en') + '&tz=-480&geo=' + geo + '&ns=15';
-        return fetchJSON(url, { timeout: 15000, retries: 1, proxyLimit: 3 })
+        return fetchJSON(url, { timeout: 15000, retries: 2, proxyLimit: 2 })
             .then(function(data) {
                 var trending = [];
                 if (data.default && data.default.trendingSearchesDays) {
@@ -5520,7 +5516,7 @@
 
     function krFetchWikipediaKeywords(seed) {
         var url = 'https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(seed);
-        return fetchJSON(url, { timeout: 10000, retries: 1, proxyLimit: 5 }).then(function(data) {
+        return fetchJSON(url, { timeout: 12000, retries: 2, proxyLimit: 2 }).then(function(data) {
             var keywords = [];
             if (data.extract) {
                 var text = data.extract.toLowerCase();
@@ -5545,7 +5541,7 @@
 
     function krFetchRedditKeywords(seed) {
         var url = 'https://www.reddit.com/search.json?q=' + encodeURIComponent(seed) + '&limit=25&sort=relevance&t=month';
-        return fetchJSON(url, { timeout: 10000, retries: 1, proxyLimit: 5 }).then(function(data) {
+        return fetchJSON(url, { timeout: 12000, retries: 2, proxyLimit: 2 }).then(function(data) {
             var keywords = [];
             if (data && data.data && data.data.children) {
                 var children = data.data.children;
@@ -7382,7 +7378,7 @@
         testEl.style.cssText = 'background:#1e1b4b;color:#c7d2fe;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:13px;font-family:monospace;';
         testEl.textContent = currentLang === 'ar' ? '\u062c\u0627\u0631\u064a \u0627\u0644\u0627\u062a\u0635\u0627\u0644...' : 'Testing proxy connection...';
         out.insertBefore(testEl, out.firstChild);
-        fetchJSON(testUrl, { timeout: 15000, retries: 1, proxyLimit: 7 })
+        fetchJSON(testUrl, { timeout: 15000, retries: 2, proxyLimit: 2 })
             .then(function(data) {
                 var sugs = data[1] || [];
                 if (sugs.length > 0) {
