@@ -2985,9 +2985,12 @@
         var bom = '\uFEFF';
         var headers = [
             'sku','name_ar','name_en','weight_unit','weight','price','sale_price','cost',
-            'quantity','categories','published','images','vat_free','keywords',
-            'description_ar','description_en','short_description_ar','short_description_en',
-            'has_variants','option1_name_ar','option1_name_en','option1_value_ar','option1_value_en'
+            'quantity','categories','published','images','vat_free',
+            'minimum_quantity_per_order','maximum_quantity_per_order','shipping_required',
+            'keywords','description_ar','description_en','short_description_ar','short_description_en',
+            'has_variants','option1_name_ar','option1_name_en','option1_value_ar','option1_value_en',
+            'option2_name_ar','option2_name_en','option2_value_ar','option2_value_en',
+            'option3_name_ar','option3_name_en','option3_value_ar','option3_value_en'
         ];
         var h = headers.join(',') + '\n';
         var rows = '';
@@ -3007,12 +3010,14 @@
                 '"' + name.replace(/"/g, '""') + '"',
                 'Kg', '', price, '', '',
                 '100', '"' + cats + '"', 'Yes', img ? 'Yes' : 'No', 'No',
+                '', '', 'Yes',
                 '"' + keywords.replace(/"/g, '""') + '"',
                 '"' + desc.substring(0, 500).replace(/"/g, '""') + '"',
                 '"' + desc.substring(0, 500).replace(/"/g, '""') + '"',
                 '"' + shortDesc.replace(/"/g, '""') + '"',
                 '"' + shortDesc.replace(/"/g, '""') + '"',
-                'No', '', '', '', ''
+                'No', '', '', '', '',
+                '', '', '', ''
             ];
             rows += row.join(',') + '\n';
         }
@@ -3023,9 +3028,12 @@
         var bom = '\uFEFF';
         var headers = [
             'Handle','Title','Body (HTML)','Vendor','Product Category','Type','Tags',
-            'Published','Published Scope','Option1 Name','Option1 Value',
-            'Variant SKU','Variant Inventory Qty','Variant Price','Variant Compare At Price',
-            'Variant Requires Shipping','Variant Taxable',
+            'Published','Option1 Name','Option1 Value',
+            'Option2 Name','Option2 Value','Option3 Name','Option3 Value',
+            'Variant SKU','Variant Grams','Variant Inventory Tracker','Variant Inventory Qty',
+            'Variant Inventory Policy','Variant Fulfillment Service',
+            'Variant Price','Variant Compare At Price',
+            'Variant Requires Shipping','Variant Taxable','Variant Barcode',
             'Image Src','Image Position','Image Alt Text',
             'SEO Title','SEO Description','URL Redirect'
         ];
@@ -3048,13 +3056,16 @@
                 '"' + desc.substring(0, 500) + '"',
                 '"' + vendor + '"',
                 '', '', '',
-                'TRUE', 'web', '', '',
-                '"' + sku + '"', '100', price, '',
-                'TRUE', 'TRUE',
+                'TRUE', '', '',
+                '', '', '', '',
+                '"' + sku + '"', '', 'shopify', '100',
+                'deny', 'manual',
+                price, '',
+                'TRUE', 'TRUE', '',
                 '"' + img + '"', '1', '"' + title.replace(/"/g, '""') + '"',
                 '"' + seoTitle + '"',
                 '"' + seoDesc + '"',
-                '"' + r.url + '"'
+                '"' + (r.url || '') + '"'
             ];
             rows += row.join(',') + '\n';
         }
@@ -3066,8 +3077,15 @@
         var headers = [
             'ID','Type','SKU','Name','Published','Is featured?',
             'Visibility in catalog','Short description','Description',
-            'Regular price','Sale price','Categories','Tags','Images',
-            'In stock?','Stock','Position'
+            'Date sale price starts','Date sale price ends',
+            'Tax status','Tax class','In stock?','Stock','Low stock amount',
+            'Backorders allowed?','Sold individually?',
+            'Weight (kg)','Length (cm)','Width (cm)','Height (cm)',
+            'Allow customer reviews?','Purchase note',
+            'Sale price','Regular price','Categories','Tags','Shipping class',
+            'Images','Download limit','Download expiry days',
+            'Parent','Grouped products','Upsells','Cross-sells',
+            'External URL','Button text','Position'
         ];
         var h = headers.join(',') + '\n';
         var rows = '';
@@ -3085,9 +3103,16 @@
                 '"' + name + '"', '1', '0', '"visible"',
                 '"' + shortDesc + '"',
                 '"' + desc.substring(0, 500) + '"',
+                '', '',
+                '"taxable"', '', '1', '100', '',
+                '0', '0',
+                '', '', '', '',
+                '1', '',
                 '"' + price + '"', '"' + price + '"',
-                '"' + cats + '"', '', '"' + img + '"',
-                '1', '100', (i + 1)
+                '"' + cats + '"', '', '',
+                '"' + img + '"', '', '',
+                '', '', '', '',
+                '', '', (i + 1)
             ];
             rows += row.join(',') + '\n';
         }
@@ -3104,17 +3129,28 @@
             '<Style ss:ID="req"><Interior ss:Color="#fef3c7" ss:Pattern="Solid"/></Style></Styles>' +
             '<Worksheet ss:Name="Products"><Table ss:DefaultColumnWidth="120">';
         var headers = [
-            '\u0646\u0648\u0639 \u0627\u0644\u0635\u0646\u0641',
             '\u0627\u0633\u0645 \u0627\u0644\u0645\u0646\u062a\u062c',
-            '\u0631\u0645\u0632 \u0627\u0644\u0645\u0646\u062a\u062c',
+            '\u062a\u0635\u0646\u064a\u0641 \u0627\u0644\u0645\u0646\u062a\u062c',
+            '\u0646\u0648\u0639 \u0627\u0644\u0645\u0646\u062a\u062c',
+            '\u0627\u0644\u0648\u0635\u0641',
+            '\u0627\u0644\u0635\u0648\u0631\u0629 \u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629',
+            '\u0631\u0645\u0632 \u0627\u0644\u0645\u0646\u062a\u062c sku',
             '\u0627\u0644\u0633\u0639\u0631',
             '\u0633\u0639\u0631 \u0627\u0644\u062a\u062e\u0641\u064a\u0636',
+            '\u0633\u0639\u0631 \u0627\u0644\u062a\u0643\u0644\u0641\u0629',
             '\u0627\u0644\u0643\u0645\u064a\u0629',
             '\u0627\u0644\u0648\u0632\u0646',
-            '\u0627\u0644\u062a\u0635\u0646\u064a\u0641',
-            '\u0627\u0644\u0635\u0648\u0631\u0629 \u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629',
-            '\u0627\u0644\u0648\u0635\u0641 \u0627\u0644\u0625\u0636\u0627\u0641\u064a',
-            '\u0627\u0644\u0648\u0635\u0641',
+            '\u0648\u062d\u062f\u0629 \u0627\u0644\u0648\u0632\u0646',
+            '\u062d\u0627\u0644\u0629 \u0627\u0644\u0645\u0646\u062a\u062c',
+            '\u0627\u0644\u0645\u0627\u0631\u0643\u0629',
+            '\u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u062a\u0631\u0648\u064a\u062c\u064a',
+            '\u062e\u0627\u0636\u0639 \u0644\u0644\u0636\u0631\u064a\u0628\u0629\u061f',
+            '\u063a\u064a\u0631 \u0645\u062d\u062f\u0648\u062f \u0627\u0644\u0643\u0645\u064a\u0629',
+            '\u062a\u0648\u0636\u064a\u062a \u0627\u0644\u0645\u0646\u062a\u062c',
+            '\u0645\u0639\u062f\u0627\u062f \u0635\u0641\u062d\u0629 \u0627\u0644\u0645\u0646\u062a\u062c (SEO)',
+            '\u0631\u0627\u0628\u0637 \u0645\u062e\u0635\u0635 \u0644\u0644\u0645\u0646\u062a\u062c (SEO)',
+            '\u0648\u0635\u0641 \u0635\u0641\u062d\u0629 \u0627\u0644\u0645\u0646\u062a\u062c (SEO)',
+            '\u0627\u0644\u0628\u0627\u0631\u0643\u0648\u062f',
             '\u062d\u0627\u0644\u0629 \u0627\u0644\u0645\u0646\u062a\u062c'
         ];
         xml += '<Row ss:StyleID="hdr">';
@@ -3128,18 +3164,31 @@
             var desc = (r.description || '').substring(0, 500);
             var price = r.price || '0';
             var img = r.image || '';
+            var sku = r.sku || 'PRD-' + (1000 + i);
             xml += '<Row>' +
-                '<Cell><Data ss:Type="String">product</Data></Cell>' +
                 '<Cell><Data ss:Type="String">' + esc(name) + '</Data></Cell>' +
-                '<Cell><Data ss:Type="String">' + esc(r.sku || 'PRD-' + (1000 + i)) + '</Data></Cell>' +
+                '<Cell><Data ss:Type="String">' + esc(r.category || '') + '</Data></Cell>' +
+                '<Cell><Data ss:Type="String">product</Data></Cell>' +
+                '<Cell><Data ss:Type="String">' + esc(desc) + '</Data></Cell>' +
+                '<Cell><Data ss:Type="String">' + esc(img) + '</Data></Cell>' +
+                '<Cell><Data ss:Type="String">' + esc(sku) + '</Data></Cell>' +
                 '<Cell ss:StyleID="req"><Data ss:Type="String">' + esc(price) + '</Data></Cell>' +
+                '<Cell><Data ss:Type="String"></Data></Cell>' +
                 '<Cell><Data ss:Type="String"></Data></Cell>' +
                 '<Cell ss:StyleID="req"><Data ss:Type="String">100</Data></Cell>' +
                 '<Cell><Data ss:Type="String"></Data></Cell>' +
                 '<Cell><Data ss:Type="String"></Data></Cell>' +
-                '<Cell><Data ss:Type="String">' + esc(img) + '</Data></Cell>' +
+                '<Cell><Data ss:Type="String">Active</Data></Cell>' +
                 '<Cell><Data ss:Type="String"></Data></Cell>' +
-                '<Cell><Data ss:Type="String">' + esc(desc) + '</Data></Cell>' +
+                '<Cell><Data ss:Type="String"></Data></Cell>' +
+                '<Cell><Data ss:Type="String">No</Data></Cell>' +
+                '<Cell><Data ss:Type="String">No</Data></Cell>' +
+                '<Cell><Data ss:Type="String">No</Data></Cell>' +
+                '<Cell><Data ss:Type="String"></Data></Cell>' +
+                '<Cell><Data ss:Type="String"></Data></Cell>' +
+                '<Cell><Data ss:Type="String"></Data></Cell>' +
+                '<Cell><Data ss:Type="String"></Data></Cell>' +
+                '<Cell><Data ss:Type="String"></Data></Cell>' +
                 '<Cell><Data ss:Type="String">Active</Data></Cell>' +
                 '</Row>';
         }
