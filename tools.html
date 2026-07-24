@@ -446,6 +446,7 @@
                     <textarea id="crawl-paste" class="tool-input" style="margin-top:8px;min-height:120px;max-height:250px;font-family:monospace;font-size:12px;resize:vertical;" placeholder="Paste product URLs (one per line) or sitemap XML here..."></textarea>
                     <button class="tool-go-btn" onclick="runCrawlerFromPaste()" style="background:#8b5cf6;margin-top:8px;font-size:13px;">&#128270; Scan from Pasted Data</button>
                 </details>
+                <div id="crawl-proxy-status" style="margin-top:8px;text-align:center;"></div>
                 <div class="tool-output" id="crawl-output"><div class="tool-loading"><p data-i18n="load_crawl">Enter your store URL above and click Scan Products to extract all product data</p></div></div>
             </div>
         </div>
@@ -571,11 +572,7 @@
             { url: 'https://api.cors.lol/?url=', type: 'text' }
         ];
         var proxyLimit = (opts && opts.proxyLimit) || proxies.length;
-        var localAvailable = false;
-        try {
-            var lr = await fetch('http://localhost:3001/status', { signal: AbortSignal.timeout(1500) });
-            if (lr.ok) localAvailable = true;
-        } catch(e) {}
+        var localAvailable = _localProxyAvailable === true;
         if (!localAvailable) proxies = proxies.filter(function(p) { return !p.local; });
         while (attempt <= retries) {
             for (var i = 0; i < proxyLimit; i++) {
@@ -2742,6 +2739,24 @@
     var _crawlRunning = false;
     var _crawlAbort = false;
     var _crawlResults = [];
+    var _localProxyAvailable = null;
+
+    function checkLocalProxy() {
+        if (_localProxyAvailable !== null) return Promise.resolve(_localProxyAvailable);
+        return fetch('http://localhost:3001/status', { signal: AbortSignal.timeout(2000) })
+            .then(function(r) { _localProxyAvailable = r.ok; return r.ok; })
+            .catch(function() { _localProxyAvailable = false; return false; });
+    }
+
+    function updateProxyStatus() {
+        var el = document.getElementById('crawl-proxy-status');
+        if (!el) return;
+        if (_localProxyAvailable === true) {
+            el.innerHTML = '<span style="color:#10b981;font-size:12px;font-weight:600;">&#9679; Local proxy active</span>';
+        } else {
+            el.innerHTML = '<span style="color:#f59e0b;font-size:12px;">&#9679; Using external proxies</span> <span style="color:var(--gray-2);font-size:11px;">| Run <code>node proxy-server.js</code> for faster crawling</span>';
+        }
+    }
 
     function detectPlatform(html, url) {
         var h = html.toLowerCase();
@@ -3082,7 +3097,11 @@
 
             crawlUpdateUI(0, 0, 'Scanning ' + unique.length + ' products from pasted data...');
 
+            await checkLocalProxy();
+            updateProxyStatus();
+
             var batch = 10;
+            var pasteFailedCount = 0;
             for (var bi = 0; bi < unique.length; bi += batch) {
                 if (_crawlAbort) break;
                 var end = Math.min(bi + batch, unique.length);
@@ -3099,6 +3118,7 @@
                                     _crawlResults.push(data);
                                 })
                                 .catch(function() {
+                                    pasteFailedCount++;
                                     _crawlResults.push({ url: unique[idx], title: '', price: '', currency: 'SAR', image: '', sku: '', description: '', brand: '' });
                                 })
                         );
@@ -3106,6 +3126,22 @@
                 }
                 await Promise.all(promises);
                 await new Promise(function(r) { setTimeout(r, 100); });
+
+                if (bi === 0 && pasteFailedCount >= promises.length) {
+                    _crawlResults = [];
+                    crawlUpdateUI(0, 0, '');
+                    out.innerHTML = '<div class="tool-loading"><p style="color:#ef4444;font-weight:700;">&#9888; All proxies failed for these URLs.</p>' +
+                        '<p style="font-size:13px;color:var(--gray-1);margin-top:8px;">The target site blocks or timeouts all CORS proxies.</p>' +
+                        '<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-top:12px;max-width:500px;text-align:left;">' +
+                        '<p style="font-size:13px;font-weight:700;color:#92400e;margin:0 0 6px;">&#9889; How to fix:</p>' +
+                        '<ol style="font-size:12px;color:#78350f;margin:0;padding-left:18px;">' +
+                        '<li style="margin-bottom:4px;">Open a <b>new terminal</b> and run: <code style="background:#fff;padding:2px 6px;border-radius:4px;border:1px solid #f59e0b;">node proxy-server.js</code></li>' +
+                        '<li style="margin-bottom:4px;">Keep it running, then click <b>Scan from Pasted Data</b> again</li>' +
+                        '<li>Or try pasting the sitemap XML content instead of full URLs</li>' +
+                        '</ol></div></div>';
+                    _crawlRunning = false;
+                    return;
+                }
             }
 
             var finalOk = 0;
@@ -3133,6 +3169,10 @@
         _crawlRunning = true;
         _crawlAbort = false;
         _crawlResults = [];
+
+        await checkLocalProxy();
+        updateProxyStatus();
+
         out.innerHTML = '<div class="tool-loading"><p>Starting scan...</p></div>';
 
         try {
@@ -3140,11 +3180,24 @@
             var productUrls = [];
             var allUrls = [];
 
-            // Step 1: Detect platform
-            out.innerHTML = '<div class="tool-loading"><p>Detecting platform...</p></div>';
+            // Step 1: Detect platform + proxy health check
+            out.innerHTML = '<div class="tool-loading"><p>Detecting platform & checking proxies...</p></div>';
             var mainHtml = '';
             try { mainHtml = await fetchHTML(url, { timeout: 15000, proxyLimit: 3 }); } catch(e) {}
-            if (mainHtml && platform === 'auto') {
+            if (!mainHtml) {
+                _crawlRunning = false;
+                out.innerHTML = '<div class="tool-loading"><p style="color:#ef4444;font-weight:700;">&#9888; Cannot reach this store via any proxy.</p>' +
+                    '<p style="font-size:13px;color:var(--gray-1);margin-top:8px;">All CORS proxies failed to fetch the homepage. The site may block proxied requests.</p>' +
+                    '<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-top:12px;max-width:500px;text-align:left;">' +
+                    '<p style="font-size:13px;font-weight:700;color:#92400e;margin:0 0 6px;">&#9889; Solutions:</p>' +
+                    '<ol style="font-size:12px;color:#78350f;margin:0;padding-left:18px;">' +
+                    '<li style="margin-bottom:4px;">Run local proxy: <code style="background:#fff;padding:2px 6px;border-radius:4px;border:1px solid #f59e0b;">node proxy-server.js</code> then retry</li>' +
+                    '<li style="margin-bottom:4px;">Open the store\'s sitemap.xml in your browser and paste it in the box below</li>' +
+                    '<li>Or paste all product URLs one-per-line below</li>' +
+                    '</ol></div></div>';
+                return;
+            }
+            if (platform === 'auto') {
                 platform = detectPlatform(mainHtml, url);
             }
 
@@ -3358,6 +3411,23 @@
                 }
                 await Promise.all(promises);
                 await new Promise(function(r) { setTimeout(r, 100); });
+
+                // Early abort: if first batch fully failed, proxies are broken
+                if (bi === 0 && failedCount >= promises.length) {
+                    _crawlResults = [];
+                    crawlUpdateUI(0, total, '');
+                    out.innerHTML = '<div class="tool-loading"><p style="color:#ef4444;font-weight:700;">&#9888; All proxies failed for this store.</p>' +
+                        '<p style="font-size:13px;color:var(--gray-1);margin-top:8px;">The target site blocks or timeouts all CORS proxies.</p>' +
+                        '<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-top:12px;max-width:500px;text-align:left;">' +
+                        '<p style="font-size:13px;font-weight:700;color:#92400e;margin:0 0 6px;">&#9889; How to fix:</p>' +
+                        '<ol style="font-size:12px;color:#78350f;margin:0;padding-left:18px;">' +
+                        '<li style="margin-bottom:4px;">Open a <b>new terminal</b> and run: <code style="background:#fff;padding:2px 6px;border-radius:4px;border:1px solid #f59e0b;">node proxy-server.js</code></li>' +
+                        '<li style="margin-bottom:4px;">Keep it running, then click <b>Scan Products</b> again</li>' +
+                        '<li>Or use the <b>Paste URLs/XML</b> option below (copy sitemap content from your browser)</li>' +
+                        '</ol></div></div>';
+                    _crawlRunning = false;
+                    return;
+                }
 
                 // Update progress
                 var okCount = 0;
