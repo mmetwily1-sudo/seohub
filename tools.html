@@ -549,7 +549,11 @@
         btn.classList.add('active');
     }
 
-    async function fetchHTML(url) {
+    async function fetchHTML(url, opts) {
+        var timeout = (opts && opts.timeout) || 12000;
+        var retries = (opts && opts.retries) || 0;
+        var attempt = 0;
+        var lastError;
         var proxies = [
             { url: 'https://api.allorigins.win/raw?url=', type: 'text' },
             { url: 'https://corsproxy.io/?url=', type: 'text' },
@@ -557,27 +561,32 @@
             { url: 'https://api.cors.lol/?url=', type: 'text' },
             { url: 'https://thingproxy.freeboard.io/fetch/', type: 'text' }
         ];
-        var lastError;
-        for (var i = 0; i < proxies.length; i++) {
-            var p = proxies[i];
-            var u = p.url + encodeURIComponent(url);
-            try {
-                var controller = new AbortController();
-                var timer = setTimeout(function() { controller.abort(); }, 12000);
-                var res = await fetch(u, { signal: controller.signal });
-                clearTimeout(timer);
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                var text;
-                if (p.type === 'json') {
-                    var json = await res.json();
-                    text = json.contents || '';
-                } else {
-                    text = await res.text();
+        while (attempt <= retries) {
+            for (var i = 0; i < proxies.length; i++) {
+                var p = proxies[i];
+                var u = p.url + encodeURIComponent(url);
+                try {
+                    var controller = new AbortController();
+                    var timer = setTimeout(function() { controller.abort(); }, timeout);
+                    var res = await fetch(u, { signal: controller.signal });
+                    clearTimeout(timer);
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    var text;
+                    if (p.type === 'json') {
+                        var json = await res.json();
+                        text = json.contents || '';
+                    } else {
+                        text = await res.text();
+                    }
+                    if (!text || text.length < 50) throw new Error('Empty or too short response');
+                    return text;
+                } catch (e) {
+                    lastError = e;
                 }
-                if (!text || text.length < 50) throw new Error('Empty or too short response');
-                return text;
-            } catch (e) {
-                lastError = e;
+            }
+            attempt++;
+            if (attempt <= retries) {
+                await new Promise(function(r) { setTimeout(r, 1000 * attempt); });
             }
         }
         throw new Error('All proxies failed. Last error: ' + (lastError ? lastError.message : 'unknown'));
@@ -2983,7 +2992,7 @@
             // Step 1: Detect platform
             out.innerHTML = '<div class="tool-loading"><p>Detecting platform...</p></div>';
             var mainHtml = '';
-            try { mainHtml = await fetchHTML(url); } catch(e) {}
+            try { mainHtml = await fetchHTML(url, { timeout: 15000 }); } catch(e) {}
             if (mainHtml && platform === 'auto') {
                 platform = detectPlatform(mainHtml, url);
             }
@@ -2994,8 +3003,10 @@
 
             for (var si = 0; si < sitemapUrls.length; si++) {
                 if (_crawlAbort) break;
+                var smName = sitemapUrls[si].split('/').pop();
+                crawlUpdateUI(0, 0, 'Fetching ' + smName + '...');
                 try {
-                    var smText = await fetchHTML(sitemapUrls[si]);
+                    var smText = await fetchHTML(sitemapUrls[si], { timeout: 20000, retries: 1 });
                     if (smText && smText.indexOf('<urlset') !== -1) {
                         var smUrls = parseSitemapUrls(smText);
                         for (var ui = 0; ui < smUrls.length; ui++) {
@@ -3008,8 +3019,11 @@
                         // Sub-sitemaps
                         var subUrls = parseSitemapUrls(smText);
                         for (var subi = 0; subi < subUrls.length; subi++) {
+                            if (_crawlAbort) break;
+                            var subName = subUrls[subi].split('/').pop();
+                            crawlUpdateUI(0, 0, 'Fetching sub-sitemap: ' + subName + '...');
                             try {
-                                var subText = await fetchHTML(subUrls[subi]);
+                                var subText = await fetchHTML(subUrls[subi], { timeout: 20000, retries: 1 });
                                 if (subText) {
                                     var subParsed = parseSitemapUrls(subText);
                                     for (var spi = 0; spi < subParsed.length; spi++) {
@@ -3019,10 +3033,16 @@
                                         allUrls.push(subParsed[spi]);
                                     }
                                 }
-                            } catch(e) {}
+                            } catch(e) {
+                                crawlUpdateUI(0, 0, 'Skipping ' + subUrls[subi].split('/').pop() + ' (timeout) - continuing...');
+                                await new Promise(function(r) { setTimeout(r, 500); });
+                            }
                         }
                     }
-                } catch(e) {}
+                } catch(e) {
+                    crawlUpdateUI(0, 0, 'Skipping ' + sitemapUrls[si].split('/').pop() + ' (timeout) - continuing...');
+                    await new Promise(function(r) { setTimeout(r, 500); });
+                }
             }
 
             // Step 3: If no sitemap, crawl main page links
