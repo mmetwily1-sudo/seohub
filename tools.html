@@ -444,7 +444,7 @@
                 <details style="margin-top:12px;">
                     <summary style="cursor:pointer;font-size:13px;color:var(--gray-2);font-weight:600;">&#128203; Or paste product URLs / sitemap XML (when proxy fails)</summary>
                     <textarea id="crawl-paste" class="tool-input" style="margin-top:8px;min-height:120px;max-height:250px;font-family:monospace;font-size:12px;resize:vertical;" placeholder="Paste product URLs (one per line) or sitemap XML here..."></textarea>
-                    <button class="tool-go-btn" onclick="runCrawlerFromPaste()" style="background:#8b5cf6;margin-top:8px;font-size:13px;">&#128270; Scan from Pasted Data</button>
+                    <button class="tool-go-btn" onclick="runCrawlerFromPaste()" style="background:#8b5cf6;margin-top:8px;font-size:13px;">&#128270; Monitor from Pasted Data</button>
                 </details>
                 <div id="crawl-proxy-status" style="margin-top:8px;text-align:center;"></div>
                 <div class="tool-output" id="crawl-output"><div class="tool-loading"><p data-i18n="load_crawl">Enter your store URL above and click Scan Products to extract all product data</p></div></div>
@@ -2740,6 +2740,7 @@
     var _crawlAbort = false;
     var _crawlResults = [];
     var _localProxyAvailable = null;
+    var _detectedPlatform = 'generic';
 
     function checkLocalProxy() {
         if (_localProxyAvailable !== null) return Promise.resolve(_localProxyAvailable);
@@ -2911,6 +2912,10 @@
             (found > 0 ? buildCrawlTable() : '') +
         '</div>';
         out.innerHTML = h;
+        if (found > 0 && _detectedPlatform) {
+            var sel = document.getElementById('crawl-export-platform');
+            if (sel) sel.value = _detectedPlatform;
+        }
     }
 
     function buildCrawlTable() {
@@ -2918,13 +2923,12 @@
         h += '<div class="crawl-export" style="align-items:center;">' +
             '<select id="crawl-export-platform" style="padding:8px 14px;border:2px solid var(--gray-4);border-radius:100px;font-size:13px;font-family:inherit;font-weight:600;background:var(--white);color:#1e293b;">' +
                 '<option value="generic">Generic CSV</option>' +
-                '<option value="zid">ZID Import</option>' +
-                '<option value="shopify">Shopify Import</option>' +
-                '<option value="woocommerce">WooCommerce Import</option>' +
-                '<option value="salla">Salla Import</option>' +
+                '<option value="zid">ZID Import (CSV)</option>' +
+                '<option value="shopify">Shopify Import (CSV)</option>' +
+                '<option value="woocommerce">WooCommerce Import (CSV)</option>' +
+                '<option value="salla">Salla Import (XLS)</option>' +
             '</select>' +
-            '<button class="crawl-export-btn" onclick="exportCrawlPlatform()">&#128190; Download CSV</button>' +
-            '<button class="crawl-export-btn" onclick="exportCrawlExcel()">&#128202; Download Excel</button>' +
+            '<button class="crawl-export-btn" onclick="exportCrawlPlatform()">&#128190; Download Import File</button>' +
         '</div>';
         h += '<div class="crawl-table-wrap"><table class="crawl-table"><thead><tr>' +
             '<th>#</th><th>Image</th><th>Product Name</th><th>Price</th><th>URL</th><th>Status</th>' +
@@ -2962,86 +2966,207 @@
         if (_crawlResults.length === 0) return;
         var platEl = document.getElementById('crawl-export-platform');
         var platform = platEl ? platEl.value : 'generic';
-        var bom = '\uFEFF';
-        var header = '';
-        var rows = '';
-        var fname = '';
+        var today = new Date().toISOString().slice(0, 10);
 
         if (platform === 'zid') {
-            header = 'اسم المنتج,الوصف,السعر,العملة,الكمية,الصورة,التصنيف,الحالة,الباركود\n';
-            fname = 'zid-import-';
-            for (var i = 0; i < _crawlResults.length; i++) {
-                var r = _crawlResults[i];
-                rows += '"' + (r.title || '').replace(/"/g, '""') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 200) + '",' + (r.price || '0') + ',' + (r.currency || 'SAR') + ',100,"' + (r.image || '') + '","",1,"' + (r.sku || '') + '"\n';
-            }
+            exportZID(_crawlResults, today);
         } else if (platform === 'shopify') {
-            header = 'Handle,Title,Body (HTML),Vendor,Product Category,Type,Tags,Published,Option1 Name,Option1 Value,Variant SKU,Variant Inventory Qty,Variant Price,Variant Compare At Price,Image Src,Image Alt Text,SEO Title,SEO Description,URL Redirect\n';
-            fname = 'shopify-import-';
-            for (var i = 0; i < _crawlResults.length; i++) {
-                var r = _crawlResults[i];
-                var handle = (r.title || '').toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/^-|-$/g, '');
-                rows += '"' + handle + '","' + (r.title || '').replace(/"/g, '""') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 500) + '","' + (r.brand || '') + '","","",",true","Default","",' + (r.sku || '') + ',100,' + (r.price || '0') + ',,"' + (r.image || '') + '","' + (r.title || '').replace(/"/g, '""') + '","' + (r.title || '').replace(/"/g, '""') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 160) + '",""\n';
-            }
+            exportShopify(_crawlResults, today);
         } else if (platform === 'woocommerce') {
-            header = 'ID,Type,SKU,Name,Published,Featured,Short description,Description,Sale price,Regular price,Categories,Tags,Images,Position\n';
-            fname = 'woo-import-';
-            for (var i = 0; i < _crawlResults.length; i++) {
-                var r = _crawlResults[i];
-                rows += ',"simple","' + (r.sku || '') + '","' + (r.title || '').replace(/"/g, '""') + '",1,0,"' + (r.description || '').replace(/"/g, '""').substring(0, 200) + '","' + (r.description || '').replace(/"/g, '""').substring(0, 500) + '","' + (r.price || '') + '","' + (r.price || '') + '","","","' + (r.image || '') + '",' + (i + 1) + '\n';
-            }
+            exportWooCommerce(_crawlResults, today);
         } else if (platform === 'salla') {
-            header = 'اسم المنتج,الوصف القصير,الوصف الكامل,السعر,العملة,الكمية,الصورة,التصنيف,الحالة,المتجر,الباركود,الوزن\n';
-            fname = 'salla-import-';
-            for (var i = 0; i < _crawlResults.length; i++) {
-                var r = _crawlResults[i];
-                rows += '"' + (r.title || '').replace(/"/g, '""') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 100) + '","' + (r.description || '').replace(/"/g, '""').substring(0, 500) + '",' + (r.price || '0') + ',' + (r.currency || 'SAR') + ',100,"' + (r.image || '') + '","",1,"","' + (r.sku || '') + '",""\n';
-            }
+            exportSalla(_crawlResults, today);
         } else {
-            header = 'No,Product Name,Price,Currency,SKU,Brand,Description,URL,Image\n';
-            fname = 'products-';
-            for (var i = 0; i < _crawlResults.length; i++) {
-                var r = _crawlResults[i];
-                rows += (i + 1) + ',"' + (r.title || '').replace(/"/g, '""') + '",' + (r.price || '') + ',' + (r.currency || 'SAR') + ',"' + (r.sku || '') + '","' + (r.brand || '') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 200) + '","' + r.url + '","' + (r.image || '') + '"\n';
-            }
+            exportGeneric(_crawlResults, today);
         }
-
-        var blob = new Blob([bom + header + rows], { type: 'text/csv;charset=utf-8' });
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = fname + new Date().toISOString().slice(0, 10) + '.csv';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 100);
     }
 
-    function exportCrawlExcel() {
-        if (_crawlResults.length === 0) return;
+    function exportZID(results, today) {
+        var bom = '\uFEFF';
+        var headers = [
+            'sku','name_ar','name_en','weight_unit','weight','price','sale_price','cost',
+            'quantity','categories','published','images','vat_free','keywords',
+            'description_ar','description_en','short_description_ar','short_description_en',
+            'has_variants','option1_name_ar','option1_name_en','option1_value_ar','option1_value_en'
+        ];
+        var h = headers.join(',') + '\n';
+        var rows = '';
+        for (var i = 0; i < results.length; i++) {
+            var r = results[i];
+            var sku = r.sku || ('PRD-' + (1000 + i));
+            var name = (r.title || 'Product ' + (i + 1));
+            var desc = (r.description || '').replace(/"/g, '""');
+            var shortDesc = desc.substring(0, 250);
+            var price = r.price || '0';
+            var img = r.image || '';
+            var cats = (r.category || '').replace(/"/g, '""');
+            var keywords = name.split(/\s+/).slice(0, 5).join(', ');
+            var row = [
+                '"' + sku + '"',
+                '"' + name.replace(/"/g, '""') + '"',
+                '"' + name.replace(/"/g, '""') + '"',
+                'Kg', '', price, '', '',
+                '100', '"' + cats + '"', 'Yes', img ? 'Yes' : 'No', 'No',
+                '"' + keywords.replace(/"/g, '""') + '"',
+                '"' + desc.substring(0, 500).replace(/"/g, '""') + '"',
+                '"' + desc.substring(0, 500).replace(/"/g, '""') + '"',
+                '"' + shortDesc.replace(/"/g, '""') + '"',
+                '"' + shortDesc.replace(/"/g, '""') + '"',
+                'No', '', '', '', ''
+            ];
+            rows += row.join(',') + '\n';
+        }
+        downloadBlob(bom + h + rows, 'text/csv;charset=utf-8', 'zid-import-' + today + '.csv');
+    }
+
+    function exportShopify(results, today) {
+        var bom = '\uFEFF';
+        var headers = [
+            'Handle','Title','Body (HTML)','Vendor','Product Category','Type','Tags',
+            'Published','Published Scope','Option1 Name','Option1 Value',
+            'Variant SKU','Variant Inventory Qty','Variant Price','Variant Compare At Price',
+            'Variant Requires Shipping','Variant Taxable',
+            'Image Src','Image Position','Image Alt Text',
+            'SEO Title','SEO Description','URL Redirect'
+        ];
+        var h = headers.join(',') + '\n';
+        var rows = '';
+        for (var i = 0; i < results.length; i++) {
+            var r = results[i];
+            var title = (r.title || 'Product ' + (i + 1));
+            var handle = title.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/^-|-$/g, '');
+            var desc = (r.description || '').replace(/"/g, '""');
+            var vendor = (r.brand || '').replace(/"/g, '""');
+            var sku = r.sku || '';
+            var price = r.price || '0';
+            var img = r.image || '';
+            var seoTitle = title.substring(0, 70).replace(/"/g, '""');
+            var seoDesc = desc.substring(0, 160).replace(/"/g, '""');
+            var row = [
+                '"' + handle + '"',
+                '"' + title.replace(/"/g, '""') + '"',
+                '"' + desc.substring(0, 500) + '"',
+                '"' + vendor + '"',
+                '', '', '',
+                'TRUE', 'web', '', '',
+                '"' + sku + '"', '100', price, '',
+                'TRUE', 'TRUE',
+                '"' + img + '"', '1', '"' + title.replace(/"/g, '""') + '"',
+                '"' + seoTitle + '"',
+                '"' + seoDesc + '"',
+                '"' + r.url + '"'
+            ];
+            rows += row.join(',') + '\n';
+        }
+        downloadBlob(bom + h + rows, 'text/csv;charset=utf-8', 'shopify-import-' + today + '.csv');
+    }
+
+    function exportWooCommerce(results, today) {
+        var bom = '\uFEFF';
+        var headers = [
+            'ID','Type','SKU','Name','Published','Is featured?',
+            'Visibility in catalog','Short description','Description',
+            'Regular price','Sale price','Categories','Tags','Images',
+            'In stock?','Stock','Position'
+        ];
+        var h = headers.join(',') + '\n';
+        var rows = '';
+        for (var i = 0; i < results.length; i++) {
+            var r = results[i];
+            var name = (r.title || 'Product ' + (i + 1)).replace(/"/g, '""');
+            var desc = (r.description || '').replace(/"/g, '""');
+            var shortDesc = desc.substring(0, 200).replace(/"/g, '""');
+            var sku = (r.sku || '').replace(/"/g, '""');
+            var price = r.price || '';
+            var cats = (r.category || '').replace(/"/g, '""');
+            var img = r.image || '';
+            var row = [
+                '', '"simple"', '"' + sku + '"',
+                '"' + name + '"', '1', '0', '"visible"',
+                '"' + shortDesc + '"',
+                '"' + desc.substring(0, 500) + '"',
+                '"' + price + '"', '"' + price + '"',
+                '"' + cats + '"', '', '"' + img + '"',
+                '1', '100', (i + 1)
+            ];
+            rows += row.join(',') + '\n';
+        }
+        downloadBlob(bom + h + rows, 'text/csv;charset=utf-8', 'woo-import-' + today + '.csv');
+    }
+
+    function exportSalla(results, today) {
+        var ns = 'urn:schemas-microsoft-com:office:spreadsheet';
         var xml = '<?xml version="1.0" encoding="UTF-8"?>' +
             '<?mso-application progid="Excel.Sheet"?>' +
             '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"' +
             ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
-            '<Styles><Style ss:ID="hdr"><Font ss:Bold="1" ss:Size="12"/><Interior ss:Color="#2563eb" ss:Pattern="Solid"/><Font ss:Color="#FFFFFF"/></Style>' +
-            '<Style ss:ID="price"><Font ss:Bold="1" ss:Color="#2563eb"/></Style>' +
-            '<Style ss:ID="link"><Font ss:Color="#2563eb" ss:Underline="Single"/></Style></Styles>' +
-            '<Worksheet ss:Name="Products"><Table>' +
-            '<Row ss:StyleID="hdr"><Cell><Data ss:Type="String">#</Data></Cell><Cell><Data ss:Type="String">Product Name</Data></Cell><Cell><Data ss:Type="String">Price</Data></Cell><Cell><Data ss:Type="String">Currency</Data></Cell><Cell><Data ss:Type="String">URL</Data></Cell><Cell><Data ss:Type="String">Image</Data></Cell><Cell><Data ss:Type="String">SKU</Data></Cell><Cell><Data ss:Type="String">Description</Data></Cell><Cell><Data ss:Type="String">Brand</Data></Cell></Row>';
-        for (var i = 0; i < _crawlResults.length; i++) {
-            var r = _crawlResults[i];
-            xml += '<Row><Cell><Data ss:Type="Number">' + (i + 1) + '</Data></Cell>' +
-                '<Cell><Data ss:Type="String">' + esc(r.title || 'N/A') + '</Data></Cell>' +
-                '<Cell ss:StyleID="price"><Data ss:Type="String">' + esc(r.price || 'N/A') + '</Data></Cell>' +
-                '<Cell><Data ss:Type="String">' + esc(r.currency || '') + '</Data></Cell>' +
-                '<Cell ss:StyleID="link"><Data ss:Type="String">' + esc(r.url) + '</Data></Cell>' +
-                '<Cell><Data ss:Type="String">' + esc(r.image || '') + '</Data></Cell>' +
-                '<Cell><Data ss:Type="String">' + esc(r.sku || '') + '</Data></Cell>' +
-                '<Cell><Data ss:Type="String">' + esc((r.description || '').substring(0, 200)) + '</Data></Cell>' +
-                '<Cell><Data ss:Type="String">' + esc(r.brand || '') + '</Data></Cell></Row>';
+            '<Styles><Style ss:ID="hdr"><Font ss:Bold="1" ss:Size="11"/><Interior ss:Color="#1e40af" ss:Pattern="Solid"/><Font ss:Color="#FFFFFF"/></Style>' +
+            '<Style ss:ID="req"><Interior ss:Color="#fef3c7" ss:Pattern="Solid"/></Style></Styles>' +
+            '<Worksheet ss:Name="Products"><Table ss:DefaultColumnWidth="120">';
+        var headers = [
+            '\u0646\u0648\u0639 \u0627\u0644\u0635\u0646\u0641',
+            '\u0627\u0633\u0645 \u0627\u0644\u0645\u0646\u062a\u062c',
+            '\u0631\u0645\u0632 \u0627\u0644\u0645\u0646\u062a\u062c',
+            '\u0627\u0644\u0633\u0639\u0631',
+            '\u0633\u0639\u0631 \u0627\u0644\u062a\u062e\u0641\u064a\u0636',
+            '\u0627\u0644\u0643\u0645\u064a\u0629',
+            '\u0627\u0644\u0648\u0632\u0646',
+            '\u0627\u0644\u062a\u0635\u0646\u064a\u0641',
+            '\u0627\u0644\u0635\u0648\u0631\u0629 \u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629',
+            '\u0627\u0644\u0648\u0635\u0641 \u0627\u0644\u0625\u0636\u0627\u0641\u064a',
+            '\u0627\u0644\u0648\u0635\u0641',
+            '\u062d\u0627\u0644\u0629 \u0627\u0644\u0645\u0646\u062a\u062c'
+        ];
+        xml += '<Row ss:StyleID="hdr">';
+        for (var hi = 0; hi < headers.length; hi++) {
+            xml += '<Cell><Data ss:Type="String">' + headers[hi] + '</Data></Cell>';
+        }
+        xml += '</Row>';
+        for (var i = 0; i < results.length; i++) {
+            var r = results[i];
+            var name = r.title || '\u0645\u0646\u062a\u062c ' + (i + 1);
+            var desc = (r.description || '').substring(0, 500);
+            var price = r.price || '0';
+            var img = r.image || '';
+            xml += '<Row>' +
+                '<Cell><Data ss:Type="String">product</Data></Cell>' +
+                '<Cell><Data ss:Type="String">' + esc(name) + '</Data></Cell>' +
+                '<Cell><Data ss:Type="String">' + esc(r.sku || 'PRD-' + (1000 + i)) + '</Data></Cell>' +
+                '<Cell ss:StyleID="req"><Data ss:Type="String">' + esc(price) + '</Data></Cell>' +
+                '<Cell><Data ss:Type="String"></Data></Cell>' +
+                '<Cell ss:StyleID="req"><Data ss:Type="String">100</Data></Cell>' +
+                '<Cell><Data ss:Type="String"></Data></Cell>' +
+                '<Cell><Data ss:Type="String"></Data></Cell>' +
+                '<Cell><Data ss:Type="String">' + esc(img) + '</Data></Cell>' +
+                '<Cell><Data ss:Type="String"></Data></Cell>' +
+                '<Cell><Data ss:Type="String">' + esc(desc) + '</Data></Cell>' +
+                '<Cell><Data ss:Type="String">Active</Data></Cell>' +
+                '</Row>';
         }
         xml += '</Table></Worksheet></Workbook>';
-        var blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+        downloadBlob(xml, 'application/vnd.ms-excel', 'salla-import-' + today + '.xls');
+    }
+
+    function exportGeneric(results, today) {
+        var bom = '\uFEFF';
+        var headers = ['No','Product Name','Price','Currency','SKU','Brand','Description','URL','Image'];
+        var h = headers.join(',') + '\n';
+        var rows = '';
+        for (var i = 0; i < results.length; i++) {
+            var r = results[i];
+            rows += (i + 1) + ',"' + (r.title || '').replace(/"/g, '""') + '",' +
+                (r.price || '') + ',' + (r.currency || 'SAR') + ',"' + (r.sku || '') + '","' +
+                (r.brand || '') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 200) + '","' +
+                r.url + '","' + (r.image || '') + '"\n';
+        }
+        downloadBlob(bom + h + rows, 'text/csv;charset=utf-8', 'products-' + today + '.csv');
+    }
+
+    function downloadBlob(content, type, filename) {
+        var blob = new Blob([content], { type: type });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'products-' + new Date().toISOString().slice(0, 10) + '.xls';
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 100);
@@ -3136,7 +3261,7 @@
                         '<p style="font-size:13px;font-weight:700;color:#92400e;margin:0 0 6px;">&#9889; How to fix:</p>' +
                         '<ol style="font-size:12px;color:#78350f;margin:0;padding-left:18px;">' +
                         '<li style="margin-bottom:4px;">Open a <b>new terminal</b> and run: <code style="background:#fff;padding:2px 6px;border-radius:4px;border:1px solid #f59e0b;">node proxy-server.js</code></li>' +
-                        '<li style="margin-bottom:4px;">Keep it running, then click <b>Scan from Pasted Data</b> again</li>' +
+                        '<li style="margin-bottom:4px;">Keep it running, then click <b>Monitor from Pasted Data</b> again</li>' +
                         '<li>Or try pasting the sitemap XML content instead of full URLs</li>' +
                         '</ol></div></div>';
                     _crawlRunning = false;
@@ -3173,7 +3298,7 @@
         await checkLocalProxy();
         updateProxyStatus();
 
-        out.innerHTML = '<div class="tool-loading"><p>Starting scan...</p></div>';
+        out.innerHTML = '<div class="tool-loading"><p>Starting monitoring...</p></div>';
 
         try {
             var platform = platEl ? platEl.value : 'auto';
@@ -3200,6 +3325,7 @@
             if (platform === 'auto') {
                 platform = detectPlatform(mainHtml, url);
             }
+            _detectedPlatform = platform === 'unknown' ? 'generic' : platform;
 
             // Step 2: Fetch sitemaps - smart approach: try direct product sitemap first
             var smUrl = url.replace(/\/$/, '') + '/sitemap.xml';
@@ -3422,7 +3548,7 @@
                         '<p style="font-size:13px;font-weight:700;color:#92400e;margin:0 0 6px;">&#9889; How to fix:</p>' +
                         '<ol style="font-size:12px;color:#78350f;margin:0;padding-left:18px;">' +
                         '<li style="margin-bottom:4px;">Open a <b>new terminal</b> and run: <code style="background:#fff;padding:2px 6px;border-radius:4px;border:1px solid #f59e0b;">node proxy-server.js</code></li>' +
-                        '<li style="margin-bottom:4px;">Keep it running, then click <b>Scan Products</b> again</li>' +
+                        '<li style="margin-bottom:4px;">Keep it running, then click <b>Monitor Products</b> again</li>' +
                         '<li>Or use the <b>Paste URLs/XML</b> option below (copy sitemap content from your browser)</li>' +
                         '</ol></div></div>';
                     _crawlRunning = false;
@@ -3874,12 +4000,12 @@
             tab_score: 'Score', tab_meta: 'Meta', tab_headings: 'Headings', tab_schema: 'Schema',
             tab_audit: 'Audit', tab_speed: 'Speed', tab_content: 'Content', tab_keywords: 'Keywords',
             tab_images: 'Images', tab_links: 'Links', tab_robots: 'Robots', tab_sitemap: 'Sitemap',
-            tab_competitor: 'Competitor', tab_fullaudit: 'Full Audit', tab_report: 'Report', tab_crawler: 'Crawler',
+            tab_competitor: 'Competitor', tab_fullaudit: 'Full Audit', tab_report: 'Report', tab_crawler: 'Product Monitor',
             btn_analyze: 'Analyze', btn_analyze_meta: 'Analyze Meta Tags', btn_check_headings: 'Check Headings',
             btn_run_audit: 'Run Audit', btn_test_speed: 'Test Speed', btn_analyze_content: 'Analyze Content',
             btn_extract_kw: 'Extract Keywords', btn_check_images: 'Check Images', btn_analyze_links: 'Analyze Links',
             btn_generate_sitemap: 'Generate Sitemap', btn_compare: 'Compare', btn_full_audit: 'Run Full Audit',
-            btn_generate_report: 'Generate Report', btn_crawl: '\uD83D\uDD0D Scan Products',
+            btn_generate_report: 'Generate Report', btn_crawl: '\uD83D\uDD0D Monitor Products',
             audit_dl_html: '\uD83D\uDCBE Download HTML Report', audit_dl_print: '\uD83D\uDC24 Print / Save PDF',
             load_score: 'Paste a URL above and click Analyze', load_meta: 'Paste a URL above and click Analyze Meta Tags',
             load_head: 'Paste a URL above and click Check Headings', load_audit: 'Paste a URL above and click Run Audit',
@@ -3890,7 +4016,7 @@
             load_comp: 'Enter two URLs above and click Compare',
             load_rpt: 'Paste a URL above and click Generate Report',
             load_fullaudit: 'Paste a URL above and click Run Full Audit for a comprehensive analysis',
-            load_crawl: 'Enter your store URL above and click Scan Products to extract all product data',
+            load_crawl: 'Enter your store URL above and click Monitor Products to extract all product data',
             crawl_auto: 'Auto Detect', crawl_zid: 'ZID', crawl_shopify: 'Shopify', crawl_salla: 'Salla', crawl_woo: 'WooCommerce',
             schema_title: 'Schema Generator', schema_desc: 'Select a type and fill in the fields to generate JSON-LD structured data.',
             schema_gen_btn: 'Generate JSON-LD', schema_copy: 'Copy',
@@ -3920,12 +4046,12 @@
             tab_score: '\u0627\u0644\u0646\u062a\u064a\u062c\u0629', tab_meta: '\u0627\u0644\u0648\u0633\u0648\u0645', tab_headings: '\u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646', tab_schema: '\u0627\u0644\u0647\u064a\u0643\u0644',
             tab_audit: '\u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629', tab_speed: '\u0627\u0644\u0633\u0631\u0639\u0629', tab_content: '\u0627\u0644\u0645\u062d\u062a\u0648\u0649', tab_keywords: '\u0627\u0644\u0643\u0644\u0645\u0627\u062a',
             tab_images: '\u0627\u0644\u0635\u0648\u0631', tab_links: '\u0627\u0644\u0631\u0648\u0627\u0628\u0637', tab_robots: '\u0627\u0644\u0628\u0648\u062a', tab_sitemap: '\u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639',
-            tab_competitor: '\u0627\u0644\u0645\u0646\u0627\u0641\u0633', tab_fullaudit: '\u062a\u062d\u0644\u064a\u0644 \u0634\u0627\u0645\u0644', tab_report: '\u0627\u0644\u062a\u0642\u0631\u064a\u0631', tab_crawler: '\u0627\u0644\u0645\u0633\u062d',
+            tab_competitor: '\u0627\u0644\u0645\u0646\u0627\u0641\u0633', tab_fullaudit: '\u062a\u062d\u0644\u064a\u0644 \u0634\u0627\u0645\u0644', tab_report: '\u0627\u0644\u062a\u0642\u0631\u064a\u0631', tab_crawler: '\u0631\u0635\u062f \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a',
             btn_analyze: '\u062a\u062d\u0644\u064a\u0644', btn_analyze_meta: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0648\u0633\u0648\u0645', btn_check_headings: '\u0641\u062d\u0635 \u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646',
             btn_run_audit: '\u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629', btn_test_speed: '\u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0644\u0633\u0631\u0639\u0629', btn_analyze_content: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649',
             btn_extract_kw: '\u0627\u0633\u062a\u062e\u0631\u0627\u062c \u0627\u0644\u0643\u0644\u0645\u0627\u062a', btn_check_images: '\u0641\u062d\u0635 \u0627\u0644\u0635\u0648\u0631', btn_analyze_links: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0631\u0648\u0627\u0628\u0637',
             btn_generate_sitemap: '\u062a\u0648\u0644\u064a\u062f \u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639', btn_compare: '\u0645\u0639\u0627\u0631\u0641\u0629', btn_full_audit: '\u062a\u062d\u0644\u064a\u0644 \u0634\u0627\u0645\u0644',
-            btn_generate_report: '\u062a\u0648\u0644\u064a\u062f \u0627\u0644\u062a\u0642\u0631\u064a\u0631', btn_crawl: '\uD83D\uDD0D \u0645\u0633\u062d \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a',
+            btn_generate_report: '\u062a\u0648\u0644\u064a\u062f \u0627\u0644\u062a\u0642\u0631\u064a\u0631', btn_crawl: '\uD83D\uDD0D \u0631\u0635\u062f \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a',
             audit_dl_html: '\uD83D\uDCBE \u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u062a\u0642\u0631\u064a\u0631 HTML', audit_dl_print: '\uD83D\uDC24 \u0637\u0628\u0627\u0639\u0629 / \u062d\u0641\u0638 PDF',
             load_score: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u062d\u0644\u064a\u0644', load_meta: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0648\u0633\u0648\u0645',
             load_head: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0641\u062d\u0635 \u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646', load_audit: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629',
@@ -3936,7 +4062,7 @@
             load_comp: '\u0623\u062f\u062e\u0644 \u0631\u0627\u0628\u0637\u064a\u0646 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0645\u0639\u0627\u0631\u0641\u0629',
             load_rpt: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u062a\u0648\u0644\u064a\u062f \u0627\u0644\u062a\u0642\u0631\u064a\u0631',
             load_fullaudit: '\u0627\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0627\u0644\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0634\u0627\u0645\u0644 \u0644\u0644\u062d\u0635\u0648\u0644 \u0639\u0644\u0649 \u062a\u062d\u0644\u064a\u0644 \u0645\u0641\u0635\u0644',
-            load_crawl: '\u0623\u062f\u062e\u0644 \u0631\u0627\u0628\u0637 \u0645\u0648\u0642\u0639\u0643 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0645\u0633\u062d \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0644\u0633\u062d\u0628 \u062c\u0645\u064a\u0639 \u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a',
+            load_crawl: '\u0623\u062f\u062e\u0644 \u0631\u0627\u0628\u0637 \u0645\u0648\u0642\u0639\u0643 \u0623\u0639\u0644\u0627\u0647 \u0648\u0627\u0636\u063a\u0637 \u0631\u0635\u062f \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0644\u0633\u062d\u0628 \u062c\u0645\u064a\u0639 \u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a',
             crawl_auto: '\u0627\u0643\u062a\u0634\u0627\u0641 \u062a\u0644\u0642\u0627\u0626\u064a', crawl_zid: '\u0632\u064a\u062f', crawl_shopify: '\u0634\u0648\u0628\u0627\u064a\u0641\u0627\u064a', crawl_salla: '\u0635\u0644\u0629', crawl_woo: '\u0648\u0648\u0643\u0648\u0645\u0631\u0633',
             schema_title: '\u0645\u0648\u0644\u062f \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0645\u0646\u0638\u0645\u0629', schema_desc: '\u0627\u062e\u062a\u0631 \u0627\u0644\u0646\u0648\u0639 \u0648\u0627\u0645\u0644\u0623 \u0627\u0644\u062d\u0642\u0648\u0644 \u0644\u062a\u0648\u0644\u064a\u062f \u0628\u064a\u0627\u0646\u0627\u062a JSON-LD \u0645\u0646\u0638\u0645\u0629.',
             schema_gen_btn: '\u062a\u0648\u0644\u064a\u062f JSON-LD', schema_copy: '\u0646\u0633\u062e',
