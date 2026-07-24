@@ -275,6 +275,9 @@
         .kr-badge-trans{background:#fce7f3;color:#9d174d}
         .kr-badge-nav{background:#e0e7ff;color:#3730a3}
         .kr-badge-commer{background:#fef9c3;color:#854d0e}
+        .kr-badge-trend-up{background:#dcfce7;color:#166534}
+        .kr-badge-trend-stable{background:#e0e7ff;color:#3730a3}
+        .kr-badge-trend-down{background:#fee2e2;color:#991b1b}
         .kr-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
         .kr-filter-btn{padding:6px 14px;border:2px solid var(--gray-4);border-radius:100px;background:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:var(--transition)}
         .kr-filter-btn.active,.kr-filter-btn:hover{background:var(--primary);color:white;border-color:var(--primary)}
@@ -4787,27 +4790,34 @@
 
     function krScoreDifficulty(keyword) {
         var lower = keyword.toLowerCase();
-        var score = 50;
+        var score = 40;
         var words = lower.split(/\s+/).length;
-        if (words <= 1) score += 25;
+        if (words === 1) score += 25;
         else if (words === 2) score += 15;
         else if (words === 3) score += 5;
+        else if (words === 4) score -= 5;
         else if (words >= 5) score -= 15;
-        else score -= 5;
         var commWords = ['buy', 'cheap', 'price', 'deal', 'discount', 'best', 'top', 'review', 'free', 'online', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645', '\u0645\u062c\u0627\u0646\u064a', '\u062a\u0633\u0648\u064a\u0642', '\u062d\u0635\u0645', '\u0631\u0627\u0626\u0639', '\u062a\u0642\u0644\u064a\u0644', '\u0643\u064a\u0633', '\u0633\u0647\u0648\u0644', '\u0639\u0631\u0648\u0636', '\u062e\u0635\u0645\u0627\u062a', '\u0645\u0631\u0627\u062c\u0639\u0627\u062a', '\u0645\u0648\u0642\u0639', '\u0645\u062a\u0627\u0628\u0639', '\u062a\u062e\u0641\u064a\u0636'];
+        var commCount = 0;
         for (var i = 0; i < commWords.length; i++) {
-            if (lower.indexOf(commWords[i]) !== -1) score += 5;
+            if (lower.indexOf(commWords[i]) !== -1) { commCount++; score += 3; }
         }
-        var questionWords = ['how', 'what', 'why', 'when', 'where', 'who', '\u0643\u064a\u0641', '\u0645\u0627', '\u0644\u0645\u0627\u0630\u0627', '\u0645\u062a\u0649', '\u063a\u064a\u0631', '\u0647\u0644', '\u0645\u0646', '\u0647\u0644 \u064a\u0645\u0643\u0646', '\u0643\u064a\u0641 \u0627\u0633\u062a\u062e\u062f\u0645'];
+        var questionWords = ['how', 'what', 'why', 'when', 'where', 'who', 'which', 'does', 'can', 'should', 'is', 'are', '\u0643\u064a\u0641', '\u0645\u0627', '\u0644\u0645\u0627\u0630\u0627', '\u0645\u062a\u0649', '\u063a\u064a\u0631', '\u0647\u0644', '\u0645\u0646', '\u0647\u0644 \u064a\u0645\u0643\u0646', '\u0643\u064a\u0641 \u0627\u0633\u062a\u062e\u062f\u0645'];
+        var isQuestion = false;
         for (var i = 0; i < questionWords.length; i++) {
-            if (lower.indexOf(questionWords[i]) === 0) score -= 10;
+            if (lower.indexOf(questionWords[i]) === 0) { isQuestion = true; score -= 10; break; }
         }
-        var brandWords = ['google', 'facebook', 'apple', 'microsoft', 'amazon', 'nike', 'adobe', 'samsung', 'huawei', 'noon', 'jarir', 'extra', 'stc', 'zain', 'stc pay', 'tamara', 'tabby', 'noon', 'careem', 'hungry'];
+        var brandWords = ['google', 'facebook', 'apple', 'microsoft', 'amazon', 'nike', 'adobe', 'samsung', 'huawei', 'noon', 'jarir', 'extra', 'stc', 'zain', 'stc pay', 'tamara', 'tabby', 'careem', 'uber', 'netflix', 'spotify', 'chatgpt', 'openai', 'tesla', 'bmw', 'mercedes'];
+        var isBrand = false;
         for (var i = 0; i < brandWords.length; i++) {
-            if (lower.indexOf(brandWords[i]) !== -1) score += 20;
+            if (lower.indexOf(brandWords[i]) !== -1) { isBrand = true; score += 20; break; }
         }
         if (lower.indexOf('near me') !== -1 || lower.indexOf('\u0628\u0642\u0631\u064a\u0628') !== -1 || lower.indexOf('\u0641\u064a \u0627\u0644\u0645\u0645\u0644\u0643\u0629') !== -1) score -= 10;
         if (lower.indexOf('\u0623\u0631\u0636\u0644') !== -1 || lower.indexOf('\u0645\u0646\u0635\u062d') !== -1 || lower.indexOf('official') !== -1) score += 10;
+        if (lower.indexOf('vs') !== -1 || lower.indexOf('\u0645\u0639\u062a\u0627\u0628\u0639\u0629') !== -1 || lower.indexOf('alternative') !== -1 || lower.indexOf('\u0628\u062f\u064a\u0644') !== -1) score += 8;
+        if (lower.indexOf('tutorial') !== -1 || lower.indexOf('guide') !== -1 || lower.indexOf('\u062f\u0644\u064a\u0644') !== -1 || lower.indexOf('\u0637\u0631\u064a\u0642') !== -1) score -= 8;
+        if (lower.indexOf('2024') !== -1 || lower.indexOf('2025') !== -1 || lower.indexOf('2026') !== -1) score += 3;
+        if (lower.indexOf('free') !== -1 || lower.indexOf('\u0645\u062c\u0627\u0646\u064a') !== -1) score -= 5;
         if (score < 15) score = 15;
         if (score > 95) score = 95;
         return score;
@@ -4890,6 +4900,135 @@
                 return trending;
             })
             .catch(function() { return []; });
+    }
+
+    function krScrapeSerp(keyword, lang, country) {
+        var gl = (country || 'us').toLowerCase();
+        var hl = (lang || 'en').toLowerCase();
+        var url = 'https://www.google.com/search?q=' + encodeURIComponent(keyword) + '&hl=' + hl + '&gl=' + gl + '&num=10';
+        return fetchHTML(url).then(function(html) {
+            var result = { paa: [], related: [], featured: false, knowledgePanel: false, serpFeatures: 0 };
+            if (!html || typeof html !== 'string') return result;
+            var paaMatch = html.match(/People also ask/i);
+            if (paaMatch) result.serpFeatures++;
+            var kpMatch = html.match(/Knowledge Panel|knowledge-panel|kp-blk/i);
+            if (kpMatch) result.serpFeatures++;
+            var fsMatch = html.match(/featured.snippet|kp-whc|if6DPd|LGOjhe/i);
+            if (fsMatch) { result.featured = true; result.serpFeatures++; }
+            var localMatch = html.match(/Local pack|local-pack|uj0Bfe/i);
+            if (localMatch) result.serpFeatures++;
+            var imgMatch = html.match(/image.*pack|ZU6Mfc/i);
+            if (imgMatch) result.serpFeatures++;
+            var vidMatch = html.match(/video.*result|DxUMMb/i);
+            if (vidMatch) result.serpFeatures++;
+            var paaRegex = /data-q="([^"]+)"/g;
+            var paaMatch2;
+            while ((paaMatch2 = paaRegex.exec(html)) !== null) {
+                var q = paaMatch2[1].replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+                if (q && q.length > 3 && q.length < 150) result.paa.push(q);
+            }
+            var paaRegex2 = /\u0022([A-Z\u0600-\u06FF][^"\u0022]{5,80})\?\u0022/g;
+            while ((paaMatch2 = paaRegex2.exec(html)) !== null) {
+                var q2 = paaMatch2[1].replace(/\\u[\da-f]{4}/gi, function(m) {
+                    return String.fromCharCode(parseInt(m.substr(2), 16));
+                });
+                if (q2.indexOf('?') === -1) result.paa.push(q2 + '?');
+            }
+            var relatedRegex = /class="BNeawe.*?">(.*?)<\/span/g;
+            var relatedMatches = html.match(relatedRegex);
+            var relatedCandidates = [];
+            if (relatedMatches) {
+                for (var r = 0; r < relatedMatches.length; r++) {
+                    var rc = relatedMatches[r].replace(/class="BNeawe[^"]*">/g, '').replace(/<\/span/g, '').replace(/<[^>]+>/g, '').trim();
+                    if (rc && rc.length > 3 && rc.length < 100 && rc.toLowerCase() !== keyword.toLowerCase()) {
+                        relatedCandidates.push(rc);
+                    }
+                }
+            }
+            var relatedBlock = html.match(/Related searches|Related questions/i);
+            if (relatedBlock) {
+                var relRegex = /<a href="\/search\?q=([^"&]+)[^"]*"[^>]*>([^<]+)<\/a/g;
+                var relMatch;
+                while ((relMatch = relRegex.exec(html)) !== null) {
+                    var rw = decodeURIComponent(relMatch[1].replace(/\+/g, ' ')).replace(/<[^>]+>/g, '').trim();
+                    if (rw && rw.length > 3 && rw.length < 100) relatedCandidates.push(rw);
+                }
+            }
+            var seenRel = {};
+            for (var r = 0; r < relatedCandidates.length; r++) {
+                var rl = relatedCandidates[r].toLowerCase();
+                if (!seenRel[rl] && rl !== keyword.toLowerCase()) {
+                    seenRel[rl] = true;
+                    result.related.push(relatedCandidates[r]);
+                }
+            }
+            var seenPaa = {};
+            var cleanPaa = [];
+            for (var p = 0; p < result.paa.length; p++) {
+                var pl = result.paa[p].toLowerCase();
+                if (!seenPaa[pl]) { seenPaa[pl] = true; cleanPaa.push(result.paa[p]); }
+            }
+            result.paa = cleanPaa.slice(0, 8);
+            result.related = result.related.slice(0, 8);
+            return result;
+        }).catch(function() {
+            return { paa: [], related: [], featured: false, knowledgePanel: false, serpFeatures: 0 };
+        });
+    }
+
+    function krBatchScrapeSerp(keywords, lang, country, onProgress) {
+        var serpData = {};
+        var toScrape = keywords.slice(0, 20);
+        var batchSize = 5;
+        var done = 0;
+        function runBatch(start) {
+            if (start >= toScrape.length) return Promise.resolve(serpData);
+            var batch = toScrape.slice(start, start + batchSize);
+            var promises = [];
+            for (var i = 0; i < batch.length; i++) {
+                (function(kw) {
+                    promises.push(krScrapeSerp(kw, lang, country).then(function(data) {
+                        serpData[kw.toLowerCase()] = data;
+                        done++;
+                        if (onProgress) onProgress(Math.round((done / toScrape.length) * 100));
+                    }).catch(function() {
+                        serpData[kw.toLowerCase()] = { paa: [], related: [], featured: false, knowledgePanel: false, serpFeatures: 0 };
+                        done++;
+                        if (onProgress) onProgress(Math.round((done / toScrape.length) * 100));
+                    }));
+                })(batch[i]);
+            }
+            return Promise.all(promises).then(function() {
+                if (start + batchSize < toScrape.length) return runBatch(start + batchSize);
+                return serpData;
+            });
+        }
+        return runBatch(0);
+    }
+
+    function krCalcKEI(volume, difficulty) {
+        var volNum = 0;
+        if (volume) {
+            var clean = String(volume).replace(/[^0-9.Kk]/g, '');
+            if (clean.indexOf('K') !== -1) volNum = parseFloat(clean) * 1000;
+            else volNum = parseFloat(clean) || 0;
+        }
+        if (volNum <= 0 || difficulty <= 0) return 0;
+        var kei = (volNum * volNum) / difficulty;
+        if (kei >= 100000) return Math.round(kei / 100) / 10;
+        if (kei >= 1000) return Math.round(kei) / 10;
+        return Math.round(kei * 10) / 10;
+    }
+
+    function krTrendDirection(keyword, serpData) {
+        if (!serpData) return { icon: '', text: '', cls: '' };
+        var paaCount = serpData.paa ? serpData.paa.length : 0;
+        var relCount = serpData.related ? serpData.related.length : 0;
+        var total = paaCount + relCount;
+        if (total >= 6) return { icon: '\uD83D\uDCC8', text: currentLang === 'ar' ? '\u0645\u0647\u062a\u0645' : 'Rising', cls: 'kr-badge-trend-up' };
+        if (total >= 3) return { icon: '\u27A1\uFE0F', text: currentLang === 'ar' ? '\u0633\u0627\u0626\u0639' : 'Stable', cls: 'kr-badge-trend-stable' };
+        if (serpData.featured) return { icon: '\uD83C\uDFC6', text: currentLang === 'ar' ? '\u062a\u0631\u0636\u064a\u0646' : 'Featured', cls: 'kr-badge-trend-up' };
+        return { icon: '', text: '', cls: '' };
     }
 
     function krVerifyKeywords(keywords, lang, country, onProgress) {
@@ -5510,6 +5649,19 @@
         var qCount = 0;
         for (var i = 0; i < data.length; i++) { if (data[i].intent === 'informational' && krHasQuestionWord(data[i].keyword)) qCount++; }
         html2 += '<div class="kr-stat"><span class="kr-stat-num">' + qCount + '</span><span class="kr-stat-label">' + t.kr_questions + '</span></div>';
+        var totalSerp = 0;
+        var totalPaa = 0;
+        var totalKei = 0;
+        var keiCount = 0;
+        for (var i = 0; i < data.length; i++) {
+            totalSerp += data[i].serpFeatures || 0;
+            totalPaa += (data[i].paa || []).length;
+            if (data[i].kei && data[i].kei > 0) { totalKei += data[i].kei; keiCount++; }
+        }
+        var avgKei = keiCount > 0 ? Math.round(totalKei / keiCount) : 0;
+        html2 += '<div class="kr-stat" style="border-left:3px solid #8b5cf6;"><span class="kr-stat-num" style="color:#8b5cf6;">' + totalSerp + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? '\u0645\u064a\u0632\u0627\u0646\u064a\u0627\u062a SERP' : 'SERP Ftrs') + '</span></div>';
+        html2 += '<div class="kr-stat" style="border-left:3px solid #0ea5e9;"><span class="kr-stat-num" style="color:#0ea5e9;">' + totalPaa + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? 'PAA' : 'PAA') + '</span></div>';
+        html2 += '<div class="kr-stat" style="border-left:3px solid #059669;"><span class="kr-stat-num" style="color:#059669;">' + avgKei + '</span><span class="kr-stat-label">KEI</span></div>';
         html2 += '</div>';
         html += html2;
         html += '<div class="kr-filters">';
@@ -5531,7 +5683,7 @@
         html += '</div>';
         html += '<div class="kr-table-wrap"><table class="kr-table" id="kr-table">';
         html += '<thead><tr>';
-        var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_volume, t.kr_difficulty, t.kr_intent, t.kr_cpc];
+        var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_volume, t.kr_difficulty, 'KEI', t.kr_intent, t.kr_cpc, currentLang === 'ar' ? '\u062a\u0631\u0646\u062f' : 'Trend', currentLang === 'ar' ? '\u0645\u064a\u0632\u0627\u0646\u064a\u0627\u062a SERP' : 'SERP'];
         for (var i = 0; i < cols.length; i++) {
             var arrow = '';
             if (_krSortCol === i) arrow = _krSortAsc ? ' \u25B2' : ' \u25BC';
@@ -5548,13 +5700,29 @@
             var volBadge = krVolumeBadge({ volume: d.volume, level: d.volumeLevel });
             var trendingBadge = d.trending ? ' <span style="font-size:10px;color:#ef4444;font-weight:700;">\uD83D\uDD25</span>' : '';
             var srcBadge = d.source === 'trending' ? ' <span style="font-size:10px;color:#8b5cf6;font-weight:700;">TREND</span>' : '';
+            var srcBadge2 = d.source === 'serp-features' ? ' <span style="font-size:10px;color:#0ea5e9;font-weight:700;">SERP</span>' : '';
+            var keiVal = d.kei || 0;
+            var keiColor = keiVal >= 500 ? '#059669' : keiVal >= 100 ? '#f59e0b' : '#ef4444';
+            var keiLabel = keiVal >= 500 ? (currentLang === 'ar' ? '\u0645\u0645\u064a\u0632' : 'Great') : keiVal >= 100 ? (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637' : 'OK') : (currentLang === 'ar' ? '\u0636\u0639\u064a\u0641' : 'Hard');
+            var trendHtml = '';
+            if (d.trendDir && d.trendDir.icon) trendHtml = '<span class="kr-badge ' + d.trendDir.cls + '">' + d.trendDir.icon + ' ' + d.trendDir.text + '</span>';
+            var serpHtml = '';
+            if (d.serpFeatures > 0) {
+                var sfLabels = [];
+                if (d.featured) sfLabels.push('\u2B50');
+                if (d.paa && d.paa.length > 0) sfLabels.push('PAA(' + d.paa.length + ')');
+                serpHtml = '<span style="font-size:11px;color:#8b5cf6;font-weight:600;">' + (sfLabels.length > 0 ? sfLabels.join(' ') : d.serpFeatures + ' F') + '</span>';
+            }
             html += '<tr>';
             html += '<td style="font-weight:600;color:var(--gray-1);">' + (i + 1) + '</td>';
-            html += '<td><strong>' + kw + trendingBadge + srcBadge + '</strong></td>';
+            html += '<td><strong>' + kw + trendingBadge + srcBadge + srcBadge2 + '</strong></td>';
             html += '<td>' + volBadge + '</td>';
             html += '<td><span class="kr-badge ' + diff.cls + '">' + diff.text + ' (' + d.difficulty + ')</span></td>';
+            html += '<td><span style="color:' + keiColor + ';font-weight:700;font-size:12px;">' + keiVal + ' <span style="font-size:10px;">' + keiLabel + '</span></span></td>';
             html += '<td><span class="kr-badge ' + intent.cls + '">' + intent.text + '</span></td>';
             html += '<td>' + d.cpc + '</td>';
+            html += '<td>' + trendHtml + '</td>';
+            html += '<td>' + serpHtml + '</td>';
             html += '</tr>';
         }
         html += '</tbody></table></div>';
@@ -5600,8 +5768,11 @@
                 vb = order[b.volumeLevel] !== undefined ? order[b.volumeLevel] : 5;
             }
             else if (col === 3) { va = a.difficulty; vb = b.difficulty; }
-            else if (col === 4) { va = a.intent; vb = b.intent; }
-            else if (col === 5) { va = parseFloat(String(a.cpc).replace(/[^0-9.]/g, '')) || 0; vb = parseFloat(String(b.cpc).replace(/[^0-9.]/g, '')) || 0; }
+            else if (col === 4) { va = a.kei || 0; vb = b.kei || 0; }
+            else if (col === 5) { va = a.intent; vb = b.intent; }
+            else if (col === 6) { va = parseFloat(String(a.cpc).replace(/[^0-9.]/g, '')) || 0; vb = parseFloat(String(b.cpc).replace(/[^0-9.]/g, '')) || 0; }
+            else if (col === 7) { va = a.serpFeatures || 0; vb = b.serpFeatures || 0; }
+            else if (col === 8) { va = a.serpFeatures || 0; vb = b.serpFeatures || 0; }
             else { va = a.keyword; vb = b.keyword; }
             if (typeof va === 'string') return _krSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
             return _krSortAsc ? va - vb : vb - va;
@@ -5627,11 +5798,11 @@
         var t = currentLang === 'ar' ? translations.ar : translations.en;
         var volLabel = t.kr_volume;
         var rows = [
-            ['Keyword', volLabel, 'Volume Level', t.kr_difficulty, t.kr_intent, t.kr_cpc, 'Trending', 'Source']
+            ['Keyword', volLabel, 'Volume Level', t.kr_difficulty, 'KEI', t.kr_intent, t.kr_cpc, 'Trending', 'Source', 'SERP Features', 'PAA Count', 'Related Count']
         ];
         for (var i = 0; i < _krResults.length; i++) {
             var d = _krResults[i];
-            rows.push([d.keyword, d.volume, d.volumeLevel || '', d.difficulty, d.intent, d.cpc, d.trending ? 'Yes' : '', d.source || '']);
+            rows.push([d.keyword, d.volume, d.volumeLevel || '', d.difficulty, d.kei || 0, d.intent, d.cpc, d.trending ? 'Yes' : '', d.source || '', d.serpFeatures || 0, (d.paa || []).length, (d.related || []).length]);
         }
         var csv = '';
         for (var i = 0; i < rows.length; i++) {
@@ -5816,6 +5987,7 @@
             var taskCount = 2;
             if (doAZ) taskCount++;
             if (templateList.length > 0) taskCount++;
+            taskCount++;
             var tasksDone = 0;
             function onTaskDone() {
                 tasksDone++;
@@ -5823,6 +5995,7 @@
             }
 
             var allPromises = [];
+            var serpResults = {};
 
             allPromises.push(
                 krFetchTrends(country, lang).then(function(trending) {
@@ -5833,6 +6006,22 @@
                             rawKeywords[tk] = true;
                             kwSources[tk] = 'trending';
                             kwPosition[tk] = i + 1;
+                        }
+                    }
+                }).catch(function() {}).then(onTaskDone)
+            );
+
+            allPromises.push(
+                krScrapeSerp(seed, lang, country).then(function(serp) {
+                    serpResults[seed.toLowerCase()] = serp;
+                    var seedSugs = serp.paa.concat(serp.related);
+                    for (var i = 0; i < seedSugs.length; i++) {
+                        var sk = seedSugs[i].toLowerCase().replace(/\?$/, '');
+                        if (sk.length > 2 && sk.length < 100 && !rawKeywords[sk]) {
+                            rawKeywords[sk] = true;
+                            kwSources[sk] = 'serp-features';
+                            kwPosition[sk] = i + 1;
+                            kwExpansionCount[sk] = 1;
                         }
                     }
                 }).catch(function() {}).then(onTaskDone)
@@ -5927,6 +6116,11 @@
                 var difficulty = krScoreDifficulty(kw.keyword);
                 var vol = krEstimateVolume(kw.keyword, kw.position, kw.source, kw.expansionCount);
                 var cpc = krEstimateCPC(kw.keyword, intent);
+                var kei = krCalcKEI(vol.volume, difficulty);
+                var kwSerp = serpResults[kw.keyword.toLowerCase()] || null;
+                var serpFeat = kwSerp ? kwSerp.serpFeatures : 0;
+                if (kwSerp && kwSerp.featured) serpFeat += 1;
+                var trendDir = krTrendDirection(kw.keyword, kwSerp);
                 results.push({
                     idx: i + 1,
                     keyword: kw.keyword,
@@ -5936,7 +6130,12 @@
                     volumeLevel: vol.level,
                     cpc: cpc,
                     trending: kw.trending || null,
-                    source: kw.source
+                    source: kw.source,
+                    kei: kei,
+                    serpFeatures: serpFeat,
+                    trendDir: trendDir,
+                    paa: kwSerp ? kwSerp.paa : [],
+                    related: kwSerp ? kwSerp.related : []
                 });
             }
             results.sort(function(a, b) {
