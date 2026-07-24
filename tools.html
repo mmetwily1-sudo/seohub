@@ -581,7 +581,7 @@
                 var u = p.url + encodeURIComponent(url);
                 try {
                     var controller = new AbortController();
-                    var timer = setTimeout(function() { controller.abort(); }, p.local ? 35000 : timeout);
+                    var timer = setTimeout(function() { controller.abort(); }, p.local ? 60000 : timeout);
                     var res = await fetch(u, { signal: controller.signal });
                     clearTimeout(timer);
                     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -3504,7 +3504,7 @@
                 for (var pi = bi; pi < end; pi++) {
                     (function(idx) {
                         promises.push(
-                            fetchHTML(unique[idx], { timeout: 10000, retries: 0, proxyLimit: 1 })
+                            fetchHTML(unique[idx], { timeout: 20000, retries: 0, proxyLimit: 2 })
                                 .then(function(html) {
                                     var doc = parseHTML(html);
                                     var data = extractProductData(doc, unique[idx]);
@@ -3790,7 +3790,7 @@
                 for (var pi = bi; pi < end; pi++) {
                     (function(idx) {
                         promises.push(
-                            fetchHTML(productUrls[idx], { timeout: 10000, retries: 0, proxyLimit: 1 })
+                            fetchHTML(productUrls[idx], { timeout: 20000, retries: 0, proxyLimit: 2 })
                                 .then(function(html) {
                                     var doc = parseHTML(html);
                                     var data = extractProductData(doc, productUrls[idx]);

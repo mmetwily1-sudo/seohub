@@ -57,9 +57,15 @@ var server = http.createServer(function(req, res) {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
                     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language': 'ar,en;q=0.5'
+                    'Accept-Language': 'ar,en;q=0.5',
+                    'Accept-Encoding': 'identity',
+                    'Connection': 'close'
                 },
-                timeout: 30000
+                timeout: 55000,
+                headersTimeout: 55000,
+                lookup: function(hostname, opts, cb) {
+                    require('dns').lookup4(hostname, cb);
+                }
             }, function(proxyRes) {
                 if (responded) return;
                 var body = '';
@@ -67,6 +73,13 @@ var server = http.createServer(function(req, res) {
                 proxyRes.on('data', function(chunk) { body += chunk; });
                 proxyRes.on('end', function() {
                     safeEnd(200, { contents: body, status: proxyRes.statusCode });
+                });
+                proxyRes.on('error', function() {
+                    if (body.length > 0) {
+                        safeEnd(200, { contents: body, status: proxyRes.statusCode });
+                    } else {
+                        safeEnd(502, { error: 'Response stream error' });
+                    }
                 });
             });
         } catch(e) {
@@ -80,12 +93,13 @@ var server = http.createServer(function(req, res) {
 
         proxyReq.on('timeout', function() {
             try { proxyReq.destroy(); } catch(e) {}
-            safeEnd(504, { error: 'Request timeout after 30s' });
+            safeEnd(504, { error: 'Request timeout after 55s - site is too slow' });
         });
 
-        req.on('close', function() {
-            try { proxyReq.destroy(); } catch(e) {}
-            responded = true;
+        proxyReq.on('close', function() {
+            if (!responded) {
+                safeEnd(502, { error: 'Connection closed unexpectedly' });
+            }
         });
 
     } else if (parsed.pathname === '/status') {
