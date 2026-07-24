@@ -2891,8 +2891,15 @@
 
     function buildCrawlTable() {
         var h = '<div class="crawl-filter"><input type="text" id="crawl-filter-input" placeholder="Search products..." oninput="filterCrawlTable()"></div>';
-        h += '<div class="crawl-export">' +
-            '<button class="crawl-export-btn" onclick="exportCrawlCSV()">&#128190; Download CSV</button>' +
+        h += '<div class="crawl-export" style="align-items:center;">' +
+            '<select id="crawl-export-platform" style="padding:8px 14px;border:2px solid var(--gray-4);border-radius:100px;font-size:13px;font-family:inherit;font-weight:600;background:var(--white);color:#1e293b;">' +
+                '<option value="generic">Generic CSV</option>' +
+                '<option value="zid">ZID Import</option>' +
+                '<option value="shopify">Shopify Import</option>' +
+                '<option value="woocommerce">WooCommerce Import</option>' +
+                '<option value="salla">Salla Import</option>' +
+            '</select>' +
+            '<button class="crawl-export-btn" onclick="exportCrawlPlatform()">&#128190; Download CSV</button>' +
             '<button class="crawl-export-btn" onclick="exportCrawlExcel()">&#128202; Download Excel</button>' +
         '</div>';
         h += '<div class="crawl-table-wrap"><table class="crawl-table"><thead><tr>' +
@@ -2927,19 +2934,57 @@
         }
     }
 
-    function exportCrawlCSV() {
+    function exportCrawlPlatform() {
         if (_crawlResults.length === 0) return;
+        var platEl = document.getElementById('crawl-export-platform');
+        var platform = platEl ? platEl.value : 'generic';
         var bom = '\uFEFF';
-        var header = 'No,Product Name,Price,Currency,URL,Image,SKU,Description,Brand\n';
+        var header = '';
         var rows = '';
-        for (var i = 0; i < _crawlResults.length; i++) {
-            var r = _crawlResults[i];
-            rows += (i + 1) + ',"' + (r.title || '').replace(/"/g, '""') + '",' + (r.price || '') + ',' + (r.currency || '') + ',"' + r.url + '","' + (r.image || '') + '","' + (r.sku || '') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 200) + '","' + (r.brand || '') + '"\n';
+        var fname = '';
+
+        if (platform === 'zid') {
+            header = 'اسم المنتج,الوصف,السعر,العملة,الكمية,الصورة,التصنيف,الحالة,الباركود\n';
+            fname = 'zid-import-';
+            for (var i = 0; i < _crawlResults.length; i++) {
+                var r = _crawlResults[i];
+                rows += '"' + (r.title || '').replace(/"/g, '""') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 200) + '",' + (r.price || '0') + ',' + (r.currency || 'SAR') + ',100,"' + (r.image || '') + '","",1,"' + (r.sku || '') + '"\n';
+            }
+        } else if (platform === 'shopify') {
+            header = 'Handle,Title,Body (HTML),Vendor,Product Category,Type,Tags,Published,Option1 Name,Option1 Value,Variant SKU,Variant Inventory Qty,Variant Price,Variant Compare At Price,Image Src,Image Alt Text,SEO Title,SEO Description,URL Redirect\n';
+            fname = 'shopify-import-';
+            for (var i = 0; i < _crawlResults.length; i++) {
+                var r = _crawlResults[i];
+                var handle = (r.title || '').toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/^-|-$/g, '');
+                rows += '"' + handle + '","' + (r.title || '').replace(/"/g, '""') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 500) + '","' + (r.brand || '') + '","","",",true","Default","",' + (r.sku || '') + ',100,' + (r.price || '0') + ',,"' + (r.image || '') + '","' + (r.title || '').replace(/"/g, '""') + '","' + (r.title || '').replace(/"/g, '""') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 160) + '",""\n';
+            }
+        } else if (platform === 'woocommerce') {
+            header = 'ID,Type,SKU,Name,Published,Featured,Short description,Description,Sale price,Regular price,Categories,Tags,Images,Position\n';
+            fname = 'woo-import-';
+            for (var i = 0; i < _crawlResults.length; i++) {
+                var r = _crawlResults[i];
+                rows += ',"simple","' + (r.sku || '') + '","' + (r.title || '').replace(/"/g, '""') + '",1,0,"' + (r.description || '').replace(/"/g, '""').substring(0, 200) + '","' + (r.description || '').replace(/"/g, '""').substring(0, 500) + '","' + (r.price || '') + '","' + (r.price || '') + '","","","' + (r.image || '') + '",' + (i + 1) + '\n';
+            }
+        } else if (platform === 'salla') {
+            header = 'اسم المنتج,الوصف القصير,الوصف الكامل,السعر,العملة,الكمية,الصورة,التصنيف,الحالة,المتجر,الباركود,الوزن\n';
+            fname = 'salla-import-';
+            for (var i = 0; i < _crawlResults.length; i++) {
+                var r = _crawlResults[i];
+                rows += '"' + (r.title || '').replace(/"/g, '""') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 100) + '","' + (r.description || '').replace(/"/g, '""').substring(0, 500) + '",' + (r.price || '0') + ',' + (r.currency || 'SAR') + ',100,"' + (r.image || '') + '","",1,"","' + (r.sku || '') + '",""\n';
+            }
+        } else {
+            header = 'No,Product Name,Price,Currency,SKU,Brand,Description,URL,Image\n';
+            fname = 'products-';
+            for (var i = 0; i < _crawlResults.length; i++) {
+                var r = _crawlResults[i];
+                rows += (i + 1) + ',"' + (r.title || '').replace(/"/g, '""') + '",' + (r.price || '') + ',' + (r.currency || 'SAR') + ',"' + (r.sku || '') + '","' + (r.brand || '') + '","' + (r.description || '').replace(/"/g, '""').substring(0, 200) + '","' + r.url + '","' + (r.image || '') + '"\n';
+            }
         }
+
         var blob = new Blob([bom + header + rows], { type: 'text/csv;charset=utf-8' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'products-' + new Date().toISOString().slice(0, 10) + '.csv';
+        a.download = fname + new Date().toISOString().slice(0, 10) + '.csv';
         document.body.appendChild(a);
         a.click();
         setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 100);
@@ -3028,17 +3073,17 @@
 
             crawlUpdateUI(0, 0, 'Scanning ' + unique.length + ' products from pasted data...');
 
-            var batch = 3;
+            var batch = 10;
             for (var bi = 0; bi < unique.length; bi += batch) {
                 if (_crawlAbort) break;
                 var end = Math.min(bi + batch, unique.length);
-                crawlUpdateUI(bi, unique.length, 'Scanning products ' + (bi + 1) + '-' + end + ' of ' + unique.length + '...');
+                crawlUpdateUI(bi, unique.length, 'Scanning ' + (bi + 1) + '-' + end + ' of ' + unique.length + '...');
 
                 var promises = [];
                 for (var pi = bi; pi < end; pi++) {
                     (function(idx) {
                         promises.push(
-                            fetchHTML(unique[idx], { timeout: 15000, retries: 0, proxyLimit: 3 })
+                            fetchHTML(unique[idx], { timeout: 10000, retries: 0, proxyLimit: 1 })
                                 .then(function(html) {
                                     var doc = parseHTML(html);
                                     var data = extractProductData(doc, unique[idx]);
@@ -3051,7 +3096,7 @@
                     })(pi);
                 }
                 await Promise.all(promises);
-                await new Promise(function(r) { setTimeout(r, 500); });
+                await new Promise(function(r) { setTimeout(r, 100); });
             }
 
             var finalOk = 0;
@@ -3272,32 +3317,34 @@
                 return;
             }
 
-            // Step 4: Fetch each product page
+            // Step 4: Fetch each product page (fast mode)
             var total = productUrls.length;
-            var batch = 3;
+            var batch = 10;
+            var failedCount = 0;
             for (var bi = 0; bi < total; bi += batch) {
                 if (_crawlAbort) break;
                 var end = Math.min(bi + batch, total);
-                crawlUpdateUI(bi, total, 'Scanning products ' + (bi + 1) + '-' + end + ' of ' + total + '...');
+                crawlUpdateUI(bi, total, 'Scanning ' + (bi + 1) + '-' + end + ' of ' + total + '...');
 
                 var promises = [];
                 for (var pi = bi; pi < end; pi++) {
                     (function(idx) {
                         promises.push(
-                            fetchHTML(productUrls[idx], { timeout: 15000, retries: 0, proxyLimit: 3 })
+                            fetchHTML(productUrls[idx], { timeout: 10000, retries: 0, proxyLimit: 1 })
                                 .then(function(html) {
                                     var doc = parseHTML(html);
                                     var data = extractProductData(doc, productUrls[idx]);
                                     _crawlResults.push(data);
                                 })
                                 .catch(function() {
+                                    failedCount++;
                                     _crawlResults.push({ url: productUrls[idx], title: '', price: '', currency: 'SAR', image: '', sku: '', description: '', brand: '' });
                                 })
                         );
                     })(pi);
                 }
                 await Promise.all(promises);
-                await new Promise(function(r) { setTimeout(r, 500); });
+                await new Promise(function(r) { setTimeout(r, 100); });
 
                 // Update progress
                 var okCount = 0;
