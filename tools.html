@@ -555,14 +555,15 @@
         var attempt = 0;
         var lastError;
         var proxies = [
+            { url: 'https://api.allorigins.win/get?url=', type: 'json' },
             { url: 'https://api.allorigins.win/raw?url=', type: 'text' },
             { url: 'https://corsproxy.io/?url=', type: 'text' },
             { url: 'https://api.codetabs.com/v1/proxy?quest=', type: 'text' },
-            { url: 'https://api.cors.lol/?url=', type: 'text' },
-            { url: 'https://thingproxy.freeboard.io/fetch/', type: 'text' }
+            { url: 'https://api.cors.lol/?url=', type: 'text' }
         ];
+        var proxyLimit = (opts && opts.proxyLimit) || proxies.length;
         while (attempt <= retries) {
-            for (var i = 0; i < proxies.length; i++) {
+            for (var i = 0; i < proxyLimit; i++) {
                 var p = proxies[i];
                 var u = p.url + encodeURIComponent(url);
                 try {
@@ -2992,7 +2993,7 @@
             // Step 1: Detect platform
             out.innerHTML = '<div class="tool-loading"><p>Detecting platform...</p></div>';
             var mainHtml = '';
-            try { mainHtml = await fetchHTML(url, { timeout: 15000 }); } catch(e) {}
+            try { mainHtml = await fetchHTML(url, { timeout: 15000, proxyLimit: 3 }); } catch(e) {}
             if (mainHtml && platform === 'auto') {
                 platform = detectPlatform(mainHtml, url);
             }
@@ -3006,7 +3007,7 @@
             // Phase 1: Try main sitemap
             crawlUpdateUI(0, 0, 'Fetching sitemap.xml...');
             try {
-                var smText = await fetchHTML(smUrl, { timeout: 20000, retries: 0 });
+                var smText = await fetchHTML(smUrl, { timeout: 20000, retries: 0, proxyLimit: 3 });
                 if (smText && smText.indexOf('<urlset') !== -1) {
                     var smUrls = parseSitemapUrls(smText);
                     for (var ui = 0; ui < smUrls.length; ui++) {
@@ -3044,7 +3045,7 @@
                     var subName = prodSubSitemaps[subi].split('/').pop();
                     crawlUpdateUI(0, 0, 'Fetching sub-sitemap: ' + subName + ' (' + (subi + 1) + '/' + prodSubSitemaps.length + ')...');
                     try {
-                        var subText = await fetchHTML(prodSubSitemaps[subi], { timeout: 20000, retries: 0 });
+                        var subText = await fetchHTML(prodSubSitemaps[subi], { timeout: 20000, retries: 0, proxyLimit: 3 });
                         if (subText) {
                             var subParsed = parseSitemapUrls(subText);
                             for (var spi = 0; spi < subParsed.length; spi++) {
@@ -3070,7 +3071,7 @@
                     if (_crawlAbort) break;
                     crawlUpdateUI(0, 0, 'Trying fallback: ' + fallbacks[fi].split('/').pop() + '...');
                     try {
-                        var fbText = await fetchHTML(fallbacks[fi], { timeout: 20000, retries: 0 });
+                        var fbText = await fetchHTML(fallbacks[fi], { timeout: 20000, retries: 0, proxyLimit: 3 });
                         if (fbText) {
                             var fbUrls = parseSitemapUrls(fbText);
                             for (var fbi = 0; fbi < fbUrls.length; fbi++) {
@@ -3111,7 +3112,7 @@
                     if (_crawlAbort) break;
                     crawlUpdateUI(0, 0, 'Crawling category ' + (ci + 1) + '/' + maxCat + '...');
                     try {
-                        var catHtml = await fetchHTML(catUrls[ci], { timeout: 15000, retries: 0 });
+                        var catHtml = await fetchHTML(catUrls[ci], { timeout: 15000, retries: 0, proxyLimit: 3 });
                         if (catHtml) {
                             var catDoc = parseHTML(catHtml);
                             var catLinks = catDoc.querySelectorAll('a[href]');
@@ -3167,7 +3168,7 @@
                 for (var pi = bi; pi < end; pi++) {
                     (function(idx) {
                         promises.push(
-                            fetchHTML(productUrls[idx], { timeout: 15000, retries: 0 })
+                            fetchHTML(productUrls[idx], { timeout: 15000, retries: 0, proxyLimit: 3 })
                                 .then(function(html) {
                                     var doc = parseHTML(html);
                                     var data = extractProductData(doc, productUrls[idx]);
