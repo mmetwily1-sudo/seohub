@@ -5064,6 +5064,40 @@
         return Math.round(kei * 10) / 10;
     }
 
+    function krCalcOpportunityScore(keyword, difficulty, volumeLevel, kei, serpFeatures, trendDir, intent) {
+        var score = 50;
+        var volScores = { 'very-high': 30, 'high': 22, 'medium': 12, 'low': 5, 'very-low': 0 };
+        score += (volScores[volumeLevel] || 0);
+        if (difficulty <= 20) score += 25;
+        else if (difficulty <= 35) score += 18;
+        else if (difficulty <= 50) score += 10;
+        else if (difficulty <= 70) score += 2;
+        else score -= 10;
+        if (kei >= 500) score += 15;
+        else if (kei >= 200) score += 10;
+        else if (kei >= 100) score += 5;
+        else if (kei < 20) score -= 5;
+        if (serpFeatures === 0) score += 8;
+        else if (serpFeatures >= 3) score -= 5;
+        if (trendDir && trendDir.text === (currentLang === 'ar' ? '\u0645\u0647\u062a\u0645' : 'Rising')) score += 10;
+        if (intent === 'transactional') score += 5;
+        else if (intent === 'commercial') score += 3;
+        else if (intent === 'navigational') score -= 3;
+        var wc = keyword.split(/\s+/).length;
+        if (wc >= 4) score += 5;
+        else if (wc === 1) score -= 5;
+        if (score < 5) score = 5;
+        if (score > 99) score = 99;
+        return score;
+    }
+
+    function krOpportunityLabel(score) {
+        if (score >= 75) return { text: currentLang === 'ar' ? '\u0641\u0631\u0635' : 'Excellent', cls: 'kr-badge-trend-up', color: '#059669' };
+        if (score >= 55) return { text: currentLang === 'ar' ? '\u062c\u064a\u062f' : 'Good', cls: '', color: '#10b981' };
+        if (score >= 35) return { text: currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637' : 'Medium', cls: 'kr-badge-trend-stable', color: '#f59e0b' };
+        return { text: currentLang === 'ar' ? '\u0636\u0639\u064a\u0641' : 'Poor', cls: '', color: '#ef4444' };
+    }
+
     function krTrendDirection(keyword, serpData) {
         if (!serpData) return { icon: '', text: '', cls: '' };
         var paaCount = serpData.paa ? serpData.paa.length : 0;
@@ -5238,7 +5272,7 @@
         var hl = (lang || 'en').toLowerCase();
         var url = 'https://www.google.com/search?q=site:' + encodeURIComponent(domain) + '&hl=' + hl + '&gl=' + gl + '&num=20';
         return fetchHTML(url).then(function(html) {
-            var result = { domain: domain, keywords: [], titles: [], snippets: [] };
+            var result = { domain: domain, keywords: [], titles: [], snippets: [], urlPatterns: [], estimatedPages: 0, categories: [] };
             if (!html || typeof html !== 'string') return result;
             var titleRegex = /<title[^>]*>(.*?)<\/title>/gi;
             var titleMatch;
@@ -5251,6 +5285,25 @@
             while ((descMatch = descRegex.exec(html)) !== null) {
                 var d = descMatch[1].replace(/<[^>]+>/g, '').replace(/&[^;]+;/g, ' ').trim();
                 if (d && d.length > 10) result.snippets.push(d);
+            }
+            var urlRegex = new RegExp('https?://(?:www\\.)?' + domain.replace(/\./g, '\\.') + '/([^"\\s<>]+)', 'gi');
+            var urlMatch;
+            var urlSegments = {};
+            while ((urlMatch = urlRegex.exec(html)) !== null) {
+                var path = urlMatch[1].split('/')[0].split('?')[0];
+                if (path && path.length > 1 && path.length < 50) {
+                    urlSegments[path] = (urlSegments[path] || 0) + 1;
+                    result.urlPatterns.push(path);
+                }
+            }
+            var segKeys = Object.keys(urlSegments);
+            for (var s = 0; s < segKeys.length; s++) {
+                result.categories.push({ segment: segKeys[s], count: urlSegments[segKeys[s]] });
+            }
+            result.categories.sort(function(a, b) { return b.count - a.count; });
+            var resultCountMatch = html.match(/About ([\d,]+) results|About ([\d,]+) result|\u0646\u062a\u0627\u0626\u062c ([\d,]+)/i);
+            if (resultCountMatch) {
+                result.estimatedPages = parseInt((resultCountMatch[1] || resultCountMatch[2] || resultCountMatch[3] || '0').replace(/,/g, ''));
             }
             var combined = result.titles.join(' ').toLowerCase() + ' ' + result.snippets.join(' ').toLowerCase();
             var stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'it', 'this', 'that', 'are', 'was', 'be', 'has', 'had', 'have', 'will', 'can', 'our', 'your', 'we', 'you', 'not', 'all', 'from', 'more', 'best', 'top', 'new', 'official', '\u0645\u0646', '\u0641\u064a', '\u0639\u0644\u0649', '\u0627\u0644\u0630\u064a', '\u0647\u0630\u0627', '\u0647\u064a', '\u062a\u064a', '\u062e\u0635\u0648\u0635\u064a\u0627\u062a'];
@@ -5275,10 +5328,73 @@
             for (var i = 0; i < Math.min(sorted.length, 30); i++) {
                 result.keywords.push(sorted[i].word);
             }
+            var bigrams = {};
+            for (var w = 0; w < words.length - 1; w++) {
+                if (words[w].length > 2 && words[w + 1].length > 2) {
+                    var bg = words[w] + ' ' + words[w + 1];
+                    bigrams[bg] = (bigrams[bg] || 0) + 1;
+                }
+            }
+            var biSorted = [];
+            var bgKeys = Object.keys(bigrams);
+            for (var b = 0; b < bgKeys.length; b++) {
+                if (bigrams[bgKeys[b]] >= 2) biSorted.push({ phrase: bgKeys[b], count: bigrams[bgKeys[b]] });
+            }
+            biSorted.sort(function(a, b) { return b.count - a.count; });
+            result.bigrams = biSorted.slice(0, 10);
             return result;
         }).catch(function() {
-            return { domain: domain, keywords: [], titles: [], snippets: [] };
+            return { domain: domain, keywords: [], titles: [], snippets: [], urlPatterns: [], estimatedPages: 0, categories: [], bigrams: [] };
         });
+    }
+
+    function krRenderSerpOptTips(serpFeatures) {
+        var tips = [];
+        if (serpFeatures && serpFeatures.featured) {
+            tips.push({
+                title: '\u2B50 ' + (currentLang === 'ar' ? '\u0643\u064a\u0641 \u062a\u0641\u0648\u0632 \u0627\u0644\u0645\u0646\u0635\u0629 \u0627\u0644\u0645\u0645\u064a\u0632\u0629' : 'Win Featured Snippet'),
+                items: currentLang === 'ar'
+                    ? ['\u0627\u0643\u062a\u0628 \u0627\u0644\u062c\u0648\u0627\u0628 \u0645\u0628\u0634\u0631\u062d\u064b\u0627 \u0641\u064a \u0623\u0648\u0644 200 \u062d\u0631\u0641', '\u0627\u0633\u062a\u062e\u062f\u0645 \u0642\u0627\u0626\u0645\u0629 \u0642\u0627\u0626\u0645\u0629 \u0623\u0648 \u0642\u0627\u0626\u0645\u0629 \u0645\u0631\u062a\u0628\u0637\u0629', '\u0623\u0636\u0641 \u0642\u0627\u0626\u0645\u0629 \u0623\u0648 \u062c\u062f\u0648\u0644 \u0642\u0627\u0626\u0645\u0629', '\u0627\u0633\u062a\u062e\u062f\u0645 \u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0639\u062f\u062f \u0627\u0644\u0645\u0631\u062a\u0628\u0637\u0629 H2/H3']
+                    : ['Write a direct answer in the first 200 words', 'Use numbered/bulleted lists', 'Add a table or comparison chart', 'Use structured data markup (FAQ, HowTo)']
+            });
+        }
+        if (serpFeatures && serpFeatures.paa && serpFeatures.paa.length > 0) {
+            tips.push({
+                title: '\u2753 ' + (currentLang === 'ar' ? '\u0643\u064a\u0641 \u062a\u0638\u0647\u0631 \u0623\u0633\u0626\u0644\u0629 PAA' : 'Win People Also Ask'),
+                items: currentLang === 'ar'
+                    ? ['\u0623\u062c\u0628 \u0643\u0644 \u0633\u0624\u0627\u0644\u0629 \u0628\u0633\u064a\u0637\u0631 H2/H3 \u0645\u0646\u0641\u0635\u0644', '\u0627\u0633\u062a\u062e\u062f\u0645 \u062c\u0648\u0627\u0628 \u0645\u0628\u0634\u0631\u062d \u064a\u062c\u064a\u0628 \u0627\u0644\u0625\u062c\u0627\u0628\u0629 \u0628\u0634\u0643\u0644 \u0645\u0628\u0627\u0634\u0631', '\u0627\u0633\u062a\u062e\u062f\u0645 FAQ Schema \u0645\u0631\u062a\u0628\u0637\u0629', '\u062c\u0648\u0628 \u0627\u0644\u0625\u062c\u0627\u0628\u0629 \u0628\u0639\u0646\u0648\u0627\u0646 "According to..."']
+                    : ['Answer each question with a dedicated H2/H3 section', 'Write answers under 50 words for snippet potential', 'Use structured FAQ Schema markup', 'Start answers with "According to..." or "The answer is..."']
+            });
+        }
+        if (serpFeatures && serpFeatures.serpFeatures >= 2) {
+            tips.push({
+                title: '\uD83D\uDCCA ' + (currentLang === 'ar' ? '\u062a\u062d\u0633\u064a\u0646 \u0646\u0637\u0642\u0629 \u0627\u0644\u0646\u0638\u0631 \u0627\u0644\u0639\u0648\u0645\u0629' : 'Optimize Organic CTR'),
+                items: currentLang === 'ar'
+                    ? ['\u0643\u062a\u0628 \u0639\u0646\u0648\u0627\u064a\u0646 title tag \u062c\u0630\u0627\u0628\u0629 \u0627\u0644\u0639\u062f\u062f \u0627\u0644\u0645\u0631\u062a\u0628\u0637\u0629 (\u0627\u0644\u0633\u0646\u0648\u0627\u062a)', '\u0623\u0636\u0641 meta description \u062a\u062c\u0630\u064a\u0628 \u0645\u0644\u0645\u0648\u0633 \u0644\u0644\u0646\u0631\u0636', '\u0627\u0633\u062a\u062e\u062f\u0645 Rich Snippets (stars, prices)']
+                    : ['Add year to title tag (e.g. 2025)', 'Write compelling meta description with CTA', 'Add schema markup for rich snippets (stars, prices)']
+            });
+        }
+        if (tips.length === 0) {
+            tips.push({
+                title: '\uD83D\uDCD6 ' + (currentLang === 'ar' ? '\u0646\u0635\u0627\u0626\u062d \u0639\u0627\u0645\u0629 \u0644\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'General Content Tips'),
+                items: currentLang === 'ar'
+                    ? ['\u0623\u0646\u0634\u0626 \u0645\u0642\u0627\u0644\u0627\u062a H2/H3 \u0645\u0631\u062a\u0628\u0637\u0629', '\u0623\u0636\u0641 \u0635\u0648\u0631 \u0628\u0635\u0641\u0631\u0627\u062a alt text', '\u0627\u0633\u062a\u062e\u062f\u0645 \u0631\u0648\u0627\u0628\u0637 \u062f\u0627\u062e\u0644\u064a\u0629 \u0644\u0644\u0645\u0648\u0627\u062f \u0627\u0644\u0645\u0631\u062a\u0628\u0637\u0629', '\u062a\u062d\u0633\u064a\u0646 \u0633\u0631\u0639\u0629 \u0627\u0644\u062a\u062d\u0645\u064a\u0644 \u0645\u0646 \u0627\u0644\u0645\u0648\u0627\u0642\u0639 \u0627\u0644\u0645\u0646\u0627\u0633\u0628\u0629']
+                    : ['Structure content with H2/H3 headings', 'Add images with descriptive alt text', 'Include internal links to related pages', 'Optimize page speed (Core Web Vitals)']
+            });
+        }
+        var html = '<div style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:2px solid #10b981;border-radius:16px;padding:20px;">';
+        html += '<h3 style="margin:0 0 12px;color:#059669;">\uD83D\uDCA1 ' + (currentLang === 'ar' ? '\u0646\u0635\u0627\u0626\u062d \u062a\u062d\u0633\u064a\u0646 SERP' : 'SERP Optimization Tips') + '</h3>';
+        for (var t = 0; t < tips.length; t++) {
+            html += '<div style="background:white;border-radius:10px;padding:12px;margin-bottom:8px;border-left:3px solid #10b981;">';
+            html += '<h4 style="margin:0 0 6px;font-size:13px;color:#1e293b;">' + tips[t].title + '</h4>';
+            html += '<ul style="margin:0;padding-left:16px;">';
+            for (var i = 0; i < tips[t].items.length; i++) {
+                html += '<li style="font-size:12px;color:#475569;margin-bottom:2px;">' + tips[t].items[i] + '</li>';
+            }
+            html += '</ul></div>';
+        }
+        html += '</div>';
+        return html;
     }
 
     function krExplainDifficulty(keyword, difficulty, serpData) {
@@ -5377,6 +5493,63 @@
         return gap;
     }
 
+    function krFetchWikipediaKeywords(seed) {
+        var url = 'https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(seed);
+        return fetchJSON(url, { timeout: 8000, retries: 1, proxyLimit: 2 }).then(function(data) {
+            var keywords = [];
+            if (data.extract) {
+                var text = data.extract.toLowerCase();
+                var words = text.replace(/[^a-z0-9\u0600-\u06FF\s]/g, ' ').split(/\s+/);
+                var freq = {};
+                for (var i = 0; i < words.length; i++) {
+                    var w = words[i];
+                    if (w.length > 3) freq[w] = (freq[w] || 0) + 1;
+                }
+                var sorted = [];
+                var keys = Object.keys(freq);
+                for (var k = 0; k < keys.length; k++) sorted.push({ word: keys[k], count: freq[keys[k]] });
+                sorted.sort(function(a, b) { return b.count - a.count; });
+                for (var s = 0; s < Math.min(sorted.length, 8); s++) {
+                    keywords.push(seed + ' ' + sorted[s].word);
+                }
+            }
+            if (data.title && data.title !== seed) keywords.push(data.title.toLowerCase());
+            return keywords.slice(0, 10);
+        }).catch(function() { return []; });
+    }
+
+    function krFetchRedditKeywords(seed) {
+        var url = 'https://www.reddit.com/search.json?q=' + encodeURIComponent(seed) + '&limit=25&sort=relevance&t=month';
+        return fetchJSON(url, { timeout: 10000, retries: 1, proxyLimit: 2 }).then(function(data) {
+            var keywords = [];
+            if (data && data.data && data.data.children) {
+                var children = data.data.children;
+                var wordFreq = {};
+                var stopWords = { 'the': 1, 'and': 1, 'for': 1, 'are': 1, 'but': 1, 'not': 1, 'you': 1, 'all': 1, 'can': 1, 'had': 1, 'her': 1, 'was': 1, 'one': 1, 'our': 1, 'out': 1, 'has': 1, 'his': 1, 'how': 1, 'its': 1, 'may': 1, 'new': 1, 'now': 1, 'old': 1, 'see': 1, 'way': 1, 'who': 1, 'did': 1, 'get': 1, 'let': 1, 'say': 1, 'she': 1, 'too': 1, 'use': 1 };
+                for (var c = 0; c < children.length; c++) {
+                    var post = children[c].data;
+                    var title = (post.title || '').toLowerCase();
+                    var selftext = (post.selftext || '').substring(0, 500).toLowerCase();
+                    var combined = title + ' ' + selftext;
+                    var words = combined.replace(/[^a-z0-9\u0600-\u06FF\s]/g, ' ').split(/\s+/);
+                    for (var w = 0; w < words.length; w++) {
+                        if (words[w].length > 3 && !stopWords[words[w]]) {
+                            wordFreq[words[w]] = (wordFreq[words[w]] || 0) + 1;
+                        }
+                    }
+                }
+                var sorted = [];
+                var keys = Object.keys(wordFreq);
+                for (var k = 0; k < keys.length; k++) sorted.push({ word: keys[k], count: wordFreq[keys[k]] });
+                sorted.sort(function(a, b) { return b.count - a.count; });
+                for (var s = 0; s < Math.min(sorted.length, 12); s++) {
+                    keywords.push(seed + ' ' + sorted[s].word);
+                }
+            }
+            return keywords.slice(0, 10);
+        }).catch(function() { return []; });
+    }
+
     function krRunCompetitorLookup() {
         var domain = prompt(currentLang === 'ar' ? '\u0623\u062f\u062e\u0644 \u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u0645\u0646\u0627\u0641\u0633 (e.g. amazon.sa, jarir.com):' : 'Enter competitor domain (e.g. amazon.sa, jarir.com):');
         if (!domain || !domain.trim()) return;
@@ -5393,15 +5566,33 @@
             html += '<h3 style="margin:0;color:#b45309;">&#127760; ' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064a\u0644 ' : 'Competitor Analysis: ') + esc(domain) + '</h3>';
             html += '<button onclick="document.getElementById(\'kr-competitor-output\').style.display=\'none\';" style="background:none;border:none;font-size:20px;cursor:pointer;color:#92400e;">&times;</button>';
             html += '</div>';
-            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px;">';
-            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:24px;font-weight:800;color:#b45309;">' + result.titles.length + '</span><br><span style="font-size:12px;color:#64748b;">' + (currentLang === 'ar' ? '\u0635\u0641\u062d\u0627\u062a \u0645\u0641\u0631\u0648\u0636\u0629' : 'Indexed Pages') + '</span></div>';
-            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:24px;font-weight:800;color:#b45309;">' + result.keywords.length + '</span><br><span style="font-size:12px;color:#64748b;">' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a \u0645\u0641\u062a\u0627\u062d\u0629' : 'Keywords Found') + '</span></div>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px;">';
+            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:22px;font-weight:800;color:#b45309;">' + (result.estimatedPages || result.titles.length) + '</span><br><span style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u0635\u0641\u062d\u0627\u062a' : 'Pages') + '</span></div>';
+            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:22px;font-weight:800;color:#b45309;">' + result.keywords.length + '</span><br><span style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a' : 'Keywords') + '</span></div>';
+            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:22px;font-weight:800;color:#b45309;">' + (result.bigrams ? result.bigrams.length : 0) + '</span><br><span style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u062a\u0631\u0627\u062a\u064a\u0628' : 'Phrases') + '</span></div>';
+            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:22px;font-weight:800;color:#b45309;">' + (result.categories ? result.categories.length : 0) + '</span><br><span style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u0642\u0633\u0645\u0627\u062a URL' : 'URL Segments') + '</span></div>';
             html += '</div>';
+            if (result.bigrams && result.bigrams.length > 0) {
+                html += '<h4 style="margin:0 0 8px;color:#92400e;">&#128269; ' + (currentLang === 'ar' ? '\u0627\u0644\u062a\u0631\u0627\u062a\u064a\u0628 \u0627\u0644\u0645\u0634\u062a\u063a\u0644\u0629:' : 'Top Phrases:') + '</h4>';
+                html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">';
+                for (var i = 0; i < result.bigrams.length; i++) {
+                    html += '<span style="background:white;padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid #fde68a;color:#92400e;">' + esc(result.bigrams[i].phrase) + ' <span style="font-size:10px;color:#b45309;">x' + result.bigrams[i].count + '</span></span>';
+                }
+                html += '</div>';
+            }
             if (result.keywords.length > 0) {
-                html += '<h4 style="margin:0 0 8px;color:#92400e;">&#128269; ' + (currentLang === 'ar' ? '\u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0643\u0634\u0648\u0641\u0629:' : 'Discovered Keywords:') + '</h4>';
+                html += '<h4 style="margin:0 0 8px;color:#92400e;">&#128269; ' + (currentLang === 'ar' ? '\u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0641\u062a\u0627\u062d\u0629:' : 'Discovered Keywords:') + '</h4>';
                 html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
                 for (var i = 0; i < result.keywords.length; i++) {
                     html += '<span style="background:white;padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid #fde68a;color:#92400e;">' + esc(result.keywords[i]) + '</span>';
+                }
+                html += '</div>';
+            }
+            if (result.categories && result.categories.length > 0) {
+                html += '<h4 style="margin:12px 0 8px;color:#92400e;">&#128194; ' + (currentLang === 'ar' ? '\u0627\u0644\u0642\u0633\u0645\u0627\u062a:' : 'URL Segments:') + '</h4>';
+                html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">';
+                for (var i = 0; i < Math.min(result.categories.length, 15); i++) {
+                    html += '<span style="background:white;padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid #fcd34d;color:#78350f;">' + esc(result.categories[i].segment) + ' <span style="font-size:10px;color:#b45309;">x' + result.categories[i].count + '</span></span>';
                 }
                 html += '</div>';
             }
@@ -6123,7 +6314,8 @@
         var sorted = krSortData(_krFilter === 'all' ? _krResults : _krResults.filter(function(d) { return d.intent === _krFilter; }));
         var d = sorted[idx];
         if (!d) return;
-        var explanation = krExplainDifficulty(d.keyword, d.difficulty, d.topDomains ? { featured: d.featured, paa: d.paa || [], topDomains: d.topDomains || [], serpFeatures: d.serpFeatures } : null);
+        var kwSerp = { featured: d.featured, paa: d.paa || [], topDomains: d.topDomains || [], serpFeatures: d.serpFeatures };
+        var explanation = krExplainDifficulty(d.keyword, d.difficulty, d.topDomains ? kwSerp : null);
         var panel = document.getElementById('kr-kd-panel');
         if (!panel) {
             panel = document.createElement('div');
@@ -6158,6 +6350,9 @@
             html += '</div>';
         }
         html += '</div>';
+        if (kwSerp) {
+            html += '<div style="margin-top:12px;">' + krRenderSerpOptTips(kwSerp) + '</div>';
+        }
         html += '<button onclick="krShowContentBrief(\'' + esc(d.keyword) + '\',\'' + d.intent + '\')" style="display:block;width:100%;margin-top:16px;padding:10px;border-radius:100px;border:2px solid #3b82f6;background:#3b82f6;color:white;font-weight:700;cursor:pointer;font-size:14px;">&#128196; ' + (currentLang === 'ar' ? '\u062a\u0648\u0644\u064a\u062f \u0645\u062d\u062a\u0648\u0627\u0647 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'Generate Content Brief') + '</button>';
         panel.innerHTML = html;
         panel.style.display = 'block';
@@ -6336,7 +6531,7 @@
         html += '</div>';
         html += '<div class="kr-table-wrap"><table class="kr-table" id="kr-table">';
         html += '<thead><tr>';
-        var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_volume, t.kr_difficulty, 'KEI', t.kr_intent, t.kr_cpc, currentLang === 'ar' ? '\u062a\u0631\u0646\u062f' : 'Trend', currentLang === 'ar' ? '\u0645\u064a\u0632\u0627\u0646\u064a\u0627\u062a SERP' : 'SERP'];
+        var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_volume, t.kr_difficulty, 'KEI', currentLang === 'ar' ? '\u0627\u0644\u0641\u0631\u0635' : 'Opp.', t.kr_intent, t.kr_cpc, currentLang === 'ar' ? '\u062a\u0631\u0646\u062f' : 'Trend', currentLang === 'ar' ? '\u0645\u064a\u0632\u0627\u0646\u064a\u0627\u062a SERP' : 'SERP'];
         for (var i = 0; i < cols.length; i++) {
             var arrow = '';
             if (_krSortCol === i) arrow = _krSortAsc ? ' \u25B2' : ' \u25BC';
@@ -6354,6 +6549,8 @@
             var trendingBadge = d.trending ? ' <span style="font-size:10px;color:#ef4444;font-weight:700;">\uD83D\uDD25</span>' : '';
             var srcBadge = d.source === 'trending' ? ' <span style="font-size:10px;color:#8b5cf6;font-weight:700;">TREND</span>' : '';
             var srcBadge2 = d.source === 'serp-features' ? ' <span style="font-size:10px;color:#0ea5e9;font-weight:700;">SERP</span>' : '';
+            var srcBadge3 = d.source === 'wikipedia' ? ' <span style="font-size:10px;color:#64748b;font-weight:700;">WIKI</span>' : '';
+            var srcBadge4 = d.source === 'reddit' ? ' <span style="font-size:10px;color:#ff4500;font-weight:700;">REDDIT</span>' : '';
             var keiVal = d.kei || 0;
             var keiColor = keiVal >= 500 ? '#059669' : keiVal >= 100 ? '#f59e0b' : '#ef4444';
             var keiLabel = keiVal >= 500 ? (currentLang === 'ar' ? '\u0645\u0645\u064a\u0632' : 'Great') : keiVal >= 100 ? (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637' : 'OK') : (currentLang === 'ar' ? '\u0636\u0639\u064a\u0641' : 'Hard');
@@ -6368,10 +6565,13 @@
             }
             html += '<tr>';
             html += '<td style="font-weight:600;color:var(--gray-1);">' + (i + 1) + '</td>';
-            html += '<td><strong>' + kw + trendingBadge + srcBadge + srcBadge2 + '</strong></td>';
+            html += '<td><strong>' + kw + trendingBadge + srcBadge + srcBadge2 + srcBadge3 + srcBadge4 + '</strong></td>';
             html += '<td>' + volBadge + '</td>';
             html += '<td><span class="kr-badge ' + diff.cls + '" style="cursor:pointer;" onclick="krShowKDExplanation(' + i + ')" title="Click for explanation">' + diff.text + ' (' + d.difficulty + ')</span></td>';
             html += '<td><span style="color:' + keiColor + ';font-weight:700;font-size:12px;">' + keiVal + ' <span style="font-size:10px;">' + keiLabel + '</span></span></td>';
+            var oppScore = d.opportunity || 0;
+            var oppLabel = krOpportunityLabel(oppScore);
+            html += '<td><div style="display:flex;align-items:center;gap:4px;"><div style="width:40px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;"><div style="width:' + oppScore + '%;height:100%;background:' + oppLabel.color + ';border-radius:3px;"></div></div><span style="font-size:11px;font-weight:700;color:' + oppLabel.color + ';">' + oppScore + '</span></div></td>';
             html += '<td><span class="kr-badge ' + intent.cls + '">' + intent.text + '</span></td>';
             html += '<td>' + d.cpc + '</td>';
             html += '<td>' + trendHtml + '</td>';
@@ -6407,7 +6607,7 @@
     function krSortData(data) {
         var copy = data.slice();
         if (_krSortCol === -1) {
-            copy.sort(function(a, b) { return b.difficulty - a.difficulty; });
+            copy.sort(function(a, b) { return (b.opportunity || 0) - (a.opportunity || 0); });
             return copy;
         }
         var col = _krSortCol;
@@ -6422,10 +6622,11 @@
             }
             else if (col === 3) { va = a.difficulty; vb = b.difficulty; }
             else if (col === 4) { va = a.kei || 0; vb = b.kei || 0; }
-            else if (col === 5) { va = a.intent; vb = b.intent; }
-            else if (col === 6) { va = parseFloat(String(a.cpc).replace(/[^0-9.]/g, '')) || 0; vb = parseFloat(String(b.cpc).replace(/[^0-9.]/g, '')) || 0; }
-            else if (col === 7) { va = a.serpFeatures || 0; vb = b.serpFeatures || 0; }
+            else if (col === 5) { va = a.opportunity || 0; vb = b.opportunity || 0; }
+            else if (col === 6) { va = a.intent; vb = b.intent; }
+            else if (col === 7) { va = parseFloat(String(a.cpc).replace(/[^0-9.]/g, '')) || 0; vb = parseFloat(String(b.cpc).replace(/[^0-9.]/g, '')) || 0; }
             else if (col === 8) { va = a.serpFeatures || 0; vb = b.serpFeatures || 0; }
+            else if (col === 9) { va = a.serpFeatures || 0; vb = b.serpFeatures || 0; }
             else { va = a.keyword; vb = b.keyword; }
             if (typeof va === 'string') return _krSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
             return _krSortAsc ? va - vb : vb - va;
@@ -6644,7 +6845,7 @@
             var taskCount = 2;
             if (doAZ) taskCount++;
             if (templateList.length > 0) taskCount++;
-            taskCount++;
+            taskCount += 3;
             var tasksDone = 0;
             function onTaskDone() {
                 tasksDone++;
@@ -6679,6 +6880,34 @@
                             kwSources[sk] = 'serp-features';
                             kwPosition[sk] = i + 1;
                             kwExpansionCount[sk] = 1;
+                        }
+                    }
+                }).catch(function() {}).then(onTaskDone)
+            );
+
+            allPromises.push(
+                krFetchWikipediaKeywords(seed).then(function(wikiKws) {
+                    for (var i = 0; i < wikiKws.length; i++) {
+                        var wk = wikiKws[i].toLowerCase();
+                        if (wk.length > 2 && wk.length < 80 && !rawKeywords[wk]) {
+                            rawKeywords[wk] = true;
+                            kwSources[wk] = 'wikipedia';
+                            kwPosition[wk] = i + 1;
+                            kwExpansionCount[wk] = 1;
+                        }
+                    }
+                }).catch(function() {}).then(onTaskDone)
+            );
+
+            allPromises.push(
+                krFetchRedditKeywords(seed).then(function(redditKws) {
+                    for (var i = 0; i < redditKws.length; i++) {
+                        var rk = redditKws[i].toLowerCase();
+                        if (rk.length > 2 && rk.length < 80 && !rawKeywords[rk]) {
+                            rawKeywords[rk] = true;
+                            kwSources[rk] = 'reddit';
+                            kwPosition[rk] = i + 1;
+                            kwExpansionCount[rk] = 1;
                         }
                     }
                 }).catch(function() {}).then(onTaskDone)
@@ -6796,7 +7025,8 @@
                     topDomains: kwSerp ? kwSerp.topDomains : [],
                     featured: kwSerp ? kwSerp.featured : false,
                     ctr: krEstimateCTR(serpFeat, 1),
-                    da: krEstimateDA(kwSerp ? kwSerp.topDomains : [], serpFeat)
+                    da: krEstimateDA(kwSerp ? kwSerp.topDomains : [], serpFeat),
+                    opportunity: krCalcOpportunityScore(kw.keyword, difficulty, vol.level, kei, serpFeat, trendDir, intent)
                 });
             }
             results.sort(function(a, b) {
