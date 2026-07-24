@@ -285,6 +285,58 @@
         .kr-options{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
         .kr-opt{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500}
         .kr-opt input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary)}
+        .kr-view-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+        .kr-view-btn{padding:8px 16px;border:2px solid var(--gray-4);border-radius:10px;background:var(--white);font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition)}
+        .kr-view-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .kr-view-btn:hover:not(.active){border-color:var(--primary);color:var(--primary)}
+        .kr-topic-layout{display:grid;grid-template-columns:280px 1fr;gap:16px;min-height:400px}
+        .kr-topic-sidebar{background:var(--gray-5);border:1px solid var(--gray-4);border-radius:12px;padding:12px;max-height:600px;overflow-y:auto}
+        .kr-topic-sidebar-search{width:100%;padding:8px 12px;border:1px solid var(--gray-4);border-radius:8px;font-size:13px;margin-bottom:10px;font-family:inherit}
+        .kr-topic-item{padding:10px 12px;border-radius:8px;cursor:pointer;transition:var(--transition);margin-bottom:2px;display:flex;justify-content:space-between;align-items:center}
+        .kr-topic-item:hover{background:var(--white);border:1px solid var(--gray-4)}
+        .kr-topic-item.active{background:var(--primary);color:#fff;border:1px solid var(--primary)}
+        .kr-topic-item-name{font-weight:600;font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .kr-topic-item-count{font-size:11px;background:rgba(0,0,0,.08);padding:2px 8px;border-radius:100px;font-weight:700;margin-left:6px;flex-shrink:0}
+        .kr-topic-item.active .kr-topic-item-count{background:rgba(255,255,255,.25)}
+        .kr-topic-detail{background:var(--white);border:1px solid var(--gray-4);border-radius:12px;padding:20px}
+        .kr-topic-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+        .kr-topic-title{font-size:20px;font-weight:800;color:var(--primary)}
+        .kr-topic-meta{display:flex;gap:8px;flex-wrap:wrap}
+        .kr-topic-pill{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:700;background:var(--gray-5);border:1px solid var(--gray-4)}
+        .kr-topic-kw-row{display:flex;align-items:center;padding:8px 12px;border-radius:8px;margin-bottom:2px;font-size:13px;transition:var(--transition)}
+        .kr-topic-kw-row:hover{background:var(--gray-5)}
+        .kr-topic-kw-word{flex:1;font-weight:500}
+        .kr-topic-kw-metrics{display:flex;gap:10px;align-items:center;flex-shrink:0}
+        .kr-subtopic-title{font-size:14px;font-weight:700;color:var(--gray-2);margin:16px 0 8px;padding-left:20px;border-left:3px solid var(--primary)}
+        .kr-content-plan{display:grid;gap:12px}
+        .kr-article-card{background:var(--gray-5);border:1px solid var(--gray-4);border-radius:12px;padding:16px;transition:var(--transition)}
+        .kr-article-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(37,99,235,.08)}
+        .kr-article-type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:inline-block;padding:2px 8px;border-radius:100px}
+        .kr-article-type.pillar{background:#ede9fe;color:#5b21b6}
+        .kr-article-type.supporting{background:#dbeafe;color:#1e40af}
+        .kr-article-type.faq{background:#fef3c7;color:#92400e}
+        .kr-article-type.howto{background:#d1fae5;color:#065f46}
+        .kr-article-title{font-size:15px;font-weight:700;margin-bottom:4px}
+        .kr-article-desc{font-size:12px;color:var(--gray-1);margin-bottom:8px}
+        .kr-article-kws{display:flex;flex-wrap:wrap;gap:4px}
+        .kr-article-kw-tag{font-size:11px;padding:2px 8px;background:var(--white);border:1px solid var(--gray-4);border-radius:100px}
+        .kr-roadmap-item{display:flex;gap:12px;padding:12px;border:1px solid var(--gray-4);border-radius:10px;margin-bottom:8px;align-items:flex-start}
+        .kr-roadmap-week{background:var(--primary);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;white-space:nowrap;flex-shrink:0}
+        .kr-roadmap-content{flex:1}
+        .kr-roadmap-title{font-weight:700;font-size:14px;margin-bottom:4px}
+        .kr-roadmap-kws{font-size:12px;color:var(--gray-1)}
+        .kr-link-suggestion{background:var(--gray-5);border:1px solid var(--gray-4);border-radius:10px;padding:12px;margin-bottom:8px}
+        .kr-link-from{font-weight:700;color:var(--primary);font-size:13px}
+        .kr-link-arrow{color:var(--gray-1);margin:0 6px}
+        .kr-link-to{font-weight:600;font-size:13px}
+        .kr-link-reason{font-size:12px;color:var(--gray-1);margin-top:4px}
+        .kr-gap-item{display:flex;align-items:center;padding:10px;border:1px dashed var(--gray-4);border-radius:8px;margin-bottom:6px}
+        .kr-gap-icon{margin-right:8px;font-size:16px}
+        .kr-gap-text{font-size:13px;font-weight:500}
+        .kr-coverage-bar{height:12px;background:var(--gray-4);border-radius:100px;overflow:hidden;margin:8px 0}
+        .kr-coverage-fill{height:100%;border-radius:100px;transition:width .5s}
+        .kr-coverage-score{font-size:28px;font-weight:800}
+        @media(max-width:768px){.kr-topic-layout{grid-template-columns:1fr}.kr-topic-sidebar{max-height:250px}}
         @media(max-width:600px){.kr-controls{flex-direction:column}.kr-keyword-input{min-width:100%}.kr-stats{grid-template-columns:repeat(2,1fr)}}
     </style>
 </head><body>
@@ -567,6 +619,10 @@
                 </div>
                 <div class="kr-progress" id="kr-progress"><div class="kr-progress-bar" id="kr-progress-bar" style="width:0%"></div></div>
                 <div class="tool-output" id="kr-output"><div class="tool-loading"><p data-i18n="kr_loading">Enter a seed keyword above and click Research Keywords</p></div></div>
+                <div id="kr-topic-view" style="display:none;"></div>
+                <div id="kr-plan-view" style="display:none;"></div>
+                <div id="kr-internal-view" style="display:none;"></div>
+                <div id="kr-roadmap-view" style="display:none;"></div>
             </div>
         </div>
     </section>    <section class="cta-section">
@@ -4961,6 +5017,454 @@
         return clusters;
     }
 
+    var _stopWords = {'the':1,'a':1,'an':1,'and':1,'or':1,'but':1,'in':1,'on':1,'at':1,'to':1,'for':1,'of':1,'with':1,'by':1,'is':1,'it':1,'as':1,'be':1,'was':1,'are':1,'this':1,'that':1,'from':1,'or':1,'how':1,'what':1,'when':1,'where':1,'who':1,'which':1,'why':1,'do':1,'does':1,'can':1,'you':1,'i':1,'my':1,'your':1,'its':1,'\u0645\u0646':1,'\u0641\u064a':1,'\u0639\u0644\u0649':1,'\u0628\u064a\u0646':1,'\u0645\u0639':1,'\u0644\u0645\u0646':1,'\u0623\u0648':1,'\u0647\u064a':1,'\u0627\u0644\u062a\u064a':1,'\u064a\u0643\u0648\u0646':1,'\u0647\u0644':1,'\u0645\u0627':1,'\u0643\u064a\u0641':1,'\u0644\u0645\u0627\u0630\u0627':1,'\u0645\u062a\u0649':1,'\u063a\u064a\u0631':1};
+
+    function krExtractTopics(keywords, seed) {
+        var wordFreq = {};
+        var wordKws = {};
+        for (var i = 0; i < keywords.length; i++) {
+            var words = keywords[i].keyword.toLowerCase().split(/\s+/);
+            for (var j = 0; j < words.length; j++) {
+                var w = words[j];
+                if (w.length < 3 || _stopWords[w]) continue;
+                if (!wordFreq[w]) { wordFreq[w] = 0; wordKws[w] = {}; }
+                wordFreq[w]++;
+                wordKws[w][keywords[i].keyword.toLowerCase()] = true;
+            }
+        }
+        var topicWords = Object.keys(wordFreq).filter(function(w) {
+            return wordFreq[w] >= 2;
+        }).sort(function(a, b) {
+            return wordFreq[b] - wordFreq[a];
+        });
+        var topicMap = {};
+        var assigned = {};
+        for (var i = 0; i < keywords.length; i++) {
+            var kw = keywords[i].keyword.toLowerCase();
+            var words = kw.split(/\s+/);
+            var bestTopic = null;
+            var bestScore = 0;
+            for (var j = 0; j < topicWords.length; j++) {
+                if (words.indexOf(topicWords[j]) !== -1 && wordFreq[topicWords[j]] > bestScore) {
+                    bestScore = wordFreq[topicWords[j]];
+                    bestTopic = topicWords[j];
+                }
+            }
+            if (!bestTopic) bestTopic = seed.toLowerCase();
+            if (!topicMap[bestTopic]) topicMap[bestTopic] = [];
+            topicMap[bestTopic].push(keywords[i]);
+        }
+        var topics = [];
+        var topicKeys = Object.keys(topicMap).sort(function(a, b) {
+            return topicMap[b].length - topicMap[a].length;
+        });
+        for (var i = 0; i < topicKeys.length; i++) {
+            var tk = topicKeys[i];
+            var kws = topicMap[tk];
+            var subTopics = [];
+            if (kws.length >= 5) {
+                var subWordFreq = {};
+                for (var j = 0; j < kws.length; j++) {
+                    var words = kws[j].keyword.toLowerCase().split(/\s+/);
+                    for (var m = 0; m < words.length; m++) {
+                        var sw = words[m];
+                        if (sw.length < 3 || _stopWords[sw] || sw === tk) continue;
+                        if (!subWordFreq[sw]) subWordFreq[sw] = [];
+                        subWordFreq[sw].push(kws[j]);
+                    }
+                }
+                var subKeys = Object.keys(subWordFreq).filter(function(sw) {
+                    return subWordFreq[sw].length >= 2;
+                }).sort(function(a, b) {
+                    return subWordFreq[b].length - subWordFreq[a].length;
+                });
+                var subAssigned = {};
+                for (var s = 0; s < Math.min(subKeys.length, 5); s++) {
+                    var subKws = subWordFreq[subKeys[s]].filter(function(k) {
+                        var kwl = k.keyword.toLowerCase();
+                        if (subAssigned[kwl]) return false;
+                        subAssigned[kwl] = true;
+                        return true;
+                    });
+                    if (subKws.length >= 2) {
+                        subTopics.push({ name: subKeys[s], keywords: subKws });
+                    }
+                }
+                var unassigned = kws.filter(function(k) {
+                    return !subAssigned[k.keyword.toLowerCase()];
+                });
+                if (unassigned.length > 0) {
+                    subTopics.push({ name: tk + ' ' + (currentLang === 'ar' ? '\u0622\u062e\u0631\u0649' : 'Other'), keywords: unassigned });
+                }
+            }
+            var totalVol = 0, totalDiff = 0, intents = {};
+            for (var j = 0; j < kws.length; j++) {
+                totalVol += kws[j].volume || 0;
+                totalDiff += kws[j].difficulty || 0;
+                intents[kws[j].intent] = (intents[kws[j].intent] || 0) + 1;
+            }
+            var primaryIntent = 'informational';
+            var maxInt = 0;
+            var intentKeys = Object.keys(intents);
+            for (var j = 0; j < intentKeys.length; j++) {
+                if (intents[intentKeys[j]] > maxInt) { maxInt = intents[intentKeys[j]]; primaryIntent = intentKeys[j]; }
+            }
+            topics.push({
+                name: tk,
+                keywords: kws,
+                subTopics: subTopics,
+                metrics: {
+                    totalKeywords: kws.length,
+                    totalVolume: totalVol,
+                    avgDifficulty: kws.length ? Math.round(totalDiff / kws.length) : 0,
+                    primaryIntent: primaryIntent
+                }
+            });
+        }
+        return topics;
+    }
+
+    var _krTopicTree = [];
+    var _krActiveTopic = -1;
+    var _krActiveView = 'table';
+
+    function krRenderTopicView(topics) {
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        _krTopicTree = topics;
+        _krActiveTopic = 0;
+        var html = '<div class="kr-topic-layout">';
+        html += '<div class="kr-topic-sidebar" id="kr-topic-sidebar">';
+        html += '<input class="kr-topic-sidebar-search" type="text" placeholder="' + (currentLang === 'ar' ? '\u0628\u062d\u062b \u0639\u0646 \u0645\u0648\u0636\u0648\u0639...' : 'Search topics...') + '" oninput="krFilterTopics(this.value)">';
+        for (var i = 0; i < topics.length; i++) {
+            var isActive = i === _krActiveTopic ? ' active' : '';
+            var icon = topics[i].metrics.primaryIntent === 'transactional' ? '&#128722;' : topics[i].metrics.primaryIntent === 'informational' ? '&#128218;' : topics[i].metrics.primaryIntent === 'commercial' ? '&#128176;' : '&#128205;';
+            html += '<div class="kr-topic-item' + isActive + '" onclick="krSelectTopic(' + i + ')" data-topic-idx="' + i + '">';
+            html += '<span class="kr-topic-item-name">' + icon + ' ' + esc(topics[i].name) + '</span>';
+            html += '<span class="kr-topic-item-count">' + topics[i].keywords.length + '</span>';
+            html += '</div>';
+        }
+        html += '</div>';
+        html += '<div class="kr-topic-detail" id="kr-topic-detail">';
+        if (topics.length > 0) html += krRenderTopicDetail(topics[0], 0);
+        else html += '<p style="color:var(--gray-1);text-align:center;padding:40px;">' + (currentLang === 'ar' ? '\u0644\u0645 \u064a\u062a\u0645 \u0627\u0633\u062a\u062e\u0631\u0627\u062c \u0645\u0648\u0627\u0636\u064a\u0639' : 'No topics found') + '</p>';
+        html += '</div></div>';
+        html += '<div style="margin-top:16px;">' + krRenderCoverageScore(topics) + '</div>';
+        return html;
+    }
+
+    function krRenderTopicDetail(topic, idx) {
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var intentLabel = krIntentLabel(topic.metrics.primaryIntent);
+        var html = '<div class="kr-topic-header">';
+        html += '<div><div class="kr-topic-title">' + esc(topic.name) + '</div>';
+        html += '<div class="kr-topic-meta">';
+        html += '<span class="kr-topic-pill">' + topic.keywords.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0645\u0641\u062a\u0627\u062d\u064a\u0629' : 'keywords') + '</span>';
+        html += '<span class="kr-topic-pill">' + (currentLang === 'ar' ? '\u0627\u0644\u062d\u0633\u0645 \u0627\u0644\u0645\u0648\u062c\u0648\u062f: ' : 'Vol: ') + topic.metrics.totalVolume + '</span>';
+        html += '<span class="kr-topic-pill">' + (currentLang === 'ar' ? '\u0627\u0644\u0635\u0639\u0648\u0628\u0629: ' : 'KD: ') + topic.metrics.avgDifficulty + '</span>';
+        html += '<span class="kr-badge ' + intentLabel.cls + '">' + intentLabel.text + '</span>';
+        html += '</div></div></div>';
+        var pillarKw = topic.keywords[0];
+        html += '<div style="background:#ede9fe;border-radius:10px;padding:12px 16px;margin-bottom:16px;">';
+        html += '<div style="font-size:11px;font-weight:700;color:#5b21b6;text-transform:uppercase;margin-bottom:4px;">&#127968; ' + (currentLang === 'ar' ? '\u0635\u0641\u062d\u0629 \u0627\u0644\u0639\u0645\u0648\u062f (Pillar Page)' : 'Pillar Page') + '</div>';
+        html += '<div style="font-weight:700;font-size:15px;">' + esc(topic.name.charAt(0).toUpperCase() + topic.name.slice(1)) + ' ' + (currentLang === 'ar' ? '\u062f\u0644\u064a\u0644 \u0634\u0627\u0645\u0644' : 'Complete Guide') + '</div>';
+        html += '<div style="font-size:12px;color:#6b7280;margin-top:4px;">' + (currentLang === 'ar' ? '\u064a\u0646\u0628\u063a\u064a \u062a\u063a\u0637\u064a\u0627\u064b \u0627\u0644\u0645\u0648\u0636\u0648\u0639 \u0628\u0627\u0633\u062a\u062e\u062f\u0627\u0645 ' + topic.keywords.length + ' \u0643\u0644\u0645\u0629 \u0645\u0641\u062a\u0627\u062d\u064a\u0629 \u0645\u0631\u062a\u0628\u0637\u0629' : 'Covers the topic using ' + topic.keywords.length + ' related keywords') + '</div>';
+        html += '</div>';
+        if (topic.subTopics && topic.subTopics.length > 0) {
+            for (var s = 0; s < topic.subTopics.length; s++) {
+                var sub = topic.subTopics[s];
+                html += '<div class="kr-subtopic-title">' + esc(sub.name.charAt(0).toUpperCase() + sub.name.slice(1)) + ' (' + sub.keywords.length + ')</div>';
+                for (var j = 0; j < sub.keywords.length; j++) {
+                    html += krRenderKwRow(sub.keywords[j]);
+                }
+            }
+        } else {
+            for (var j = 0; j < topic.keywords.length; j++) {
+                html += krRenderKwRow(topic.keywords[j]);
+            }
+        }
+        return html;
+    }
+
+    function krRenderKwRow(kw) {
+        var diff = krDiffLabel(kw.difficulty);
+        var intent = krIntentLabel(kw.intent);
+        var html = '<div class="kr-topic-kw-row">';
+        html += '<span class="kr-topic-kw-word">' + esc(kw.keyword) + '</span>';
+        html += '<span class="kr-topic-kw-metrics">';
+        html += '<span class="kr-badge ' + intent.cls + '">' + intent.text + '</span>';
+        html += '<span class="kr-badge ' + diff.cls + '">' + diff.text + '</span>';
+        html += '<span style="font-size:12px;color:var(--gray-1);min-width:50px;text-align:right;">' + kw.volume + '</span>';
+        html += '<span style="font-size:12px;color:var(--gray-1);min-width:40px;text-align:right;">' + kw.cpc + '</span>';
+        html += '</span></div>';
+        return html;
+    }
+
+    function krSelectTopic(idx) {
+        _krActiveTopic = idx;
+        var items = document.querySelectorAll('.kr-topic-item');
+        for (var i = 0; i < items.length; i++) {
+            items[i].classList.toggle('active', parseInt(items[i].getAttribute('data-topic-idx')) === idx);
+        }
+        var detail = document.getElementById('kr-topic-detail');
+        if (detail && _krTopicTree[idx]) {
+            detail.innerHTML = krRenderTopicDetail(_krTopicTree[idx], idx);
+            detail.scrollTop = 0;
+        }
+    }
+
+    function krFilterTopics(query) {
+        var q = query.toLowerCase();
+        var items = document.querySelectorAll('.kr-topic-item');
+        for (var i = 0; i < items.length; i++) {
+            var name = items[i].querySelector('.kr-topic-item-name').textContent.toLowerCase();
+            items[i].style.display = name.indexOf(q) !== -1 ? '' : 'none';
+        }
+    }
+
+    function krRenderCoverageScore(topics) {
+        var totalKws = 0;
+        var totalVol = 0;
+        for (var i = 0; i < topics.length; i++) {
+            totalKws += topics[i].keywords.length;
+            totalVol += topics[i].metrics.totalVolume;
+        }
+        var topicCount = topics.length;
+        var score = Math.min(100, Math.round((topicCount * 10) + (totalKws > 20 ? 20 : totalKws) + (totalVol > 1000 ? 30 : Math.round(totalVol / 33))));;
+        var color = score >= 70 ? '#10b981' : score >= 40 ? '#f59e0b' : '#ef4444';
+        var label = score >= 70 ? (currentLang === 'ar' ? '\u062a\u063a\u0637\u064a\u0629 \u0645\u0645\u062a\u064a\u0632\u0629' : 'Strong Coverage') : score >= 40 ? (currentLang === 'ar' ? '\u062a\u063a\u0637\u064a\u0629 \u0645\u0639\u062a\u062f\u0644\u0629' : 'Moderate Coverage') : (currentLang === 'ar' ? '\u062a\u063a\u0637\u064a\u0629 \u0636\u0639\u064a\u0641\u0629' : 'Weak Coverage');
+        var html = '<div style="background:var(--gray-5);border:1px solid var(--gray-4);border-radius:12px;padding:20px;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+        html += '<span style="font-weight:700;">&#128200; ' + (currentLang === 'ar' ? '\u0645\u0624\u0634\u0631 \u0627\u0644\u062a\u063a\u0637\u064a\u0629 \u0627\u0644\u0645\u0648\u0636\u0648\u0639\u064a\u0629 (Topical Coverage Score)' : 'Topical Coverage Score') + '</span>';
+        html += '<span class="kr-coverage-score" style="color:' + color + ';">' + score + '%</span>';
+        html += '</div>';
+        html += '<div class="kr-coverage-bar"><div class="kr-coverage-fill" style="width:' + score + '%;background:' + color + ';"></div></div>';
+        html += '<div style="font-size:12px;color:var(--gray-1);margin-top:4px;">' + label + ' &mdash; ' + topicCount + ' ' + (currentLang === 'ar' ? '\u0645\u0648\u0636\u0648\u0639 / ' : 'topics / ') + totalKws + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0645\u0641\u062a\u0627\u062d\u064a\u0629' : 'keywords') + '</div>';
+        html += '</div>';
+        return html;
+    }
+
+    function krGenerateContentPlan(topics) {
+        var plan = [];
+        for (var i = 0; i < topics.length; i++) {
+            var topic = topics[i];
+            var pillarTitle = topic.name.charAt(0).toUpperCase() + topic.name.slice(1) + ' ' + (currentLang === 'ar' ? '\u062f\u0644\u064a\u0644 \u0634\u0627\u0645\u0644' : 'Complete Guide');
+            var pillarKws = topic.keywords.slice(0, 5).map(function(k) { return k.keyword; });
+            plan.push({
+                type: 'pillar',
+                title: pillarTitle,
+                topic: topic.name,
+                keywords: pillarKws,
+                priority: topic.metrics.totalVolume,
+                intent: topic.metrics.primaryIntent,
+                wordCount: '2000-3000',
+                description: currentLang === 'ar' ? '\u0635\u0641\u062d\u0629 \u0639\u0645\u0648\u062f\u064a\u0629 \u0634\u0627\u0645\u0644\u0629 \u062a\u063a\u0637\u064a \u062c\u0645\u064a\u0639 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0641\u062a\u0627\u062d\u064a\u0629' : 'Comprehensive guide covering all related keywords'
+            });
+            if (topic.subTopics) {
+                for (var s = 0; s < topic.subTopics.length; s++) {
+                    var sub = topic.subTopics[s];
+                    var subTitle = sub.name.charAt(0).toUpperCase() + sub.name.slice(1);
+                    var subKws = sub.keywords.slice(0, 3).map(function(k) { return k.keyword; });
+                    var subType = 'supporting';
+                    if (subKws.some(function(k) { return k.indexOf('?') !== -1 || /\bhow\b|\bwhat\b|\bwhy\b|\u0643\u064a\u0641|\u0645\u0627/.test(k); })) subType = 'faq';
+                    if (subKws.some(function(k) { return /\bhow to\b|\u0643\u064a\u0641 \u064a\u0645\u0643\u0646/.test(k); })) subType = 'howto';
+                    plan.push({
+                        type: subType,
+                        title: subTitle,
+                        topic: topic.name,
+                        keywords: subKws,
+                        priority: sub.keywords.length * 10,
+                        intent: sub.keywords[0] ? sub.keywords[0].intent : 'informational',
+                        wordCount: subType === 'faq' ? '1000-1500' : '1200-2000',
+                        description: currentLang === 'ar' ? '\u0645\u0642\u0627\u0644\u0629 \u0645\u0639\u062a\u0645\u062f\u0629 \u0644\u0644\u0645\u0648\u0636\u0648\u0639: ' + sub.name : 'Supporting article for: ' + sub.name
+                    });
+                }
+            }
+        }
+        plan.sort(function(a, b) { return b.priority - a.priority; });
+        return plan;
+    }
+
+    function krRenderContentPlan(topics) {
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var plan = krGenerateContentPlan(topics);
+        var html = '<div style="margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 4px;">&#128197; ' + (currentLang === 'ar' ? '\u062e\u0637\u0629 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'Content Plan') + '</h3>';
+        html += '<p style="font-size:13px;color:var(--gray-1);">' + plan.length + ' ' + (currentLang === 'ar' ? '\u0645\u0642\u0627\u0644\u0629 \u0645\u0642\u062a\u0631\u062d\u0629 (' + plan.filter(function(p) { return p.type === 'pillar'; }).length + ' ' + (currentLang === 'ar' ? '\u0635\u0641\u062d\u0627\u062a \u0639\u0645\u0648\u062f\u064a\u0629' : 'pillar pages') + ')' : ' articles suggested (' + plan.filter(function(p) { return p.type === 'pillar'; }).length + ' pillar pages)') + '</p>';
+        html += '</div>';
+        html += '<div class="kr-content-plan">';
+        for (var i = 0; i < plan.length; i++) {
+            var item = plan[i];
+            var typeLabel = { pillar: '&#127968; Pillar', supporting: '&#128221; Supporting', faq: '&#10067; FAQ', howto: '&#128736; How-To' };
+            html += '<div class="kr-article-card">';
+            html += '<div class="kr-article-type ' + item.type + '">' + (typeLabel[item.type] || item.type) + '</div>';
+            html += '<div class="kr-article-title">' + esc(item.title) + '</div>';
+            html += '<div class="kr-article-desc">' + esc(item.description) + ' &bull; ' + item.wordCount + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629' : 'words') + '</div>';
+            html += '<div class="kr-article-kws">';
+            for (var j = 0; j < item.keywords.length; j++) {
+                html += '<span class="kr-article-kw-tag">' + esc(item.keywords[j]) + '</span>';
+            }
+            html += '</div></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+
+    function krSuggestInternalLinks(topics) {
+        var links = [];
+        for (var i = 0; i < topics.length; i++) {
+            var topic = topics[i];
+            var related = [];
+            for (var j = 0; j < topics.length; j++) {
+                if (i === j) continue;
+                var overlap = 0;
+                var wordsA = topic.name.split(/\s+/);
+                var wordsB = topics[j].name.split(/\s+/);
+                for (var a = 0; a < wordsA.length; a++) {
+                    if (wordsB.indexOf(wordsA[a]) !== -1 && !_stopWords[wordsA[a]]) overlap++;
+                }
+                if (overlap > 0) {
+                    related.push({ topic: topics[j], overlap: overlap });
+                }
+            }
+            for (var j = 0; j < topic.keywords.length; j++) {
+                for (var k = 0; k < topic.keywords.length; k++) {
+                    if (j === k) continue;
+                    var kwA = topic.keywords[j].keyword.toLowerCase();
+                    var kwB = topic.keywords[k].keyword.toLowerCase();
+                    if (kwA !== kwB && (kwA.indexOf(kwB) !== -1 || kwB.indexOf(kwA) !== -1)) {
+                        links.push({
+                            from: topic.keywords[j].keyword,
+                            to: topic.keywords[k].keyword,
+                            topic: topic.name,
+                            reason: currentLang === 'ar' ? '\u0643\u0644\u0645\u062a\u0627\u0646 \u0645\u062a\u0634\u0627\u0628\u0647\u0629 \u0641\u064a \u0646\u0641\u0633 \u0627\u0644\u0645\u0648\u0636\u0648\u0639: ' + topic.name : 'Related keywords in topic: ' + topic.name
+                        });
+                    }
+                }
+            }
+            for (var r = 0; r < related.length; r++) {
+                links.push({
+                    from: topic.name + ' ' + (currentLang === 'ar' ? '\u062f\u0644\u064a\u0644 \u0634\u0627\u0645\u0644' : 'Complete Guide'),
+                    to: related[r].topic.name + ' ' + (currentLang === 'ar' ? '\u062f\u0644\u064a\u0644 \u0634\u0627\u0645\u0644' : 'Complete Guide'),
+                    topic: topic.name,
+                    reason: (currentLang === 'ar' ? '\u0645\u0648\u0636\u0648\u0639\u0627\u0646 \u0645\u062a\u0631\u0627\u0628\u0637\u0627\u0646' : 'Related topics') + ' (' + related[r].overlap + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a' : 'shared words') + ')'
+                });
+            }
+        }
+        var seen = {};
+        var unique = [];
+        for (var i = 0; i < links.length; i++) {
+            var key = links[i].from + '|' + links[i].to;
+            if (!seen[key] && links[i].from !== links[i].to) {
+                seen[key] = true;
+                unique.push(links[i]);
+            }
+        }
+        return unique.slice(0, 50);
+    }
+
+    function krRenderInternalLinks(topics) {
+        var links = krSuggestInternalLinks(topics);
+        var html = '<div style="margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 4px;">&#128279; ' + (currentLang === 'ar' ? '\u0627\u0644\u0631\u0628\u0637\u0627\u062a \u0627\u0644\u062f\u0627\u062e\u0644\u064a\u0629' : 'Internal Linking Suggestions') + '</h3>';
+        html += '<p style="font-size:13px;color:var(--gray-1);">' + links.length + ' ' + (currentLang === 'ar' ? '\u0631\u0628\u0637 \u0645\u0642\u062a\u0631\u062d' : 'suggested links') + '</p>';
+        html += '</div>';
+        for (var i = 0; i < links.length; i++) {
+            html += '<div class="kr-link-suggestion">';
+            html += '<span class="kr-link-from">' + esc(links[i].from) + '</span>';
+            html += '<span class="kr-link-arrow">&rarr;</span>';
+            html += '<span class="kr-link-to">' + esc(links[i].to) + '</span>';
+            html += '<div class="kr-link-reason">' + esc(links[i].reason) + '</div>';
+            html += '</div>';
+        }
+        return html;
+    }
+
+    function krGenerateRoadmap(topics) {
+        var plan = krGenerateContentPlan(topics);
+        var weeks = [];
+        var articlesPerWeek = 3;
+        for (var i = 0; i < plan.length; i += articlesPerWeek) {
+            var weekArticles = plan.slice(i, i + articlesPerWeek);
+            weeks.push({ week: Math.floor(i / articlesPerWeek) + 1, articles: weekArticles });
+        }
+        return weeks;
+    }
+
+    function krRenderRoadmap(topics) {
+        var weeks = krGenerateRoadmap(topics);
+        var html = '<div style="margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 4px;">&#128640; ' + (currentLang === 'ar' ? '\u062e\u0637\u0629 \u0627\u0644\u0625\u0646\u062a\u0627\u062c (Publishing Roadmap)' : 'Publishing Roadmap') + '</h3>';
+        html += '<p style="font-size:13px;color:var(--gray-1);">' + weeks.length + ' ' + (currentLang === 'ar' ? '\u0623\u0633\u0627\u0628\u064a\u0639 \u0646\u0634\u0627\u0637' : 'weeks') + ' &bull; ' + (currentLang === 'ar' ? '\u0627\u0644\u062a\u0631\u062a\u064a\u0628 \u062d\u0633\u0628 \u0627\u0644\u0623\u0648\u0644\u0648\u064a\u0629 \u0644\u0644\u0645\u0648\u0627\u0636\u064a\u0639 \u0627\u0644\u0623\u0643\u062b\u0631 \u0641\u0631\u0635\u064a\u0629' : 'Prioritized by topic authority potential') + '</p>';
+        html += '</div>';
+        for (var w = 0; w < weeks.length; w++) {
+            var week = weeks[w];
+            html += '<div class="kr-roadmap-item">';
+            html += '<div class="kr-roadmap-week">' + (currentLang === 'ar' ? '\u0627\u0644\u0623\u0633\u0628\u0648\u0639 ' : 'Week ') + week.week + '</div>';
+            html += '<div class="kr-roadmap-content">';
+            for (var a = 0; a < week.articles.length; a++) {
+                var art = week.articles[a];
+                var typeIcon = art.type === 'pillar' ? '&#127968;' : art.type === 'faq' ? '&#10067;' : art.type === 'howto' ? '&#128736;' : '&#128221;';
+                html += '<div class="kr-roadmap-title">' + typeIcon + ' ' + esc(art.title) + '</div>';
+                html += '<div class="kr-roadmap-kws">' + art.keywords.slice(0, 3).join(', ') + ' &bull; ' + art.wordCount + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629' : 'words') + '</div>';
+            }
+            html += '</div></div>';
+        }
+        return html;
+    }
+
+    function krRenderContentGaps(topics) {
+        var gaps = [];
+        for (var i = 0; i < topics.length; i++) {
+            var topic = topics[i];
+            if (topic.subTopics && topic.subTopics.length < 3 && topic.keywords.length > 8) {
+                gaps.push({ topic: topic.name, reason: currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0636\u0648\u0639 \u064a\u062d\u062a\u0648\u064a \u0639\u0644\u0649 \u0645\u0632\u064a\u062f \u0645\u0646 ' + topic.subTopics.length + ' \u0645\u0648\u0636\u0648\u0639 \u0641\u0631\u0639\u064a \u0644\u0646 ' + topic.keywords.length + ' \u0643\u0644\u0645\u0629 \u0645\u0641\u062a\u0627\u062d\u064a\u0629' : 'Only ' + topic.subTopics.length + ' sub-topics for ' + topic.keywords.length + ' keywords — needs more depth' });
+            }
+            if (topic.metrics.avgDifficulty < 30 && topic.metrics.totalVolume > 500) {
+                gaps.push({ topic: topic.name, reason: currentLang === 'ar' ? '\u0641\u0631\u0635 \u0630\u0647\u0628\u064a: \u0635\u0639\u0648\u0628\u0629 \u0645\u0646\u062e\u0641\u0636\u0629 (' + topic.metrics.avgDifficulty + ') \u0648\u062d\u0633\u0645 \u0645\u0631\u062a\u0641\u0639 (' + topic.metrics.totalVolume + ')' : 'Quick win: Low KD (' + topic.metrics.avgDifficulty + ') with decent volume (' + topic.metrics.totalVolume + ')' });
+            }
+        }
+        if (gaps.length === 0) return '';
+        var html = '<div style="margin-top:16px;">';
+        html += '<h3 style="margin:0 0 8px;">&#128269; ' + (currentLang === 'ar' ? '\u0641\u0631\u0635 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621 (Content Gaps)' : 'Content Gaps & Opportunities') + '</h3>';
+        for (var i = 0; i < gaps.length; i++) {
+            html += '<div class="kr-gap-item">';
+            html += '<span class="kr-gap-icon">&#128161;</span>';
+            html += '<span class="kr-gap-text"><strong>' + esc(gaps[i].topic) + '</strong> &mdash; ' + esc(gaps[i].reason) + '</span>';
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+
+    function krSwitchView(view) {
+        _krActiveView = view;
+        var btns = document.querySelectorAll('.kr-view-btn');
+        for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+        var viewMap = { table: 0, topics: 1, plan: 2, links: 3, roadmap: 4 };
+        if (btns[viewMap[view]]) btns[viewMap[view]].classList.add('active');
+        var output = document.getElementById('kr-output');
+        var topicView = document.getElementById('kr-topic-view');
+        var planView = document.getElementById('kr-plan-view');
+        var linksView = document.getElementById('kr-internal-view');
+        var roadmapView = document.getElementById('kr-roadmap-view');
+        output.style.display = (view === 'table') ? '' : 'none';
+        topicView.style.display = (view === 'topics') ? '' : 'none';
+        planView.style.display = (view === 'plan') ? '' : 'none';
+        linksView.style.display = (view === 'links') ? '' : 'none';
+        roadmapView.style.display = (view === 'roadmap') ? '' : 'none';
+        if (view === 'topics' && _krTopicTree.length > 0) {
+            topicView.innerHTML = krRenderTopicView(_krTopicTree);
+            _krActiveTopic = 0;
+            setTimeout(function() { krSelectTopic(0); }, 10);
+        } else if (view === 'plan' && _krTopicTree.length > 0) {
+            planView.innerHTML = krRenderContentPlan(_krTopicTree) + krRenderContentGaps(_krTopicTree);
+        } else if (view === 'links' && _krTopicTree.length > 0) {
+            linksView.innerHTML = krRenderInternalLinks(_krTopicTree);
+        } else if (view === 'roadmap' && _krTopicTree.length > 0) {
+            roadmapView.innerHTML = krRenderRoadmap(_krTopicTree);
+        }
+    }
+
     function krUpdateProgress(pct) {
         var bar = document.getElementById('kr-progress-bar');
         var prog = document.getElementById('kr-progress');
@@ -5243,9 +5747,19 @@
         btn.textContent = '...';
         _krResults = [];
         _krClusters = [];
+        _krTopicTree = [];
         _krSortCol = -1;
         _krFilter = 'all';
+        _krActiveView = 'table';
         var out = document.getElementById('kr-output');
+        var topicView = document.getElementById('kr-topic-view');
+        var planView = document.getElementById('kr-plan-view');
+        var linksView = document.getElementById('kr-internal-view');
+        var roadmapView = document.getElementById('kr-roadmap-view');
+        if (topicView) topicView.style.display = 'none';
+        if (planView) planView.style.display = 'none';
+        if (linksView) linksView.style.display = 'none';
+        if (roadmapView) roadmapView.style.display = 'none';
         out.innerHTML = '<div class="tool-loading"><p>' + t.kr_fetching + '</p></div>';
         krUpdateProgress(0);
 
@@ -5413,6 +5927,7 @@
             krUpdateProgress(95);
             _krResults = results;
             _krClusters = krClusterKeywords(results);
+            _krTopicTree = krExtractTopics(results, seed);
             krUpdateProgress(100);
             var proxyWarning = '';
             if (!googleAccessible) {
@@ -5422,7 +5937,14 @@
                         : 'Warning: Could not connect to Google. Results below are generated from templates only. For live Google data, run: <code>node proxy-server.js</code>') +
                     '</div>';
             }
-            out.innerHTML = proxyWarning + krRenderTable(results);
+            var viewBar = '<div class="kr-view-bar">';
+            viewBar += '<button class="kr-view-btn active" onclick="krSwitchView(\'table\')">&#128202; ' + (currentLang === 'ar' ? '\u062c\u062f\u0648\u0644' : 'Table') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'topics\')">&#128193; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0627\u0636\u064a\u0639 (' + _krTopicTree.length + ')' : 'Topics (' + _krTopicTree.length + ')') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'plan\')">&#128197; ' + (currentLang === 'ar' ? '\u062e\u0637\u0629 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'Content Plan') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'links\')">&#128279; ' + (currentLang === 'ar' ? '\u0627\u0644\u0631\u0628\u0637\u0627\u062a' : 'Links') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'roadmap\')">&#128640; ' + (currentLang === 'ar' ? '\u0627\u0644\u062e\u0637\u062a\u0629' : 'Roadmap') + '</button>';
+            viewBar += '</div>';
+            out.innerHTML = proxyWarning + viewBar + krRenderTable(results);
             setTimeout(function() {
                 var prog = document.getElementById('kr-progress');
                 if (prog) prog.style.display = 'none';
