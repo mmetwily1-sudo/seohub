@@ -650,6 +650,7 @@
                 </details>
                 <div class="kr-progress" id="kr-progress"><div class="kr-progress-bar" id="kr-progress-bar" style="width:0%"></div></div>
                 <div id="kr-competitor-output" style="display:none;margin-bottom:16px;"></div>
+                <div id="kr-view-tabs" style="display:none;"></div>
                 <div class="tool-output" id="kr-output"><div class="tool-loading"><p data-i18n="kr_loading">Enter a seed keyword above and click Research Keywords</p></div></div>
                 <div id="kr-topic-view" style="display:none;"></div>
                 <div id="kr-gap-view" style="display:none;"></div>
@@ -6018,10 +6019,12 @@
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'intent\')">&#127919; ' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u064a\u0627\u062a' : 'By Intent') + '</button>';
             viewBar += '</div>';
 
+            var viewTabsEl = document.getElementById('kr-view-tabs');
+            if (viewTabsEl) { viewTabsEl.innerHTML = exportBtns + viewBar; viewTabsEl.style.display = ''; }
             out.innerHTML = '<div style="background:#f0fdf4;border:2px solid #10b981;border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;">' +
                 '&#10003; ' + (currentLang === 'ar' ? '\u062a\u0645 \u0627\u0643\u062a\u0634\u0627\u0641 ' + allResults.length + ' \u0643\u0644\u0645\u0629 (\u0628\u0639\u062f \u0627\u0644\u062a\u0634\u0637\u064a\u0639: ' + deduped.length + ' \u0641\u0631\u064a\u062f\u0629)' : 'Found ' + allResults.length + ' keywords (' + deduped.length + ' after dedup)') +
                 ' | &#128197; ' + seeds.length + ' ' + (currentLang === 'ar' ? '\u0628\u0630\u0631\u0629 \u0645\u0641\u062a\u0627\u062d\u0629' : 'seeds processed') +
-                '</div>' + exportBtns + viewBar + krRenderTable(deduped);
+                '</div>' + krRenderTable(deduped);
         } else {
             out.innerHTML = '<div style="background:#fee2e2;border:2px solid #fca5a5;border-radius:12px;padding:16px;">' +
                 (currentLang === 'ar' ? '\u0644\u0645 \u064a\u062a\u0645 \u0627\u0643\u062a\u0634\u0627\u0641 \u0646\u062a\u0627\u0626\u062c' : 'No results found') + '</div>';
@@ -7720,7 +7723,9 @@
                 '<button onclick="krExportCSV(_krResults)" style="background:#10b981;color:white;border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">&#128229; CSV</button>' +
                 '<button onclick="krExportSheetsFormat(_krResults)" style="background:#3b82f6;color:white;border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">&#128203; Sheets TSV</button>' +
                 '</div>';
-            out.innerHTML = proxyWarning + exportBtns + viewBar + krRenderTable(results);
+            out.innerHTML = proxyWarning + krRenderTable(results);
+            var viewTabsEl = document.getElementById('kr-view-tabs');
+            if (viewTabsEl) { viewTabsEl.innerHTML = exportBtns + viewBar; viewTabsEl.style.display = ''; }
             setTimeout(function() {
                 var prog = document.getElementById('kr-progress');
                 if (prog) prog.style.display = 'none';
