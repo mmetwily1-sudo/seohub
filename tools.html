@@ -11310,6 +11310,325 @@
     }
 
     // ==============================
+    // KEYWORD VALUE CALCULATOR
+    // ==============================
+    function krRenderKeywordValue(results) {
+        var totalValue = 0;
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128176; ' + (currentLang === 'ar' ? '\u0642\u064a\u0645\u0629 \u0627\u0644\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0641\u062a\u0627\u062d\u0629' : 'Keyword Value Calculator') + '</h4>';
+        html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">';
+        var kwWithValue = [];
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i];
+            var vol = kw.volume || 0;
+            var cpc = parseFloat(kw.cpc) || 0;
+            var val = Math.round(vol * cpc);
+            totalValue += val;
+            kwWithValue.push({ keyword: kw.keyword, volume: vol, cpc: cpc, value: val, difficulty: kw.difficulty || 0 });
+        }
+        html += '<div style="text-align:center;padding:16px;background:#ecfdf5;border-radius:10px;"><div style="font-size:24px;font-weight:800;color:#059669;">$' + totalValue.toLocaleString() + '</div><div style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u0627\u0644\u0642\u064a\u0645\u0629 \u0627\u0644\u0625\u0639\u0644\u0627\u0646\u064a\u0629 / \u0634\u0647\u0631' : 'Total Value / Month') + '</div></div>';
+        html += '<div style="text-align:center;padding:16px;background:#eff6ff;border-radius:10px;"><div style="font-size:24px;font-weight:800;color:#3b82f6;">$' + (totalValue * 12).toLocaleString() + '</div><div style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u0627\u0644\u0642\u064a\u0645\u0629 / \u0633\u0646\u0629' : 'Total Value / Year') + '</div></div>';
+        var avgCpc = results.length > 0 ? (results.reduce(function(s, r) { return s + (parseFloat(r.cpc) || 0); }, 0) / results.length).toFixed(2) : 0;
+        html += '<div style="text-align:center;padding:16px;background:#fffbeb;border-radius:10px;"><div style="font-size:24px;font-weight:800;color:#d97706;">$' + avgCpc + '</div><div style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637 CPC' : 'Avg CPC') + '</div></div>';
+        html += '</div>';
+        kwWithValue.sort(function(a, b) { return b.value - a.value; });
+        var top = kwWithValue.slice(0, 15);
+        if (top.length > 0) {
+            var maxVal = top[0].value || 1;
+            html += '<div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:8px;">' + (currentLang === 'ar' ? '\u0623\u063a\u0644\u0649 15 \u0643\u0644\u0645\u0629 \u0628\u0642\u064a\u0645\u0629:' : 'Top 15 by Value:') + '</div>';
+            html += '<div style="display:flex;flex-direction:column;gap:4px;">';
+            for (var t = 0; t < top.length; t++) {
+                var item = top[t];
+                var barPct = maxVal > 0 ? (item.value / maxVal * 100) : 0;
+                html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8fafc;border-radius:6px;">';
+                html += '<span style="flex:1;font-size:12px;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(item.keyword) + '</span>';
+                html += '<div style="width:100px;height:6px;background:#e2e8f0;border-radius:3px;flex-shrink:0;"><div style="height:100%;width:' + barPct + '%;background:#059669;border-radius:3px;"></div></div>';
+                html += '<span style="font-size:11px;color:#059669;font-weight:700;width:60px;text-align:right;">$' + item.value.toLocaleString() + '</span>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowKeywordValue() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderKeywordValue(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // SEARCH INTENT VISUALIZER
+    // ==============================
+    function krRenderIntentVisualizer(results) {
+        var intents = { informational: 0, navigational: 0, transactional: 0, commercial: 0 };
+        for (var i = 0; i < results.length; i++) {
+            var intent = (results[i].intent || '').toLowerCase();
+            if (intent === 'info' || intent === 'informational') intents.informational++;
+            else if (intent === 'nav' || intent === 'navigational') intents.navigational++;
+            else if (intent === 'trans' || intent === 'transactional') intents.transactional++;
+            else if (intent === 'comm' || intent === 'commercial') intents.commercial++;
+            else intents.informational++;
+        }
+        var segs = [
+            { key: 'informational', label: 'Informational', labelAr: '\u0625\u0639\u0644\u0627\u0645\u064a\u0629', count: intents.informational, color: '#3b82f6' },
+            { key: 'navigational', label: 'Navigational', labelAr: '\u062a\u0648\u0638\u064a\u0641\u064a\u0629', count: intents.navigational, color: '#8b5cf6' },
+            { key: 'transactional', label: 'Transactional', labelAr: '\u062a\u062c\u0627\u0631\u064a\u0629', count: intents.transactional, color: '#10b981' },
+            { key: 'commercial', label: 'Commercial', labelAr: '\u062a\u062c\u0627\u0631\u064a\u0629 \u0645\u0636\u0645\u0646\u0629', count: intents.commercial, color: '#f59e0b' }
+        ];
+        var total = results.length || 1;
+        var svgSize = 200, cx = 100, cy = 100, r = 70, innerR = 45;
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#127919; ' + (currentLang === 'ar' ? '\u062a\u0635\u0648\u0631 \u0646\u064a\u0629 \u0627\u0644\u0628\u062d\u062b' : 'Search Intent Visualizer') + '</h4>';
+        html += '<div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;">';
+        html += '<svg viewBox="0 0 ' + svgSize + ' ' + svgSize + '" style="width:200px;height:200px;">';
+        var cumAngle = -90;
+        for (var s = 0; s < segs.length; s++) {
+            if (segs[s].count === 0) continue;
+            var pct = segs[s].count / total;
+            var startAngle = cumAngle;
+            var endAngle = cumAngle + pct * 360;
+            var startRad = startAngle * Math.PI / 180;
+            var endRad = endAngle * Math.PI / 180;
+            var x1o = cx + r * Math.cos(startRad);
+            var y1o = cy + r * Math.sin(startRad);
+            var x2o = cx + r * Math.cos(endRad);
+            var y2o = cy + r * Math.sin(endRad);
+            var x1i = cx + innerR * Math.cos(endRad);
+            var y1i = cy + innerR * Math.sin(endRad);
+            var x2i = cx + innerR * Math.cos(startRad);
+            var y2i = cy + innerR * Math.sin(startRad);
+            var largeArc = pct > 0.5 ? 1 : 0;
+            var path = 'M' + x1o + ',' + y1o + ' A' + r + ',' + r + ' 0 ' + largeArc + ' 1 ' + x2o + ',' + y2o;
+            path += ' L' + x1i + ',' + y1i + ' A' + innerR + ',' + innerR + ' 0 ' + largeArc + ' 0 ' + x2i + ',' + y2i + ' Z';
+            html += '<path d="' + path + '" fill="' + segs[s].color + '" />';
+            cumAngle = endAngle;
+        }
+        html += '<text x="' + cx + '" y="' + (cy - 5) + '" text-anchor="middle" font-size="18" font-weight="800" fill="#1e293b">' + total + '</text>';
+        html += '<text x="' + cx + '" y="' + (cy + 12) + '" text-anchor="middle" font-size="9" fill="#64748b">' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629' : 'Keywords') + '</text>';
+        html += '</svg>';
+        html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+        for (var s = 0; s < segs.length; s++) {
+            var pctNum = total > 0 ? Math.round(segs[s].count / total * 100) : 0;
+            html += '<div style="display:flex;align-items:center;gap:8px;">';
+            html += '<span style="width:12px;height:12px;border-radius:3px;background:' + segs[s].color + ';flex-shrink:0;"></span>';
+            html += '<span style="font-size:13px;color:#334155;width:110px;">' + (currentLang === 'ar' ? segs[s].labelAr : segs[s].label) + '</span>';
+            html += '<span style="font-size:13px;color:#64748b;width:30px;text-align:right;">' + segs[s].count + '</span>';
+            html += '<span style="font-size:11px;color:#94a3b8;width:40px;text-align:right;">' + pctNum + '%</span>';
+            html += '<div style="width:80px;height:6px;background:#f1f5f9;border-radius:3px;"><div style="height:100%;width:' + pctNum + '%;background:' + segs[s].color + ';border-radius:3px;"></div></div>';
+            html += '</div>';
+        }
+        html += '</div></div>';
+        html += '<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:12px;color:#64748b;">';
+        html += '&#128161; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a \u0627\u0644\u0625\u0639\u0644\u0627\u0645\u064a\u0629 \u062a\u0646\u0627\u0633\u0628 \u0645\u0642\u0627\u0644\u0627\u062a \u0637\u0648\u064a\u0644\u0629. \u0627\u0644\u062a\u062c\u0627\u0631\u064a\u0629 \u062a\u0646\u0627\u0633\u0628 \u0623\u0632\u0648\u064a\u0627\u0621 \u0627\u0644\u0634\u0631\u0627\u0621. \u062a\u0648\u0638\u064a\u0641\u064a\u0629 \u062a\u0646\u0627\u0633\u0628 \u0639\u0646\u0648\u0627\u0646 \u0645\u0639\u064a\u0646.' : 'Informational needs content answers. Transactional needs product pages. Navigational needs brand presence.') + '</div>';
+        html += '</div>';
+        return html;
+    }
+    function krShowIntentViz() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderIntentVisualizer(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // CONTENT GAP FINDER
+    // ==============================
+    function krRenderContentGap(results) {
+        var topicClusters = {};
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i].keyword.toLowerCase();
+            var words = kw.split(/\s+/).filter(function(w) { return w.length > 3; });
+            for (var w = 0; w < words.length; w++) {
+                if (!topicClusters[words[w]]) topicClusters[words[w]] = { keywords: [], totalVol: 0, avgDiff: 0, hasLowDiff: false };
+                topicClusters[words[w]].keywords.push(results[i]);
+                topicClusters[words[w]].totalVol += (results[i].volume || 0);
+                topicClusters[words[w]].avgDiff += (results[i].difficulty || 0);
+                if ((results[i].difficulty || 0) <= 30) topicClusters[words[w]].hasLowDiff = true;
+            }
+        }
+        var gaps = [];
+        var tKeys = Object.keys(topicClusters);
+        for (var t = 0; t < tKeys.length; t++) {
+            var cl = topicClusters[tKeys[t]];
+            if (cl.keywords.length >= 3) {
+                cl.avgDiff = Math.round(cl.avgDiff / cl.keywords.length);
+                gaps.push({ topic: tKeys[t], keywords: cl.keywords, totalVol: cl.totalVol, avgDiff: cl.avgDiff, hasLowDiff: cl.hasLowDiff });
+            }
+        }
+        gaps.sort(function(a, b) { return b.totalVol - a.totalVol; });
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128269; ' + (currentLang === 'ar' ? '\u0641\u0631\u0627\u063a \u0641\u0631\u0627\u0626\u0642 \u0627\u0644\u0645\u062d\u062a\u0648\u0649' : 'Content Gap Finder') + '</h4>';
+        if (gaps.length === 0) {
+            html += '<div style="text-align:center;padding:20px;color:#94a3b8;">' + (currentLang === 'ar' ? '\u0644\u0627 \u062a\u0648\u062c\u062f \u0641\u0631\u0627\u0626\u0642 \u0645\u062d\u062a\u0645\u0644\u0629' : 'No content gaps found') + '</div>';
+        } else {
+            var showGaps = gaps.slice(0, 12);
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">';
+            for (var g = 0; g < showGaps.length; g++) {
+                var gap = showGaps[g];
+                var borderColor = gap.hasLowDiff ? '#10b981' : gap.avgDiff <= 50 ? '#f59e0b' : '#ef4444';
+                html += '<div style="border:1px solid ' + borderColor + '33;border-radius:10px;padding:14px;background:#f8fafc;">';
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+                html += '<strong style="color:#1e293b;font-size:14px;">' + esc(gap.topic) + '</strong>';
+                html += '<span style="background:' + borderColor + ';color:white;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;">' + gap.keywords.length + ' kws</span>';
+                html += '</div>';
+                html += '<div style="display:flex;gap:8px;font-size:11px;color:#64748b;margin-bottom:8px;">';
+                html += '<span>Vol: ' + gap.totalVol.toLocaleString() + '</span>';
+                html += '<span>KD: ' + gap.avgDiff + '</span>';
+                if (gap.hasLowDiff) html += '<span style="color:#10b981;font-weight:600;">&#10003; Easy</span>';
+                html += '</div>';
+                html += '<div style="display:flex;flex-direction:column;gap:3px;">';
+                var showKws = gap.keywords.slice(0, 4);
+                for (var k = 0; k < showKws.length; k++) {
+                    html += '<div style="font-size:11px;color:#475569;padding:3px 6px;background:white;border-radius:4px;">&#8226; ' + esc(showKws[k].keyword.length > 30 ? showKws[k].keyword.substring(0, 28) + '..' : showKws[k].keyword) + '</div>';
+                }
+                html += '</div></div>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowContentGap() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderContentGap(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // SERP SNAPSHOT SAVER
+    // ==============================
+    function krGetSnapshots() {
+        try { return JSON.parse(localStorage.getItem('kr_serp_snapshots') || '[]'); } catch(e) { return []; }
+    }
+    function krSaveSnapshot() {
+        if (!_krResults || _krResults.length === 0) return;
+        var snapshots = krGetSnapshots();
+        snapshots.unshift({ date: new Date().toISOString(), query: document.getElementById('kr-seed') ? document.getElementById('kr-seed').value : '', count: _krResults.length, results: _krResults.map(function(r) { return { keyword: r.keyword, volume: r.volume, difficulty: r.difficulty, intent: r.intent }; }) });
+        if (snapshots.length > 10) snapshots = snapshots.slice(0, 10);
+        localStorage.setItem('kr_serp_snapshots', JSON.stringify(snapshots));
+        alert(currentLang === 'ar' ? '\u062a\u0645 \u062d\u0641\u0638 \u0627\u0644\u0644\u062d\u0638\u0629!' : 'Snapshot saved!');
+    }
+    function krRenderSnapshotManager() {
+        var snapshots = krGetSnapshots();
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
+        html += '<h4 style="margin:0;color:#1e293b;font-size:15px;">&#128190; ' + (currentLang === 'ar' ? '\u0645\u062f\u064a\u0631 \u0627\u0644\u0644\u062d\u0638\u0627\u062a' : 'Snapshot Manager') + '</h4>';
+        html += '<button onclick="krSaveSnapshot()" style="padding:6px 16px;border-radius:100px;background:#3b82f6;color:white;border:none;font-weight:700;cursor:pointer;font-size:12px;">&#128190; Save Current</button>';
+        html += '</div>';
+        if (snapshots.length === 0) {
+            html += '<div style="text-align:center;padding:30px;color:#94a3b8;">' + (currentLang === 'ar' ? '\u0644\u0645 \u062a\u062d\u0641\u0638 \u0644\u062d\u0638\u0627\u062a \u0628\u0639\u062f' : 'No snapshots saved yet') + '</div>';
+        } else {
+            html += '<div style="display:flex;flex-direction:column;gap:10px;">';
+            for (var s = 0; s < snapshots.length; s++) {
+                var snap = snapshots[s];
+                var d = new Date(snap.date);
+                var dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString().substring(0, 5);
+                var diffPct = 0;
+                if (s < snapshots.length - 1 && snapshots[s + 1]) {
+                    diffPct = snap.count - snapshots[s + 1].count;
+                }
+                html += '<div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">';
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+                html += '<div>';
+                html += '<strong style="font-size:13px;color:#334155;">' + esc(snap.query || 'Research') + '</strong>';
+                html += '<div style="font-size:11px;color:#94a3b8;">' + dateStr + '</div>';
+                html += '</div>';
+                html += '<div style="display:flex;gap:8px;align-items:center;">';
+                html += '<span style="font-size:12px;color:#64748b;">' + snap.count + ' kws</span>';
+                if (diffPct !== 0) {
+                    var diffCol = diffPct > 0 ? '#10b981' : '#ef4444';
+                    html += '<span style="font-size:11px;color:' + diffCol + ';font-weight:600;">' + (diffPct > 0 ? '+' : '') + diffPct + '</span>';
+                }
+                html += '</div></div>';
+                html += '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;">';
+                var topKws = snap.results.slice(0, 5);
+                for (var k = 0; k < topKws.length; k++) {
+                    html += '<span style="font-size:10px;padding:2px 6px;background:white;border:1px solid #e2e8f0;border-radius:100px;">' + esc(topKws[k].keyword.length > 18 ? topKws[k].keyword.substring(0, 16) + '..' : topKws[k].keyword) + '</span>';
+                }
+                html += '</div></div>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowSnapshots() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderSnapshotManager() + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // CONTENT BRIEF GENERATOR (ENHANCED)
+    // ==============================
+    function krRenderContentBrief(results) {
+        if (!results || results.length === 0) return '<p style="color:#94a3b8;">Run research first.</p>';
+        var topKw = results[0];
+        var similarKws = results.slice(1, 11);
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128221; ' + (currentLang === 'ar' ? '\u0645\u0644\u062e\u0635 \u0627\u0644\u0645\u062d\u062a\u0648\u0649 \u0627\u0644\u0645\u0634\u0631\u0639' : 'Content Brief Generator') + '</h4>';
+        html += '<div style="padding:14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;margin-bottom:16px;">';
+        html += '<div style="font-size:14px;font-weight:700;color:#1e40af;margin-bottom:8px;">Target: ' + esc(topKw.keyword) + '</div>';
+        html += '<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#475569;">';
+        html += '<span>Vol: ' + (topKw.volume || 0).toLocaleString() + '</span>';
+        html += '<span>KD: ' + (topKw.difficulty || 0) + '</span>';
+        html += '<span>CPC: $' + (topKw.cpc || 0) + '</span>';
+        html += '<span>Intent: ' + (topKw.intent || 'info') + '</span>';
+        html += '</div></div>';
+        var recWords = (topKw.volume || 1000) > 5000 ? 3000 : (topKw.volume || 1000) > 1000 ? 2000 : 1200;
+        var recH2 = Math.max(3, Math.round(recWords / 350));
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">';
+        html += '<div style="padding:12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">';
+        html += '<div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px;">Recommended Length</div>';
+        html += '<div style="font-size:18px;font-weight:800;color:#3b82f6;">' + recWords.toLocaleString() + ' words</div>';
+        html += '</div>';
+        html += '<div style="padding:12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">';
+        html += '<div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px;">Subheadings (H2)</div>';
+        html += '<div style="font-size:18px;font-weight:800;color:#8b5cf6;">' + recH2 + ' sections</div>';
+        html += '</div>';
+        html += '</div>';
+        html += '<div style="margin-bottom:16px;">';
+        html += '<div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:8px;">Suggested H2 Headings:</div>';
+        html += '<div style="display:flex;flex-direction:column;gap:4px;">';
+        var h2Suggestions = ['What is ' + topKw.keyword + '?', 'How to Choose the Best ' + topKw.keyword, topKw.keyword + ' vs Alternatives', 'Frequently Asked Questions about ' + topKw.keyword, 'Final Verdict: ' + topKw.keyword];
+        for (var h = 0; h < h2Suggestions.length; h++) {
+            html += '<div style="padding:6px 10px;background:#f8fafc;border-left:3px solid #8b5cf6;border-radius:0 6px 6px 0;font-size:12px;color:#475569;">H2: ' + esc(h2Suggestions[h]) + '</div>';
+        }
+        html += '</div></div>';
+        if (similarKws.length > 0) {
+            html += '<div style="margin-bottom:16px;">';
+            html += '<div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:8px;">Secondary Keywords to Include:</div>';
+            html += '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+            for (var k = 0; k < similarKws.length; k++) {
+                html += '<span style="padding:3px 10px;background:#ecfdf5;border:1px solid #d1fae5;border-radius:100px;font-size:11px;color:#065f46;">' + esc(similarKws[k].keyword) + '</span>';
+            }
+            html += '</div></div>';
+        }
+        html += '<div style="padding:12px;background:#f0fdf4;border:1px solid #d1fae5;border-radius:8px;">';
+        html += '<div style="font-size:12px;color:#065f46;font-weight:600;">' + (currentLang === 'ar' ? '\u0645\u0644\u0627\u062d\u0638\u0627\u062a \u0627\u0644\u0645\u062d\u062a\u0648\u0649:' : 'Content Checklist:') + '</div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px;font-size:11px;color:#475569;">';
+        html += '<div>&#9744; Include primary keyword in title</div>';
+        html += '<div>&#9744; Use keyword in first 100 words</div>';
+        html += '<div>&#9744; Add ' + recH2 + ' H2 subheadings</div>';
+        html += '<div>&#9744; Include 5+ images with alt text</div>';
+        html += '<div>&#9744; Add FAQ section from PAA</div>';
+        html += '<div>&#9744; Internal link to related pages</div>';
+        html += '</div></div>';
+        html += '</div>';
+        return html;
+    }
+    function krShowBrief() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderContentBrief(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
     // Update the extra analysis bar with new buttons
     // ==============================
     var _krOrigRenderExtraAnalysis = krRenderExtraAnalysis;
@@ -11346,6 +11665,11 @@
         html += '<button onclick="krShowMapping()" style="padding:8px 16px;border-radius:100px;border:2px solid #0d9488;background:#f0fdfa;color:#115e59;font-weight:700;cursor:pointer;font-size:13px;">&#128221; Mapping</button>';
         html += '<button onclick="krShowTrafficEstimator()" style="padding:8px 16px;border-radius:100px;border:2px solid #dc2626;background:#fef2f2;color:#991b1b;font-weight:700;cursor:pointer;font-size:13px;">&#128200; Traffic Est</button>';
         html += '<button onclick="krShowRankingPotential()" style="padding:8px 16px;border-radius:100px;border:2px solid #eab308;background:#fefce8;color:#854d0e;font-weight:700;cursor:pointer;font-size:13px;">&#11088; Rank Score</button>';
+        html += '<button onclick="krShowKeywordValue()" style="padding:8px 16px;border-radius:100px;border:2px solid #059669;background:#ecfdf5;color:#065f46;font-weight:700;cursor:pointer;font-size:13px;">&#128176; KW Value</button>';
+        html += '<button onclick="krShowIntentViz()" style="padding:8px 16px;border-radius:100px;border:2px solid #8b5cf6;background:#f5f3ff;color:#6d28d9;font-weight:700;cursor:pointer;font-size:13px;">&#127919; Intent Viz</button>';
+        html += '<button onclick="krShowContentGap()" style="padding:8px 16px;border-radius:100px;border:2px solid #0ea5e9;background:#f0f9ff;color:#0369a1;font-weight:700;cursor:pointer;font-size:13px;">&#128269; Gap</button>';
+        html += '<button onclick="krShowSnapshots()" style="padding:8px 16px;border-radius:100px;border:2px solid #64748b;background:#f8fafc;color:#334155;font-weight:700;cursor:pointer;font-size:13px;">&#128190; Snapshots</button>';
+        html += '<button onclick="krShowBrief()" style="padding:8px 16px;border-radius:100px;border:2px solid #3b82f6;background:#eff6ff;color:#1e40af;font-weight:700;cursor:pointer;font-size:13px;">&#128221; Brief</button>';
         html += '<button onclick="krExportGoogleSheets(_krResults)" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#059669;font-weight:700;cursor:pointer;font-size:13px;">&#128203; Sheets</button>';
         html += '</div>';
         return html;
