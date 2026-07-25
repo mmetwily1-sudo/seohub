@@ -815,6 +815,8 @@
     }
 
     async function fetchJSON(url, opts) {
+        var _domain = url.replace(/https?:\/\//, '').split('/')[0];
+        if (_fetchJSONBlocked[_domain]) throw new Error('Domain blocked: ' + _domain);
         var timeout = (opts && opts.timeout) || 15000;
         var retries = (opts && opts.retries) || 2;
         var attempt = 0;
@@ -882,6 +884,7 @@
                 await new Promise(function(r) { setTimeout(r, 1500 * (attempt + 1)); });
             }
         }
+        _fetchJSONBlocked[_domain] = true;
         throw new Error(lastError ? lastError.message : 'All proxies failed');
     }
 
@@ -4710,6 +4713,7 @@
     var _krFilter = 'all';
     var _suggestSource = 'unknown';
     var _googleBlocked = false;
+    var _fetchJSONBlocked = {};
 
     function krFetchSuggestions(query, lang, country) {
         return krFetchFast(query, lang, country);
