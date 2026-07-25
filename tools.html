@@ -8095,6 +8095,7 @@
         html += '<button class="kr-btn kr-btn-copy" onclick="krCopyAll()">' + t.kr_btn_copy + '</button>';
         html += '<button class="kr-btn kr-btn-export" style="background:#3b82f6;color:white;border-color:#3b82f6;" onclick="krExportHTMLReport(_krResults, document.getElementById(\'kr-seed\').value)">&#128196; ' + (currentLang === 'ar' ? '\u062a\u0642\u0631\u064a\u0631 HTML' : 'HTML Report') + '</button>';
         html += '</div>';
+        html += krRenderExtraAnalysis(data);
         html += '<div class="kr-table-wrap"><table class="kr-table" id="kr-table">';
         html += '<thead><tr>';
         var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_volume, t.kr_difficulty, 'KEI', currentLang === 'ar' ? '\u0627\u0644\u0641\u0631\u0635' : 'Opp.', t.kr_intent, t.kr_cpc, currentLang === 'ar' ? '\u062a\u0631\u0646\u062f' : 'Trend', currentLang === 'ar' ? '\u062a\u062c\u0627\u0631\u064A' : 'Shop', currentLang === 'ar' ? '\u0627\u0644\u0641\u0636\u0648\u0644\u0629' : 'Season', currentLang === 'ar' ? '\u0645\u0646\u0627\u0641\u0633 SERP' : 'SERP'];
@@ -8135,7 +8136,7 @@
             var _favs = krGetFavorites();
             for (var fi = 0; fi < _favs.length; fi++) { if (_favs[fi].keyword === d.keyword) { isFav = true; break; } }
             var favId = 'fav-star-' + d.keyword.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_');
-            html += '<td><strong>' + kw + trendingBadge + srcBadge + srcBadge2 + srcBadge3 + srcBadge4 + '</strong> <span id="' + favId + '" onclick="krToggleFavorite(\'' + esc(d.keyword).replace(/'/g, "\\'") + '\')" style="cursor:pointer;font-size:14px;color:' + (isFav ? '#f59e0b' : '#d1d5db') + ';" title="Favorite">&#9733;</span></td>';
+            html += '<td><strong style="cursor:pointer;color:#3b82f6;" onclick="krToggleSerpDetail(' + i + ')" title="Click to expand SERP details">' + kw + '</strong>' + trendingBadge + srcBadge + srcBadge2 + srcBadge3 + srcBadge4 + ' <span id="' + favId + '" onclick="event.stopPropagation();krToggleFavorite(\'' + esc(d.keyword).replace(/'/g, "\\'") + '\')" style="cursor:pointer;font-size:14px;color:' + (isFav ? '#f59e0b' : '#d1d5db') + ';" title="Favorite">&#9733;</span></td>';
             html += '<td>' + volBadge + '</td>';
             html += '<td><div style="position:relative;display:inline-flex;align-items:center;gap:4px;cursor:pointer;" onclick="krShowKDExplanation(' + i + ')" title="Click for explanation">' + krKdGaugeHtml(d.difficulty, 32) + '<span class="kr-badge ' + diff.cls + '">' + diff.text + '</span></div></td>';
             html += '<td><span style="color:' + keiColor + ';font-weight:700;font-size:12px;">' + keiVal + ' <span style="font-size:10px;">' + keiLabel + '</span></span></td>';
@@ -9175,6 +9176,243 @@
         } else {
             container.style.display = 'none';
         }
+    }
+
+    // ==============================
+    // SERP DETAIL PANEL (click to expand)
+    // ==============================
+    var _krExpandedRow = -1;
+    function krToggleSerpDetail(idx) {
+        var sorted = krSortData(_krFilter === 'all' ? _krResults : _krResults.filter(function(d) { return d.intent === _krFilter; }));
+        var d = sorted[idx];
+        if (!d) return;
+        var existing = document.getElementById('kr-serp-detail-' + idx);
+        if (existing) {
+            existing.remove();
+            _krExpandedRow = -1;
+            return;
+        }
+        var old = document.getElementById('kr-serp-detail-' + _krExpandedRow);
+        if (old) old.remove();
+        _krExpandedRow = idx;
+        var row = document.querySelector('#kr-table tbody tr:nth-child(' + (idx + 1) + ')');
+        if (!row) return;
+        var tr = document.createElement('tr');
+        tr.id = 'kr-serp-detail-' + idx;
+        var td = document.createElement('td');
+        td.colSpan = 13;
+        td.style.cssText = 'padding:0 !important;background:#f8fafc;';
+        var html = '<div style="padding:16px 20px;">';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">';
+        html += '<div>';
+        html += '<h4 style="margin:0 0 8px;font-size:13px;color:#475569;">&#127760; ' + (currentLang === 'ar' ? '\u0623\u0646\u062a\u0627\u0626\u062c SERP' : 'SERP Features') + '</h4>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+        if (d.featured) html += '<span style="background:#fef3c7;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;">&#11088; Featured Snippet</span>';
+        if (d.knowledgePanel) html += '<span style="background:#dbeafe;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;">&#128218; Knowledge Panel</span>';
+        if (d.shoppingResults) html += '<span style="background:#ecfdf5;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;">&#128722; Shopping</span>';
+        if (d.localPack) html += '<span style="background:#fef2f2;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;">&#128205; Local Pack</span>';
+        if (d.videoCarousel || d.videoResults) html += '<span style="background:#fce7f3;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;">&#127909; Video</span>';
+        if (d.imagePack) html += '<span style="background:#f5f3ff;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;">&#128444; Images</span>';
+        if (d.newsResults) html += '<span style="background:#fee2e2;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;">&#128240; News</span>';
+        if (d.featuredSnippet) html += '<div style="margin-top:6px;font-size:12px;color:#475569;background:white;padding:8px;border-radius:8px;border-left:3px solid #f59e0b;width:100%;">"' + esc(d.featuredSnippet) + '"</div>';
+        if (!d.featured && !d.knowledgePanel && !d.shoppingResults && !d.localPack && !d.videoCarousel && !d.videoResults && !d.imagePack && !d.newsResults) html += '<span style="color:#94a3b8;font-size:12px;">No special features detected</span>';
+        html += '</div></div>';
+        html += '<div>';
+        html += '<h4 style="margin:0 0 8px;font-size:13px;color:#475569;">&#10067; ' + (currentLang === 'ar' ? '\u0627\u0644\u0623\u0633\u0626\u0644\u0629 \u0627\u0644\u0634\u0627\u0626\u0639\u0629 (PAA)' : 'People Also Ask') + ' (' + ((d.paa || []).length) + ')</h4>';
+        if (d.paa && d.paa.length > 0) {
+            for (var p = 0; p < Math.min(d.paa.length, 6); p++) {
+                html += '<div style="font-size:12px;color:#475569;padding:4px 0;border-bottom:1px solid #e2e8f0;">&#8226; ' + esc(d.paa[p]) + '</div>';
+            }
+        } else {
+            html += '<span style="color:#94a3b8;font-size:12px;">No PAA found</span>';
+        }
+        html += '</div>';
+        html += '<div>';
+        html += '<h4 style="margin:0 0 8px;font-size:13px;color:#475569;">&#128161; ' + (currentLang === 'ar' ? '\u0628\u062d\u062b \u0645\u0631\u062a\u0628\u0637' : 'Related Searches') + ' (' + ((d.related || []).length) + ')</h4>';
+        if (d.related && d.related.length > 0) {
+            for (var r = 0; r < Math.min(d.related.length, 6); r++) {
+                html += '<div style="font-size:12px;color:#475569;padding:4px 0;border-bottom:1px solid #e2e8f0;">&#8226; ' + esc(d.related[r]) + '</div>';
+            }
+        } else {
+            html += '<span style="color:#94a3b8;font-size:12px;">No related searches found</span>';
+        }
+        html += '</div></div>';
+        html += '<div style="margin-top:12px;">';
+        html += '<h4 style="margin:0 0 8px;font-size:13px;color:#475569;">&#127968; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0627\u0642\u0639 \u0627\u0644\u0639\u0644\u064a\u0629' : 'Top Domains') + '</h4>';
+        html += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+        if (d.topDomains && d.topDomains.length > 0) {
+            for (var t = 0; t < Math.min(d.topDomains.length, 8); t++) {
+                var dom = d.topDomains[t];
+                var barW = d.topDomains[0].count > 0 ? Math.round((dom.count / d.topDomains[0].count) * 100) : 0;
+                html += '<div style="display:flex;align-items:center;gap:6px;font-size:12px;background:white;padding:4px 10px;border-radius:8px;border:1px solid #e2e8f0;">';
+                html += '<span style="font-weight:600;color:#1e293b;">' + esc(dom.domain) + '</span>';
+                html += '<div style="width:60px;height:4px;background:#e2e8f0;border-radius:2px;"><div style="width:' + barW + '%;height:100%;background:#8b5cf6;border-radius:2px;"></div></div>';
+                html += '<span style="color:#94a3b8;">' + dom.count + '</span></div>';
+            }
+        } else {
+            html += '<span style="color:#94a3b8;font-size:12px;">No domain data</span>';
+        }
+        html += '</div></div>';
+        html += '<div style="margin-top:12px;display:flex;gap:8px;">';
+        html += '<button onclick="krAddTrackKeyword(\'' + esc(d.keyword).replace(/'/g, "\\'") + '\')" style="padding:4px 12px;border-radius:100px;border:1px solid #8b5cf6;background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:600;cursor:pointer;">&#128200; Track</button>';
+        html += '<button onclick="krToggleFavorite(\'' + esc(d.keyword).replace(/'/g, "\\'") + '\')" style="padding:4px 12px;border-radius:100px;border:1px solid #f59e0b;background:#fffbeb;color:#d97706;font-size:11px;font-weight:600;cursor:pointer;">&#9733; Favorite</button>';
+        html += '<button onclick="krCopyKeywordData(\'' + esc(d.keyword).replace(/'/g, "\\'") + '\')" style="padding:4px 12px;border-radius:100px;border:1px solid #10b981;background:#ecfdf5;color:#059669;font-size:11px;font-weight:600;cursor:pointer;">&#128203; Copy</button>';
+        html += '</div>';
+        html += '</div>';
+        td.innerHTML = html;
+        tr.appendChild(td);
+        row.parentNode.insertBefore(tr, row.nextSibling);
+    }
+    function krCopyKeywordData(keyword) {
+        var d = null;
+        for (var i = 0; i < _krResults.length; i++) { if (_krResults[i].keyword === keyword) { d = _krResults[i]; break; } }
+        if (!d) return;
+        var text = d.keyword + '\tVol: ' + d.volume + '\tKD: ' + d.difficulty + '\tCPC: $' + d.cpc + '\tIntent: ' + d.intent + '\tKEI: ' + (d.kei || 0) + '\tSERP: ' + (d.serpFeatures || 0) + '\tPAA: ' + ((d.paa || []).length);
+        if (navigator.clipboard) { navigator.clipboard.writeText(text); }
+    }
+
+    // ==============================
+    // OPPORTUNITY MATRIX (2x2 quadrant)
+    // ==============================
+    function krRenderOpportunityMatrix(results) {
+        var html = '<div style="background:linear-gradient(135deg,#fef2f2,#fff7ed);border:2px solid #f97316;border-radius:16px;padding:20px;margin-bottom:20px;">';
+        html += '<h3 style="margin:0 0 8px;color:#c2410c;">&#128200; ' + (currentLang === 'ar' ? '\u0645\u0639\u0631\u0636 \u0627\u0644\u0641\u0631\u0635' : 'Opportunity Matrix') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0645\u0631\u062a\u0628\u0637\u0629 \u0628\u0627\u0644\u062d\u062c\u0645 \u0648\u0639\u0645\u0644\u0629 \u0627\u0644\u062a\u0646\u0627\u0641\u0633' : 'Keywords plotted by volume and difficulty') + '</p>';
+        html += '</div>';
+        var maxVol = 0, maxDiff = 0;
+        for (var i = 0; i < results.length; i++) {
+            if ((results[i].volume || 0) > maxVol) maxVol = results[i].volume;
+            if ((results[i].difficulty || 0) > maxDiff) maxDiff = results[i].difficulty;
+        }
+        if (maxVol === 0) maxVol = 1;
+        var quadrants = [
+            { name: currentLang === 'ar' ? '\u0641\u0631\u0635 \u0645\u0646\u0627\u0633\u0628' : 'Quick Wins', desc: currentLang === 'ar' ? '\u062d\u062c\u0645 \u0645\u0646\u062e\u0641\u0636 + \u0639\u0645\u0644\u0629 \u0639\u0627\u0644\u064a\u0629' : 'Low difficulty + High volume', color: '#059669', bg: '#ecfdf5', x: 0, y: 0 },
+            { name: currentLang === 'ar' ? '\u0645\u0634\u0631\u0648\u0639\u0627\u062a \u0643\u0628\u064a\u0631\u0629' : 'Big Opportunities', desc: currentLang === 'ar' ? '\u062d\u062c\u0645 \u0639\u0627\u0644\u064a + \u0639\u0645\u0644\u0629 \u0639\u0627\u0644\u064a\u0629' : 'High difficulty + High volume', color: '#f59e0b', bg: '#fffbeb', x: 1, y: 0 },
+            { name: currentLang === 'ar' ? '\u0642\u064a\u0645 \u0625\u0636\u0627\u0641\u064a' : 'Worth It', desc: currentLang === 'ar' ? '\u062d\u062c\u0645 \u0645\u0646\u062e\u0641\u0636 + \u0639\u0645\u0644\u0629 \u0645\u0646\u062e\u0641\u0636\u0629' : 'Low difficulty + Low volume', color: '#3b82f6', bg: '#eff6ff', x: 0, y: 1 },
+            { name: currentLang === 'ar' ? '\u062a\u062c\u0646\u0628 \u0627\u0644\u0645\u0639\u0627\u0644\u0645\u0629' : 'Ignore', desc: currentLang === 'ar' ? '\u062d\u062c\u0645 \u0639\u0627\u0644\u064a + \u0639\u0645\u0644\u0629 \u0645\u0646\u062e\u0641\u0636\u0629' : 'High difficulty + Low volume', color: '#94a3b8', bg: '#f8fafc', x: 1, y: 1 }
+        ];
+        for (var q = 0; q < quadrants.length; q++) {
+            var quad = quadrants[q];
+            var midDiff = 50;
+            var midVol = maxVol * 0.5;
+            var kws = [];
+            for (var i = 0; i < results.length; i++) {
+                var d = results[i];
+                var isHighDiff = (d.difficulty || 0) >= midDiff;
+                var isHighVol = (d.volume || 0) >= midVol;
+                var match = false;
+                if (quad.x === 0 && quad.y === 0) match = !isHighDiff && isHighVol;
+                if (quad.x === 1 && quad.y === 0) match = isHighDiff && isHighVol;
+                if (quad.x === 0 && quad.y === 1) match = !isHighDiff && !isHighVol;
+                if (quad.x === 1 && quad.y === 1) match = isHighDiff && !isHighVol;
+                if (match) kws.push(d);
+            }
+            html += '<div style="background:' + quad.bg + ';border:1px solid ' + quad.color + '33;border-radius:12px;padding:14px;margin-bottom:12px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+            html += '<div><strong style="color:' + quad.color + ';font-size:14px;">' + quad.name + '</strong>';
+            html += '<span style="font-size:12px;color:#64748b;margin-left:8px;">' + quad.desc + '</span></div>';
+            html += '<span style="background:' + quad.color + ';color:white;padding:2px 10px;border-radius:100px;font-size:12px;font-weight:700;">' + kws.length + '</span>';
+            html += '</div>';
+            if (kws.length > 0) {
+                html += '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+                var showKws = kws.slice(0, 10);
+                for (var k = 0; k < showKws.length; k++) {
+                    html += '<span style="background:white;padding:3px 10px;border-radius:100px;font-size:11px;border:1px solid ' + quad.color + '33;">' + esc(showKws[k].keyword) + ' <span style="color:' + quad.color + ';font-weight:700;">Vol:' + showKws[k].volume + ' KD:' + showKws[k].difficulty + '</span></span>';
+                }
+                if (kws.length > 10) html += '<span style="padding:3px 8px;font-size:11px;color:#94a3b8;">+' + (kws.length - 10) + ' more</span>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        return html;
+    }
+
+    // ==============================
+    // KEYWORD CLOUD (word frequency)
+    // ==============================
+    function krRenderKeywordCloud(results) {
+        var words = {};
+        for (var i = 0; i < results.length; i++) {
+            var parts = results[i].keyword.toLowerCase().split(/[\s,.\-!?;:()]+/);
+            for (var p = 0; p < parts.length; p++) {
+                var w = parts[p].trim();
+                if (w.length > 2 && w.length < 25) {
+                    words[w] = (words[w] || 0) + 1;
+                }
+            }
+        }
+        var sorted = [];
+        var keys = Object.keys(words);
+        for (var k = 0; k < keys.length; k++) sorted.push({ word: keys[k], count: words[keys[k]] });
+        sorted.sort(function(a, b) { return b.count - a.count; });
+        var maxCount = sorted.length > 0 ? sorted[0].count : 1;
+        var html = '<div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:2px solid #0ea5e9;border-radius:16px;padding:20px;margin-bottom:20px;">';
+        html += '<h3 style="margin:0 0 8px;color:#0369a1;">&#9998; ' + (currentLang === 'ar' ? '\u0633\u062d\u0628 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Keyword Cloud') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u0623\u0643\u062b\u0631 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u062a\u0643\u0631\u0631\u0629 \u0641\u064a \u062c\u0645\u064a\u0639 \u0627\u0644\u0646\u062a\u0627\u0626\u062c' : 'Most frequent words across all keywords') + '</p>';
+        html += '</div>';
+        html += '<div style="text-align:center;padding:20px;background:white;border-radius:12px;border:1px solid #e0f2fe;">';
+        if (sorted.length === 0) {
+            html += '<span style="color:#94a3b8;">No data</span>';
+        } else {
+            var colors = ['#0ea5e9', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#6366f1'];
+            var show = sorted.slice(0, 40);
+            for (var i = 0; i < show.length; i++) {
+                var ratio = show[i].count / maxCount;
+                var fontSize = Math.round(11 + ratio * 24);
+                var color = colors[i % colors.length];
+                var opacity = 0.5 + ratio * 0.5;
+                html += '<span style="display:inline-block;margin:3px 6px;font-size:' + fontSize + 'px;color:' + color + ';font-weight:' + (ratio > 0.5 ? '800' : '600') + ';opacity:' + opacity + ';">' + esc(show[i].word) + ' <sup style="font-size:' + Math.round(fontSize * 0.5) + 'px;color:#94a3b8;">' + show[i].count + '</sup></span>';
+            }
+        }
+        html += '</div>';
+        return html;
+    }
+
+    // ==============================
+    // GOOGLE SHEETS EXPORT (open in browser)
+    // ==============================
+    function krExportGoogleSheets(results) {
+        if (!results || results.length === 0) return;
+        var tsv = 'Keyword\tVolume\tDifficulty\tKEI\tOpportunity\tIntent\tCPC\tSERP\tPAA\tShopping\tLocal\tVideo\tSeasonality\tTop Domain\n';
+        for (var i = 0; i < results.length; i++) {
+            var d = results[i];
+            var topDom = (d.topDomains && d.topDomains.length > 0) ? d.topDomains[0].domain : '';
+            var season = d.seasonality || 'year-round';
+            tsv += (d.keyword || '') + '\t' + (d.volume || 0) + '\t' + (d.difficulty || 0) + '\t' + (d.kei || 0) + '\t' + (d.opportunity || 0) + '\t' + (d.intent || '') + '\t' + (d.cpc || 0) + '\t' + (d.serpFeatures || 0) + '\t' + ((d.paa || []).length) + '\t' + (d.shoppingResults ? 'Yes' : 'No') + '\t' + (d.localPack ? 'Yes' : 'No') + '\t' + (d.videoCarousel || d.videoResults ? 'Yes' : 'No') + '\t' + season + '\t' + topDom + '\n';
+        }
+        var blob = new Blob(['\uFEFF' + tsv], { type: 'text/tab-separated-values;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'seohub-export-' + new Date().toISOString().slice(0, 10) + '.tsv';
+        a.click();
+        URL.revokeObjectURL(url);
+        var sheetUrl = 'https://docs.google.com/spreadsheets/create';
+        window.open(sheetUrl, '_blank');
+    }
+
+    // ==============================
+    // ENHANCED: Add matrix/cloud/sheets buttons to view tabs
+    // ==============================
+    function krRenderExtraAnalysis(results) {
+        var html = '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">';
+        html += '<button onclick="krShowMatrix()" style="padding:8px 16px;border-radius:100px;border:2px solid #f97316;background:#fff7ed;color:#c2410c;font-weight:700;cursor:pointer;font-size:13px;">&#128200; Opportunity Matrix</button>';
+        html += '<button onclick="krShowCloud()" style="padding:8px 16px;border-radius:100px;border:2px solid #0ea5e9;background:#f0f9ff;color:#0369a1;font-weight:700;cursor:pointer;font-size:13px;">&#9998; Keyword Cloud</button>';
+        html += '<button onclick="krExportGoogleSheets(_krResults)" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#059669;font-weight:700;cursor:pointer;font-size:13px;">&#128203; Open in Sheets</button>';
+        html += '</div>';
+        return html;
+    }
+    function krShowMatrix() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = krRenderOpportunityMatrix(_krResults);
+        container.style.display = '';
+    }
+    function krShowCloud() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = krRenderKeywordCloud(_krResults);
+        container.style.display = '';
     }
 
     document.addEventListener('DOMContentLoaded', function() {
