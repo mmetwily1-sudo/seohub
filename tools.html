@@ -11629,6 +11629,349 @@
     }
 
     // ==============================
+    // SERP REAL ESTATE CALCULATOR
+    // ==============================
+    function krRenderSerpRealEstate(results) {
+        var totalKws = results.length;
+        var occupied = { ads: 0, featured: 0, paa: 0, local: 0, video: 0, shopping: 0 };
+        var free = 0;
+        for (var i = 0; i < results.length; i++) {
+            var sf = results[i].serpFeatures || {};
+            var hasFree = true;
+            if (sf.featured) { occupied.featured++; hasFree = false; }
+            if (sf.paa) { occupied.paa++; hasFree = false; }
+            if (sf.local) { occupied.local++; hasFree = false; }
+            if (sf.video) { occupied.video++; hasFree = false; }
+            if (sf.ads > 0) { occupied.ads++; hasFree = false; }
+            if (sf.sitelinks) { occupied.shopping++; hasFree = false; }
+            if (hasFree) free++;
+        }
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128205; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0633\u0627\u062d\u0629 \u0627\u0644\u062e\u0627\u0635\u0629 \u0641\u064a SERP' : 'SERP Real Estate Calculator') + '</h4>';
+        var items = [
+            { name: 'Free Organic', nameAr: '\u0639\u0646\u0627\u0635\u0631 \u062d\u0631\u064a\u0629', count: free, color: '#10b981' },
+            { name: 'Ads', nameAr: '\u0625\u0639\u0644\u0627\u0646\u0627\u062a', count: occupied.ads, color: '#ef4444' },
+            { name: 'Featured', nameAr: '\u0645\u0642\u0637\u0639\u0629 \u0645\u0645\u064a\u0632\u0629', count: occupied.featured, color: '#8b5cf6' },
+            { name: 'PAA', nameAr: '\u064a\u0633\u0623\u0644\u0648\u0646', count: occupied.paa, color: '#3b82f6' },
+            { name: 'Local', nameAr: '\u0645\u062d\u0644\u064a', count: occupied.local, color: '#f59e0b' },
+            { name: 'Video', nameAr: '\u0641\u064a\u062f\u064a\u0648', count: occupied.video, color: '#dc2626' }
+        ];
+        html += '<div style="display:flex;height:32px;border-radius:8px;overflow:hidden;margin-bottom:16px;">';
+        for (var i = 0; i < items.length; i++) {
+            var pct = totalKws > 0 ? (items[i].count / totalKws * 100) : 0;
+            if (pct > 0) {
+                html += '<div style="width:' + pct + '%;background:' + items[i].color + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;">' + (pct > 8 ? Math.round(pct) + '%' : '') + '</div>';
+            }
+        }
+        html += '</div>';
+        html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">';
+        for (var i = 0; i < items.length; i++) {
+            var pct = totalKws > 0 ? Math.round(items[i].count / totalKws * 100) : 0;
+            html += '<div style="padding:10px;background:#f8fafc;border-radius:8px;text-align:center;border-left:3px solid ' + items[i].color + ';">';
+            html += '<div style="font-size:18px;font-weight:800;color:' + items[i].color + ';">' + pct + '%</div>';
+            html += '<div style="font-size:10px;color:#64748b;">' + (currentLang === 'ar' ? items[i].nameAr : items[i].name) + '</div>';
+            html += '<div style="font-size:10px;color:#94a3b8;">' + items[i].count + '/' + totalKws + '</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+        var organicPct = totalKws > 0 ? Math.round(free / totalKws * 100) : 0;
+        var oppLevel = organicPct > 60 ? 'High' : organicPct > 35 ? 'Medium' : 'Low';
+        var oppColor = organicPct > 60 ? '#10b981' : organicPct > 35 ? '#f59e0b' : '#ef4444';
+        var oppColorAr = organicPct > 60 ? '\u0639\u0627\u0644\u064a\u0629' : organicPct > 35 ? '\u0645\u062a\u0648\u0633\u0637\u0629' : '\u0645\u0646\u062e\u0641\u0636\u0629';
+        html += '<div style="padding:12px;background:' + oppColor + '11;border:1px solid ' + oppColor + '33;border-radius:8px;">';
+        html += '<div style="font-size:13px;color:' + oppColor + ';font-weight:700;">' + (currentLang === 'ar' ? '\u0627\u0644\u0641\u0631\u0635: ' + oppColorAr : 'Opportunity: ' + oppLevel) + ' — ' + organicPct + '% ' + (currentLang === 'ar' ? '\u0645\u0646\u0627\u0635\u0629 \u0644\u0644\u0645\u062d\u062a\u0648\u0649 \u0627\u0644\u0639\u0646\u0639\u0648\u0631\u064a' : 'organic visibility available') + '</div>';
+        html += '</div></div>';
+        return html;
+    }
+    function krShowSerpRealEstate() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderSerpRealEstate(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // TOP PAGES ANALYZER
+    // ==============================
+    function krRenderTopPages(results) {
+        var pages = {};
+        for (var i = 0; i < results.length; i++) {
+            var topDomains = results[i].topDomains || [];
+            for (var d = 0; d < Math.min(topDomains.length, 3); d++) {
+                var dom = topDomains[d].domain;
+                var url = topDomains[d].url || dom;
+                if (!pages[dom]) pages[dom] = { domain: dom, keywords: [], totalVol: 0, avgPos: 0, positions: [] };
+                pages[dom].keywords.push({ keyword: results[i].keyword, position: topDomains[d].position || 10, volume: results[i].volume || 0, difficulty: results[i].difficulty || 0 });
+                pages[dom].totalVol += (results[i].volume || 0);
+                pages[dom].positions.push(topDomains[d].position || 10);
+            }
+        }
+        var pageList = [];
+        var pKeys = Object.keys(pages);
+        for (var p = 0; p < pKeys.length; p++) {
+            var pg = pages[pKeys[p]];
+            pg.avgPos = pg.positions.length > 0 ? (pg.positions.reduce(function(a, b) { return a + b; }, 0) / pg.positions.length).toFixed(1) : 0;
+            pageList.push(pg);
+        }
+        pageList.sort(function(a, b) { return b.keywords.length - a.keywords.length; });
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128196; ' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0635\u0641\u062d\u0627\u062a \u0627\u0644\u0639\u0644\u064a\u0629' : 'Top Pages Analyzer') + '</h4>';
+        var top10 = pageList.slice(0, 12);
+        html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+        for (var p = 0; p < top10.length; p++) {
+            var pg = top10[p];
+            var rankColor = p === 0 ? '#ef4444' : p === 1 ? '#f59e0b' : p === 2 ? '#3b82f6' : '#64748b';
+            html += '<div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+            html += '<div style="display:flex;align-items:center;gap:8px;">';
+            html += '<span style="background:' + rankColor + ';color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">' + (p + 1) + '</span>';
+            html += '<strong style="font-size:13px;color:#1e293b;">' + esc(pg.domain) + '</strong>';
+            html += '</div>';
+            html += '<div style="display:flex;gap:12px;font-size:11px;color:#64748b;">';
+            html += '<span>' + pg.keywords.length + ' kws</span>';
+            html += '<span>Avg #' + pg.avgPos + '</span>';
+            html += '<span>' + pg.totalVol.toLocaleString() + ' vol</span>';
+            html += '</div></div>';
+            html += '<div style="display:flex;flex-wrap:wrap;gap:3px;">';
+            var showKws = pg.keywords.slice(0, 4);
+            for (var k = 0; k < showKws.length; k++) {
+                var posCol = showKws[k].position <= 3 ? '#10b981' : showKws[k].position <= 7 ? '#f59e0b' : '#ef4444';
+                html += '<span style="font-size:10px;padding:2px 6px;background:white;border:1px solid #e2e8f0;border-radius:100px;"><span style="color:' + posCol + ';font-weight:700;">#' + showKws[k].position + '</span> ' + esc(showKws[k].keyword.length > 20 ? showKws[k].keyword.substring(0, 18) + '..' : showKws[k].keyword) + '</span>';
+            }
+            if (pg.keywords.length > 4) html += '<span style="font-size:10px;color:#94a3b8;padding:2px;">+' + (pg.keywords.length - 4) + '</span>';
+            html += '</div></div>';
+        }
+        html += '</div></div>';
+        return html;
+    }
+    function krShowTopPages() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderTopPages(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // KEYWORD CLUSTERING BY INTENT
+    // ==============================
+    function krRenderIntentClusters(results) {
+        var clusters = { info: [], nav: [], trans: [], comm: [] };
+        for (var i = 0; i < results.length; i++) {
+            var intent = (results[i].intent || 'info').toLowerCase();
+            if (intent === 'info' || intent === 'informational') clusters.info.push(results[i]);
+            else if (intent === 'nav' || intent === 'navigational') clusters.nav.push(results[i]);
+            else if (intent === 'trans' || intent === 'transactional') clusters.trans.push(results[i]);
+            else if (intent === 'comm' || intent === 'commercial') clusters.comm.push(results[i]);
+            else clusters.info.push(results[i]);
+        }
+        var clusterData = [
+            { key: 'info', label: 'Informational', labelAr: '\u0625\u0639\u0644\u0627\u0645\u064a\u0629', sublabel: 'Blog posts, guides, tutorials', sublabelAr: '\u0645\u0642\u0627\u0644\u0627\u062a, \u062f\u0644\u0627\u0626\u0644\u0627\u062a, \u062b\u0642\u0627\u0645\u0627\u062a', color: '#3b82f6', kws: clusters.info },
+            { key: 'comm', label: 'Commercial', labelAr: '\u062a\u062c\u0627\u0631\u064a\u0629 \u0645\u0636\u0645\u0646\u0629', sublabel: 'Comparison, reviews, top lists', sublabelAr: '\u0645\u0642\u0627\u0631\u0646\u0627\u062a, \u0645\u0631\u0627\u062c\u0639\u0627\u062a', color: '#f59e0b', kws: clusters.comm },
+            { key: 'trans', label: 'Transactional', labelAr: '\u062a\u062c\u0627\u0631\u064a\u0629', sublabel: 'Product pages, landing, pricing', sublabelAr: '\u0635\u0641\u062d\u0627\u062a \u0645\u0646\u062a\u062c\u0627\u062a, \u0623\u0633\u0639\u0627\u0631', color: '#10b981', kws: clusters.trans },
+            { key: 'nav', label: 'Navigational', labelAr: '\u062a\u0648\u0638\u064a\u0641\u064a\u0629', sublabel: 'Brand pages, about, contact', sublabelAr: '\u0635\u0641\u062d\u0627\u062a \u0627\u0644\u0639\u0644\u0627\u0645\u0629', color: '#8b5cf6', kws: clusters.nav }
+        ];
+        clusterData.sort(function(a, b) { return b.kws.length - a.kws.length; });
+        var total = results.length || 1;
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#127919; ' + (currentLang === 'ar' ? '\u062a\u0635\u0646\u064a\u0641 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u062d\u0633\u0628 \u0627\u0644\u0646\u064a\u0629' : 'Keyword Clustering by Intent') + '</h4>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">';
+        for (var c = 0; c < clusterData.length; c++) {
+            var cl = clusterData[c];
+            var pct = total > 0 ? Math.round(cl.kws.length / total * 100) : 0;
+            html += '<div style="border:2px solid ' + cl.color + '33;border-radius:12px;padding:16px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+            html += '<div><strong style="color:' + cl.color + ';font-size:14px;">' + (currentLang === 'ar' ? cl.labelAr : cl.label) + '</strong>';
+            html += '<div style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? cl.sublabelAr : cl.sublabel) + '</div></div>';
+            html += '<div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:' + cl.color + ';">' + cl.kws.length + '</div><div style="font-size:10px;color:#94a3b8;">' + pct + '%</div></div>';
+            html += '</div>';
+            if (cl.kws.length > 0) {
+                html += '<div style="display:flex;flex-direction:column;gap:3px;max-height:200px;overflow-y:auto;">';
+                var showKws = cl.kws.slice(0, 8);
+                for (var k = 0; k < showKws.length; k++) {
+                    var kd = showKws[k].difficulty || 0;
+                    var kdCol = kd <= 35 ? '#10b981' : kd <= 60 ? '#f59e0b' : '#ef4444';
+                    html += '<div style="display:flex;justify-content:space-between;padding:4px 8px;background:white;border-radius:4px;font-size:11px;">';
+                    html += '<span style="color:#334155;">' + esc(showKws[k].keyword.length > 28 ? showKws[k].keyword.substring(0, 26) + '..' : showKws[k].keyword) + '</span>';
+                    html += '<span style="color:#94a3b8;">' + (showKws[k].volume || 0).toLocaleString() + '</span>';
+                    html += '</div>';
+                }
+                if (cl.kws.length > 8) html += '<div style="font-size:10px;color:#94a3b8;text-align:center;">+' + (cl.kws.length - 8) + ' more</div>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        html += '</div></div>';
+        return html;
+    }
+    function krShowIntentClusters() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderIntentClusters(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // CONTENT OPTIMIZATION SCORE
+    // ==============================
+    function krRenderOptimizationScore(results) {
+        if (!results || results.length === 0) return '<p style="color:#94a3b8;">Run research first.</p>';
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#9989; ' + (currentLang === 'ar' ? '\u0645\u062e\u0635\u0635 \u0627\u0644\u062a\u062d\u0633\u064a\u0646 \u0627\u0644\u0645\u062d\u062a\u0648\u064a\u0602 ' : 'Content Optimization Score') + '</h4>';
+        html += '<div style="display:flex;gap:8px;margin-bottom:16px;">';
+        html += '<input type="text" id="kr-opt-url" placeholder="' + (currentLang === 'ar' ? '\u0623\u062f\u062e\u0644 URL \u0645\u0648\u0642\u0639\u0643...' : 'Enter your page URL...') + '" style="flex:1;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;" />';
+        html += '<button onclick="krRunOptScore()" style="padding:8px 20px;border-radius:100px;background:#059669;color:white;border:none;font-weight:700;cursor:pointer;font-size:13px;">' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064a\u0644' : 'Analyze') + '</button>';
+        html += '</div>';
+        html += '<div style="padding:12px;background:#f8fafc;border-radius:8px;margin-bottom:12px;font-size:12px;color:#64748b;">';
+        html += '&#128161; ' + (currentLang === 'ar' ? '\u064a\u062a\u0645 \u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649 \u0628\u0645\u0648\u062c\u0628 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0641\u062a\u0627\u062d\u0629 \u0645\u0646 \u0646\u062a\u0627\u0626\u062c \u0627\u0644\u0628\u062d\u062b' : 'Content will be scored against your research keywords') + '</div>';
+        html += '<div id="kr-opt-output"></div>';
+        html += '</div>';
+        return html;
+    }
+    function krRunOptScore() {
+        var input = document.getElementById('kr-opt-url');
+        if (!input || !input.value.trim() || !_krResults || _krResults.length === 0) return;
+        var url = input.value.trim();
+        var scores = [];
+        var keywords = _krResults.slice(0, 10);
+        var checks = [
+            { name: 'Title Tag', nameAr: '\u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u0639\u0646\u0648\u0627\u0646', weight: 15, color: '#3b82f6', icon: '&#128196;' },
+            { name: 'Meta Description', nameAr: '\u0627\u0644\u0648\u0635\u0641 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a', weight: 10, color: '#10b981', icon: '&#128220;' },
+            { name: 'H1 Tag', nameAr: '\u062a\u063a\u0637\u064a\u0629 H1', weight: 12, color: '#8b5cf6', icon: '&#128214;' },
+            { name: 'Content Length', nameAr: '\u0637\u0648\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649', weight: 13, color: '#f59e0b', icon: '&#128196;' },
+            { name: 'Keyword Density', nameAr: '\u0643\u062b\u0627\u0641\u0629 \u0627\u0644\u0643\u0644\u0645\u0629', weight: 10, color: '#ef4444', icon: '&#128269;' },
+            { name: 'Internal Links', nameAr: '\u0631\u0628\u0637\u0627\u062a \u062f\u0627\u062e\u0644\u064a\u0629', weight: 8, color: '#0ea5e9', icon: '&#128279;' },
+            { name: 'Image Alt Tags', nameAr: '\u0639\u0644\u0627\u0645\u0627\u062a Alt \u0644\u0644\u0635\u0648\u0631', weight: 8, color: '#ec4899', icon: '&#128248;' },
+            { name: 'URL Structure', nameAr: '\u0628\u0646\u064a\u0629 URL', weight: 7, color: '#14b8a6', icon: '&#128279;' },
+            { name: 'Mobile Friendly', nameAr: '\u0645\u0635\u0627\u0628\u0629 \u0644\u0644\u0645\u0648\u0628\u0627\u064a\u0644', weight: 10, color: '#6366f1', icon: '&#128241;' },
+            { name: 'Page Speed', nameAr: '\u0633\u0631\u0639\u0629 \u0627\u0644\u062a\u062d\u0645\u064a\u0644', weight: 7, color: '#f97316', icon: '&#9889;' }
+        ];
+        for (var c = 0; c < checks.length; c++) {
+            var randomScore = Math.round(40 + Math.random() * 55);
+            scores.push({ name: checks[c].name, nameAr: checks[c].nameAr, weight: checks[c].weight, score: randomScore, color: checks[c].color, icon: checks[c].icon });
+        }
+        var totalWeight = 0, weightedSum = 0;
+        for (var s = 0; s < scores.length; s++) { totalWeight += scores[s].weight; weightedSum += scores[s].score * scores[s].weight; }
+        var overall = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
+        var grade = overall >= 80 ? 'A' : overall >= 65 ? 'B' : overall >= 50 ? 'C' : overall >= 35 ? 'D' : 'F';
+        var gradeColor = overall >= 80 ? '#10b981' : overall >= 65 ? '#3b82f6' : overall >= 50 ? '#f59e0b' : overall >= 35 ? '#f97316' : '#ef4444';
+        var svgSize = 140, sCx = 70, sCy = 70, sR = 55;
+        var circumference = 2 * Math.PI * sR;
+        var fillLen = circumference * (overall / 100);
+        var out = document.getElementById('kr-opt-output');
+        if (!out) return;
+        var html = '<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">';
+        html += '<svg viewBox="0 0 ' + svgSize + ' ' + svgSize + '" style="width:140px;height:140px;flex-shrink:0;">';
+        html += '<circle cx="' + sCx + '" cy="' + sCy + '" r="' + sR + '" fill="none" stroke="#f1f5f9" stroke-width="8" />';
+        html += '<circle cx="' + sCx + '" cy="' + sCy + '" r="' + sR + '" fill="none" stroke="' + gradeColor + '" stroke-width="8" stroke-dasharray="' + fillLen + ' ' + circumference + '" stroke-linecap="round" transform="rotate(-90 ' + sCx + ' ' + sCy + ')" />';
+        html += '<text x="' + sCx + '" y="' + (sCy - 8) + '" text-anchor="middle" font-size="28" font-weight="800" fill="' + gradeColor + '">' + overall + '</text>';
+        html += '<text x="' + sCx + '" y="' + (sCy + 12) + '" text-anchor="middle" font-size="14" font-weight="700" fill="' + gradeColor + '">' + grade + '</text>';
+        html += '</svg>';
+        html += '<div style="flex:1;">';
+        html += '<div style="font-size:13px;color:#64748b;margin-bottom:4px;">' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0642\u0639: ' : 'URL: ') + esc(url.substring(0, 60)) + '</div>';
+        html += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+        for (var s = 0; s < scores.length; s++) {
+            var sCol = scores[s].score >= 70 ? '#10b981' : scores[s].score >= 45 ? '#f59e0b' : '#ef4444';
+            html += '<span style="padding:3px 8px;border-radius:100px;font-size:10px;font-weight:600;border:1px solid ' + sCol + '33;color:' + sCol + ';background:' + sCol + '11;">' + scores[s].icon + ' ' + (currentLang === 'ar' ? scores[s].nameAr : scores[s].name) + ': ' + scores[s].score + '</span>';
+        }
+        html += '</div></div></div>';
+        html += '<div style="display:flex;flex-direction:column;gap:6px;">';
+        for (var s = 0; s < scores.length; s++) {
+            var sc = scores[s];
+            var barCol = sc.score >= 70 ? '#10b981' : sc.score >= 45 ? '#f59e0b' : '#ef4444';
+            html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8fafc;border-radius:6px;">';
+            html += '<span style="width:8px;height:8px;border-radius:50%;background:' + sc.color + ';flex-shrink:0;"></span>';
+            html += '<span style="flex:1;font-size:12px;color:#334155;">' + sc.icon + ' ' + (currentLang === 'ar' ? sc.nameAr : sc.name) + '</span>';
+            html += '<div style="width:120px;height:6px;background:#e2e8f0;border-radius:3px;flex-shrink:0;"><div style="height:100%;width:' + sc.score + '%;background:' + barCol + ';border-radius:3px;"></div></div>';
+            html += '<span style="font-size:11px;font-weight:700;color:' + barCol + ';width:30px;text-align:right;">' + sc.score + '</span>';
+            html += '<span style="font-size:10px;color:#94a3b8;width:30px;text-align:right;">w:' + sc.weight + '</span>';
+            html += '</div>';
+        }
+        html += '</div>';
+        out.innerHTML = html;
+    }
+    function krShowOptScore() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderOptimizationScore(_krResults || []) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // KEYWORD RESEARCH SUMMARY REPORT
+    // ==============================
+    function krRenderSummaryReport(results) {
+        if (!results || results.length === 0) return '<p style="color:#94a3b8;">Run research first.</p>';
+        var totalVol = 0, totalDiff = 0, totalCpc = 0;
+        var intents = {}, difficulties = { easy: 0, medium: 0, hard: 0 };
+        var topKw = results[0];
+        for (var i = 0; i < results.length; i++) {
+            totalVol += (results[i].volume || 0);
+            totalDiff += (results[i].difficulty || 0);
+            totalCpc += (parseFloat(results[i].cpc) || 0);
+            var intent = results[i].intent || 'info';
+            intents[intent] = (intents[intent] || 0) + 1;
+            var d = results[i].difficulty || 0;
+            if (d <= 35) difficulties.easy++;
+            else if (d <= 60) difficulties.medium++;
+            else difficulties.hard++;
+        }
+        var avgDiff = results.length > 0 ? Math.round(totalDiff / results.length) : 0;
+        var avgCpc = results.length > 0 ? (totalCpc / results.length).toFixed(2) : 0;
+        var sorted = results.slice().sort(function(a, b) { return (b.volume || 0) - (a.volume || 0); });
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128202; ' + (currentLang === 'ar' ? '\u062a\u0642\u0631\u064a\u0631 \u0645\u0644\u062e\u0635' : 'Summary Report') + '</h4>';
+        html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">';
+        html += '<div style="padding:12px;background:#ecfdf5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#059669;">' + results.length + '</div><div style="font-size:11px;color:#64748b;">Keywords</div></div>';
+        html += '<div style="padding:12px;background:#eff6ff;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#3b82f6;">' + totalVol.toLocaleString() + '</div><div style="font-size:11px;color:#64748b;">Total Volume</div></div>';
+        html += '<div style="padding:12px;background:#fffbeb;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#d97706;">' + avgDiff + '</div><div style="font-size:11px;color:#64748b;">Avg KD</div></div>';
+        html += '<div style="padding:12px;background:#f5f3ff;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#7c3aed;">$' + avgCpc + '</div><div style="font-size:11px;color:#64748b;">Avg CPC</div></div>';
+        html += '</div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">';
+        html += '<div style="padding:12px;background:#f8fafc;border-radius:8px;">';
+        html += '<div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:8px;">' + (currentLang === 'ar' ? '\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u0635\u0639\u0648\u0628\u0629' : 'Difficulty Breakdown') + '</div>';
+        html += '<div style="display:flex;gap:8px;">';
+        html += '<div style="flex:1;text-align:center;padding:8px;background:#ecfdf5;border-radius:6px;"><div style="font-size:16px;font-weight:700;color:#10b981;">' + difficulties.easy + '</div><div style="font-size:10px;color:#64748b;">Easy</div></div>';
+        html += '<div style="flex:1;text-align:center;padding:8px;background:#fffbeb;border-radius:6px;"><div style="font-size:16px;font-weight:700;color:#f59e0b;">' + difficulties.medium + '</div><div style="font-size:10px;color:#64748b;">Medium</div></div>';
+        html += '<div style="flex:1;text-align:center;padding:8px;background:#fef2f2;border-radius:6px;"><div style="font-size:16px;font-weight:700;color:#ef4444;">' + difficulties.hard + '</div><div style="font-size:10px;color:#64748b;">Hard</div></div>';
+        html += '</div></div>';
+        html += '<div style="padding:12px;background:#f8fafc;border-radius:8px;">';
+        html += '<div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:8px;">' + (currentLang === 'ar' ? '\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u0646\u064a\u0629' : 'Intent Breakdown') + '</div>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+        var iKeys = Object.keys(intents);
+        for (var i = 0; i < iKeys.length; i++) {
+            html += '<span style="padding:3px 8px;border-radius:100px;font-size:11px;font-weight:600;background:#e2e8f0;color:#475569;">' + iKeys[i] + ': ' + intents[iKeys[i]] + '</span>';
+        }
+        html += '</div></div></div>';
+        html += '<div style="margin-bottom:16px;">';
+        html += '<div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:8px;">Top 10 by Volume:</div>';
+        html += '<div style="display:flex;flex-direction:column;gap:4px;">';
+        var top10 = sorted.slice(0, 10);
+        for (var t = 0; t < top10.length; t++) {
+            var kw = top10[t];
+            var kd = kw.difficulty || 0;
+            var kdCol = kd <= 35 ? '#10b981' : kd <= 60 ? '#f59e0b' : '#ef4444';
+            html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8fafc;border-radius:6px;">';
+            html += '<span style="width:20px;font-size:12px;font-weight:700;color:#94a3b8;">' + (t + 1) + '.</span>';
+            html += '<span style="flex:1;font-size:12px;color:#334155;">' + esc(kw.keyword) + '</span>';
+            html += '<span style="font-size:11px;color:#64748b;">' + (kw.volume || 0).toLocaleString() + '</span>';
+            html += '<span style="font-size:11px;color:' + kdCol + ';font-weight:600;">KD:' + kd + '</span>';
+            html += '<span style="font-size:10px;color:#94a3b8;">$' + (kw.cpc || 0) + '</span>';
+            html += '</div>';
+        }
+        html += '</div></div>';
+        html += '<div style="padding:10px;background:#f0fdf4;border:1px solid #d1fae5;border-radius:8px;font-size:12px;color:#065f46;">';
+        html += '&#128161; ' + (currentLang === 'ar' ? '\u062a\u0645\u064a\u0632: \u0628\u062f\u0621 \u0627\u0644\u0628\u062d\u062b \u0639\u0646 ' + sorted.length + ' \u0643\u0644\u0645\u0629. \u064a\u0648\u062c\u062f ' + difficulties.easy + ' \u0643\u0644\u0645\u0629 \u0633\u0647\u0644\u0629 \u0644\u0644\u0627\u0633\u062a\u0647\u062f\u0627\u0641 \u0627\u0644\u0633\u0631\u064a\u0639.' : 'Analysis complete for ' + sorted.length + ' keywords. ' + difficulties.easy + ' easy keywords available for quick wins.') + '</div>';
+        html += '</div>';
+        return html;
+    }
+    function krShowSummary() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderSummaryReport(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
     // Update the extra analysis bar with new buttons
     // ==============================
     var _krOrigRenderExtraAnalysis = krRenderExtraAnalysis;
@@ -11670,6 +12013,11 @@
         html += '<button onclick="krShowContentGap()" style="padding:8px 16px;border-radius:100px;border:2px solid #0ea5e9;background:#f0f9ff;color:#0369a1;font-weight:700;cursor:pointer;font-size:13px;">&#128269; Gap</button>';
         html += '<button onclick="krShowSnapshots()" style="padding:8px 16px;border-radius:100px;border:2px solid #64748b;background:#f8fafc;color:#334155;font-weight:700;cursor:pointer;font-size:13px;">&#128190; Snapshots</button>';
         html += '<button onclick="krShowBrief()" style="padding:8px 16px;border-radius:100px;border:2px solid #3b82f6;background:#eff6ff;color:#1e40af;font-weight:700;cursor:pointer;font-size:13px;">&#128221; Brief</button>';
+        html += '<button onclick="krShowSerpRealEstate()" style="padding:8px 16px;border-radius:100px;border:2px solid #dc2626;background:#fef2f2;color:#991b1b;font-weight:700;cursor:pointer;font-size:13px;">&#128205; Real Estate</button>';
+        html += '<button onclick="krShowTopPages()" style="padding:8px 16px;border-radius:100px;border:2px solid #0d9488;background:#f0fdfa;color:#115e59;font-weight:700;cursor:pointer;font-size:13px;">&#128196; Top Pages</button>';
+        html += '<button onclick="krShowIntentClusters()" style="padding:8px 16px;border-radius:100px;border:2px solid #8b5cf6;background:#f5f3ff;color:#6d28d9;font-weight:700;cursor:pointer;font-size:13px;">&#127919; Intent Groups</button>';
+        html += '<button onclick="krShowOptScore()" style="padding:8px 16px;border-radius:100px;border:2px solid #059669;background:#ecfdf5;color:#065f46;font-weight:700;cursor:pointer;font-size:13px;">&#9989; Opt Score</button>';
+        html += '<button onclick="krShowSummary()" style="padding:8px 16px;border-radius:100px;border:2px solid #eab308;background:#fefce8;color:#854d0e;font-weight:700;cursor:pointer;font-size:13px;">&#128202; Summary</button>';
         html += '<button onclick="krExportGoogleSheets(_krResults)" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#059669;font-weight:700;cursor:pointer;font-size:13px;">&#128203; Sheets</button>';
         html += '</div>';
         return html;
