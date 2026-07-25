@@ -9392,16 +9392,8 @@
     }
 
     // ==============================
-    // ENHANCED: Add matrix/cloud/sheets buttons to view tabs
+    // Add dashboard/matrix/cloud/heatmap/outline/sheets buttons to table export bar
     // ==============================
-    function krRenderExtraAnalysis(results) {
-        var html = '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">';
-        html += '<button onclick="krShowMatrix()" style="padding:8px 16px;border-radius:100px;border:2px solid #f97316;background:#fff7ed;color:#c2410c;font-weight:700;cursor:pointer;font-size:13px;">&#128200; Opportunity Matrix</button>';
-        html += '<button onclick="krShowCloud()" style="padding:8px 16px;border-radius:100px;border:2px solid #0ea5e9;background:#f0f9ff;color:#0369a1;font-weight:700;cursor:pointer;font-size:13px;">&#9998; Keyword Cloud</button>';
-        html += '<button onclick="krExportGoogleSheets(_krResults)" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#059669;font-weight:700;cursor:pointer;font-size:13px;">&#128203; Open in Sheets</button>';
-        html += '</div>';
-        return html;
-    }
     function krShowMatrix() {
         var container = document.getElementById('kr-favorites-output');
         if (!container) return;
@@ -9413,6 +9405,362 @@
         if (!container) return;
         container.innerHTML = krRenderKeywordCloud(_krResults);
         container.style.display = '';
+    }
+
+    // ==============================
+    // ANALYTICS DASHBOARD (pure CSS charts)
+    // ==============================
+    function krRenderAnalyticsDashboard(results) {
+        var html = '<div style="background:linear-gradient(135deg,#fdf4ff,#faf5ff);border:2px solid #a855f7;border-radius:16px;padding:20px;margin-bottom:20px;">';
+        html += '<h3 style="margin:0 0 8px;color:#7e22ce;">&#128202; ' + (currentLang === 'ar' ? '\u0644\u0648\u062d\u0629 \u0627\u0644\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u062a\u0646\u0638\u064a\u0645\u064a\u0629' : 'Analytics Dashboard') + '</h3>';
+        html += '</div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">';
+        var easyKws = results.filter(function(d) { return d.difficulty <= 35; });
+        var medKws = results.filter(function(d) { return d.difficulty > 35 && d.difficulty <= 60; });
+        var hardKws = results.filter(function(d) { return d.difficulty > 60; });
+        var total = results.length || 1;
+        html += '<div style="background:white;border:1px solid #e9d5ff;border-radius:12px;padding:16px;">';
+        html += '<h4 style="margin:0 0 12px;font-size:13px;color:#6b21a8;">&#127919; ' + (currentLang === 'ar' ? '\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u0635\u0639\u0648\u0628\u0629' : 'Difficulty Distribution') + '</h4>';
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:50px;font-size:12px;color:#059669;">Easy</span><div style="flex:1;height:20px;background:#f1f5f9;border-radius:10px;overflow:hidden;"><div style="width:' + Math.round(easyKws.length / total * 100) + '%;height:100%;background:#059669;border-radius:10px;"></div></div><span style="font-size:12px;font-weight:700;color:#059669;">' + easyKws.length + '</span></div>';
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:50px;font-size:12px;color:#f59e0b;">Medium</span><div style="flex:1;height:20px;background:#f1f5f9;border-radius:10px;overflow:hidden;"><div style="width:' + Math.round(medKws.length / total * 100) + '%;height:100%;background:#f59e0b;border-radius:10px;"></div></div><span style="font-size:12px;font-weight:700;color:#f59e0b;">' + medKws.length + '</span></div>';
+        html += '<div style="display:flex;align-items:center;gap:8px;"><span style="width:50px;font-size:12px;color:#ef4444;">Hard</span><div style="flex:1;height:20px;background:#f1f5f9;border-radius:10px;overflow:hidden;"><div style="width:' + Math.round(hardKws.length / total * 100) + '%;height:100%;background:#ef4444;border-radius:10px;"></div></div><span style="font-size:12px;font-weight:700;color:#ef4444;">' + hardKws.length + '</span></div>';
+        html += '</div>';
+        var infoKws = results.filter(function(d) { return d.intent === 'informational'; });
+        var transKws = results.filter(function(d) { return d.intent === 'transactional'; });
+        var navKws = results.filter(function(d) { return d.intent === 'navigational'; });
+        var commKws = results.filter(function(d) { return d.intent === 'commercial'; });
+        html += '<div style="background:white;border:1px solid #e9d5ff;border-radius:12px;padding:16px;">';
+        html += '<h4 style="margin:0 0 12px;font-size:13px;color:#6b21a8;">&#128161; ' + (currentLang === 'ar' ? '\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u0646\u064a\u0629' : 'Intent Distribution') + '</h4>';
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:50px;font-size:12px;color:#3b82f6;">Info</span><div style="flex:1;height:20px;background:#f1f5f9;border-radius:10px;overflow:hidden;"><div style="width:' + Math.round(infoKws.length / total * 100) + '%;height:100%;background:#3b82f6;border-radius:10px;"></div></div><span style="font-size:12px;font-weight:700;color:#3b82f6;">' + infoKws.length + '</span></div>';
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:50px;font-size:12px;color:#8b5cf6;">Trans</span><div style="flex:1;height:20px;background:#f1f5f9;border-radius:10px;overflow:hidden;"><div style="width:' + Math.round(transKws.length / total * 100) + '%;height:100%;background:#8b5cf6;border-radius:10px;"></div></div><span style="font-size:12px;font-weight:700;color:#8b5cf6;">' + transKws.length + '</span></div>';
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:50px;font-size:12px;color:#6366f1;">Nav</span><div style="flex:1;height:20px;background:#f1f5f9;border-radius:10px;overflow:hidden;"><div style="width:' + Math.round(navKws.length / total * 100) + '%;height:100%;background:#6366f1;border-radius:10px;"></div></div><span style="font-size:12px;font-weight:700;color:#6366f1;">' + navKws.length + '</span></div>';
+        html += '<div style="display:flex;align-items:center;gap:8px;"><span style="width:50px;font-size:12px;color:#f59e0b;">Comm</span><div style="flex:1;height:20px;background:#f1f5f9;border-radius:10px;overflow:hidden;"><div style="width:' + Math.round(commKws.length / total * 100) + '%;height:100%;background:#f59e0b;border-radius:10px;"></div></div><span style="font-size:12px;font-weight:700;color:#f59e0b;">' + commKws.length + '</span></div>';
+        html += '</div></div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">';
+        var volBuckets = { 'Very High (80+)': 0, 'High (60-79)': 0, 'Medium (40-59)': 0, 'Low (20-39)': 0, 'Very Low (<20)': 0 };
+        for (var i = 0; i < results.length; i++) {
+            var v = results[i].volume || 0;
+            if (v >= 80) volBuckets['Very High (80+)']++;
+            else if (v >= 60) volBuckets['High (60-79)']++;
+            else if (v >= 40) volBuckets['Medium (40-59)']++;
+            else if (v >= 20) volBuckets['Low (20-39)']++;
+            else volBuckets['Very Low (<20)']++;
+        }
+        var volColors = ['#059669', '#10b981', '#f59e0b', '#f97316', '#94a3b8'];
+        var volKeys = Object.keys(volBuckets);
+        html += '<div style="background:white;border:1px solid #e9d5ff;border-radius:12px;padding:16px;">';
+        html += '<h4 style="margin:0 0 12px;font-size:13px;color:#6b21a8;">&#128200; ' + (currentLang === 'ar' ? '\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u062d\u062c\u0645' : 'Volume Distribution') + '</h4>';
+        for (var v = 0; v < volKeys.length; v++) {
+            var pct = Math.round(volBuckets[volKeys[v]] / total * 100);
+            html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="width:100px;font-size:11px;color:#475569;">' + volKeys[v] + '</span><div style="flex:1;height:14px;background:#f1f5f9;border-radius:7px;overflow:hidden;"><div style="width:' + pct + '%;height:100%;background:' + volColors[v] + ';border-radius:7px;"></div></div><span style="font-size:11px;font-weight:600;width:30px;text-align:right;">' + volBuckets[volKeys[v]] + '</span></div>';
+        }
+        html += '</div>';
+        var sfCounts = { Featured: 0, Shopping: 0, Local: 0, Video: 0, News: 0, Images: 0 };
+        for (var i = 0; i < results.length; i++) {
+            if (results[i].featured) sfCounts.Featured++;
+            if (results[i].shoppingResults) sfCounts.Shopping++;
+            if (results[i].localPack) sfCounts.Local++;
+            if (results[i].videoCarousel || results[i].videoResults) sfCounts.Video++;
+            if (results[i].newsResults) sfCounts.News++;
+            if (results[i].imagePack) sfCounts.Images++;
+        }
+        var sfColors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#ef4444', '#8b5cf6'];
+        var sfKeys = Object.keys(sfCounts);
+        html += '<div style="background:white;border:1px solid #e9d5ff;border-radius:12px;padding:16px;">';
+        html += '<h4 style="margin:0 0 12px;font-size:13px;color:#6b21a8;">&#127760; ' + (currentLang === 'ar' ? '\u0645\u064a\u0632\u0627\u0646\u064a\u0627\u062a SERP' : 'SERP Features') + '</h4>';
+        for (var s = 0; s < sfKeys.length; s++) {
+            var sPct = Math.round(sfCounts[sfKeys[s]] / total * 100);
+            html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="width:60px;font-size:11px;color:#475569;">' + sfKeys[s] + '</span><div style="flex:1;height:14px;background:#f1f5f9;border-radius:7px;overflow:hidden;"><div style="width:' + sPct + '%;height:100%;background:' + sfColors[s] + ';border-radius:7px;"></div></div><span style="font-size:11px;font-weight:600;width:30px;text-align:right;">' + sfCounts[sfKeys[s]] + '</span></div>';
+        }
+        html += '</div></div>';
+        var avgDiff = 0, avgVol = 0, avgCpc = 0, totalCpc = 0;
+        for (var i = 0; i < results.length; i++) { avgDiff += (results[i].difficulty || 0); avgVol += (results[i].volume || 0); totalCpc += parseFloat(results[i].cpc) || 0; }
+        html += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:16px;">';
+        html += '<div style="text-align:center;padding:12px;background:white;border-radius:10px;border:1px solid #e9d5ff;"><div style="font-size:22px;font-weight:800;color:#7e22ce;">' + results.length + '</div><div style="font-size:11px;color:#64748b;">Total Keywords</div></div>';
+        html += '<div style="text-align:center;padding:12px;background:white;border-radius:10px;border:1px solid #e9d5ff;"><div style="font-size:22px;font-weight:800;color:#059669;">' + Math.round(avgVol / total) + '</div><div style="font-size:11px;color:#64748b;">Avg Volume</div></div>';
+        html += '<div style="text-align:center;padding:12px;background:white;border-radius:10px;border:1px solid #e9d5ff;"><div style="font-size:22px;font-weight:800;color:#f59e0b;">' + Math.round(avgDiff / total) + '</div><div style="font-size:11px;color:#64748b;">Avg Difficulty</div></div>';
+        html += '<div style="text-align:center;padding:12px;background:white;border-radius:10px;border:1px solid #e9d5ff;"><div style="font-size:22px;font-weight:800;color:#10b981;">$' + (totalCpc / total).toFixed(2) + '</div><div style="font-size:11px;color:#64748b;">Avg CPC</div></div>';
+        var totalPaa = 0;
+        for (var i = 0; i < results.length; i++) totalPaa += (results[i].paa || []).length;
+        html += '<div style="text-align:center;padding:12px;background:white;border-radius:10px;border:1px solid #e9d5ff;"><div style="font-size:22px;font-weight:800;color:#3b82f6;">' + totalPaa + '</div><div style="font-size:11px;color:#64748b;">Total PAA</div></div>';
+        html += '</div>';
+        return html;
+    }
+    function krShowAnalytics() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = krRenderAnalyticsDashboard(_krResults);
+        container.style.display = '';
+    }
+
+    // ==============================
+    // LONG-TAIL KEYWORD GENERATOR
+    // ==============================
+    function krRenderLongTailGenerator() {
+        var html = '<div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid #10b981;border-radius:16px;padding:20px;margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 8px;color:#065f46;">&#128256; ' + (currentLang === 'ar' ? '\u0645\u0648\u0644\u062f \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0637\u0648\u064a\u0644\u0629' : 'Long-tail Keyword Generator') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u062a\u0648\u0644\u062f \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0641\u062a\u0627\u062d \u0648\u0627\u0644\u062d\u0635\u0648\u0631 \u0645\u0639 \u0645\u0639\u062f\u064a\u0644\u0627\u062a \u0645\u062e\u062a\u0644\u0641\u0629' : 'Generate long-tail variations with custom modifiers') + '</p>';
+        html += '</div>';
+        html += '<div style="background:white;border:1px solid #d1fae5;border-radius:12px;padding:16px;margin-bottom:16px;">';
+        html += '<label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0641\u062a\u0627\u062d' : 'Seed Keyword') + '</label>';
+        html += '<input type="text" id="kr-lt-seed" value="' + esc(document.getElementById('kr-seed') ? document.getElementById('kr-seed').value : '') + '" style="width:100%;padding:8px 12px;border:2px solid #d1fae5;border-radius:8px;font-size:14px;" />';
+        html += '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">';
+        html += '<label style="font-size:12px;font-weight:600;color:#374151;">Modifications:</label>';
+        var modifiers = ['how to', 'best', 'cheap', 'review', 'vs', 'alternative', 'for beginners', 'guide', '2026', 'near me', 'online', 'free', 'top 10', 'buy', 'price', '\u0639\u0646', '\u0623\u0641\u0636\u0644', '\u0633\u0639\u0631', '\u0634\u0631\u0627\u0621', '\u062c\u0648\u062f\u0629', '\u0645\u0631\u0627\u062c\u0639\u0629', '\u0637\u0631\u064a\u0642', '\u0645\u0639\u0644\u0648\u0645\u0627\u062a', '\u0645\u062c\u0627\u0646\u064a'];
+        for (var m = 0; m < modifiers.length; m++) {
+            html += '<label style="font-size:11px;"><input type="checkbox" class="kr-lt-mod" value="' + esc(modifiers[m]) + '" checked /> ' + esc(modifiers[m]) + '</label>';
+        }
+        html += '</div>';
+        html += '<button onclick="krGenerateLongTail()" style="margin-top:12px;padding:8px 20px;border-radius:100px;background:#10b981;color:white;border:none;font-weight:700;cursor:pointer;font-size:13px;">&#128640; Generate</button>';
+        html += '</div>';
+        html += '<div id="kr-lt-output"></div>';
+        return html;
+    }
+    function krGenerateLongTail() {
+        var seed = document.getElementById('kr-lt-seed').value.trim();
+        if (!seed) return;
+        var modChecks = document.querySelectorAll('.kr-lt-mod');
+        var mods = [];
+        for (var i = 0; i < modChecks.length; i++) {
+            if (modChecks[i].checked) mods.push(modChecks[i].value);
+        }
+        if (mods.length === 0) { alert('Select at least one modifier'); return; }
+        var variations = [];
+        for (var m = 0; m < mods.length; m++) {
+            variations.push(mods[m] + ' ' + seed);
+            variations.push(seed + ' ' + mods[m]);
+        }
+        var words = seed.split(/\s+/);
+        if (words.length <= 3) {
+            var questionStarts = ['what is the best', 'how do i', 'how to', 'why is', 'when should i', 'where to buy', 'which', '\u0643\u064a\u0641', '\u0645\u0627\u0647\u064a', '\u0644\u0645\u0627\u0630\u0627', '\u0645\u062a\u0649', '\u063a\u064a\u0631', '\u0647\u0644'];
+            for (var q = 0; q < questionStarts.length; q++) {
+                variations.push(questionStarts[q] + ' ' + seed);
+            }
+        }
+        var seen = {};
+        var unique = [];
+        for (var i = 0; i < variations.length; i++) {
+            var v = variations[i].toLowerCase().trim();
+            if (!seen[v] && v.length > 5 && v.length < 100) {
+                seen[v] = true;
+                unique.push(variations[i]);
+            }
+        }
+        var out = document.getElementById('kr-lt-output');
+        if (!out) return;
+        var html = '<div style="background:white;border:1px solid #d1fae5;border-radius:12px;padding:16px;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+        html += '<strong style="color:#065f46;">' + unique.length + ' ' + (currentLang === 'ar' ? '\u062a\u0646\u0648\u064a\u0639\u0629 \u0645\u0641\u062a\u0648\u062d\u0629' : 'variations generated') + '</strong>';
+        html += '<button onclick="krCopyLongTail()" style="padding:4px 12px;border-radius:100px;border:1px solid #10b981;background:#ecfdf5;color:#059669;font-size:12px;font-weight:600;cursor:pointer;">' + (currentLang === 'ar' ? '\u0646\u0633\u062e' : 'Copy All') + '</button>';
+        html += '</div>';
+        html += '<div id="kr-lt-list" style="display:flex;flex-direction:column;gap:4px;">';
+        for (var i = 0; i < unique.length; i++) {
+            html += '<div style="padding:6px 12px;background:#f0fdf4;border-radius:6px;font-size:13px;color:#1e293b;border:1px solid #d1fae5;">' + esc(unique[i]) + '</div>';
+        }
+        html += '</div></div>';
+        out.innerHTML = html;
+        window._krLongTailData = unique;
+    }
+    function krCopyLongTail() {
+        if (!window._krLongTailData) return;
+        var text = window._krLongTailData.join('\n');
+        if (navigator.clipboard) navigator.clipboard.writeText(text);
+    }
+    function krShowLongTail() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = krRenderLongTailGenerator();
+        container.style.display = '';
+    }
+
+    // ==============================
+    // DOMAIN SERP HEATMAP
+    // ==============================
+    function krRenderDomainHeatmap(results) {
+        var domainMap = {};
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i].keyword;
+            var topDomains = results[i].topDomains || [];
+            for (var d = 0; d < Math.min(topDomains.length, 5); d++) {
+                var dom = topDomains[d].domain;
+                if (!domainMap[dom]) domainMap[dom] = {};
+                domainMap[dom][kw] = d + 1;
+            }
+        }
+        var domSorted = [];
+        var domKeys = Object.keys(domainMap);
+        for (var d = 0; d < domKeys.length; d++) {
+            var appearances = Object.keys(domainMap[domKeys[d]]).length;
+            domSorted.push({ domain: domKeys[d], count: appearances });
+        }
+        domSorted.sort(function(a, b) { return b.count - a.count; });
+        var topDomains = domSorted.slice(0, 12);
+        var topKws = results.slice(0, 15);
+        var html = '<div style="background:linear-gradient(135deg,#fef3c7,#fff7ed);border:2px solid #f59e0b;border-radius:16px;padding:20px;margin-bottom:20px;">';
+        html += '<h3 style="margin:0 0 8px;color:#92400e;">&#128293; ' + (currentLang === 'ar' ? '\u062e\u0631\u064a\u0637\u0629 SERP \u0644\u0644\u0645\u0648\u0627\u0642\u0639' : 'Domain SERP Heatmap') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0627\u0642\u0639 \u0627\u0644\u0630\u064a \u062a\u0638\u0647\u0631 \u0641\u064a \u0646\u0638\u0627\u0626\u0637 \u0627\u0644\u0628\u062d\u062b \u0627\u0644\u0639\u0645\u064a\u0629 \u0627\u0644\u0639\u0644\u064a\u0629' : 'Domains appearing in top results across keywords') + '</p>';
+        html += '</div>';
+        if (topDomains.length === 0) {
+            html += '<div style="text-align:center;padding:20px;color:#94a3b8;background:#f8fafc;border-radius:12px;">No domain data available</div>';
+            return html;
+        }
+        html += '<div style="overflow-x:auto;background:white;border:1px solid #fef3c7;border-radius:12px;padding:12px;">';
+        html += '<table style="border-collapse:collapse;font-size:12px;">';
+        html += '<thead><tr><th style="padding:8px;text-align:left;position:sticky;left:0;background:white;z-index:1;border-bottom:2px solid #f59e0b;min-width:160px;">' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0627\u0642\u0639' : 'Domain') + '</th>';
+        for (var k = 0; k < topKws.length; k++) {
+            var kwShort = topKws[k].keyword.length > 18 ? topKws[k].keyword.substring(0, 16) + '..' : topKws[k].keyword;
+            html += '<th style="padding:4px 6px;text-align:center;writing-mode:vertical-rl;text-orientation:mixed;height:100px;font-weight:600;color:#475569;border-bottom:2px solid #f59e0b;">' + esc(kwShort) + '</th>';
+        }
+        html += '</tr></thead><tbody>';
+        for (var d = 0; d < topDomains.length; d++) {
+            var dom = topDomains[d].domain;
+            html += '<tr><td style="padding:6px 8px;font-weight:600;color:#1e293b;border-bottom:1px solid #f3f4f6;position:sticky;left:0;background:white;">' + esc(dom) + ' <span style="color:#94a3b8;font-weight:400;">(' + topDomains[d].count + ')</span></td>';
+            for (var k = 0; k < topKws.length; k++) {
+                var pos = domainMap[dom][topKws[k].keyword] || 0;
+                var cellBg = pos === 0 ? '#f8fafc' : pos === 1 ? '#dcfce7' : pos === 2 ? '#d1fae5' : pos === 3 ? '#fef9c3' : '#fee2e2';
+                var cellText = pos > 0 ? '#' + pos : '';
+                var textColor = pos === 0 ? '#d1d5db' : pos <= 2 ? '#059669' : pos <= 3 ? '#d97706' : '#ef4444';
+                html += '<td style="padding:6px;text-align:center;background:' + cellBg + ';border:1px solid white;border-radius:4px;font-weight:600;color:' + textColor + ';">' + cellText + '</td>';
+            }
+            html += '</tr>';
+        }
+        html += '</tbody></table></div>';
+        html += '<div style="margin-top:8px;display:flex;gap:12px;justify-content:center;font-size:11px;color:#64748b;">';
+        html += '<span><span style="display:inline-block;width:12px;height:12px;background:#dcfce7;border-radius:2px;vertical-align:middle;"></span> #1</span>';
+        html += '<span><span style="display:inline-block;width:12px;height:12px;background:#d1fae5;border-radius:2px;vertical-align:middle;"></span> #2</span>';
+        html += '<span><span style="display:inline-block;width:12px;height:12px;background:#fef9c3;border-radius:2px;vertical-align:middle;"></span> #3</span>';
+        html += '<span><span style="display:inline-block;width:12px;height:12px;background:#fee2e2;border-radius:2px;vertical-align:middle;"></span> #4-5</span>';
+        html += '</div>';
+        return html;
+    }
+    function krShowHeatmap() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = krRenderDomainHeatmap(_krResults);
+        container.style.display = '';
+    }
+
+    // ==============================
+    // CONTENT OUTLINE GENERATOR
+    // ==============================
+    function krRenderContentOutline() {
+        var html = '<div style="background:linear-gradient(135deg,#dbeafe,#eff6ff);border:2px solid #3b82f6;border-radius:16px;padding:20px;margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 8px;color:#1e40af;">&#128221; ' + (currentLang === 'ar' ? '\u0645\u0648\u0644\u062f \u0645\u062d\u062a\u0648\u0649 \u0645\u0636\u0645\u0648\u0646' : 'Content Outline Generator') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u062a\u0648\u0644\u062f \u0645\u0641\u062a\u0627\u062d \u0627\u0644\u0645\u0648\u0642\u0639 \u0648\u0627\u0644\u0645\u0648\u0627\u0636\u0639 \u0627\u0644\u0641\u0631\u0639\u064a\u0629 \u0627\u0644\u0645\u0648\u0635\u0649 \u0628\u0627\u0644\u0645\u062d\u062a\u0648\u0649' : 'Generate suggested headings, word count, and FAQs for any topic') + '</p>';
+        html += '</div>';
+        html += '<div style="background:white;border:1px solid #dbeafe;border-radius:12px;padding:16px;margin-bottom:16px;">';
+        html += '<label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0636\u0648\u0639' : 'Topic / Keyword') + '</label>';
+        html += '<input type="text" id="kr-outline-seed" value="' + esc(document.getElementById('kr-seed') ? document.getElementById('kr-seed').value : '') + '" style="width:100%;padding:8px 12px;border:2px solid #dbeafe;border-radius:8px;font-size:14px;" />';
+        html += '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">';
+        html += '<label style="font-size:12px;">' + (currentLang === 'ar' ? '\u0627\u0644\u0644\u063a\u0629' : 'Language') + ': <select id="kr-outline-lang" style="padding:4px 8px;border:1px solid #dbeafe;border-radius:6px;"><option value="en">English</option><option value="ar">\u0627\u0644\u0639\u0631\u0628\u064a\u0629</option></select></label>';
+        html += '<label style="font-size:12px;">' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u0648\u0639' : 'Type') + ': <select id="kr-outline-type" style="padding:4px 8px;border:1px solid #dbeafe;border-radius:6px;"><option value="blog">' + (currentLang === 'ar' ? '\u0645\u0642\u0627\u0644\u0629 \u0645\u0639\u0631\u0641\u0629' : 'Blog Post') + '</option><option value="landing">' + (currentLang === 'ar' ? '\u0635\u0641\u062d\u0629 \u0647\u0628\u0627\u0637' : 'Landing Page') + '</option><option value="guide">' + (currentLang === 'ar' ? '\u062f\u0644\u064a\u0644 \u0634\u0627\u0645\u0644' : 'Full Guide') + '</option><option value="comparison">' + (currentLang === 'ar' ? '\u0645\u0642\u0627\u0631\u0646\u0629' : 'Comparison') + '</option></select></label>';
+        html += '</div>';
+        html += '<button onclick="krGenerateOutline()" style="margin-top:12px;padding:8px 20px;border-radius:100px;background:#3b82f6;color:white;border:none;font-weight:700;cursor:pointer;font-size:13px;">&#128221; Generate Outline</button>';
+        html += '</div>';
+        html += '<div id="kr-outline-output"></div>';
+        return html;
+    }
+    function krGenerateOutline() {
+        var seed = document.getElementById('kr-outline-seed').value.trim();
+        if (!seed) return;
+        var lang = document.getElementById('kr-outline-lang').value;
+        var type = document.getElementById('kr-outline-type').value;
+        var isAr = lang === 'ar';
+        var paaQuestions = [];
+        var relatedKws = [];
+        for (var i = 0; i < _krResults.length; i++) {
+            if (_krResults[i].keyword === seed || _krResults[i].keyword.indexOf(seed) !== -1) {
+                if (_krResults[i].paa) paaQuestions = paaQuestions.concat(_krResults[i].paa);
+                if (_krResults[i].related) relatedKws = relatedKws.concat(_krResults[i].related);
+            }
+        }
+        var headings = [];
+        if (type === 'blog') {
+            headings = isAr ? ['\u0645\u0642\u062f\u0645\u0629', '\u0645\u0627 \u0647\u0648 ' + seed + '\u061f', '\u0644\u0645\u0627\u0630\u0627 \u062a\u062d\u062a\u0627\u062c \u0625\u0644\u064a\u0647', '\u0627\u0644\u0645\u0632\u0627\u064a\u0627 \u0627\u0644\u0641\u0631\u0639\u0629', '\u0646\u0635\u0627\u0626\u062d \u062e\u0628\u0631\u0629', '\u062e\u0635\u0627\u0626\u0635 \u0645\u0641\u064a\u062f\u0629', '\u0623\u0646\u0648\u0627\u0639 \u0634\u0627\u0626\u0639\u0629', '\u062e\u0635\u0627\u0626\u0635 \u0639\u0646 \u0627\u0644\u062e\u0628\u0631\u064a\u0646', '\u0623\u0643\u062b\u0631 \u0627\u0644\u0623\u0633\u0626\u0644\u0629', '\u062e\u0644\u0627\u0635\u0629'] : ['Introduction', 'What is ' + seed + '?', 'Why Choose ' + seed, 'Key Features', 'Pros & Cons', 'Best Alternatives', 'Pricing', 'User Reviews', 'FAQs', 'Conclusion'];
+        } else if (type === 'landing') {
+            headings = isAr ? ['\u0627\u0644\u0639\u0646\u0648\u0627\u0646', '\u0627\u0644\u0645\u064a\u0632\u0627\u062a \u0627\u0644\u0623\u0633\u0627\u0633\u064a\u0629', '\u0643\u064a\u0641 \u064a\u0639\u0645\u0644', '\u0627\u0644\u0633\u0639\u0631', '\u0627\u0644\u0634\u0647\u0648\u062f', '\u0627\u0644\u0623\u0633\u0626\u0644\u0629 \u0627\u0644\u0634\u0627\u0626\u0639\u0629'] : ['Hero Section', 'Key Features', 'How It Works', 'Pricing', 'Testimonials', 'FAQs', 'CTA'];
+        } else if (type === 'guide') {
+            headings = isAr ? ['\u0645\u0642\u062f\u0645\u0629 \u0634\u0627\u0645\u0644\u0629', '\u0645\u0627 \u0647\u064a ' + seed + '\u061f', '\u062f\u0644\u064a\u0644 \u0627\u0644\u0628\u062f\u0627\u0626\u0644 \u0627\u0644\u0645\u0639\u0636\u0644', '\u0645\u0633\u0627\u062e\u0637 \u0628\u0627\u0644\u0645\u062d\u062a\u0648\u0649', '\u0646\u0635\u0627\u0626\u062d \u0645\u062a\u0642\u062f\u0645\u0629', '\u0623\u0646\u0648\u0627\u0639 \u0645\u062a\u0642\u062f\u0645\u0629', '\u0623\u0633\u0626\u0644\u0629 \u0634\u0627\u0626\u0639\u0629'] : ['Complete Guide', 'What is ' + seed + '?', 'Getting Started', 'Advanced Tips', 'Best Practices', 'Common Mistakes', 'Resources', 'FAQs', 'Conclusion'];
+        } else {
+            headings = isAr ? ['\u0645\u0642\u062f\u0645\u0629', seed + ' vs \u0627\u0644\u062e\u0635\u0645 \u0627\u0644\u0645\u0646\u0627\u0641\u0633', '\u0645\u064a\u0632\u0627\u062a \u0627\u0644\u0645\u0648\u0627\u0642\u0639', '\u0627\u0644\u0645\u0632\u0627\u064a\u0627 \u0627\u0644\u0641\u0631\u0639\u0629', '\u062e\u0635\u0627\u0626\u0635 \u0648\u0639\u064a\u0648\u0628', '\u0645\u0646 \u064a\u0631\u062d\u0632'] : ['Introduction', seed + ' vs Alternatives', 'Key Features', 'Pricing Comparison', 'Pros & Cons', 'Verdict'];
+        }
+        if (paaQuestions.length > 0) {
+            var faqHeadings = isAr ? '\u0623\u0633\u0626\u0644\u0629 \u0634\u0627\u0626\u0639\u0629 (FAQ)' : 'Frequently Asked Questions';
+            headings.push(faqHeadings);
+        }
+        var wordCount = type === 'blog' ? '1500-2500' : type === 'landing' ? '500-1000' : type === 'guide' ? '2500-5000' : '1200-2000';
+        var out = document.getElementById('kr-outline-output');
+        if (!out) return;
+        var html = '<div style="background:white;border:1px solid #dbeafe;border-radius:12px;padding:20px;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
+        html += '<strong style="font-size:16px;color:#1e40af;">' + esc(seed) + ' — ' + (currentLang === 'ar' ? '\u0645\u062d\u062a\u0648\u0649' : 'Outline') + '</strong>';
+        html += '<button onclick="krCopyOutline()" style="padding:4px 12px;border-radius:100px;border:1px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;">Copy</button>';
+        html += '</div>';
+        html += '<div style="margin-bottom:12px;padding:10px;background:#eff6ff;border-radius:8px;font-size:13px;">';
+        html += '<strong>&#128196; ' + (currentLang === 'ar' ? '\u0627\u0644\u062a\u0648\u0635\u064a\u0629' : 'Details') + ':</strong> ';
+        html += (currentLang === 'ar' ? '\u0627\u0644\u0646\u0648\u0639: ' : 'Type: ') + type + ' | ';
+        html += (currentLang === 'ar' ? '\u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0642\u0635\u062f\u0629: ' : 'Target words: ') + wordCount;
+        html += '</div>';
+        html += '<div style="padding-left:0;">';
+        for (var h = 0; h < headings.length; h++) {
+            var indent = 0;
+            if (h > 0 && h === headings.length - 1 && paaQuestions.length > 0) indent = 0;
+            else if (h >= 1) indent = 0;
+            var tag = h === 0 ? 'h1' : (h === headings.length - 1 && paaQuestions.length > 0 && type !== 'landing') ? 'h2' : 'h2';
+            var fontSize = h === 0 ? '18px' : '15px';
+            var fontWeight = '700';
+            html += '<div style="margin-bottom:8px;font-size:' + fontSize + ';font-weight:' + fontWeight + ';color:#1e293b;padding:6px 0;border-bottom:1px solid #f1f5f9;">';
+            html += '<span style="background:#3b82f6;color:white;padding:1px 6px;border-radius:4px;font-size:10px;margin-right:6px;">' + tag.toUpperCase() + '</span>';
+            html += esc(headings[h]);
+            html += '</div>';
+            if (h === headings.length - 1 && paaQuestions.length > 0) {
+                var showPaa = paaQuestions.slice(0, 6);
+                for (var p = 0; p < showPaa.length; p++) {
+                    html += '<div style="margin-left:20px;margin-bottom:6px;font-size:13px;color:#475569;padding:4px 0;">';
+                    html += '<span style="color:#3b82f6;font-weight:600;">Q: </span>' + esc(showPaa[p]);
+                    html += '<br><span style="color:#94a3b8;font-style:italic;">A: [Your answer here based on research]</span>';
+                    html += '</div>';
+                }
+            }
+        }
+        html += '</div>';
+        if (relatedKws.length > 0) {
+            html += '<div style="margin-top:16px;padding:12px;background:#f0fdf4;border-radius:8px;">';
+            html += '<strong style="font-size:13px;color:#065f46;">&#128270; ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a \u0645\u0631\u062a\u0628\u0637\u0629 \u0644\u0644\u0625\u062f\u0645\u0627\u062c' : 'Related Keywords to Include') + ':</strong> ';
+            var showRel = relatedKws.slice(0, 10);
+            for (var r = 0; r < showRel.length; r++) {
+                html += '<span style="display:inline-block;padding:2px 8px;margin:2px;background:white;border:1px solid #d1fae5;border-radius:100px;font-size:11px;color:#065f46;">' + esc(showRel[r]) + '</span>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+        out.innerHTML = html;
+        window._krOutlineText = headings.join('\n');
+    }
+    function krCopyOutline() {
+        if (window._krOutlineText && navigator.clipboard) navigator.clipboard.writeText(window._krOutlineText);
+    }
+    function krShowOutline() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = krRenderContentOutline();
+        container.style.display = '';
+    }
+
+    // ==============================
+    // Add dashboard/matrix/cloud/heatmap/outline/sheets buttons to table export bar
+    // ==============================
+    function krRenderExtraAnalysis(results) {
+        var html = '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">';
+        html += '<button onclick="krShowAnalytics()" style="padding:8px 16px;border-radius:100px;border:2px solid #a855f7;background:#faf5ff;color:#7e22ce;font-weight:700;cursor:pointer;font-size:13px;">&#128202; Dashboard</button>';
+        html += '<button onclick="krShowMatrix()" style="padding:8px 16px;border-radius:100px;border:2px solid #f97316;background:#fff7ed;color:#c2410c;font-weight:700;cursor:pointer;font-size:13px;">&#128200; Matrix</button>';
+        html += '<button onclick="krShowCloud()" style="padding:8px 16px;border-radius:100px;border:2px solid #0ea5e9;background:#f0f9ff;color:#0369a1;font-weight:700;cursor:pointer;font-size:13px;">&#9998; Cloud</button>';
+        html += '<button onclick="krShowHeatmap()" style="padding:8px 16px;border-radius:100px;border:2px solid #f59e0b;background:#fffbeb;color:#92400e;font-weight:700;cursor:pointer;font-size:13px;">&#128293; Heatmap</button>';
+        html += '<button onclick="krShowLongTail()" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#065f46;font-weight:700;cursor:pointer;font-size:13px;">&#128256; Long-tail</button>';
+        html += '<button onclick="krShowOutline()" style="padding:8px 16px;border-radius:100px;border:2px solid #3b82f6;background:#eff6ff;color:#1e40af;font-weight:700;cursor:pointer;font-size:13px;">&#128221; Outline</button>';
+        html += '<button onclick="krExportGoogleSheets(_krResults)" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#059669;font-weight:700;cursor:pointer;font-size:13px;">&#128203; Sheets</button>';
+        html += '</div>';
+        return html;
     }
 
     document.addEventListener('DOMContentLoaded', function() {
