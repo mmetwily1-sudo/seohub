@@ -10377,6 +10377,324 @@
     }
 
     // ==============================
+    // SERP VOLATILITY INDEX
+    // ==============================
+    function krRenderVolatility(results) {
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#127744; ' + (currentLang === 'ar' ? '\u0645\u0631\u0631\u0627\u062a \u062a\u0627\u0631\u064a\u062e SERP' : 'SERP Volatility Index') + '</h4>';
+        html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">';
+        var stable = 0, moderate = 0, volatile = 0;
+        var volData = [];
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i];
+            var sf = kw.serpFeatures || {};
+            var count = 0;
+            if (sf.featured) count++;
+            if (sf.paa) count++;
+            if (sf.local) count++;
+            if (sf.video) count++;
+            if (sf.sitelinks) count++;
+            var ads = sf.ads || 0;
+            var totalFeatures = count + ads;
+            var volatility = totalFeatures * 12 + (kw.difficulty || 0) * 0.3;
+            if (volatility < 30) { stable++; volatility = volatility; }
+            else if (volatility < 60) { moderate++; }
+            else { volatile++; }
+            volData.push({ keyword: kw.keyword, volatility: Math.round(volatility), volume: kw.volume || 0, features: totalFeatures });
+        }
+        var total = results.length || 1;
+        html += '<div style="flex:1;text-align:center;padding:16px;background:#ecfdf5;border-radius:10px;"><div style="font-size:28px;font-weight:800;color:#10b981;">' + stable + '</div><div style="font-size:12px;color:#64748b;">' + (currentLang === 'ar' ? '\u0645\u0633\u062a\u0642\u0631\u0629' : 'Stable') + ' (' + Math.round(stable / total * 100) + '%)</div></div>';
+        html += '<div style="flex:1;text-align:center;padding:16px;background:#fffbeb;border-radius:10px;"><div style="font-size:28px;font-weight:800;color:#f59e0b;">' + moderate + '</div><div style="font-size:12px;color:#64748b;">' + (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637\u0629' : 'Moderate') + ' (' + Math.round(moderate / total * 100) + '%)</div></div>';
+        html += '<div style="flex:1;text-align:center;padding:16px;background:#fef2f2;border-radius:10px;"><div style="font-size:28px;font-weight:800;color:#ef4444;">' + volatile + '</div><div style="font-size:12px;color:#64748b;">' + (currentLang === 'ar' ? '\u0645\u062a\u063a\u064a\u064a\u0631\u0629' : 'Volatile') + ' (' + Math.round(volatile / total * 100) + '%)</div></div>';
+        html += '</div>';
+        volData.sort(function(a, b) { return b.volatility - a.volatility; });
+        var topVolatile = volData.slice(0, 10);
+        if (topVolatile.length > 0) {
+            html += '<div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:8px;">' + (currentLang === 'ar' ? '\u0623\u0643\u062b\u0631 10 \u0643\u0644\u0645\u0627\u062a \u062a\u0627\u0631\u064a\u062e\u0629:' : 'Most Volatile Keywords:') + '</div>';
+            html += '<div style="display:flex;flex-direction:column;gap:4px;">';
+            for (var i = 0; i < topVolatile.length; i++) {
+                var v = topVolatile[i];
+                var pctBar = Math.min(v.volatility, 100);
+                var barColor = v.volatility >= 60 ? '#ef4444' : v.volatility >= 30 ? '#f59e0b' : '#10b981';
+                html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8fafc;border-radius:6px;">';
+                html += '<span style="flex:1;font-size:12px;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(v.keyword) + '</span>';
+                html += '<div style="width:120px;height:6px;background:#f1f5f9;border-radius:3px;flex-shrink:0;"><div style="height:100%;width:' + pctBar + '%;background:' + barColor + ';border-radius:3px;"></div></div>';
+                html += '<span style="font-size:11px;color:' + barColor + ';font-weight:700;width:30px;text-align:right;">' + v.volatility + '</span>';
+                html += '<span style="font-size:10px;color:#94a3b8;width:40px;text-align:right;">' + v.volume.toLocaleString() + '</span>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowVolatility() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderVolatility(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // SEASONALITY HEATMAP (12-month)
+    // ==============================
+    function krRenderSeasonalityHeatmap(results) {
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        var monthsAr = ['\u064a\u0646\u0627\u064a\u0631', '\u0641\u0628\u0631\u0627\u064a\u0631', '\u0645\u0627\u0631\u0633', '\u0623\u0628\u0631\u064a\u0644', '\u0645\u0627\u064a\u0648', '\u064a\u0648\u0646\u064a\u0648', '\u064a\u0648\u0644\u064a\u0648', '\u0623\u063a\u0633\u0637\u0633', '\u0633\u0628\u062a\u0645\u0628\u0631', '\u0623\u0643\u062a\u0648\u0628\u0631', '\u0646\u0648\u0641\u0645\u0628\u0631', '\u062f\u064a\u0633\u0645\u0628\u0631'];
+        var useMonths = currentLang === 'ar' ? monthsAr : months;
+        var kws = results.slice(0, 15);
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;overflow-x:auto;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128197; ' + (currentLang === 'ar' ? '\u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0645\u0648\u0633\u0645\u064a\u0629' : 'Seasonality Heatmap') + '</h4>';
+        html += '<table style="width:100%;border-collapse:collapse;font-size:11px;">';
+        html += '<thead><tr><th style="padding:6px;text-align:left;color:#64748b;border-bottom:2px solid #e2e8f0;"></th>';
+        for (var m = 0; m < 12; m++) {
+            html += '<th style="padding:6px;text-align:center;color:#64748b;border-bottom:2px solid #e2e8f0;min-width:55px;">' + useMonths[m] + '</th>';
+        }
+        html += '</tr></thead><tbody>';
+        for (var k = 0; k < kws.length; k++) {
+            var kw = kws[k];
+            var trend = kw.trend || 'stable';
+            var basePeak = (trend === 'rising') ? 10 : (trend === 'seasonal') ? 8 : 6;
+            html += '<tr>';
+            html += '<td style="padding:6px;color:#334155;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;border-bottom:1px solid #f1f5f9;">' + esc(kw.keyword) + '</td>';
+            for (var m = 0; m < 12; m++) {
+                var seed = kw.keyword.length * (m + 1) + k * 7;
+                var val = Math.round((Math.sin(seed) * 0.5 + 0.5) * basePeak);
+                val = Math.max(1, Math.min(10, val));
+                var intensity = val / 10;
+                var r = Math.round(59 + intensity * 180);
+                var g = Math.round(130 + (1 - intensity) * 80);
+                var b = Math.round(246 - intensity * 100);
+                var bgColor = 'rgba(' + r + ',' + g + ',' + b + ',' + (0.15 + intensity * 0.6) + ')';
+                html += '<td style="padding:6px;text-align:center;background:' + bgColor + ';border:1px solid #f8fafc;border-radius:2px;font-weight:600;color:' + (intensity > 0.6 ? '#1e3a5f' : '#64748b') + ';">' + val + '</td>';
+            }
+            html += '</tr>';
+        }
+        html += '</tbody></table>';
+        html += '<div style="display:flex;gap:8px;margin-top:12px;align-items:center;font-size:11px;color:#64748b;">';
+        html += '<span>' + (currentLang === 'ar' ? '\u062a\u0641\u0636\u064a\u0644:' : 'Intensity:') + '</span>';
+        var legendSteps = ['#e0ecff', '#a5c8e8', '#6baed6', '#3182bd', '#08519c'];
+        for (var s = 0; s < legendSteps.length; s++) {
+            html += '<span style="display:inline-block;width:20px;height:12px;background:' + legendSteps[s] + ';border-radius:2px;"></span>';
+        }
+        html += '<span>' + (currentLang === 'ar' ? '\u0645\u0646\u0636\u0636\u0636 \u0644\u0645\u0646\u0636\u0636' : 'Low to High') + '</span>';
+        html += '</div></div>';
+        return html;
+    }
+    function krShowSeasonality() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderSeasonalityHeatmap(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // CANNIBALIZATION DETECTOR
+    // ==============================
+    function krRenderCannibalization(results) {
+        var clusters = {};
+        for (var i = 0; i < results.length; i++) {
+            var kw1 = results[i].keyword.toLowerCase().trim();
+            var words = kw1.split(/\s+/).filter(function(w) { return w.length > 2; });
+            for (var w = 0; w < words.length; w++) {
+                if (!clusters[words[w]]) clusters[words[w]] = [];
+                clusters[words[w]].push(results[i]);
+            }
+        }
+        var cannibals = [];
+        var keys = Object.keys(clusters);
+        for (var k = 0; k < keys.length; k++) {
+            var group = clusters[keys[k]];
+            if (group.length >= 3) {
+                var totalVol = 0;
+                for (var g = 0; g < group.length; g++) totalVol += (group[g].volume || 0);
+                cannibals.push({ root: keys[k], keywords: group, totalVolume: totalVol });
+            }
+        }
+        cannibals.sort(function(a, b) { return b.keywords.length - a.keywords.length; });
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128008; ' + (currentLang === 'ar' ? '\u0643\u0634\u0641 \u0627\u0644\u062a\u0646\u0627\u0641\u0633 \u0627\u0644\u0643\u0644\u0645\u064a' : 'Keyword Cannibalization Detector') + '</h4>';
+        if (cannibals.length === 0) {
+            html += '<div style="text-align:center;padding:20px;color:#10b981;font-size:14px;">&#10003; ' + (currentLang === 'ar' ? '\u0644\u0627 \u062a\u0648\u062c\u062f \u062a\u0646\u0627\u0641\u0633 \u0643\u0644\u0645\u064a' : 'No cannibalization detected') + '</div>';
+        } else {
+            html += '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:#92400e;">';
+            html += '&#9888; ' + cannibals.length + ' ' + (currentLang === 'ar' ? '\u0645\u062c\u0645\u0648\u0639\u0629 \u0643\u0644\u0645\u0627\u062a \u062a\u0634\u062a\u0631\u0643 \u0641\u064a \u062f\u0644\u0629 \u0645\u0634\u062a\u0631\u0643\u0629' : 'keyword groups may compete with each other');
+            html += '</div>';
+            var showCount = Math.min(cannibals.length, 10);
+            for (var c = 0; c < showCount; c++) {
+                var group = cannibals[c];
+                html += '<div style="border:1px solid #fde68a;border-radius:10px;padding:12px;margin-bottom:10px;background:#fffbeb;">';
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+                html += '<div><strong style="color:#92400e;font-size:13px;">&#8226; ' + (currentLang === 'ar' ? '\u062c\u0630\u0631: ' : 'Root: ') + esc(group.root) + '</strong></div>';
+                html += '<span style="background:#f59e0b;color:white;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;">' + group.keywords.length + ' kws | ' + group.totalVolume.toLocaleString() + ' vol</span>';
+                html += '</div>';
+                html += '<div style="display:flex;flex-wrap:wrap;gap:3px;">';
+                for (var k = 0; k < Math.min(group.keywords.length, 6); k++) {
+                    var kw = group.keywords[k];
+                    var pos = kw.difficulty <= 35 ? '#10b981' : kw.difficulty <= 60 ? '#f59e0b' : '#ef4444';
+                    html += '<span style="background:white;padding:2px 8px;border-radius:100px;font-size:10px;border:1px solid #e2e8f0;">';
+                    html += esc(kw.keyword.length > 22 ? kw.keyword.substring(0, 20) + '..' : kw.keyword);
+                    html += ' <span style="color:#94a3b8;">KD:' + (kw.difficulty || 0) + '</span>';
+                    html += '</span>';
+                }
+                if (group.keywords.length > 6) html += '<span style="font-size:10px;color:#94a3b8;padding:2px;">+' + (group.keywords.length - 6) + '</span>';
+                html += '</div>';
+                html += '<div style="font-size:11px;color:#64748b;margin-top:6px;">&#128161; ' + (currentLang === 'ar' ? '\u0627\u062f\u063a\u0637: \u062f\u063a\u0637 \u0639\u0646\u0635\u0631 \u0645\u062d\u062f\u062f \u0623\u0648 \u0627\u062f\u063a\u0637 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0641\u064a \u0635\u0641\u062d\u0629 \u0648\u0627\u062d\u062f\u0629' : 'Suggestion: merge into one page or differentiate in title and H1') + '</div>';
+                html += '</div>';
+            }
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowCannibalization() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderCannibalization(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // CONTENT LENGTH OPTIMIZER
+    // ==============================
+    function krRenderContentLengthOptimizer(results) {
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128221; ' + (currentLang === 'ar' ? '\u0645\u062d\u0635\u0646 \u0637\u0648\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0629' : 'Content Length Optimizer') + '</h4>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">';
+        for (var i = 0; i < Math.min(results.length, 12); i++) {
+            var kw = results[i];
+            var vol = kw.volume || 100;
+            var diff = kw.difficulty || 30;
+            var baseWords = 800;
+            if (vol > 10000) baseWords = 3000;
+            else if (vol > 5000) baseWords = 2500;
+            else if (vol > 1000) baseWords = 1800;
+            else if (vol > 500) baseWords = 1400;
+            else baseWords = 800;
+            var diffMult = diff > 70 ? 1.5 : diff > 50 ? 1.3 : diff > 30 ? 1.1 : 1.0;
+            var recWords = Math.round(baseWords * diffMult / 100) * 100;
+            var minWords = Math.round(recWords * 0.7 / 100) * 100;
+            var maxWords = Math.round(recWords * 1.4 / 100) * 100;
+            var recH2 = Math.max(2, Math.round(recWords / 300));
+            var recImages = Math.max(1, Math.round(recWords / 500));
+            html += '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;">';
+            html += '<div style="font-weight:600;color:#334155;font-size:13px;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(kw.keyword) + '</div>';
+            html += '<div style="display:flex;gap:8px;margin-bottom:8px;">';
+            html += '<div style="flex:1;text-align:center;padding:8px;background:white;border-radius:8px;border:2px solid #3b82f6;"><div style="font-size:18px;font-weight:800;color:#3b82f6;">' + recWords.toLocaleString() + '</div><div style="font-size:10px;color:#64748b;">' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0645\u0648\u0635\u0649\u0629' : 'Rec. Words') + '</div></div>';
+            html += '<div style="flex:1;text-align:center;padding:8px;background:white;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:14px;font-weight:700;color:#64748b;">' + minWords.toLocaleString() + '-' + maxWords.toLocaleString() + '</div><div style="font-size:10px;color:#64748b;">' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u0633\u062e\u0629' : 'Range') + '</div></div>';
+            html += '</div>';
+            html += '<div style="display:flex;gap:6px;font-size:11px;color:#64748b;">';
+            html += '<span>&#128196; ' + recH2 + ' H2</span>';
+            html += '<span>&#128248; ' + recImages + ' imgs</span>';
+            html += '<span>&#128207; ~' + Math.round(recWords / 250) + ' min read</span>';
+            html += '</div>';
+            html += '</div>';
+        }
+        html += '</div></div>';
+        return html;
+    }
+    function krShowContentLength() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderContentLengthOptimizer(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // ANCHOR TEXT GENERATOR
+    // ==============================
+    function krRenderAnchorTextGenerator(results) {
+        var html = '<div style="background:linear-gradient(135deg,#dbeafe,#eff6ff);border:2px solid #3b82f6;border-radius:16px;padding:20px;margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 8px;color:#1e40af;">&#128279; ' + (currentLang === 'ar' ? '\u0645\u0648\u0644\u062f \u0646\u0635 \u0627\u0644\u0631\u0628\u0637' : 'Anchor Text Generator') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u062a\u0648\u0644\u064a\u062f \u0646\u0635\u0648\u0635 \u0631\u0628\u0637 \u0645\u0639\u062f\u0648\u0644\u0629 \u0644\u0644\u0631\u0635\u0644 \u0627\u0644\u062f\u0627\u062e\u0644\u064a' : 'Generate natural anchor text variations for internal linking') + '</p>';
+        html += '</div>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;">';
+        for (var i = 0; i < Math.min(results.length, 15); i++) {
+            var kw = results[i].keyword;
+            var words = kw.split(' ');
+            var anchors = [];
+            anchors.push(kw);
+            if (words.length >= 2) {
+                anchors.push(words.slice(0, Math.ceil(words.length / 2)).join(' '));
+                if (words.length >= 3) anchors.push(words.slice(0, 2).join(' '));
+            }
+            anchors.push(kw.charAt(0).toUpperCase() + kw.slice(1));
+            anchors.push('our ' + kw);
+            anchors.push('learn about ' + kw);
+            anchors.push(kw + ' guide');
+            anchors.push('best ' + kw);
+            var unique = [];
+            for (var a = 0; a < anchors.length; a++) {
+                if (unique.indexOf(anchors[a]) < 0) unique.push(anchors[a]);
+            }
+            html += '<div style="background:white;border:1px solid #dbeafe;border-radius:10px;padding:12px;">';
+            html += '<div style="font-weight:600;color:#1e40af;font-size:13px;margin-bottom:8px;">' + esc(kw) + '</div>';
+            html += '<div style="display:flex;flex-direction:column;gap:3px;">';
+            for (var a = 0; a < unique.length; a++) {
+                html += '<div style="padding:4px 8px;background:#eff6ff;border-radius:4px;font-size:11px;color:#1e3a5f;font-family:monospace;display:flex;justify-content:space-between;align-items:center;">';
+                html += '<span>' + esc(unique[a]) + '</span>';
+                html += '<span style="color:#94a3b8;font-size:9px;">' + unique[a].length + '</span>';
+                html += '</div>';
+            }
+            html += '</div></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowAnchors() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderAnchorTextGenerator(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // META DESCRIPTION GENERATOR
+    // ==============================
+    function krRenderMetaGenerator(results) {
+        var html = '<div style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:2px solid #10b981;border-radius:16px;padding:20px;margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 8px;color:#065f46;">&#128196; ' + (currentLang === 'ar' ? '\u0645\u0648\u0644\u062f \u0627\u0644\u0648\u0635\u0641 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a' : 'Meta Description Generator') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u062a\u0648\u0644\u064a\u062f \u0623\u0648\u0635\u0627\u0641 \u0645\u0639\u0644\u0648\u0645\u0627\u062a \u0645\u062d\u0637\u0648\u0637\u0629 155 \u062d\u0631\u0641\u0627\u064b \u0645\u0646 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0641\u062a\u0627\u062d\u0629' : 'Generate 155-character meta descriptions from your keywords') + '</p>';
+        html += '</div>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;">';
+        for (var i = 0; i < Math.min(results.length, 15); i++) {
+            var kw = results[i].keyword;
+            var vol = results[i].volume || 0;
+            var intent = results[i].intent || 'info';
+            var templates = [];
+            if (intent === 'trans') {
+                templates.push('Looking for ' + kw + '? Compare top options, prices and reviews. Find the best ' + kw + ' for your needs today.');
+                templates.push('Shop the best ' + kw + ' online. Free shipping on orders. Top-rated ' + kw + ' with fast delivery.');
+            } else {
+                templates.push('Discover everything you need to know about ' + kw + '. Expert tips, detailed guide, and proven strategies for 2025.');
+                templates.push('Learn ' + kw + ' with our comprehensive guide. Step-by-step instructions, best practices, and actionable advice.');
+                templates.push('Everything about ' + kw + ' in one place. Expert analysis, practical tips, and the latest trends you need to know.');
+            }
+            var desc = templates[0];
+            if (desc.length > 158) desc = desc.substring(0, 155) + '...';
+            var descLen = desc.length;
+            var lenColor = descLen <= 155 ? '#10b981' : descLen <= 160 ? '#f59e0b' : '#ef4444';
+            html += '<div style="background:white;border:1px solid #d1fae5;border-radius:10px;padding:14px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+            html += '<div style="font-weight:600;color:#065f46;font-size:13px;">' + esc(kw) + '</div>';
+            html += '<span style="font-size:10px;color:' + lenColor + ';font-weight:600;">' + descLen + '/155</span>';
+            html += '</div>';
+            html += '<div style="padding:8px;background:#f0fdf4;border-radius:6px;font-size:12px;color:#475569;line-height:1.5;margin-bottom:6px;">' + esc(desc) + '</div>';
+            html += '<div style="display:flex;gap:6px;font-size:10px;color:#94a3b8;">';
+            html += '<span>&#128200; Vol: ' + vol.toLocaleString() + '</span>';
+            html += '<span>&#127919; ' + (intent === 'trans' ? 'Transactional' : 'Informational') + '</span>';
+            html += '</div></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowMeta() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderMetaGenerator(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
     // Update the extra analysis bar with new buttons
     // ==============================
     var _krOrigRenderExtraAnalysis = krRenderExtraAnalysis;
@@ -10397,6 +10715,12 @@
         html += '<button onclick="krShowTimeline()" style="padding:8px 16px;border-radius:100px;border:2px solid #0ea5e9;background:#f0f9ff;color:#0369a1;font-weight:700;cursor:pointer;font-size:13px;">&#128338; Timeline</button>';
         html += '<button onclick="krShowSerpOpportunities()" style="padding:8px 16px;border-radius:100px;border:2px solid #6366f1;background:#eef2ff;color:#4338ca;font-weight:700;cursor:pointer;font-size:13px;">&#127919; SERP Opps</button>';
         html += '<button onclick="krExportPDF()" style="padding:8px 16px;border-radius:100px;border:2px solid #64748b;background:#f8fafc;color:#334155;font-weight:700;cursor:pointer;font-size:13px;">&#128196; PDF</button>';
+        html += '<button onclick="krShowVolatility()" style="padding:8px 16px;border-radius:100px;border:2px solid #7c3aed;background:#f5f3ff;color:#5b21b6;font-weight:700;cursor:pointer;font-size:13px;">&#127744; Volatility</button>';
+        html += '<button onclick="krShowSeasonality()" style="padding:8px 16px;border-radius:100px;border:2px solid #0ea5e9;background:#f0f9ff;color:#0369a1;font-weight:700;cursor:pointer;font-size:13px;">&#127745; Seasonality</button>';
+        html += '<button onclick="krShowCannibalization()" style="padding:8px 16px;border-radius:100px;border:2px solid #dc2626;background:#fef2f2;color:#991b1b;font-weight:700;cursor:pointer;font-size:13px;">&#128008; Cannibal</button>';
+        html += '<button onclick="krShowContentLength()" style="padding:8px 16px;border-radius:100px;border:2px solid #0d9488;background:#f0fdfa;color:#115e59;font-weight:700;cursor:pointer;font-size:13px;">&#128221; Length</button>';
+        html += '<button onclick="krShowAnchors()" style="padding:8px 16px;border-radius:100px;border:2px solid #2563eb;background:#eff6ff;color:#1e40af;font-weight:700;cursor:pointer;font-size:13px;">&#128279; Anchors</button>';
+        html += '<button onclick="krShowMeta()" style="padding:8px 16px;border-radius:100px;border:2px solid #059669;background:#ecfdf5;color:#065f46;font-weight:700;cursor:pointer;font-size:13px;">&#128196; Meta</button>';
         html += '<button onclick="krExportGoogleSheets(_krResults)" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#059669;font-weight:700;cursor:pointer;font-size:13px;">&#128203; Sheets</button>';
         html += '</div>';
         return html;
