@@ -9763,6 +9763,301 @@
         return html;
     }
 
+    // ==============================
+    // KEYWORD ROI CALCULATOR
+    // ==============================
+    function krRenderROICalculator(results) {
+        var html = '<div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid #059669;border-radius:16px;padding:20px;margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 8px;color:#065f46;">&#128176; ' + (currentLang === 'ar' ? '\u062d\u0627\u0633\u0628 \u0627\u0644\u0639\u0627\u0626\u062f\u0629 (ROI)' : 'Keyword ROI Calculator') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u0642\u064a\u0645\u0629 \u0627\u0644\u0639\u0627\u0626\u062f\u0629 \u0627\u0644\u0645\u062a\u0648\u0642\u0639\u0629 \u0644\u0644\u0633\u0648\u0642 \u0627\u0644\u0639\u0637\u0645\u064a\u0629 \u0627\u0644\u0628\u0631\u0627\u0632\u0639\u064a\u0629' : 'Estimate potential traffic value from your keyword portfolio') + '</p>';
+        html += '</div>';
+        html += '<div style="background:white;border:1px solid #d1fae5;border-radius:12px;padding:16px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">';
+        html += '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">' + (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637 \u0627\u0644\u0637\u0628\u0639 \u0627\u0644\u0639\u0637\u0627\u0645\u064a (%)' : 'Avg. Position') + '</label>';
+        html += '<input type="number" id="kr-roi-position" value="10" min="1" max="100" style="width:100%;padding:8px;border:2px solid #d1fae5;border-radius:8px;font-size:13px;" /></div>';
+        html += '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">CTR @ Pos (%)</label>';
+        html += '<input type="number" id="kr-roi-ctr" value="3.1" min="0.1" max="100" step="0.1" style="width:100%;padding:8px;border:2px solid #d1fae5;border-radius:8px;font-size:13px;" /></div>';
+        html += '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">' + (currentLang === 'ar' ? '\u062a\u0643\u0644\u0641\u0629 \u0645\u062a\u0642\u0628\u0644\u0629 ($)' : 'Conversion Rate (%)') + '</label>';
+        html += '<input type="number" id="kr-roi-conv" value="2" min="0.1" max="100" step="0.1" style="width:100%;padding:8px;border:2px solid #d1fae5;border-radius:8px;font-size:13px;" /></div>';
+        html += '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">' + (currentLang === 'ar' ? '\u062a\u0643\u0644\u0641\u0629 \u0644\u0644\u0639\u0645\u064a\u0644 ($)' : 'Avg. Order Value ($)') + '</label>';
+        html += '<input type="number" id="kr-roi-aov" value="50" min="1" max="100000" style="width:100%;padding:8px;border:2px solid #d1fae5;border-radius:8px;font-size:13px;" /></div>';
+        html += '</div>';
+        html += '<button onclick="krCalculateROI()" style="display:block;margin:0 auto 16px;padding:8px 24px;border-radius:100px;background:#059669;color:white;border:none;font-weight:700;cursor:pointer;font-size:13px;">&#128176; Calculate ROI</button>';
+        html += '<div id="kr-roi-output"></div>';
+        return html;
+    }
+    function krCalculateROI() {
+        var pos = parseFloat(document.getElementById('kr-roi-position').value) || 10;
+        var ctr = parseFloat(document.getElementById('kr-roi-ctr').value) || 3.1;
+        var convRate = parseFloat(document.getElementById('kr-roi-conv').value) || 2;
+        var aov = parseFloat(document.getElementById('kr-roi-aov').value) || 50;
+        if (!_krResults || _krResults.length === 0) return;
+        var totalVol = 0, totalCpc = 0, weightedVol = 0;
+        var tierKws = { easy: [], medium: [], hard: [] };
+        for (var i = 0; i < _krResults.length; i++) {
+            var d = _krResults[i];
+            var vol = d.volume || 0;
+            totalVol += vol;
+            totalCpc += parseFloat(d.cpc) || 0;
+            weightedVol += vol * (d.difficulty <= 35 ? 0.8 : d.difficulty <= 60 ? 0.5 : 0.2);
+            if (d.difficulty <= 35) tierKws.easy.push(d);
+            else if (d.difficulty <= 60) tierKws.medium.push(d);
+            else tierKws.hard.push(d);
+        }
+        var avgCpc = _krResults.length > 0 ? (totalCpc / _krResults.length).toFixed(2) : 0;
+        var traffic30d = Math.round(totalVol * (ctr / 100) * 30);
+        var traffic12m = Math.round(totalVol * (ctr / 100) * 365);
+        var clicks30d = traffic30d;
+        var clicks12m = traffic12m;
+        var conversions30d = Math.round(clicks30d * (convRate / 100));
+        var conversions12m = Math.round(clicks12m * (convRate / 100));
+        var revenue30d = conversions30d * aov;
+        var revenue12m = conversions12m * aov;
+        var adSpend30d = Math.round(totalVol * (ctr / 100) * 30 * avgCpc);
+        var adSpend12m = Math.round(totalVol * (ctr / 100) * 365 * avgCpc);
+        var html = '<div style="background:white;border:1px solid #d1fae5;border-radius:12px;padding:20px;">';
+        html += '<h4 style="margin:0 0 16px;color:#065f46;font-size:15px;">&#128200; ' + (currentLang === 'ar' ? '\u0646\u062a\u0627\u0626\u062c' : 'Results') + '</h4>';
+        html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">';
+        html += '<div style="background:#f0fdf4;padding:12px;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#059669;">' + traffic30d.toLocaleString() + '</div><div style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u0632\u064a\u0627\u0631\u0629 / \u0634\u0647\u0631' : 'Visits / Month') + '</div></div>';
+        html += '<div style="background:#eff6ff;padding:12px;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#3b82f6;">' + conversions30d.toLocaleString() + '</div><div style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u062a\u062e\u0635\u0635\u0627\u062a / \u0634\u0647\u0631' : 'Conversions / Month') + '</div></div>';
+        html += '<div style="background:#fef3c7;padding:12px;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#d97706;">$' + revenue30d.toLocaleString() + '</div><div style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u0625\u064a\u0631\u0627\u062f / \u0634\u0647\u0631' : 'Revenue / Month') + '</div></div>';
+        html += '<div style="background:#fef2f2;padding:12px;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#ef4444;">$' + adSpend30d.toLocaleString() + '</div><div style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u062a\u0643\u0644\u0641\u0629 \u0625\u0639\u0644\u0627\u0646\u064a / \u0634\u0647\u0631' : 'Ad Spend / Month') + '</div></div>';
+        html += '</div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">';
+        html += '<div style="text-align:center;padding:12px;background:#f8fafc;border-radius:10px;"><div style="font-size:18px;font-weight:800;color:#065f46;">$' + (revenue12m).toLocaleString() + '</div><div style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u0625\u064a\u0631\u0627\u062f / \u0633\u0646\u0629' : 'Revenue / Year') + '</div></div>';
+        html += '<div style="text-align:center;padding:12px;background:#f8fafc;border-radius:10px;"><div style="font-size:18px;font-weight:800;color:#3b82f6;">' + clicks12m.toLocaleString() + '</div><div style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u0632\u064a\u0627\u0631\u0629 / \u0633\u0646\u0629' : 'Visits / Year') + '</div></div>';
+        var roi = adSpend12m > 0 ? Math.round(((revenue12m - adSpend12m) / adSpend12m) * 100) : 0;
+        html += '<div style="text-align:center;padding:12px;background:#f8fafc;border-radius:10px;"><div style="font-size:18px;font-weight:800;color:' + (roi > 0 ? '#059669' : '#ef4444') + ';">' + (roi > 0 ? '+' : '') + roi + '%</div><div style="font-size:11px;color:#64748b;">ROI vs Ads</div></div>';
+        html += '</div>';
+        html += '<div style="background:#f0fdf4;border:1px solid #d1fae5;border-radius:10px;padding:12px;">';
+        html += '<h5 style="margin:0 0 8px;font-size:13px;color:#065f46;">&#128161; ' + (currentLang === 'ar' ? '\u062a\u0648\u0635\u064a\u0629' : 'Insights') + '</h5>';
+        html += '<div style="font-size:13px;color:#475569;display:flex;flex-direction:column;gap:6px;">';
+        html += '<div>&#8226; ' + tierKws.easy.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0633\u0647\u0644\u0629 — \u0645\u0646\u0627\u0633\u0628 \u0644\u0644\u0627\u0633\u062a\u0647\u062f\u0627\u0641 \u0627\u0644\u0633\u0631\u064a\u0639' : 'easy keywords — best for quick wins') + '</div>';
+        html += '<div>&#8226; ' + tierKws.medium.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0645\u062a\u0648\u0633\u0637\u0629 — \u062a\u0637\u0644\u0628 \u0645\u062c\u0647\u0648\u062f\u0629 \u0645\u0646 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'medium keywords — need moderate effort') + '</div>';
+        html += '<div>&#8226; ' + tierKws.hard.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0635\u0639\u0628\u0629 — \u062a\u062d\u062a\u0627\u062c \u0645\u0645\u062a\u0632' : 'hard keywords — long-term investment') + '</div>';
+        html += '<div>&#8226; ' + (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637 CPC: $' + avgCpc + ' \u0644\u0644\u0643\u0644\u0645\u0629 \u0627\u0644\u0648\u062d\u062f\u0629' : 'Avg CPC: $' + avgCpc + ' per keyword') + '</div>';
+        html += '<div>&#8226; ' + (currentLang === 'ar' ? '\u0627\u0644\u0639\u0627\u0626\u062f\u0629 \u0627\u0644\u0639\u0637\u0645\u064a\u0629 \u062a\u0639\u0648\u0636 ' + (revenue12m > adSpend12m ? '\u0627\u0644\u0633\u0648\u0642 \u0627\u0644\u0639\u0637\u0645\u064a' : '\u0627\u0644\u0625\u0639\u0644\u0627\u0646\u0627\u062a') + ' بـ $' + Math.abs(revenue12m - adSpend12m).toLocaleString() + '/year' : 'Organic beats ' + (revenue12m > adSpend12m ? 'ads' : 'ads beat you') + ' by $' + Math.abs(revenue12m - adSpend12m).toLocaleString() + '/year') + '</div>';
+        html += '</div></div></div>';
+        var out = document.getElementById('kr-roi-output');
+        if (out) out.innerHTML = html;
+    }
+    function krShowROI() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = krRenderROICalculator(_krResults);
+        container.style.display = '';
+    }
+
+    // ==============================
+    // SERP COMPETITOR OVERLAP
+    // ==============================
+    function krRenderCompetitorOverlap(results) {
+        var domainKeywords = {};
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i].keyword;
+            var topDomains = results[i].topDomains || [];
+            for (var d = 0; d < Math.min(topDomains.length, 5); d++) {
+                var dom = topDomains[d].domain;
+                if (!domainKeywords[dom]) domainKeywords[dom] = [];
+                domainKeywords[dom].push({ keyword: kw, position: d + 1, volume: results[i].volume || 0, difficulty: results[i].difficulty || 0 });
+            }
+        }
+        var domKeys = Object.keys(domainKeywords);
+        var domList = [];
+        for (var d = 0; d < domKeys.length; d++) {
+            domList.push({ domain: domKeys[d], keywords: domainKeywords[domKeys[d]], totalVol: 0 });
+            for (var k = 0; k < domainKeywords[domKeys[d]].length; k++) {
+                domList[d].totalVol += domainKeywords[domKeys[d]][k].volume;
+            }
+        }
+        domList.sort(function(a, b) { return b.keywords.length - a.keywords.length; });
+        var top15 = domList.slice(0, 15);
+        var html = '<div style="background:linear-gradient(135deg,#fef2f2,#fff1f2);border:2px solid #ef4444;border-radius:16px;padding:20px;margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 8px;color:#991b1b;">&#128101; ' + (currentLang === 'ar' ? '\u062a\u063a\u0637\u064a\u0627\u0634 \u0627\u0644\u0645\u0646\u0627\u0641\u0633\u064a\u0646' : 'Competitor Overlap') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0627\u0642\u0639 \u0627\u0644\u062a\u064a \u062a\u0638\u0647\u0631 \u0641\u064a \u0623\u0643\u062b\u0631 \u0646\u0638\u0627\u0626\u0637 \u0628\u062d\u062b \u0639\u0645\u064a\u0629' : 'Domains competing for the most search results') + '</p>';
+        html += '</div>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;">';
+        var maxKws = top15.length > 0 ? top15[0].keywords.length : 1;
+        for (var d = 0; d < top15.length; d++) {
+            var dom = top15[d];
+            var pct = Math.round((dom.keywords.length / maxKws) * 100);
+            var color = d === 0 ? '#ef4444' : d === 1 ? '#f59e0b' : d === 2 ? '#3b82f6' : '#64748b';
+            var avgPos = 0;
+            for (var k = 0; k < dom.keywords.length; k++) avgPos += dom.keywords[k].position;
+            avgPos = dom.keywords.length > 0 ? (avgPos / dom.keywords.length).toFixed(1) : 0;
+            html += '<div style="background:white;border:1px solid #fecaca;border-radius:12px;padding:14px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+            html += '<div><strong style="font-size:14px;color:' + color + ';">#' + (d + 1) + ' ' + esc(dom.domain) + '</strong></div>';
+            html += '<span style="background:' + color + ';color:white;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;">' + dom.keywords.length + ' kws</span>';
+            html += '</div>';
+            html += '<div style="height:6px;background:#f1f5f9;border-radius:3px;margin-bottom:8px;"><div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:3px;"></div></div>';
+            html += '<div style="display:flex;gap:8px;font-size:12px;color:#64748b;margin-bottom:8px;">';
+            html += '<span>' + (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637 \u0627\u0644\u0645\u0648\u0642\u0639: ' : 'Avg Pos: ') + avgPos + '</span>';
+            html += '<span>' + (currentLang === 'ar' ? '\u0627\u0644\u062d\u062c\u0645: ' : 'Vol: ') + dom.totalVol.toLocaleString() + '</span>';
+            html += '</div>';
+            html += '<div style="display:flex;flex-wrap:wrap;gap:3px;">';
+            var showKws = dom.keywords.slice(0, 6);
+            for (var k = 0; k < showKws.length; k++) {
+                var posColor = showKws[k].position <= 3 ? '#059669' : showKws[k].position <= 7 ? '#f59e0b' : '#ef4444';
+                html += '<span style="background:#f8fafc;padding:2px 6px;border-radius:100px;font-size:10px;border:1px solid #e2e8f0;">';
+                html += '<span style="color:' + posColor + ';font-weight:700;">#' + showKws[k].position + '</span> ';
+                html += esc(showKws[k].keyword.length > 20 ? showKws[k].keyword.substring(0, 18) + '..' : showKws[k].keyword);
+                html += '</span>';
+            }
+            if (dom.keywords.length > 6) html += '<span style="font-size:10px;color:#94a3b8;padding:2px;">+' + (dom.keywords.length - 6) + '</span>';
+            html += '</div></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowCompetitorOverlap() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = krRenderCompetitorOverlap(_krResults);
+        container.style.display = '';
+    }
+
+    // ==============================
+    // CONTENT CALENDAR
+    // ==============================
+    function krRenderContentCalendar() {
+        if (!_krTopicTree || _krTopicTree.length === 0) return '<p style="color:#94a3b8;">Run research first to generate content plan.</p>';
+        var now = new Date();
+        var html = '<div style="background:linear-gradient(135deg,#ede9fe,#f5f3ff);border:2px solid #8b5cf6;border-radius:16px;padding:20px;margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 8px;color:#6d28d9;">&#128197; ' + (currentLang === 'ar' ? '\u062a\u0642\u0648\u064a\u0645 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'Content Calendar') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u062c\u062c\u0648\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u062a \u0639\u0644\u0649 \u0627\u0644\u062a\u0642\u0648\u064a\u0645' : 'Topics scheduled for publication') + '</p>';
+        html += '</div>';
+        html += '<div style="overflow-x:auto;">';
+        html += '<table style="width:100%;border-collapse:collapse;font-size:12px;background:white;border-radius:12px;overflow:hidden;">';
+        var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        var dayNamesAr = ['\u0627\u0644\u0623\u062d\u062f', '\u0627\u0644\u0627\u062b\u0646\u064a\u0646', '\u0627\u0644\u062b\u0644\u0627\u062b\u0627\u0621', '\u0627\u0644\u0623\u0631\u0628\u0639\u0627\u0621', '\u0627\u0644\u062e\u0645\u064a\u0633', '\u0627\u0644\u062c\u0645\u0639\u0629', '\u0627\u0644\u0633\u0628\u062a'];
+        var useDays = currentLang === 'ar' ? dayNamesAr : days;
+        html += '<thead><tr style="background:#f5f3ff;">';
+        for (var d = 0; d < 7; d++) html += '<th style="padding:10px;text-align:center;font-weight:700;color:#6d28d9;border-bottom:2px solid #e9d5ff;">' + useDays[d] + '</th>';
+        html += '</tr></thead><tbody>';
+        var colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'];
+        for (var week = 0; week < 4; week++) {
+            html += '<tr>';
+            for (var d = 0; d < 7; d++) {
+                var weekOffset = week * 7 + d;
+                var cellDate = new Date(now);
+                cellDate.setDate(cellDate.getDate() + weekOffset);
+                var topicIdx = week * 2 + Math.floor(d / 4);
+                if (d === 0 || d === 3) topicIdx = week * 2 + (d === 0 ? 0 : 1);
+                else topicIdx = -1;
+                var bgColor = '#f8fafc';
+                var content = '';
+                var topic = _krTopicTree[topicIdx % _krTopicTree.length];
+                if (topic && (d === 0 || d === 3)) {
+                    bgColor = colors[topicIdx % colors.length] + '11';
+                    var col = colors[topicIdx % colors.length];
+                    content = '<div style="border-left:3px solid ' + col + ';padding-left:6px;">';
+                    content += '<div style="font-weight:700;color:' + col + ';font-size:12px;">' + esc(topic.name || topic.topic || 'Topic ' + (topicIdx + 1)) + '</div>';
+                    content += '<div style="font-size:10px;color:#64748b;">' + cellDate.toLocaleDateString() + '</div>';
+                    if (topic.keywords) content += '<div style="font-size:10px;color:#94a3b8;">' + topic.keywords.length + ' kws</div>';
+                    content += '</div>';
+                }
+                html += '<td style="padding:8px;background:' + bgColor + ';border:1px solid #f1f5f9;vertical-align:top;min-width:100px;height:80px;">';
+                html += '<div style="font-size:10px;color:#94a3b8;margin-bottom:4px;">' + cellDate.getDate() + '/' + (cellDate.getMonth() + 1) + '</div>';
+                html += content;
+                html += '</td>';
+            }
+            html += '</tr>';
+        }
+        html += '</tbody></table></div>';
+        return html;
+    }
+    function krShowCalendar() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = krRenderContentCalendar();
+        container.style.display = '';
+    }
+
+    // ==============================
+    // URL SLUG GENERATOR
+    // ==============================
+    function krRenderSlugGenerator() {
+        var html = '<div style="background:linear-gradient(135deg,#fef3c7,#fff7ed);border:2px solid #f59e0b;border-radius:16px;padding:20px;margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 8px;color:#92400e;">&#128279; ' + (currentLang === 'ar' ? '\u0645\u0648\u0644\u062f URL \u0627\u0644\u0635\u062d\u064a\u062d' : 'URL Slug Generator') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u062a\u0648\u0644\u062f \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0641\u062a\u0627\u062d \u0625\u0644\u0649 URL \u0635\u062d\u064a\u062d \u0645\u0635\u062f\u0648\u0642 \u0644\u0644\u0628\u062d\u062b' : 'Convert keywords into SEO-friendly URL slugs') + '</p>';
+        html += '</div>';
+        html += '<div style="background:white;border:1px solid #fef3c7;border-radius:12px;padding:16px;margin-bottom:16px;">';
+        html += '<label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">' + (currentLang === 'ar' ? '\u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0641\u062a\u0627\u062d\u0629 (كل سطر)' : 'Keywords (one per line)') + '</label>';
+        html += '<textarea id="kr-slug-input" rows="5" style="width:100%;padding:8px 12px;border:2px solid #fef3c7;border-radius:8px;font-family:monospace;font-size:13px;resize:vertical;">';
+        if (_krResults && _krResults.length > 0) {
+            for (var i = 0; i < Math.min(_krResults.length, 10); i++) html += esc(_krResults[i].keyword) + '\n';
+        }
+        html += '</textarea>';
+        html += '<button onclick="krGenerateSlugs()" style="margin-top:8px;padding:8px 20px;border-radius:100px;background:#f59e0b;color:white;border:none;font-weight:700;cursor:pointer;font-size:13px;">&#128279; Generate Slugs</button>';
+        html += '</div>';
+        html += '<div id="kr-slug-output"></div>';
+        return html;
+    }
+    function krToSlug(text) {
+        return text.toLowerCase()
+            .replace(/[^\w\s\u0600-\u06FF-]/g, '')
+            .replace(/[\s_]+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '')
+            .substring(0, 75);
+    }
+    function krGenerateSlugs() {
+        var input = document.getElementById('kr-slug-input');
+        if (!input) return;
+        var lines = input.value.split('\n');
+        var html = '<div style="background:white;border:1px solid #fef3c7;border-radius:12px;padding:16px;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+        html += '<strong style="color:#92400e;">' + lines.length + ' slugs generated</strong>';
+        html += '<button onclick="krCopySlugs()" style="padding:4px 12px;border-radius:100px;border:1px solid #f59e0b;background:#fffbeb;color:#92400e;font-size:12px;font-weight:600;cursor:pointer;">Copy All</button>';
+        html += '</div>';
+        html += '<div id="kr-slug-list" style="display:flex;flex-direction:column;gap:4px;">';
+        for (var i = 0; i < lines.length; i++) {
+            var kw = lines[i].trim();
+            if (!kw) continue;
+            var slug = krToSlug(kw);
+            var fullUrl = '/' + slug;
+            html += '<div style="padding:8px 12px;background:#fffbeb;border-radius:6px;font-family:monospace;font-size:13px;display:flex;justify-content:space-between;align-items:center;border:1px solid #fef3c7;">';
+            html += '<span style="color:#475569;"><span style="color:#92400e;">' + esc(kw) + '</span> &rarr; <span style="color:#059669;font-weight:600;">' + esc(fullUrl) + '</span></span>';
+            html += '<span style="color:#94a3b8;font-size:11px;">' + slug.length + ' chars</span>';
+            html += '</div>';
+        }
+        html += '</div></div>';
+        var out = document.getElementById('kr-slug-output');
+        if (out) out.innerHTML = html;
+        window._krSlugsData = [];
+        for (var i = 0; i < lines.length; i++) { if (lines[i].trim()) window._krSlugsData.push(krToSlug(lines[i].trim())); }
+    }
+    function krCopySlugs() {
+        if (window._krSlugsData && navigator.clipboard) navigator.clipboard.writeText(window._krSlugsData.join('\n'));
+    }
+    function krShowSlugs() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = krRenderSlugGenerator();
+        container.style.display = '';
+    }
+
+    // ==============================
+    // Update the extra analysis bar with new buttons
+    // ==============================
+    var _krOrigRenderExtraAnalysis = krRenderExtraAnalysis;
+    krRenderExtraAnalysis = function(results) {
+        var html = '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">';
+        html += '<button onclick="krShowAnalytics()" style="padding:8px 16px;border-radius:100px;border:2px solid #a855f7;background:#faf5ff;color:#7e22ce;font-weight:700;cursor:pointer;font-size:13px;">&#128202; Dashboard</button>';
+        html += '<button onclick="krShowROI()" style="padding:8px 16px;border-radius:100px;border:2px solid #059669;background:#ecfdf5;color:#065f46;font-weight:700;cursor:pointer;font-size:13px;">&#128176; ROI</button>';
+        html += '<button onclick="krShowMatrix()" style="padding:8px 16px;border-radius:100px;border:2px solid #f97316;background:#fff7ed;color:#c2410c;font-weight:700;cursor:pointer;font-size:13px;">&#128200; Matrix</button>';
+        html += '<button onclick="krShowCloud()" style="padding:8px 16px;border-radius:100px;border:2px solid #0ea5e9;background:#f0f9ff;color:#0369a1;font-weight:700;cursor:pointer;font-size:13px;">&#9998; Cloud</button>';
+        html += '<button onclick="krShowHeatmap()" style="padding:8px 16px;border-radius:100px;border:2px solid #f59e0b;background:#fffbeb;color:#92400e;font-weight:700;cursor:pointer;font-size:13px;">&#128293; Heatmap</button>';
+        html += '<button onclick="krShowCompetitorOverlap()" style="padding:8px 16px;border-radius:100px;border:2px solid #ef4444;background:#fef2f2;color:#991b1b;font-weight:700;cursor:pointer;font-size:13px;">&#128101; Overlap</button>';
+        html += '<button onclick="krShowLongTail()" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#065f46;font-weight:700;cursor:pointer;font-size:13px;">&#128256; Long-tail</button>';
+        html += '<button onclick="krShowOutline()" style="padding:8px 16px;border-radius:100px;border:2px solid #3b82f6;background:#eff6ff;color:#1e40af;font-weight:700;cursor:pointer;font-size:13px;">&#128221; Outline</button>';
+        html += '<button onclick="krShowSlugs()" style="padding:8px 16px;border-radius:100px;border:2px solid #f59e0b;background:#fffbeb;color:#92400e;font-weight:700;cursor:pointer;font-size:13px;">&#128279; Slugs</button>';
+        html += '<button onclick="krShowCalendar()" style="padding:8px 16px;border-radius:100px;border:2px solid #8b5cf6;background:#f5f3ff;color:#6d28d9;font-weight:700;cursor:pointer;font-size:13px;">&#128197; Calendar</button>';
+        html += '<button onclick="krExportGoogleSheets(_krResults)" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#059669;font-weight:700;cursor:pointer;font-size:13px;">&#128203; Sheets</button>';
+        html += '</div>';
+        return html;
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
         applyLang();
         setTimeout(function() {
