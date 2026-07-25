@@ -5115,45 +5115,30 @@
         var hl = (lang || 'en').toLowerCase();
         var url = 'https://www.google.com/search?q=' + encodeURIComponent(keyword) + '&hl=' + hl + '&gl=' + gl + '&num=10';
         return fetchHTML(url).then(function(html) {
-            var result = { paa: [], related: [], topDomains: [], featured: false, knowledgePanel: false, serpFeatures: 0, resultCount: 0 };
+            var result = { paa: [], related: [], topDomains: [], topResults: [], featured: false, featuredSnippet: '', knowledgePanel: false, shoppingResults: false, localPack: false, videoCarousel: false, imagePack: false, newsResults: false, serpFeatures: 0, resultCount: 0, organicCount: 0 };
             if (!html || typeof html !== 'string') return result;
-            var paaMatch = html.match(/People also ask/i);
-            if (paaMatch) result.serpFeatures++;
-            var kpMatch = html.match(/Knowledge Panel|knowledge-panel|kp-blk/i);
-            if (kpMatch) result.serpFeatures++;
-            var fsMatch = html.match(/featured.snippet|kp-whc|if6DPd|LGOjhe/i);
-            if (fsMatch) { result.featured = true; result.serpFeatures++; }
-            var localMatch = html.match(/Local pack|local-pack|uj0Bfe/i);
-            if (localMatch) result.serpFeatures++;
-            var imgMatch = html.match(/image.*pack|ZU6Mfc/i);
-            if (imgMatch) result.serpFeatures++;
-            var vidMatch = html.match(/video.*result|DxUMMb/i);
-            if (vidMatch) result.serpFeatures++;
+            if (html.match(/People also ask/i) || html.match(/\u0623\u0633\u0626\u0644\u0629 \u0639\u0646 \u0623\u064a\u0636\u0627/i)) { result.serpFeatures++; }
+            if (html.match(/Knowledge Panel|knowledge-panel|kp-blk/i)) { result.serpFeatures++; result.knowledgePanel = true; }
+            if (html.match(/featured.snippet|kp-whc|if6DPd|LGOjhe|wpQoby/i)) { result.featured = true; result.serpFeatures++; var fsMatch = html.match(/<div[^>]*class="[^"]*BNeawe[^"]*"[^>]*>([^<]{20,300})<\/div>/); if (fsMatch) result.featuredSnippet = fsMatch[1].replace(/<[^>]+>/g, '').trim(); }
+            if (html.match(/Local pack|local-pack|uj0Bfe|V7N0ye/i)) { result.localPack = true; result.serpFeatures++; }
+            if (html.match(/image.*pack|ZU6Mfc|isv-r/i)) { result.imagePack = true; result.serpFeatures++; }
+            if (html.match(/video.*result|DxUMMb|DjVCAe|ySUfS/i)) { result.videoCarousel = true; result.serpFeatures++; }
+            if (html.match(/Shopping|shopping|VOkeNg|CommercialAds/i)) { result.shoppingResults = true; result.serpFeatures++; }
+            if (html.match(/Top stories|news|Dp6wad|yY4Lee/i)) { result.newsResults = true; result.serpFeatures++; }
             var paaRegex = /data-q="([^"]+)"/g;
-            var paaMatch2;
-            while ((paaMatch2 = paaRegex.exec(html)) !== null) {
-                var q = paaMatch2[1].replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+            var paaMatch;
+            while ((paaMatch = paaRegex.exec(html)) !== null) {
+                var q = paaMatch[1].replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
                 if (q && q.length > 3 && q.length < 150) result.paa.push(q);
             }
-            var paaRegex2 = /\u0022([A-Z\u0600-\u06FF][^"\u0022]{5,80})\?\u0022/g;
-            while ((paaMatch2 = paaRegex2.exec(html)) !== null) {
-                var q2 = paaMatch2[1].replace(/\\u[\da-f]{4}/gi, function(m) {
-                    return String.fromCharCode(parseInt(m.substr(2), 16));
-                });
+            var paaRegex2 = /\u0022([A-Z\u0600-\u06FF\u00C0-\u024F][^"\u0022]{5,100})\?\u0022/g;
+            while ((paaMatch = paaRegex2.exec(html)) !== null) {
+                var q2 = paaMatch[1].replace(/\\u[\da-f]{4}/gi, function(m) { return String.fromCharCode(parseInt(m.substr(2), 16)); });
                 if (q2.indexOf('?') === -1) result.paa.push(q2 + '?');
+                else result.paa.push(q2);
             }
-            var relatedRegex = /class="BNeawe.*?">(.*?)<\/span/g;
-            var relatedMatches = html.match(relatedRegex);
             var relatedCandidates = [];
-            if (relatedMatches) {
-                for (var r = 0; r < relatedMatches.length; r++) {
-                    var rc = relatedMatches[r].replace(/class="BNeawe[^"]*">/g, '').replace(/<\/span/g, '').replace(/<[^>]+>/g, '').trim();
-                    if (rc && rc.length > 3 && rc.length < 100 && rc.toLowerCase() !== keyword.toLowerCase()) {
-                        relatedCandidates.push(rc);
-                    }
-                }
-            }
-            var relatedBlock = html.match(/Related searches|Related questions/i);
+            var relatedBlock = html.match(/Related searches|Related questions|\u0628\u062d\u062b\u062a \u0639\u0646 \u0623\u064a\u0636\u0627/i);
             if (relatedBlock) {
                 var relRegex = /<a href="\/search\?q=([^"&]+)[^"]*"[^>]*>([^<]+)<\/a/g;
                 var relMatch;
@@ -5178,7 +5163,7 @@
             if (organicBlock !== -1) searchResults = html.substring(organicBlock);
             while ((domainMatch = domainRegex.exec(searchResults)) !== null) {
                 var domain = domainMatch[1].toLowerCase();
-                if (domain.indexOf('google.') === -1 && domain.indexOf('youtube.com') === -1 && domain.indexOf('gstatic') === -1 && domain.indexOf('googleapis') === -1 && domain.length > 3) {
+                if (domain.indexOf('google.') === -1 && domain.indexOf('youtube.com') === -1 && domain.indexOf('gstatic') === -1 && domain.indexOf('googleapis') === -1 && domain.indexOf('google.co') === -1 && domain.length > 3) {
                     domainCounts[domain] = (domainCounts[domain] || 0) + 1;
                 }
             }
@@ -5190,17 +5175,40 @@
             sortedDomains.sort(function(a, b) { return b.count - a.count; });
             result.topDomains = sortedDomains.slice(0, 10);
             result.resultCount = sortedDomains.length;
+            result.organicCount = sortedDomains.length;
+            var titleRegex = /<h3[^>]*>(.*?)<\/h3>/g;
+            var titleMatch;
+            var topResults = [];
+            var seenDomains = {};
+            while ((titleMatch = titleRegex.exec(html)) !== null) {
+                var titleText = titleMatch[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
+                if (titleText.length > 5 && titleText.length < 200) {
+                    var nearbyUrl = html.substring(Math.max(0, titleMatch.index - 500), titleMatch.index);
+                    var urlMatch = nearbyUrl.match(/href="(https?:\/\/[^"]+)"/);
+                    var resultUrl = urlMatch ? urlMatch[1] : '';
+                    var resultDomain = '';
+                    if (resultUrl) {
+                        var dm = resultUrl.match(/https?:\/\/(?:www\.)?([^/]+)/);
+                        if (dm) resultDomain = dm[1].toLowerCase();
+                    }
+                    if (!seenDomains[resultDomain] && resultDomain && resultDomain.indexOf('google.') === -1) {
+                        seenDomains[resultDomain] = true;
+                        topResults.push({ title: titleText, url: resultUrl, domain: resultDomain });
+                    }
+                }
+            }
+            result.topResults = topResults.slice(0, 10);
             var seenPaa = {};
             var cleanPaa = [];
             for (var p = 0; p < result.paa.length; p++) {
                 var pl = result.paa[p].toLowerCase();
                 if (!seenPaa[pl]) { seenPaa[pl] = true; cleanPaa.push(result.paa[p]); }
             }
-            result.paa = cleanPaa.slice(0, 8);
-            result.related = result.related.slice(0, 8);
+            result.paa = cleanPaa.slice(0, 10);
+            result.related = result.related.slice(0, 10);
             return result;
         }).catch(function() {
-            return { paa: [], related: [], topDomains: [], featured: false, knowledgePanel: false, serpFeatures: 0, resultCount: 0 };
+            return { paa: [], related: [], topDomains: [], topResults: [], featured: false, featuredSnippet: '', knowledgePanel: false, shoppingResults: false, localPack: false, videoCarousel: false, imagePack: false, newsResults: false, serpFeatures: 0, resultCount: 0, organicCount: 0 };
         });
     }
 
@@ -5348,6 +5356,331 @@
         return { score: daScore, level: level, label: label, brands: brandNames, brandRatio: Math.round(brandRatio * 100) };
     }
 
+    function krEstimateVolumeV2(keyword, position, sourceType, expansionCount, serpData) {
+        var score = 30;
+        var wc = keyword.split(/\s+/).length;
+        var lower = keyword.toLowerCase();
+        if (expansionCount && expansionCount >= 5) score += 25;
+        else if (expansionCount && expansionCount >= 3) score += 18;
+        else if (expansionCount && expansionCount >= 2) score += 10;
+        else if (expansionCount >= 1) score += 5;
+        if (position <= 3) score += 20;
+        else if (position <= 5) score += 12;
+        else if (position <= 8) score += 6;
+        else if (position <= 12) score += 2;
+        if (sourceType === 'google-autocomplete') score += 12;
+        else if (sourceType === 'serp-features') score += 15;
+        else if (sourceType === 'wikipedia') score += 8;
+        else if (sourceType === 'template') score -= 5;
+        else if (sourceType === 'local') score -= 10;
+        if (wc === 1) score += 20;
+        else if (wc === 2) score += 10;
+        else if (wc === 3) score += 0;
+        else if (wc === 4) score -= 8;
+        else score -= 15;
+        if (serpData) {
+            var topCount = serpData.organicCount || serpData.resultCount || 0;
+            if (topCount >= 8) score += 10;
+            else if (topCount >= 5) score += 5;
+            var paaCount = serpData.paa ? serpData.paa.length : 0;
+            if (paaCount >= 4) score += 8;
+            else if (paaCount >= 2) score += 4;
+            var relCount = serpData.related ? serpData.related.length : 0;
+            if (relCount >= 5) score += 5;
+            if (serpData.shoppingResults) score += 8;
+            if (serpData.videoCarousel) score += 5;
+            if (serpData.newsResults) score += 6;
+            if (serpData.featured) score += 4;
+            if (serpData.topResults && serpData.topResults.length > 0) {
+                var titleMatch = false;
+                var kl = lower.replace(/\s+/g, '');
+                for (var t = 0; t < Math.min(serpData.topResults.length, 5); t++) {
+                    var tl = serpData.topResults[t].title.toLowerCase().replace(/\s+/g, '');
+                    if (tl.indexOf(kl) !== -1 || kl.indexOf(tl) !== -1) { titleMatch = true; break; }
+                }
+                if (titleMatch) score += 5;
+            }
+        }
+        var highIntent = ['buy', 'price', 'cost', 'deal', 'discount', 'order', 'shop', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u062a\u062e\u0635\u0635', '\u0627\u0633\u062a\u062b\u0645\u0627\u0631'];
+        for (var i = 0; i < highIntent.length; i++) {
+            if (lower.indexOf(highIntent[i]) !== -1) { score += 6; break; }
+        }
+        var seasonal = ['2024', '2025', '2026', '2027', '\u0634\u062a\u0627\u0621', '\u0635\u064a\u0641'];
+        for (var s = 0; s < seasonal.length; s++) {
+            if (lower.indexOf(seasonal[s]) !== -1) { score += 3; break; }
+        }
+        score = Math.max(5, Math.min(100, score));
+        var level = 'very-low';
+        if (score >= 80) level = 'very-high';
+        else if (score >= 65) level = 'high';
+        else if (score >= 45) level = 'medium';
+        else if (score >= 30) level = 'low';
+        return { volume: String(score), level: level };
+    }
+
+    function krScoreDifficultyV2(keyword, serpData) {
+        var score = 35;
+        var wc = keyword.split(/\s+/).length;
+        var lower = keyword.toLowerCase();
+        if (wc === 1) score += 20;
+        else if (wc === 2) score += 10;
+        else if (wc === 3) score -= 2;
+        else if (wc === 4) score -= 8;
+        else if (wc >= 5) score -= 15;
+        var bigBrands = ['amazon', 'noon', 'jarir', 'extra', 'hag', 'souq', 'aliexpress', 'ebay', 'wikipedia', 'nike.com', 'adidas.com', 'apple', 'samsung', 'official'];
+        if (serpData) {
+            var domains = serpData.topDomains || [];
+            var topResults = serpData.topResults || [];
+            var brandCount = 0;
+            var uniqueDomains = {};
+            for (var d = 0; d < domains.length; d++) {
+                uniqueDomains[domains[d].domain] = true;
+                for (var b = 0; b < bigBrands.length; b++) {
+                    if (domains[d].domain.indexOf(bigBrands[b]) !== -1) { brandCount++; break; }
+                }
+            }
+            var uniqueCount = Object.keys(uniqueDomains).length;
+            if (brandCount >= 4) score += 25;
+            else if (brandCount >= 3) score += 18;
+            else if (brandCount >= 2) score += 12;
+            else if (brandCount >= 1) score += 6;
+            if (uniqueCount <= 3) score += 12;
+            else if (uniqueCount <= 5) score += 5;
+            else if (uniqueCount >= 8) score -= 5;
+            if (serpData.featured) score += 6;
+            if (serpData.knowledgePanel) score += 5;
+            if (serpData.shoppingResults) score += 8;
+            if (serpData.localPack) score += 5;
+            var paaCount = serpData.paa ? serpData.paa.length : 0;
+            if (paaCount >= 3) score -= 5;
+            else if (paaCount >= 1) score -= 2;
+            if (topResults.length > 0) {
+                var exactTitleMatch = 0;
+                var kl = lower.replace(/\s+/g, '');
+                for (var t = 0; t < Math.min(topResults.length, 10); t++) {
+                    var tl = topResults[t].title.toLowerCase().replace(/\s+/g, '');
+                    if (tl === kl || tl.indexOf(kl) !== -1) exactTitleMatch++;
+                }
+                if (exactTitleMatch >= 5) score += 10;
+                else if (exactTitleMatch >= 3) score += 5;
+            }
+        }
+        var commWords = ['buy', 'cheap', 'price', 'deal', 'best', 'top', 'review', 'shop', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645', '\u0645\u062c\u0627\u0646\u064a', '\u0645\u0631\u0627\u062c\u0639\u0627\u062a'];
+        for (var c = 0; c < commWords.length; c++) {
+            if (lower.indexOf(commWords[c]) !== -1) { score += 3; break; }
+        }
+        var questionWords = ['how', 'what', 'why', 'when', 'where', 'can', 'does', '\u0643\u064a\u0641', '\u0645\u0627', '\u0647\u0644', '\u0645\u0646'];
+        for (var q = 0; q < questionWords.length; q++) {
+            if (lower.indexOf(questionWords[q]) === 0) { score -= 8; break; }
+        }
+        if (score < 10) score = 10;
+        if (score > 95) score = 95;
+        return score;
+    }
+
+    function krDetectIntentV2(keyword, serpData) {
+        var lower = keyword.toLowerCase();
+        var intentScores = { transactional: 0, informational: 0, navigational: 0, commercial: 0 };
+        var transWords = ['buy', 'price', 'cheap', 'deal', 'discount', 'order', 'shop', 'subscribe', 'purchase', 'free shipping', 'cod', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u062e\u0635\u0645', '\u062e\u0637\u0648\u0627\u062a', '\u0637\u0644\u0628', '\u0637\u0631\u0633', '\u062a\u062e\u0641\u064a\u0636', '\u0634\u0631\u0627\u0621 \u0627\u0644\u062a\u0643\u0627\u0644\u064a\u0641', '\u0645\u062a\u0646\u0627\u0632\u0644', '\u062a\u0633\u0648\u064a\u0642'];
+        var infoWords = ['how to', 'what is', 'why', 'guide', 'tutorial', 'learn', 'tips', 'definition', 'meaning', 'explained', '\u0643\u064a\u0641', '\u0645\u0639\u0646\u0649', '\u062f\u0644\u064a\u0644', '\u0639\u0644\u0645', '\u0637\u0631\u064a\u0642', '\u062e\u0637\u0648\u0637', '\u0645\u0631\u0627\u062c\u0639\u0629', '\u0646\u0635\u0627\u0626\u062d', '\u0634\u0631\u062d', '\u064a\u0639\u0644\u064a\u0643', '\u0643\u064a\u0641 \u062a\u0639\u0645\u0644', '\u0643\u064a\u0641 \u064a\u0633\u062a\u062e\u062f\u0645'];
+        var commWords = ['best', 'top', 'review', 'comparison', 'vs', 'alternative', 'rating', 'recommended', 'cheapest', 'most popular', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645', '\u0645\u0642\u0627\u0631\u0646\u0629', '\u0645\u0639\u062a\u0628\u0631', '\u0645\u0631\u0627\u062c\u0639\u0627\u062a', '\u0645\u0646\u0635\u062d\u0648\u0628', '\u062c\u0648\u062f\u0629', '\u0645\u0645\u064a\u0632', '\u0627\u0644\u0623\u0641\u0636\u0644 \u0644\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u064a\u0646', '\u0645\u0642\u0627\u0628\u0644 \u0627\u0644\u0633\u0639\u0631'];
+        var navWords = ['login', 'sign in', 'official', 'website', 'app', 'download', '\u062a\u0633\u062c\u064a\u0644', '\u0645\u0648\u0642\u0639 \u0631\u0633\u0645\u064a', '\u0645\u0648\u0642\u0639 \u0627\u0644\u0631\u0633\u0645\u064a', '\u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u062a\u0637\u0628\u064a\u0642'];
+        for (var i = 0; i < transWords.length; i++) { if (lower.indexOf(transWords[i]) !== -1) intentScores.transactional += 2; }
+        for (var i = 0; i < infoWords.length; i++) { if (lower.indexOf(infoWords[i]) !== -1) intentScores.informational += 2; }
+        for (var i = 0; i < commWords.length; i++) { if (lower.indexOf(commWords[i]) !== -1) intentScores.commercial += 2; }
+        for (var i = 0; i < navWords.length; i++) { if (lower.indexOf(navWords[i]) !== -1) intentScores.navigational += 3; }
+        if (serpData) {
+            if (serpData.shoppingResults) intentScores.transactional += 4;
+            if (serpData.localPack) intentScores.transactional += 3;
+            if (serpData.videoCarousel) intentScores.informational += 2;
+            if (serpData.featured) intentScores.informational += 1;
+            if (serpData.knowledgePanel) intentScores.informational += 2;
+            if (serpData.newsResults) intentScores.informational += 2;
+            if (serpData.paa && serpData.paa.length >= 3) intentScores.informational += 2;
+            if (serpData.topResults && serpData.topResults.length > 0) {
+                var shopDomains = ['amazon', 'noon', 'jarir', 'extra', 'souq', 'aliexpress', 'ebay', 'etsy'];
+                var shopCount = 0;
+                var eduCount = 0;
+                var wikiCount = 0;
+                for (var t = 0; t < Math.min(serpData.topResults.length, 5); t++) {
+                    var td = serpData.topResults[t].domain;
+                    for (var sd = 0; sd < shopDomains.length; sd++) {
+                        if (td.indexOf(shopDomains[sd]) !== -1) { shopCount++; break; }
+                    }
+                    if (td.indexOf('.edu') !== -1 || td.indexOf('.gov') !== -1) eduCount++;
+                    if (td.indexOf('wikipedia') !== -1) wikiCount++;
+                }
+                if (shopCount >= 3) intentScores.transactional += 5;
+                else if (shopCount >= 2) intentScores.transactional += 3;
+                if (eduCount >= 2) intentScores.informational += 3;
+                if (wikiCount >= 1) intentScores.informational += 2;
+            }
+        }
+        if (lower.match(/^\d+$/)) intentScores.transactional += 3;
+        var maxScore = 0;
+        var bestIntent = 'informational';
+        var intentKeys = ['transactional', 'commercial', 'informational', 'navigational'];
+        for (var i = 0; i < intentKeys.length; i++) {
+            if (intentScores[intentKeys[i]] > maxScore) { maxScore = intentScores[intentKeys[i]]; bestIntent = intentKeys[i]; }
+        }
+        return bestIntent;
+    }
+
+    function krSerpClustering(allKeywords, serpResultsMap) {
+        var kwUrls = {};
+        for (var i = 0; i < allKeywords.length; i++) {
+            var kw = allKeywords[i].keyword.toLowerCase();
+            var serp = serpResultsMap[kw];
+            if (serp && serp.topDomains) {
+                var urls = {};
+                for (var d = 0; d < serp.topDomains.length; d++) {
+                    urls[serp.topDomains[d].domain] = true;
+                }
+                kwUrls[kw] = Object.keys(urls);
+            } else {
+                kwUrls[kw] = [];
+            }
+        }
+        var clusters = [];
+        var assigned = {};
+        var sorted = allKeywords.slice().sort(function(a, b) { return (b.volume || 0) - (a.volume || 0); });
+        for (var i = 0; i < sorted.length; i++) {
+            var kw = sorted[i].keyword.toLowerCase();
+            if (assigned[kw]) continue;
+            var cluster = { pillar: sorted[i], keywords: [sorted[i]], urlOverlap: {} };
+            assigned[kw] = true;
+            var kwDomains = kwUrls[kw] || [];
+            for (var j = i + 1; j < allKeywords.length; j++) {
+                var kw2 = allKeywords[j].keyword.toLowerCase();
+                if (assigned[kw2]) continue;
+                var kw2Domains = kwUrls[kw2] || [];
+                var overlap = 0;
+                for (var d1 = 0; d1 < kwDomains.length; d1++) {
+                    for (var d2 = 0; d2 < kw2Domains.length; d2++) {
+                        if (kwDomains[d1] === kw2Domains[d2]) overlap++;
+                    }
+                }
+                if (overlap >= 2) {
+                    cluster.keywords.push(allKeywords[j]);
+                    assigned[kw2] = true;
+                } else if (overlap === 0 && kwDomains.length > 0 && kw2Domains.length > 0) {
+                    var kwWords = kw.split(/\s+/);
+                    var kw2Words = kw2.split(/\s+/);
+                    var wordOverlap = 0;
+                    for (var w1 = 0; w1 < kwWords.length; w1++) {
+                        for (var w2 = 0; w2 < kw2Words.length; w2++) {
+                            if (kwWords[w1] === kw2Words[w2] && kwWords[w1].length > 3) wordOverlap++;
+                        }
+                    }
+                    if (wordOverlap >= 2) {
+                        cluster.keywords.push(allKeywords[j]);
+                        assigned[kw2] = true;
+                    }
+                }
+            }
+            if (cluster.keywords.length >= 2) {
+                clusters.push({ topic: cluster.pillar.keyword, keywords: cluster.keywords.map(function(k) { return k.keyword || k; }) });
+            }
+        }
+        return clusters;
+    }
+
+    function krDeepExtractPAA(serpResultsMap, seed, lang, country) {
+        var allPAA = {};
+        var keys = Object.keys(serpResultsMap);
+        for (var i = 0; i < keys.length; i++) {
+            var serp = serpResultsMap[keys[i]];
+            if (serp && serp.paa) {
+                for (var p = 0; p < serp.paa.length; p++) {
+                    var q = serp.paa[p].toLowerCase().trim();
+                    if (q.length > 5 && q.length < 150 && q !== seed.toLowerCase()) {
+                        allPAA[q] = (allPAA[q] || 0) + 1;
+                    }
+                }
+            }
+        }
+        var paaKeywords = [];
+        var paaKeys = Object.keys(allPAA).sort(function(a, b) { return allPAA[b] - allPAA[a]; });
+        for (var j = 0; j < Math.min(paaKeys.length, 20); j++) {
+            paaKeywords.push({ keyword: paaKeys[j], source: 'paa', position: j + 1, expansionCount: allPAA[paaKeys[j]], volume: 0, difficulty: 0, intent: 'informational' });
+        }
+        return paaKeywords;
+    }
+
+    function krAnalyzeCompetitors(serpData) {
+        if (!serpData || !serpData.topDomains) return { brands: [], brandCount: 0, avgDA: 30, competitionLevel: 'low' };
+        var brands = [];
+        var brandMap = {};
+        var bigBrands = ['amazon', 'noon', 'jarir', 'extra', 'hag', 'souq', 'aliexpress', 'ebay', 'etsy', 'nike', 'adidas', 'apple', 'samsung', 'wikipedia', 'reddit', 'quora', 'medium', 'tripadvisor', 'yelp', 'official'];
+        for (var i = 0; i < serpData.topDomains.length; i++) {
+            var domain = serpData.topDomains[i].domain;
+            for (var b = 0; b < bigBrands.length; b++) {
+                if (domain.indexOf(bigBrands[b]) !== -1) {
+                    if (!brandMap[bigBrands[b]]) { brandMap[bigBrands[b]] = true; brands.push(bigBrands[b]); }
+                    break;
+                }
+            }
+        }
+        var uniqueCount = serpData.topDomains.length;
+        var brandCount = brands.length;
+        var brandRatio = uniqueCount > 0 ? brandCount / uniqueCount : 0;
+        var avgDA = 30;
+        if (brandRatio > 0.5) avgDA = 75;
+        else if (brandRatio > 0.3) avgDA = 60;
+        else if (brandRatio > 0.1) avgDA = 45;
+        else avgDA = 30;
+        if (uniqueCount <= 3) avgDA += 10;
+        var competitionLevel = 'low';
+        if (brandCount >= 3 || brandRatio > 0.4) competitionLevel = 'high';
+        else if (brandCount >= 1 || brandRatio > 0.15) competitionLevel = 'medium';
+        return { brands: brands, brandCount: brandCount, avgDA: avgDA, competitionLevel: competitionLevel, uniqueDomains: uniqueCount, brandRatio: Math.round(brandRatio * 100) };
+    }
+
+    function krGenerateContentBrief(keyword, serpData, intent) {
+        var brief = { title: keyword, h2s: [], questions: [], wordCount: 1500, keywords: [], sections: [] };
+        if (!serpData) return brief;
+        if (serpData.paa && serpData.paa.length > 0) {
+            brief.questions = serpData.paa.slice(0, 8);
+            brief.h2s = serpData.paa.slice(0, 6).map(function(q) { return q.replace(/\?$/, ''); });
+        }
+        if (serpData.related && serpData.related.length > 0) {
+            brief.keywords = serpData.related.slice(0, 10);
+        }
+        if (serpData.topResults && serpData.topResults.length > 0) {
+            var titles = [];
+            for (var t = 0; t < Math.min(serpData.topResults.length, 5); t++) {
+                titles.push(serpData.topResults[t].title);
+            }
+            brief.title = titles[0] || keyword;
+        }
+        if (intent === 'transactional') brief.wordCount = 1200;
+        else if (intent === 'commercial') brief.wordCount = 1800;
+        else if (intent === 'informational') brief.wordCount = 2200;
+        else brief.wordCount = 1500;
+        var seedWords = keyword.split(/\s+/);
+        for (var s = 0; s < seedWords.length; s++) {
+            if (seedWords[s].length > 3) brief.keywords.push(seedWords[s]);
+        }
+        return brief;
+    }
+
+    function krDetectTrendV2(keyword, serpData, serpResultsMap) {
+        var result = { icon: '', text: '', cls: '', seasonality: 'year-round', freshness: 'stable' };
+        if (!serpData) return result;
+        var lower = keyword.toLowerCase();
+        if (lower.match(/202[4-9]/)) { result.seasonality = 'trending-year'; result.freshness = 'rising'; }
+        if (lower.match(/\u0634\u062a\u0627\u0621|\u0635\u064a\u0641/)) result.seasonality = 'seasonal-winter';
+        if (lower.indexOf('\u0635\u064a\u0641') !== -1 || lower.indexOf('\u0639\u0644\u064a\u062a') !== -1) result.seasonality = 'seasonal-summer';
+        var paaCount = serpData.paa ? serpData.paa.length : 0;
+        var relCount = serpData.related ? serpData.related.length : 0;
+        var total = paaCount + relCount;
+        if (total >= 8) { result.icon = '\uD83D\uDCC8'; result.text = currentLang === 'ar' ? '\u0645\u0647\u062a\u0645' : 'Rising'; result.cls = 'kr-badge-trend-up'; result.freshness = 'rising'; }
+        else if (total >= 4) { result.icon = '\u27A1\uFE0F'; result.text = currentLang === 'ar' ? '\u0633\u0627\u0626\u0639' : 'Stable'; result.cls = 'kr-badge-trend-stable'; }
+        else if (serpData.featured || serpData.newsResults) { result.icon = '\uD83C\uDFC6'; result.text = currentLang === 'ar' ? '\u062a\u0631\u0636\u064a\u0646' : 'Featured'; result.cls = 'kr-badge-trend-up'; result.freshness = 'rising'; }
+        if (serpData.shoppingResults) { result.icon = '\uD83D\uDED2'; result.text = currentLang === 'ar' ? '\u0645\u062a\u062c\u0631 \u0639\u0644\u0649 \u0627\u0644\u0628\u064a\u0639' : 'Shopping Active'; result.cls = 'kr-badge-trend-up'; }
+        return result;
+    }
+
     function krDetectCannibalization(results) {
         var groups = [];
         var used = {};
@@ -5412,6 +5745,14 @@
         for (var i = 0; i < results.length; i++) { totalSerp += results[i].serpFeatures || 0; totalPaa += (results[i].paa || []).length; }
         html += '<div class="stat"><span class="stat-num" style="color:#8b5cf6;">' + totalSerp + '</span><span class="stat-label">SERP Features</span></div>';
         html += '<div class="stat"><span class="stat-num" style="color:#0ea5e9;">' + totalPaa + '</span><span class="stat-label">PAA Found</span></div>';
+        var totalShopping = 0;
+        var totalCompetitors = 0;
+        for (var i = 0; i < results.length; i++) {
+            if (results[i].shoppingResults) totalShopping++;
+            if (results[i].competitors) totalCompetitors++;
+        }
+        html += '<div class="stat"><span class="stat-num" style="color:#f59e0b;">' + totalShopping + '</span><span class="stat-label">Shopping SERPs</span></div>';
+        html += '<div class="stat"><span class="stat-num" style="color:#8b5cf6;">' + totalCompetitors + '</span><span class="stat-label">Competitor Data</span></div>';
         html += '</div>';
         if (cannibalGroups.length > 0) {
             html += '<div class="section" style="border-color:#fbbf24;">';
@@ -5426,17 +5767,21 @@
             }
             html += '</div>';
         }
-        html += '<table><thead><tr><th>#</th><th>Keyword</th><th>Score</th><th>Difficulty</th><th>Intent</th><th>CPC</th><th>SERPs</th></tr></thead><tbody>';
+        html += '<table><thead><tr><th>#</th><th>Keyword</th><th>Score</th><th>Difficulty</th><th>Intent</th><th>CPC</th><th>SERPs</th><th>Shopping</th><th>Seasonality</th><th>Top Domain</th></tr></thead><tbody>';
         for (var i = 0; i < results.length; i++) {
             var d = results[i];
             var diffCls = d.difficulty <= 35 ? 'easy' : d.difficulty <= 60 ? 'medium' : 'hard';
             var intentCls = d.intent === 'informational' ? 'info' : d.intent === 'transactional' ? 'trans' : d.intent === 'navigational' ? 'nav' : 'comm';
+            var topDom = (d.topDomains && d.topDomains.length > 0) ? d.topDomains[0].domain : '-';
             html += '<tr><td>' + (i + 1) + '</td><td><strong>' + esc(d.keyword) + '</strong></td>';
             html += '<td>' + d.volume + '</td>';
             html += '<td><span class="badge ' + diffCls + '">' + d.difficulty + '</span></td>';
             html += '<td><span class="badge ' + intentCls + '">' + d.intent + '</span></td>';
             html += '<td>' + d.cpc + '</td>';
-            html += '<td>' + (d.serpFeatures || 0) + '</td></tr>';
+            html += '<td>' + (d.serpFeatures || 0) + '</td>';
+            html += '<td>' + (d.shoppingResults ? '\u2705' : '\u274C') + '</td>';
+            html += '<td>' + (d.seasonality || 'year-round') + '</td>';
+            html += '<td>' + esc(topDom) + '</td></tr>';
         }
         html += '</tbody></table>';
         html += '<div class="footer">Generated by SEOHub - Free SEO Tools | seohub.mmetwily1.workers.dev</div>';
@@ -6354,15 +6699,16 @@
         var results = [];
         for (var i = 0; i < filtered.length; i++) {
             var kw = filtered[i];
-            var intent = krDetectIntent(kw.keyword);
-            var difficulty = krScoreDifficulty(kw.keyword);
-            var vol = krEstimateVolume(kw.keyword, kw.position, kw.source, kw.expansionCount);
+            var kwSerp = serpResults[kw.keyword.toLowerCase()] || null;
+            var intent = krDetectIntentV2(kw.keyword, kwSerp);
+            var difficulty = krScoreDifficultyV2(kw.keyword, kwSerp);
+            var vol = krEstimateVolumeV2(kw.keyword, kw.position, kw.source, kw.expansionCount, kwSerp);
             var cpc = krEstimateCPC(kw.keyword, intent);
             var kei = krCalcKEI(vol.volume, difficulty);
-            var kwSerp = serpResults[kw.keyword.toLowerCase()] || null;
             var serpFeat = kwSerp ? kwSerp.serpFeatures : 0;
-            if (kwSerp && kwSerp.featured) serpFeat += 1;
-            var trendDir = krTrendDirection(kw.keyword, kwSerp);
+            var trendDir = krDetectTrendV2(kw.keyword, kwSerp, serpResults);
+            var competitorInfo = kwSerp ? krAnalyzeCompetitors(kwSerp) : null;
+            var contentBrief = kwSerp ? krGenerateContentBrief(kw.keyword, kwSerp, intent) : null;
             results.push({
                 idx: i + 1,
                 keyword: kw.keyword,
@@ -6379,9 +6725,17 @@
                 paa: kwSerp ? kwSerp.paa : [],
                 related: kwSerp ? kwSerp.related : [],
                 topDomains: kwSerp ? kwSerp.topDomains : [],
+                topResults: kwSerp ? kwSerp.topResults : [],
                 featured: kwSerp ? kwSerp.featured : false,
+                featuredSnippet: kwSerp ? kwSerp.featuredSnippet : '',
+                shoppingResults: kwSerp ? kwSerp.shoppingResults : false,
+                localPack: kwSerp ? kwSerp.localPack : false,
+                videoCarousel: kwSerp ? kwSerp.videoCarousel : false,
                 ctr: krEstimateCTR(serpFeat, 1),
                 da: krEstimateDA(kwSerp ? kwSerp.topDomains : [], serpFeat),
+                competitors: competitorInfo,
+                contentBrief: contentBrief,
+                seasonality: trendDir.seasonality || 'year-round',
                 opportunity: krCalcOpportunityScore(kw.keyword, difficulty, vol.level, kei, serpFeat, trendDir, intent)
             });
         }
@@ -7373,10 +7727,14 @@
         var totalPaa = 0;
         var totalKei = 0;
         var keiCount = 0;
+        var totalShopping = 0;
+        var totalBrands = 0;
         for (var i = 0; i < data.length; i++) {
             totalSerp += data[i].serpFeatures || 0;
             totalPaa += (data[i].paa || []).length;
             if (data[i].kei && data[i].kei > 0) { totalKei += data[i].kei; keiCount++; }
+            if (data[i].shoppingResults) totalShopping++;
+            if (data[i].competitors && data[i].competitors.brandCount > 0) totalBrands++;
         }
         var avgKei = keiCount > 0 ? Math.round(totalKei / keiCount) : 0;
         var cannibalGroups = krDetectCannibalization(data);
@@ -7384,6 +7742,7 @@
         html2 += '<div class="kr-stat" style="border-left:3px solid #8b5cf6;"><span class="kr-stat-num" style="color:#8b5cf6;">' + totalSerp + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? '\u0645\u064a\u0632\u0627\u0646\u064a\u0627\u062a SERP' : 'SERP Ftrs') + '</span></div>';
         html2 += '<div class="kr-stat" style="border-left:3px solid #0ea5e9;"><span class="kr-stat-num" style="color:#0ea5e9;">' + totalPaa + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? 'PAA' : 'PAA') + '</span></div>';
         html2 += '<div class="kr-stat" style="border-left:3px solid #059669;"><span class="kr-stat-num" style="color:#059669;">' + avgKei + '</span><span class="kr-stat-label">KEI</span></div>';
+        html2 += '<div class="kr-stat" style="border-left:3px solid #f59e0b;"><span class="kr-stat-num" style="color:#f59e0b;">' + totalShopping + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? '\u062a\u062c\u0627\u0631\u064a' : 'Shopping') + '</span></div>';
         if (cannibalCount > 0) {
             html2 += '<div class="kr-stat" style="border-left:3px solid #ef4444;"><span class="kr-stat-num" style="color:#ef4444;">' + cannibalCount + '</span><span class="kr-stat-label">' + (currentLang === 'ar' ? '\u062a\u0646\u0627\u0641\u0633' : 'Cannibal') + '</span></div>';
         }
@@ -7530,11 +7889,12 @@
         var t = currentLang === 'ar' ? translations.ar : translations.en;
         var volLabel = t.kr_volume;
         var rows = [
-            ['Keyword', volLabel, 'Volume Level', t.kr_difficulty, 'KEI', t.kr_intent, t.kr_cpc, 'Trending', 'Source', 'SERP Features', 'PAA Count', 'Related Count']
+            ['Keyword', volLabel, 'Volume Level', t.kr_difficulty, 'KEI', t.kr_intent, t.kr_cpc, 'Trending', 'Source', 'SERP Features', 'PAA Count', 'Related Count', 'Shopping', 'Local Pack', 'Video', 'Seasonality', 'Top Domain']
         ];
         for (var i = 0; i < _krResults.length; i++) {
             var d = _krResults[i];
-            rows.push([d.keyword, d.volume, d.volumeLevel || '', d.difficulty, d.kei || 0, d.intent, d.cpc, d.trending ? 'Yes' : '', d.source || '', d.serpFeatures || 0, (d.paa || []).length, (d.related || []).length]);
+            var topDom = (d.topDomains && d.topDomains.length > 0) ? d.topDomains[0].domain : '';
+            rows.push([d.keyword, d.volume, d.volumeLevel || '', d.difficulty, d.kei || 0, d.intent, d.cpc, d.trending ? 'Yes' : '', d.source || '', d.serpFeatures || 0, (d.paa || []).length, (d.related || []).length, d.shoppingResults ? 'Yes' : '', d.localPack ? 'Yes' : '', d.videoCarousel ? 'Yes' : '', d.seasonality || '', topDom]);
         }
         var csv = '';
         for (var i = 0; i < rows.length; i++) {
@@ -7558,10 +7918,10 @@
 
     function krCopyAll() {
         if (_krResults.length === 0) return;
-        var text = 'Keyword\tScore\tLevel\tDifficulty\tIntent\tCPC\tTrending\n';
+        var text = 'Keyword\tScore\tLevel\tDifficulty\tIntent\tCPC\tTrending\tSERP Features\tShopping\tPAA\n';
         for (var i = 0; i < _krResults.length; i++) {
             var d = _krResults[i];
-            text += d.keyword + '\t' + d.volume + '\t' + (d.volumeLevel || '') + '\t' + d.difficulty + '\t' + d.intent + '\t' + d.cpc + '\t' + (d.trending ? 'Yes' : '') + '\n';
+            text += d.keyword + '\t' + d.volume + '\t' + (d.volumeLevel || '') + '\t' + d.difficulty + '\t' + d.intent + '\t' + d.cpc + '\t' + (d.trending ? 'Yes' : '') + '\t' + (d.serpFeatures || 0) + '\t' + (d.shoppingResults ? 'Yes' : '') + '\t' + (d.paa ? d.paa.length : 0) + '\n';
         }
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(function() {
@@ -7861,15 +8221,16 @@
             var results = [];
             for (var i = 0; i < filtered.length; i++) {
                 var kw = filtered[i];
-                var intent = krDetectIntent(kw.keyword);
-                var difficulty = krScoreDifficulty(kw.keyword);
-                var vol = krEstimateVolume(kw.keyword, kw.position, kw.source, kw.expansionCount);
+                var kwSerp = serpResults[kw.keyword.toLowerCase()] || null;
+                var intent = krDetectIntentV2(kw.keyword, kwSerp);
+                var difficulty = krScoreDifficultyV2(kw.keyword, kwSerp);
+                var vol = krEstimateVolumeV2(kw.keyword, kw.position, kw.source, kw.expansionCount, kwSerp);
                 var cpc = krEstimateCPC(kw.keyword, intent);
                 var kei = krCalcKEI(vol.volume, difficulty);
-                var kwSerp = serpResults[kw.keyword.toLowerCase()] || null;
                 var serpFeat = kwSerp ? kwSerp.serpFeatures : 0;
-                if (kwSerp && kwSerp.featured) serpFeat += 1;
-                var trendDir = krTrendDirection(kw.keyword, kwSerp);
+                var trendDir = krDetectTrendV2(kw.keyword, kwSerp, serpResults);
+                var competitorInfo = kwSerp ? krAnalyzeCompetitors(kwSerp) : null;
+                var contentBrief = kwSerp ? krGenerateContentBrief(kw.keyword, kwSerp, intent) : null;
                 results.push({
                     idx: i + 1,
                     keyword: kw.keyword,
@@ -7886,9 +8247,17 @@
                     paa: kwSerp ? kwSerp.paa : [],
                     related: kwSerp ? kwSerp.related : [],
                     topDomains: kwSerp ? kwSerp.topDomains : [],
+                    topResults: kwSerp ? kwSerp.topResults : [],
                     featured: kwSerp ? kwSerp.featured : false,
+                    featuredSnippet: kwSerp ? kwSerp.featuredSnippet : '',
+                    shoppingResults: kwSerp ? kwSerp.shoppingResults : false,
+                    localPack: kwSerp ? kwSerp.localPack : false,
+                    videoCarousel: kwSerp ? kwSerp.videoCarousel : false,
                     ctr: krEstimateCTR(serpFeat, 1),
                     da: krEstimateDA(kwSerp ? kwSerp.topDomains : [], serpFeat),
+                    competitors: competitorInfo,
+                    contentBrief: contentBrief,
+                    seasonality: trendDir.seasonality || 'year-round',
                     opportunity: krCalcOpportunityScore(kw.keyword, difficulty, vol.level, kei, serpFeat, trendDir, intent)
                 });
             }
@@ -7904,7 +8273,7 @@
 
             krUpdateProgress(95);
             _krResults = results;
-            _krClusters = krClusterKeywords(results);
+            _krClusters = krSerpClustering(results, serpResults);
             _krTopicTree = krExtractTopics(results, seed);
             krUpdateProgress(100);
             var proxyWarning = '';
