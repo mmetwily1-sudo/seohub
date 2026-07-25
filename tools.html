@@ -623,6 +623,8 @@
                     <button class="kr-btn" onclick="krRunDomainGap()" style="background:#8b5cf6;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#9878; Domain Gap</button>
                     <button class="kr-btn" onclick="krCompareKeywords()" style="background:#d946ef;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#128200; Compare</button>
                     <button class="kr-btn" onclick="krShowFavorites()" style="background:#f59e0b;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#9733; Favorites</button>
+                    <button class="kr-btn" onclick="krShowPositionTracker()" style="background:#8b5cf6;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#128200; Tracker</button>
+                    <button class="kr-btn" onclick="krShowSerpTracker()" style="background:#10b981;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#128202; SERP Track</button>
                 </div>
                 <details style="margin-top:8px;">
                     <summary style="cursor:pointer;font-size:12px;color:var(--gray-2);font-weight:600;">&#9881; <span data-i18n="kr_bulk_title">Bulk Keywords &amp; Advanced Options</span></summary>
@@ -6705,6 +6707,7 @@
         btn.disabled = false;
         btn.textContent = t.kr_btn_research;
         krSaveCurrentSession();
+        krSnapshotSerpFeatures(document.getElementById('kr-seed').value);
     }
 
     function krRunBulkExportCSV() {
@@ -7686,7 +7689,9 @@
         html += '<h3 style="margin:0 0 16px;color:#b45309;">&#128278; ' + (currentLang === 'ar' ? '\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u062d\u0641\u0648\u0638\u0629' : 'Saved Keyword Lists') + '</h3>';
         html += '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">';
         html += '<button onclick="krSaveCurrentList()" style="padding:8px 16px;border-radius:100px;border:2px solid #f59e0b;background:#f59e0b;color:white;font-weight:700;cursor:pointer;font-size:13px;">' + (currentLang === 'ar' ? '\uD83D\uDCBE \u062d\u0641\u0638 \u0627\u0644\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u062d\u0627\u0644\u064a\u0629' : 'Save Current Results') + '</button>';
-        html += '<button onclick="krExportAllLists()" style="padding:8px 16px;border-radius:100px;border:2px solid #94a3b8;background:white;color:#334155;font-weight:600;cursor:pointer;font-size:13px;">' + (currentLang === 'ar' ? '\uD83D\uDCCB \u062a\u0635\u062f\u064a\u0631 \u062c\u0645\u064a\u0639 \u0627\u0644\u0642\u0648\u0627\u0626\u0645' : 'Export All Lists') + '</button>';
+        html += '<button onclick="krCreateNewList()" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#10b981;color:white;font-weight:700;cursor:pointer;font-size:13px;">+ ' + (currentLang === 'ar' ? '\u0642\u0627\u0626\u0645\u0629 \u062c\u062f\u064a\u062f\u0629' : 'New List') + '</button>';
+        html += '<button onclick="krExportAllLists()" style="padding:8px 16px;border-radius:100px;border:2px solid #94a3b8;background:white;color:#334155;font-weight:600;cursor:pointer;font-size:13px;">' + (currentLang === 'ar' ? '\uD83D\uDCCB \u062a\u0635\u062f\u064a\u0631 \u062c\u0645\u064a\u0639' : 'Export All') + '</button>';
+        html += '<button onclick="krImportLists()" style="padding:8px 16px;border-radius:100px;border:2px solid #94a3b8;background:white;color:#334155;font-weight:600;cursor:pointer;font-size:13px;">' + (currentLang === 'ar' ? '\uD83D\uDCE5 \u0627\u0633\u062a\u064a\u0631\u0627\u062f' : 'Import') + '</button>';
         html += '</div>';
         var listNames = Object.keys(lists);
         if (listNames.length === 0) {
@@ -7697,13 +7702,28 @@
                 var listData = lists[name];
                 var kCount = listData.data ? listData.data.length : 0;
                 var savedDate = listData.savedAt ? new Date(listData.savedAt).toLocaleDateString() : '';
-                html += '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">';
-                html += '<div><strong style="font-size:14px;color:#1e293b;">' + esc(name) + '</strong>';
+                html += '<div id="kr-list-item-' + n + '" style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:8px;">';
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+                html += '<div><strong style="font-size:14px;color:#1e293b;" id="kr-list-name-' + n + '">' + esc(name) + '</strong>';
                 html += '<br><span style="font-size:12px;color:#64748b;">' + kCount + ' keywords &middot; ' + savedDate + '</span></div>';
                 html += '<div style="display:flex;gap:6px;">';
-                html += '<button onclick="krLoadList(\'' + esc(name) + '\')" style="padding:4px 12px;border-radius:100px;border:1px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;">' + (currentLang === 'ar' ? '\u062a\u062d\u0645\u064a\u0644' : 'Load') + '</button>';
-                html += '<button onclick="krDeleteKeywordList(\'' + esc(name) + '\');krRefreshListsView();" style="padding:4px 12px;border-radius:100px;border:1px solid #ef4444;background:#fef2f2;color:#dc2626;font-size:12px;font-weight:600;cursor:pointer;">' + (currentLang === 'ar' ? '\u062d\u0630\u0641' : 'Delete') + '</button>';
+                html += '<button onclick="krLoadList(\'' + esc(name).replace(/'/g, "\\'") + '\')" style="padding:4px 12px;border-radius:100px;border:1px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;">' + (currentLang === 'ar' ? '\u062a\u062d\u0645\u064a\u0644' : 'Load') + '</button>';
+                html += '<button onclick="krRenameList(\'' + esc(name).replace(/'/g, "\\'") + '\')" style="padding:4px 12px;border-radius:100px;border:1px solid #8b5cf6;background:#f5f3ff;color:#7c3aed;font-size:12px;font-weight:600;cursor:pointer;">' + (currentLang === 'ar' ? '\u062a\u0633\u0645\u064a\u0629' : 'Rename') + '</button>';
+                html += '<button onclick="krExportSingleList(\'' + esc(name).replace(/'/g, "\\'") + '\')" style="padding:4px 12px;border-radius:100px;border:1px solid #10b981;background:#ecfdf5;color:#059669;font-size:12px;font-weight:600;cursor:pointer;">CSV</button>';
+                html += '<button onclick="krMergeLists(\'' + esc(name).replace(/'/g, "\\'") + '\')" style="padding:4px 12px;border-radius:100px;border:1px solid #f59e0b;background:#fffbeb;color:#d97706;font-size:12px;font-weight:600;cursor:pointer;">' + (currentLang === 'ar' ? '\u062f\u0645\u062c' : 'Merge') + '</button>';
+                html += '<button onclick="krDeleteKeywordList(\'' + esc(name).replace(/'/g, "\\'") + '\');krRefreshListsView();" style="padding:4px 12px;border-radius:100px;border:1px solid #ef4444;background:#fef2f2;color:#dc2626;font-size:12px;font-weight:600;cursor:pointer;">' + (currentLang === 'ar' ? '\u062d\u0630\u0641' : 'Del') + '</button>';
                 html += '</div></div>';
+                if (listData.data && listData.data.length > 0) {
+                    html += '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">';
+                    var showCount = Math.min(listData.data.length, 8);
+                    for (var k = 0; k < showCount; k++) {
+                        var kwName = listData.data[k].keyword || listData.data[k];
+                        html += '<span style="background:#f1f5f9;padding:2px 8px;border-radius:100px;font-size:11px;color:#475569;">' + esc(kwName) + '</span>';
+                    }
+                    if (listData.data.length > showCount) html += '<span style="padding:2px 8px;font-size:11px;color:#94a3b8;">+' + (listData.data.length - showCount) + '</span>';
+                    html += '</div>';
+                }
+                html += '</div>';
             }
         }
         html += '</div>';
@@ -7748,6 +7768,95 @@
         a.download = 'seohub-keyword-lists.json';
         a.click();
         URL.revokeObjectURL(url);
+    }
+
+    function krCreateNewList() {
+        var name = prompt(currentLang === 'ar' ? '\u0623\u062f\u062e\u0644 \u0627\u0633\u0645 \u0642\u0627\u0626\u0645\u0629 \u062c\u062f\u064a\u062f\u0629:' : 'Enter new list name:');
+        if (!name || !name.trim()) return;
+        krSaveKeywordList(name.trim(), []);
+        krRefreshListsView();
+    }
+
+    function krRenameList(oldName) {
+        var newName = prompt(currentLang === 'ar' ? '\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u062c\u062f\u064a\u062f:' : 'New name:', oldName);
+        if (!newName || !newName.trim() || newName.trim() === oldName) return;
+        var lists = krLoadKeywordLists();
+        if (lists[oldName]) {
+            krSaveKeywordList(newName.trim(), lists[oldName].data || []);
+            try { delete lists[oldName]; localStorage.setItem('kr_keyword_lists', JSON.stringify(lists)); } catch(e) {}
+            krRefreshListsView();
+        }
+    }
+
+    function krExportSingleList(name) {
+        var lists = krLoadKeywordLists();
+        if (!lists[name] || !lists[name].data) return;
+        var data = lists[name].data;
+        if (data.length === 0) { alert('List is empty'); return; }
+        var csv = 'Keyword,Volume,Difficulty,Intent,CPC,KEI\n';
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+            csv += '"' + (d.keyword || '').replace(/"/g, '""') + '",' + (d.volume || 0) + ',' + (d.difficulty || 0) + ',' + (d.intent || '') + ',' + (d.cpc || 0) + ',' + (d.kei || 0) + '\n';
+        }
+        var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = name.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_') + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function krMergeLists(targetName) {
+        var lists = krLoadKeywordLists();
+        var listNames = Object.keys(lists).filter(function(n) { return n !== targetName; });
+        if (listNames.length === 0) { alert(currentLang === 'ar' ? '\u0644\u0627 \u062a\u0648\u062c\u062f \u0642\u0648\u0627\u0626\u0645 \u0623\u062e\u0631\u0649' : 'No other lists to merge'); return; }
+        var otherName = prompt((currentLang === 'ar' ? '\u0627\u062f\u062e\u0644 \u0627\u0633\u0645 \u0627\u0644\u0642\u0627\u0626\u0645\u0629 \u0644\u0644\u062f\u0645\u062c:' : 'Enter list name to merge into ') + targetName + ':\n' + listNames.join(', '));
+        if (!otherName || !lists[otherName]) return;
+        var targetData = (lists[targetName].data || []).slice();
+        var sourceData = lists[otherName].data || [];
+        var existing = {};
+        for (var i = 0; i < targetData.length; i++) existing[targetData[i].keyword.toLowerCase()] = true;
+        var added = 0;
+        for (var i = 0; i < sourceData.length; i++) {
+            if (!existing[sourceData[i].keyword.toLowerCase()]) {
+                targetData.push(sourceData[i]);
+                existing[sourceData[i].keyword.toLowerCase()] = true;
+                added++;
+            }
+        }
+        krSaveKeywordList(targetName, targetData);
+        alert((currentLang === 'ar' ? '\u062a\u0645 \u062f\u0645\u062c ' + added + ' \u0643\u0644\u0645\u0629' : 'Merged ' + added + ' keywords'));
+        krRefreshListsView();
+    }
+
+    function krImportLists() {
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    var imported = JSON.parse(ev.target.result);
+                    var existing = krLoadKeywordLists();
+                    var count = 0;
+                    var keys = Object.keys(imported);
+                    for (var i = 0; i < keys.length; i++) {
+                        if (imported[keys[i]] && imported[keys[i]].data) {
+                            krSaveKeywordList(keys[i], imported[keys[i]].data);
+                            count++;
+                        }
+                    }
+                    alert((currentLang === 'ar' ? '\u062a\u0645 \u0627\u0633\u062a\u064a\u0631\u0627\u062f ' + count + ' \u0642\u0627\u0626\u0645\u0629' : 'Imported ' + count + ' lists'));
+                    krRefreshListsView();
+                } catch(err) { alert('Invalid JSON file'); }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     }
 
     function krShowKDExplanation(idx) {
@@ -8028,7 +8137,7 @@
             var favId = 'fav-star-' + d.keyword.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_');
             html += '<td><strong>' + kw + trendingBadge + srcBadge + srcBadge2 + srcBadge3 + srcBadge4 + '</strong> <span id="' + favId + '" onclick="krToggleFavorite(\'' + esc(d.keyword).replace(/'/g, "\\'") + '\')" style="cursor:pointer;font-size:14px;color:' + (isFav ? '#f59e0b' : '#d1d5db') + ';" title="Favorite">&#9733;</span></td>';
             html += '<td>' + volBadge + '</td>';
-            html += '<td><span class="kr-badge ' + diff.cls + '" style="cursor:pointer;" onclick="krShowKDExplanation(' + i + ')" title="Click for explanation">' + diff.text + ' (' + d.difficulty + ')</span></td>';
+            html += '<td><div style="position:relative;display:inline-flex;align-items:center;gap:4px;cursor:pointer;" onclick="krShowKDExplanation(' + i + ')" title="Click for explanation">' + krKdGaugeHtml(d.difficulty, 32) + '<span class="kr-badge ' + diff.cls + '">' + diff.text + '</span></div></td>';
             html += '<td><span style="color:' + keiColor + ';font-weight:700;font-size:12px;">' + keiVal + ' <span style="font-size:10px;">' + keiLabel + '</span></span></td>';
             var oppScore = d.opportunity || 0;
             var oppLabel = krOpportunityLabel(oppScore);
@@ -8549,6 +8658,7 @@
         btn.disabled = false;
         btn.textContent = t.kr_btn_research;
         krSaveCurrentSession();
+        krSnapshotSerpFeatures(document.getElementById('kr-seed').value);
     }
 
     // ==============================
@@ -8811,6 +8921,256 @@
         if (!container) return;
         if (container.style.display === 'none' || !container.innerHTML) {
             container.innerHTML = krRenderFavoritesView();
+            container.style.display = '';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    // ==============================
+    // POSITION TRACKER (localStorage)
+    // ==============================
+    function krGetTracker() {
+        try { return JSON.parse(localStorage.getItem('kr_position_tracker') || '[]'); } catch(e) { return []; }
+    }
+    function krSaveTracker(data) {
+        try { localStorage.setItem('kr_position_tracker', JSON.stringify(data)); } catch(e) {}
+    }
+    function krAddTrackKeyword(keyword, url) {
+        var tracker = krGetTracker();
+        var existing = -1;
+        for (var i = 0; i < tracker.length; i++) {
+            if (tracker[i].keyword === keyword) { existing = i; break; }
+        }
+        var entry = existing !== -1 ? tracker[existing] : { keyword: keyword, url: url || '', history: [] };
+        if (url) entry.url = url;
+        var snapshot = { date: new Date().toISOString() };
+        if (_krResults) {
+            for (var i = 0; i < _krResults.length; i++) {
+                if (_krResults[i].keyword === keyword) {
+                    snapshot.volume = _krResults[i].volume;
+                    snapshot.difficulty = _krResults[i].difficulty;
+                    snapshot.intent = _krResults[i].intent;
+                    snapshot.cpc = _krResults[i].cpc;
+                    snapshot.serpFeatures = _krResults[i].serpFeatures;
+                    snapshot.topDomains = (_krResults[i].topDomains || []).slice(0, 3);
+                    break;
+                }
+            }
+        }
+        if (!entry.history) entry.history = [];
+        entry.history.push(snapshot);
+        if (entry.history.length > 30) entry.history = entry.history.slice(-30);
+        if (existing !== -1) tracker[existing] = entry; else tracker.push(entry);
+        krSaveTracker(tracker);
+    }
+    function krRemoveTrackKeyword(keyword) {
+        var tracker = krGetTracker();
+        var filtered = [];
+        for (var i = 0; i < tracker.length; i++) {
+            if (tracker[i].keyword !== keyword) filtered.push(tracker[i]);
+        }
+        krSaveTracker(filtered);
+    }
+    function krRenderTrackerView() {
+        var tracker = krGetTracker();
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var html = '<div style="background:linear-gradient(135deg,#ede9fe,#f5f3ff);border:2px solid #8b5cf6;border-radius:16px;padding:20px;margin-bottom:20px;">';
+        html += '<h3 style="margin:0 0 8px;color:#6d28d9;">&#128200; ' + (currentLang === 'ar' ? '\u0645\u062a\u0627\u0628\u0639 \u0627\u0644\u062a\u0631\u062a\u064a\u0628' : 'Position Tracker') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u062a\u0627\u0628\u0639 \u062a\u063a\u064a\u064a\u0631\u0627\u062a \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0639\u0644\u0649 \u0645\u0636\u0631\u0648\u0628 \u0627\u0644\u0648\u0642\u062a' : 'Track keyword metric changes over time') + '</p>';
+        html += '</div>';
+        if (tracker.length === 0) {
+            html += '<div style="text-align:center;padding:30px;color:#94a3b8;background:#f8fafc;border-radius:12px;">';
+            html += (currentLang === 'ar' ? '\u0644\u0645 \u062a\u0636\u0641\u0641 \u0643\u0644\u0645\u0627\u062a \u0644\u0644\u0645\u062a\u0627\u0628\u0639\u0647\u0627 \u0628\u0639\u062f. \u0627\u0636\u063a\u0637 \u0639\u0644\u0649 \u0625\u0636\u0627\u0641\u0629 \u0628\u062c\u0627\u0646\u0628 \u0627\u0644\u062a\u0631\u062a\u064a\u0628 \u0628\u0627\u0644\u0643\u0644\u0645\u0629 \u0641\u064a \u062c\u062f\u0648\u0644 \u0627\u0644\u062c\u0627\u0646\u0628.' : 'No tracked keywords yet. Click the track button next to any keyword.') + '</div>';
+            return html;
+        }
+        for (var i = 0; i < tracker.length; i++) {
+            var track = tracker[i];
+            var hist = track.history || [];
+            html += '<div style="background:white;border:1px solid #e9d5ff;border-radius:14px;padding:16px;margin-bottom:12px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+            html += '<div><strong style="font-size:15px;color:#1e293b;">' + esc(track.keyword) + '</strong>';
+            if (track.url) html += '<span style="font-size:11px;color:#94a3b8;margin-left:8px;">' + esc(track.url) + '</span>';
+            html += '</div>';
+            html += '<div style="display:flex;gap:6px;">';
+            html += '<button onclick="krTrackCurrentKeyword(\'' + esc(track.keyword).replace(/'/g, "\\'") + '\')" style="padding:4px 10px;border-radius:100px;border:1px solid #8b5cf6;background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:600;cursor:pointer;">+ Update</button>';
+            html += '<button onclick="krRemoveTrackKeyword(\'' + esc(track.keyword).replace(/'/g, "\\'") + '\');krRenderTracker();" style="padding:4px 10px;border-radius:100px;border:1px solid #ef4444;background:#fef2f2;color:#dc2626;font-size:11px;font-weight:600;cursor:pointer;">&times;</button>';
+            html += '</div></div>';
+            if (hist.length > 0) {
+                var latest = hist[hist.length - 1];
+                var first = hist[0];
+                html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;">';
+                if (latest.volume !== undefined) {
+                    var volDelta = hist.length > 1 && first.volume ? latest.volume - first.volume : 0;
+                    var volColor = volDelta > 0 ? '#059669' : volDelta < 0 ? '#ef4444' : '#64748b';
+                    var volIcon = volDelta > 0 ? '&#9650;' : volDelta < 0 ? '&#9660;' : '&#9654;';
+                    html += '<span style="font-size:13px;">Vol: <b>' + latest.volume + '</b> <span style="color:' + volColor + ';font-size:11px;">' + volIcon + ' ' + (volDelta > 0 ? '+' : '') + volDelta + '</span></span>';
+                }
+                if (latest.difficulty !== undefined) {
+                    var diffDelta = hist.length > 1 && first.difficulty ? latest.difficulty - first.difficulty : 0;
+                    var diffColor = diffDelta > 0 ? '#ef4444' : diffDelta < 0 ? '#059669' : '#64748b';
+                    html += '<span style="font-size:13px;">KD: <b>' + latest.difficulty + '</b> <span style="color:' + diffColor + ';font-size:11px;">' + (diffDelta > 0 ? '+' : '') + diffDelta + '</span></span>';
+                }
+                if (latest.cpc !== undefined) html += '<span style="font-size:13px;">CPC: <b>$' + latest.cpc + '</b></span>';
+                if (latest.intent) html += '<span style="font-size:13px;">Intent: <b>' + latest.intent + '</b></span>';
+                html += '</div>';
+                html += '<div style="font-size:11px;color:#94a3b8;">' + hist.length + ' snapshots &middot; First: ' + new Date(first.date).toLocaleDateString() + ' &middot; Latest: ' + new Date(latest.date).toLocaleDateString() + '</div>';
+                if (hist.length > 1) {
+                    html += '<div style="margin-top:8px;display:flex;gap:2px;align-items:flex-end;height:40px;">';
+                    var maxVol = 0;
+                    for (var h = 0; h < hist.length; h++) { if (hist[h].volume && hist[h].volume > maxVol) maxVol = hist[h].volume; }
+                    for (var h = 0; h < hist.length; h++) {
+                        var barH = maxVol > 0 ? Math.round(((hist[h].volume || 0) / maxVol) * 36) : 4;
+                        var barColor = h === hist.length - 1 ? '#8b5cf6' : '#c4b5fd';
+                        html += '<div title="' + new Date(hist[h].date).toLocaleDateString() + ': Vol ' + (hist[h].volume || 0) + '" style="flex:1;min-width:4px;max-width:20px;height:' + barH + 'px;background:' + barColor + ';border-radius:2px 2px 0 0;"></div>';
+                    }
+                    html += '</div>';
+                }
+            }
+            html += '</div>';
+        }
+        return html;
+    }
+    function krTrackCurrentKeyword(keyword) {
+        krAddTrackKeyword(keyword);
+        krRenderTracker();
+    }
+    function krRenderTracker() {
+        var el = document.getElementById('kr-favorites-output');
+        if (el && el.style.display !== 'none' && el.innerHTML.indexOf('Position Tracker') !== -1) {
+            el.innerHTML = krRenderTrackerView();
+        }
+    }
+
+    // ==============================
+    // VISUAL KD GAUGE (CSS-animated)
+    // ==============================
+    function krKdGaugeHtml(score, size) {
+        var s = size || 40;
+        var r = s / 2 - 4;
+        var circ = 2 * Math.PI * r;
+        var pct = Math.min(score, 100) / 100;
+        var color = score <= 35 ? '#059669' : score <= 60 ? '#f59e0b' : '#ef4444';
+        var label = score <= 35 ? 'E' : score <= 60 ? 'M' : 'H';
+        return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 ' + s + ' ' + s + '" style="transform:rotate(-90deg);">' +
+            '<circle cx="' + (s/2) + '" cy="' + (s/2) + '" r="' + r + '" fill="none" stroke="#e2e8f0" stroke-width="4" />' +
+            '<circle cx="' + (s/2) + '" cy="' + (s/2) + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="4" ' +
+            'stroke-dasharray="' + (circ * pct) + ' ' + (circ * (1 - pct)) + '" stroke-linecap="round" style="transition:stroke-dasharray 0.8s ease;" />' +
+            '</svg><span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:' + (s * 0.3) + 'px;font-weight:800;color:' + color + ';">' + label + '</span>';
+    }
+
+    // ==============================
+    // SERP FEATURE TRACKER
+    // ==============================
+    function krGetSerpTracker() {
+        try { return JSON.parse(localStorage.getItem('kr_serp_tracker') || '{}'); } catch(e) { return {}; }
+    }
+    function krSaveSerpTracker(data) {
+        try { localStorage.setItem('kr_serp_tracker', JSON.stringify(data)); } catch(e) {}
+    }
+    function krSnapshotSerpFeatures(seed) {
+        if (!_krResults || _krResults.length === 0) return;
+        var tracker = krGetSerpTracker();
+        var key = seed.toLowerCase();
+        var snapshot = {
+            date: new Date().toISOString(),
+            totalKeywords: _krResults.length,
+            features: {
+                featured: 0, paa: 0, shopping: 0, localPack: 0, video: 0, news: 0, knowledgePanel: 0, imagePack: 0
+            },
+            intentDist: { informational: 0, transactional: 0, navigational: 0, commercial: 0 },
+            avgDifficulty: 0,
+            avgVolume: 0
+        };
+        var totalDiff = 0, totalVol = 0;
+        for (var i = 0; i < _krResults.length; i++) {
+            var d = _krResults[i];
+            if (d.featured) snapshot.features.featured++;
+            if (d.paa && d.paa.length > 0) snapshot.features.paa += d.paa.length;
+            if (d.shoppingResults) snapshot.features.shopping++;
+            if (d.localPack) snapshot.features.localPack++;
+            if (d.videoCarousel || d.videoResults) snapshot.features.video++;
+            if (d.newsResults) snapshot.features.news++;
+            if (d.knowledgePanel) snapshot.features.knowledgePanel++;
+            if (d.imagePack) snapshot.features.imagePack++;
+            if (d.intent && snapshot.intentDist[d.intent] !== undefined) snapshot.intentDist[d.intent]++;
+            totalDiff += (d.difficulty || 0);
+            totalVol += (d.volume || 0);
+        }
+        snapshot.avgDifficulty = Math.round(totalDiff / _krResults.length);
+        snapshot.avgVolume = Math.round(totalVol / _krResults.length);
+        if (!tracker[key]) tracker[key] = { seed: seed, snapshots: [] };
+        tracker[key].snapshots.push(snapshot);
+        if (tracker[key].snapshots.length > 20) tracker[key].snapshots = tracker[key].snapshots.slice(-20);
+        krSaveSerpTracker(tracker);
+    }
+    function krRenderSerpTracker() {
+        var tracker = krGetSerpTracker();
+        var keys = Object.keys(tracker);
+        var html = '<div style="background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border:2px solid #10b981;border-radius:16px;padding:20px;margin-bottom:20px;">';
+        html += '<h3 style="margin:0 0 8px;color:#059669;">&#128202; ' + (currentLang === 'ar' ? '\u062a\u0627\u0628\u0639 \u0645\u064a\u0632\u0627\u0646\u064a\u0627\u062a SERP' : 'SERP Feature Tracker') + '</h3>';
+        html += '<p style="margin:0;color:#6b7280;font-size:13px;">' + (currentLang === 'ar' ? '\u0645\u0631\u0627\u0642\u0628\u0629 \u062a\u063a\u064a\u064a\u0631\u0627\u062a \u0645\u064a\u0632\u0627\u0646\u064a\u0627\u062a SERP \u0639\u0644\u0649 \u0645\u0636\u0631\u0648\u0628 \u0627\u0644\u0648\u0642\u062a' : 'Monitor how SERP features change over time') + '</p>';
+        html += '</div>';
+        if (keys.length === 0) {
+            html += '<div style="text-align:center;padding:30px;color:#94a3b8;background:#f8fafc;border-radius:12px;">' + (currentLang === 'ar' ? '\u0644\u0645 \u064a\u062a\u0645 \u0633\u062c\u0644 \u0628\u0639\u062f' : 'No SERP snapshots yet. Run a search to capture data.') + '</div>';
+            return html;
+        }
+        for (var k = 0; k < keys.length; k++) {
+            var data = tracker[keys[k]];
+            var snaps = data.snapshots || [];
+            if (snaps.length === 0) continue;
+            var latest = snaps[snaps.length - 1];
+            html += '<div style="background:white;border:1px solid #d1fae5;border-radius:12px;padding:14px 16px;margin-bottom:10px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+            html += '<strong style="font-size:14px;">' + esc(data.seed) + '</strong>';
+            html += '<span style="font-size:11px;color:#94a3b8;">' + snaps.length + ' snapshots</span>';
+            html += '</div>';
+            var f = latest.features;
+            html += '<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:12px;">';
+            if (f.featured > 0) html += '<span style="background:#fef3c7;padding:2px 8px;border-radius:100px;font-weight:600;">&#11088; Featured: ' + f.featured + '</span>';
+            if (f.paa > 0) html += '<span style="background:#ede9fe;padding:2px 8px;border-radius:100px;font-weight:600;">PAA: ' + f.paa + '</span>';
+            if (f.shopping > 0) html += '<span style="background:#ecfdf5;padding:2px 8px;border-radius:100px;font-weight:600;">&#128722; Shopping: ' + f.shopping + '</span>';
+            if (f.localPack > 0) html += '<span style="background:#dbeafe;padding:2px 8px;border-radius:100px;font-weight:600;">&#128205; Local: ' + f.localPack + '</span>';
+            if (f.video > 0) html += '<span style="background:#fce7f3;padding:2px 8px;border-radius:100px;font-weight:600;">&#127909; Video: ' + f.video + '</span>';
+            if (f.news > 0) html += '<span style="background:#fee2e2;padding:2px 8px;border-radius:100px;font-weight:600;">&#128240; News: ' + f.news + '</span>';
+            html += '</div>';
+            html += '<div style="margin-top:6px;font-size:12px;color:#64748b;">Avg KD: ' + latest.avgDifficulty + ' &middot; Avg Vol: ' + latest.avgVolume + ' &middot; ' + new Date(latest.date).toLocaleDateString() + '</div>';
+            if (snaps.length > 1) {
+                var prev = snaps[snaps.length - 2];
+                html += '<div style="margin-top:4px;font-size:11px;">';
+                var diffs = [];
+                var featNames = ['featured', 'paa', 'shopping', 'localPack', 'video', 'news'];
+                for (var fi = 0; fi < featNames.length; fi++) {
+                    var fn = featNames[fi];
+                    var delta = (latest.features[fn] || 0) - (prev.features[fn] || 0);
+                    if (delta !== 0) {
+                        var dColor = delta > 0 ? '#059669' : '#ef4444';
+                        diffs.push('<span style="color:' + dColor + ';">' + fn + ': ' + (delta > 0 ? '+' : '') + delta + '</span>');
+                    }
+                }
+                if (diffs.length > 0) html += '&#8644; ' + diffs.join(' &middot; ');
+                else html += '<span style="color:#94a3b8;">No change from previous snapshot</span>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        return html;
+    }
+    function krShowSerpTracker() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        if (container.style.display === 'none' || container.innerHTML.indexOf('SERP Feature Tracker') === -1) {
+            container.innerHTML = krRenderSerpTracker();
+            container.style.display = '';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+    function krShowPositionTracker() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        if (container.style.display === 'none' || container.innerHTML.indexOf('Position Tracker') === -1) {
+            container.innerHTML = krRenderTrackerView();
             container.style.display = '';
         } else {
             container.style.display = 'none';
