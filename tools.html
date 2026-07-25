@@ -4973,63 +4973,9 @@
         return results;
     }
 
-    function krDetectIntent(keyword) {
-        var lower = keyword.toLowerCase();
-        var infoWords = ['how to', 'what is', 'why', 'guide', 'tutorial', 'learn', 'tips', 'examples', 'definition', 'meaning', 'explained', 'ways to', 'steps to', 'methods', '\u0643\u064a\u0641', '\u0645\u0639\u0646\u0649', '\u062f\u0644\u064a\u0644', '\u0639\u0644\u0645', '\u0637\u0631\u064a\u0642', '\u062e\u0637\u0648\u0637', '\u0645\u0631\u0627\u062c\u0639\u0629', '\u0637\u0631\u0642', '\u0623\u0637\u0631\u0642', '\u0645\u0646\u0647\u062c', '\u0646\u0635\u0627\u0626\u062d', '\u0634\u0631\u062d', '\u0645\u0639\u0646\u0627', '\u064a\u0639\u0644\u064a\u0643', '\u0643\u064a\u0641 \u062a\u0639\u0645\u0644', '\u0643\u064a\u0641 \u062a\u0633\u062a\u062e\u062f\u0645', '\u0643\u064a\u0641 \u064a\u0633\u062a\u062e\u062f\u0645'];
-        var transWords = ['buy', 'price', 'cheap', 'deal', 'discount', 'coupon', 'order', 'shipping', 'subscribe', 'purchase', 'free shipping', 'cash on delivery', 'cod', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u062e\u0635\u0645', '\u062e\u0637\u0648\u0627\u062a', '\u0637\u0644\u0628', '\u0637\u0631\u0633', '\u062a\u062e\u0641\u064a\u0636', '\u0634\u0631\u0627\u0621 \u0627\u0644\u062a\u0643\u0627\u0644\u064a\u0641', '\u0634\u0631\u0627\u0621 \u0627\u0644\u0645\u0648\u0642\u0639', '\u0637\u0644\u0628 \u0627\u0644\u0645\u0648\u0642\u0639', '\u0645\u062a\u0646\u0627\u0632\u0644', '\u062a\u0633\u0648\u064a\u0642', '\u062a\u0642\u0636\u064a\u0645', '\u0639\u0631\u0648\u0636', '\u0623\u0633\u0639\u0627\u0631', '\u062e\u0635\u0645\u0627\u062a', '\u0639\u0631\u0648\u0636 \u0627\u0644\u0645\u0648\u0642\u0639', '\u062e\u0635\u0645 \u0639\u0644\u0649 \u0627\u0644\u0637\u0644\u0628'];
-        var navWords = ['login', 'sign in', 'official', 'website', 'app', 'dashboard', 'portal', 'account', 'download app', '\u062a\u0633\u062c\u064a\u0644', '\u062a\u0633\u062c\u064a\u0644 \u062f\u062e\u0648\u0644', '\u0645\u0648\u0642\u0639 \u0631\u0633\u0645\u064a', '\u0645\u0648\u0642\u0639 \u0627\u0644\u0631\u0633\u0645\u064a', '\u062a\u0633\u062c\u064a\u0644 \u062f\u062e\u0648\u0644', '\u0645\u0648\u0642\u0639 \u0627\u0644\u062a\u0633\u062c\u064a\u0644', '\u0631\u0627\u0628\u0637 \u0627\u0644\u0645\u0648\u0642\u0639', '\u0644\u0648\u062d\u0629 \u0627\u0644\u062a\u0633\u062c\u064a\u0644', '\u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u062a\u0637\u0628\u064a\u0642'];
-        var commerWords = ['best', 'top', 'review', 'comparison', 'vs', 'alternative', 'rating', 'versus', 'recommended', 'cheapest', 'most popular', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645', '\u0645\u0642\u0627\u0631\u0646\u0629', '\u0645\u0639\u062a\u0628\u0631', '\u0645\u0631\u0627\u062c\u0639\u0627\u062a', '\u0623\u0641\u0636\u0644 \u0645\u0648\u0627\u0642\u0639', '\u0623\u0631\u0636\u0644 \u0645\u0648\u0627\u0642\u0639', '\u062a\u0642\u064a\u064a\u0645 \u0645\u0648\u0627\u0642\u0639', '\u0645\u0646\u0635\u062d\u0648\u0628', '\u062c\u0648\u062f\u0629', '\u0645\u0645\u064a\u0632', '\u0627\u0644\u0623\u0641\u0636\u0644 \u0644\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u064a\u0646', '\u0627\u0644\u0623\u0631\u0636\u0644 \u0628\u0639\u064a\u062f', '\u0645\u0642\u0627\u0628\u0644 \u0627\u0644\u0633\u0639\u0631', '\u0623\u0631\u0636\u0644 \u0644\u0644\u0633\u0639\u0631'];
-        var trans = 0, info = 0, nav = 0, comm = 0;
-        for (var i = 0; i < transWords.length; i++) { if (lower.indexOf(transWords[i]) !== -1) trans++; }
-        for (var i = 0; i < infoWords.length; i++) { if (lower.indexOf(infoWords[i]) !== -1) info++; }
-        for (var i = 0; i < navWords.length; i++) { if (lower.indexOf(navWords[i]) !== -1) nav++; }
-        for (var i = 0; i < commerWords.length; i++) { if (lower.indexOf(commerWords[i]) !== -1) comm++; }
-        var max = Math.max(trans, info, nav, comm);
-        if (max === 0) {
-            var wc = keyword.split(/\s+/).length;
-            return wc <= 2 ? 'transactional' : 'informational';
-        }
-        if (trans === max) return 'transactional';
-        if (info === max) return 'informational';
-        if (comm === max) return 'commercial';
-        if (nav === max) return 'navigational';
-        return 'informational';
-    }
 
-    function krScoreDifficulty(keyword) {
-        var lower = keyword.toLowerCase();
-        var score = 40;
-        var words = lower.split(/\s+/).length;
-        if (words === 1) score += 25;
-        else if (words === 2) score += 15;
-        else if (words === 3) score += 5;
-        else if (words === 4) score -= 5;
-        else if (words >= 5) score -= 15;
-        var commWords = ['buy', 'cheap', 'price', 'deal', 'discount', 'best', 'top', 'review', 'free', 'online', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u0623\u0641\u0636\u0644', '\u062a\u0642\u064a\u064a\u0645', '\u0645\u062c\u0627\u0646\u064a', '\u062a\u0633\u0648\u064a\u0642', '\u062d\u0635\u0645', '\u0631\u0627\u0626\u0639', '\u062a\u0642\u0644\u064a\u0644', '\u0643\u064a\u0633', '\u0633\u0647\u0648\u0644', '\u0639\u0631\u0648\u0636', '\u062e\u0635\u0645\u0627\u062a', '\u0645\u0631\u0627\u062c\u0639\u0627\u062a', '\u0645\u0648\u0642\u0639', '\u0645\u062a\u0627\u0628\u0639', '\u062a\u062e\u0641\u064a\u0636'];
-        var commCount = 0;
-        for (var i = 0; i < commWords.length; i++) {
-            if (lower.indexOf(commWords[i]) !== -1) { commCount++; score += 3; }
-        }
-        var questionWords = ['how', 'what', 'why', 'when', 'where', 'who', 'which', 'does', 'can', 'should', 'is', 'are', '\u0643\u064a\u0641', '\u0645\u0627', '\u0644\u0645\u0627\u0630\u0627', '\u0645\u062a\u0649', '\u063a\u064a\u0631', '\u0647\u0644', '\u0645\u0646', '\u0647\u0644 \u064a\u0645\u0643\u0646', '\u0643\u064a\u0641 \u0627\u0633\u062a\u062e\u062f\u0645'];
-        var isQuestion = false;
-        for (var i = 0; i < questionWords.length; i++) {
-            if (lower.indexOf(questionWords[i]) === 0) { isQuestion = true; score -= 10; break; }
-        }
-        var brandWords = ['google', 'facebook', 'apple', 'microsoft', 'amazon', 'nike', 'adobe', 'samsung', 'huawei', 'noon', 'jarir', 'extra', 'stc', 'zain', 'stc pay', 'tamara', 'tabby', 'careem', 'uber', 'netflix', 'spotify', 'chatgpt', 'openai', 'tesla', 'bmw', 'mercedes'];
-        var isBrand = false;
-        for (var i = 0; i < brandWords.length; i++) {
-            if (lower.indexOf(brandWords[i]) !== -1) { isBrand = true; score += 20; break; }
-        }
-        if (lower.indexOf('near me') !== -1 || lower.indexOf('\u0628\u0642\u0631\u064a\u0628') !== -1 || lower.indexOf('\u0641\u064a \u0627\u0644\u0645\u0645\u0644\u0643\u0629') !== -1) score -= 10;
-        if (lower.indexOf('\u0623\u0631\u0636\u0644') !== -1 || lower.indexOf('\u0645\u0646\u0635\u062d') !== -1 || lower.indexOf('official') !== -1) score += 10;
-        if (lower.indexOf('vs') !== -1 || lower.indexOf('\u0645\u0639\u062a\u0627\u0628\u0639\u0629') !== -1 || lower.indexOf('alternative') !== -1 || lower.indexOf('\u0628\u062f\u064a\u0644') !== -1) score += 8;
-        if (lower.indexOf('tutorial') !== -1 || lower.indexOf('guide') !== -1 || lower.indexOf('\u062f\u0644\u064a\u0644') !== -1 || lower.indexOf('\u0637\u0631\u064a\u0642') !== -1) score -= 8;
-        if (lower.indexOf('2024') !== -1 || lower.indexOf('2025') !== -1 || lower.indexOf('2026') !== -1) score += 3;
-        if (lower.indexOf('free') !== -1 || lower.indexOf('\u0645\u062c\u0627\u0646\u064a') !== -1) score -= 5;
-        if (score < 15) score = 15;
-        if (score > 95) score = 95;
-        return score;
-    }
+
+
 
     function krDiffLabel(score) {
         if (score <= 30) return { text: 'Easy', cls: 'kr-badge-easy' };
@@ -5047,37 +4993,7 @@
         return map[intent] || map.informational;
     }
 
-    function krEstimateVolume(keyword, position, sourceType, expansionCount) {
-        var score = 50;
-        var wc = keyword.split(/\s+/).length;
-        var lower = keyword.toLowerCase();
-        if (position <= 3) score += 30;
-        else if (position <= 5) score += 20;
-        else if (position <= 8) score += 10;
-        else if (position <= 12) score += 5;
-        else score -= 5;
-        if (sourceType === 'serp-features') score += 15;
-        else if (sourceType === 'google-autocomplete') score += 10;
-        else if (sourceType === 'wikipedia') score += 5;
-        else if (sourceType === 'template') score -= 10;
-        if (wc === 1) score += 15;
-        else if (wc === 2) score += 5;
-        else if (wc === 3) score -= 5;
-        else if (wc >= 4) score -= 15;
-        var highIntent = ['buy', 'price', 'cost', 'deal', 'discount', 'order', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u062a\u062e\u0635\u0635', '\u0627\u0633\u062a\u062b\u0645\u0627\u0631'];
-        for (var i = 0; i < highIntent.length; i++) {
-            if (lower.indexOf(highIntent[i]) !== -1) { score += 8; break; }
-        }
-        if (expansionCount && expansionCount >= 3) score += 10;
-        else if (expansionCount && expansionCount >= 2) score += 5;
-        score = Math.max(5, Math.min(100, score));
-        var level = 'very-low';
-        if (score >= 80) level = 'very-high';
-        else if (score >= 65) level = 'high';
-        else if (score >= 45) level = 'medium';
-        else if (score >= 30) level = 'low';
-        return { volume: String(score), level: level };
-    }
+
 
     function krVolumeBadge(vol) {
         var colors = { 'very-high': '#059669', 'high': '#10b981', 'medium': '#f59e0b', 'low': '#f97316', 'very-low': '#94a3b8' };
@@ -5293,16 +5209,7 @@
         return { text: currentLang === 'ar' ? '\u0636\u0639\u064a\u0641' : 'Poor', cls: '', color: '#ef4444' };
     }
 
-    function krTrendDirection(keyword, serpData) {
-        if (!serpData) return { icon: '', text: '', cls: '' };
-        var paaCount = serpData.paa ? serpData.paa.length : 0;
-        var relCount = serpData.related ? serpData.related.length : 0;
-        var total = paaCount + relCount;
-        if (total >= 6) return { icon: '\uD83D\uDCC8', text: currentLang === 'ar' ? '\u0645\u0647\u062a\u0645' : 'Rising', cls: 'kr-badge-trend-up' };
-        if (total >= 3) return { icon: '\u27A1\uFE0F', text: currentLang === 'ar' ? '\u0633\u0627\u0626\u0639' : 'Stable', cls: 'kr-badge-trend-stable' };
-        if (serpData.featured) return { icon: '\uD83C\uDFC6', text: currentLang === 'ar' ? '\u062a\u0631\u0636\u064a\u0646' : 'Featured', cls: 'kr-badge-trend-up' };
-        return { icon: '', text: '', cls: '' };
-    }
+
 
     function krEstimateCTR(serpFeatures, position) {
         var baseCTR = 31.7;
@@ -5770,23 +5677,73 @@
             }
             html += '</div>';
         }
-        html += '<table><thead><tr><th>#</th><th>Keyword</th><th>Score</th><th>Difficulty</th><th>Intent</th><th>CPC</th><th>SERPs</th><th>Shopping</th><th>Seasonality</th><th>Top Domain</th></tr></thead><tbody>';
+        html += '<table><thead><tr><th>#</th><th>Keyword</th><th>Score</th><th>Difficulty</th><th>Intent</th><th>CPC</th><th>SERPs</th><th>PAA</th><th>Shopping</th><th>Local</th><th>Video</th><th>Seasonality</th><th>Top Domain</th></tr></thead><tbody>';
         for (var i = 0; i < results.length; i++) {
             var d = results[i];
             var diffCls = d.difficulty <= 35 ? 'easy' : d.difficulty <= 60 ? 'medium' : 'hard';
             var intentCls = d.intent === 'informational' ? 'info' : d.intent === 'transactional' ? 'trans' : d.intent === 'navigational' ? 'nav' : 'comm';
             var topDom = (d.topDomains && d.topDomains.length > 0) ? d.topDomains[0].domain : '-';
+            var seasonColor = d.seasonality === 'winter' ? '#0ea5e9' : d.seasonality === 'summer' ? '#f59e0b' : d.seasonality === 'trending' ? '#ef4444' : '#64748b';
+            var seasonLabel = d.seasonality || 'year-round';
             html += '<tr><td>' + (i + 1) + '</td><td><strong>' + esc(d.keyword) + '</strong></td>';
             html += '<td>' + d.volume + '</td>';
             html += '<td><span class="badge ' + diffCls + '">' + d.difficulty + '</span></td>';
             html += '<td><span class="badge ' + intentCls + '">' + d.intent + '</span></td>';
             html += '<td>' + d.cpc + '</td>';
             html += '<td>' + (d.serpFeatures || 0) + '</td>';
+            html += '<td>' + ((d.paa || []).length) + '</td>';
             html += '<td>' + (d.shoppingResults ? '\u2705' : '\u274C') + '</td>';
-            html += '<td>' + (d.seasonality || 'year-round') + '</td>';
+            html += '<td>' + (d.localPack ? '\u2705' : '\u274C') + '</td>';
+            html += '<td>' + (d.videoResults ? '\u2705' : '\u274C') + '</td>';
+            html += '<td style="color:' + seasonColor + ';">' + seasonLabel + '</td>';
             html += '<td>' + esc(topDom) + '</td></tr>';
         }
         html += '</tbody></table>';
+        var topByVolume = results.slice().sort(function(a, b) { return (b.volume || 0) - (a.volume || 0); }).slice(0, 10);
+        if (topByVolume.length > 0) {
+            html += '<div class="section"><h3>\uD83D\uDCCA ' + (currentLang === 'ar' ? '\u0623\u0639\u0644\u0649 10 \u0643\u0644\u0645\u0627\u062A \u0645\u062D\u062C\u0648\u0628\u0629 \u0628\u0627\u0644\u062D\u062C\u0645' : 'Top 10 Keywords by Volume') + '</h3>';
+            html += '<table><thead><tr><th>Keyword</th><th>Volume</th><th>Difficulty</th><th>Intent</th><th>Competition</th><th>PAA</th></tr></thead><tbody>';
+            for (var i = 0; i < topByVolume.length; i++) {
+                var kw = topByVolume[i];
+                var dc = kw.difficulty <= 35 ? 'easy' : kw.difficulty <= 60 ? 'medium' : 'hard';
+                html += '<tr><td><strong>' + esc(kw.keyword) + '</strong></td>';
+                html += '<td>' + kw.volume + '</td>';
+                html += '<td><span class="badge ' + dc + '">' + kw.difficulty + '</span></td>';
+                html += '<td>' + kw.intent + '</td>';
+                html += '<td>' + (kw.competition || '-') + '</td>';
+                html += '<td>' + ((kw.paa || []).length) + '</td></tr>';
+            }
+            html += '</tbody></table></div>';
+        }
+        var keywordsWithPAA = results.filter(function(d) { return (d.paa || []).length > 0; });
+        if (keywordsWithPAA.length > 0) {
+            html += '<div class="section"><h3>\u2753 ' + (currentLang === 'ar' ? '\u0623\u0633\u0626\u0644\u0629 \u0627\u0644\u0634\u0639\u0628 \u0627\u0644\u0634\u0627\u0626\u0639 (PAA)' : 'People Also Ask (PAA)') + '</h3>';
+            for (var i = 0; i < keywordsWithPAA.length; i++) {
+                var kw = keywordsWithPAA[i];
+                html += '<div style="background:#f0f9ff;padding:10px;border-radius:8px;margin-bottom:8px;">';
+                html += '<strong>' + esc(kw.keyword) + '</strong>';
+                for (var p = 0; p < kw.paa.length; p++) {
+                    html += '<div style="font-size:13px;color:#475569;padding:4px 0 4px 16px;">\u2022 ' + esc(kw.paa[p]) + '</div>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        var keywordsWithCompetitors = results.filter(function(d) { return d.competitors && d.competitors.length > 0; });
+        if (keywordsWithCompetitors.length > 0) {
+            html += '<div class="section"><h3>\uD83D\uDC65 ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0646\u0627\u0641\u0633\u0648\u0646 \u0627\u0644\u0639\u0645\u0644\u0627\u0621' : 'Competitor Domains') + '</h3>';
+            for (var i = 0; i < keywordsWithCompetitors.length; i++) {
+                var kw = keywordsWithCompetitors[i];
+                html += '<div style="background:#f5f3ff;padding:10px;border-radius:8px;margin-bottom:8px;">';
+                html += '<strong>' + esc(kw.keyword) + '</strong>';
+                for (var c = 0; c < Math.min(kw.competitors.length, 5); c++) {
+                    var comp = kw.competitors[c];
+                    html += '<div style="font-size:13px;color:#475569;padding:4px 0 4px 16px;">\u2022 ' + esc(comp.domain) + ' <span style="color:#94a3b8;">(' + (comp.relevance || '-') + ')</span></div>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+        }
         html += '<div class="footer">Generated by SEOHub - Free SEO Tools | seohub.mmetwily1.workers.dev</div>';
         html += '</body></html>';
         var blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
