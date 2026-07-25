@@ -10970,6 +10970,346 @@
     }
 
     // ==============================
+    // KEYWORD DIFFICULTY PREDICTOR
+    // ==============================
+    function krRenderKDPredictor(results) {
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#127919; ' + (currentLang === 'ar' ? '\u062a\u0646\u0628\u064a\u0621 \u0635\u0639\u0648\u0628\u0629 \u0627\u0644\u0643\u0644\u0645\u0629' : 'Keyword Difficulty Predictor') + '</h4>';
+        html += '<div style="display:flex;gap:8px;margin-bottom:16px;">';
+        html += '<input type="text" id="kr-predict-kw" placeholder="' + (currentLang === 'ar' ? '\u0623\u062f\u062e\u0644 \u0643\u0644\u0645\u0629...' : 'Enter keyword...') + '" style="flex:1;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;" />';
+        html += '<button onclick="krPredictDifficulty()" style="padding:8px 20px;border-radius:100px;background:#6366f1;color:white;border:none;font-weight:700;cursor:pointer;font-size:13px;">Predict</button>';
+        html += '</div>';
+        html += '<div id="kr-predict-output"></div>';
+        html += '</div>';
+        return html;
+    }
+    function krPredictDifficulty() {
+        var input = document.getElementById('kr-predict-kw');
+        if (!input || !input.value.trim()) return;
+        var kw = input.value.trim().toLowerCase();
+        var words = kw.split(' ');
+        var base = 20;
+        base += words.length * 5;
+        if (kw.length > 20) base += 10;
+        if (/\b(best|top|review|guide|how|what|why)\b/.test(kw)) base += 15;
+        if (/\b(buy|price|cheap|deal|discount|coupon)\b/.test(kw)) base += 20;
+        if (/\b(2025|2026|near me|online|free)\b/.test(kw)) base -= 5;
+        if (_krResults) {
+            var similarCount = 0;
+            var similarDiff = 0;
+            for (var i = 0; i < _krResults.length; i++) {
+                var existing = _krResults[i].keyword.toLowerCase();
+                var commonWords = 0;
+                for (var w = 0; w < words.length; w++) {
+                    if (existing.indexOf(words[w]) >= 0) commonWords++;
+                }
+                if (commonWords >= Math.ceil(words.length * 0.5)) {
+                    similarCount++;
+                    similarDiff += (_krResults[i].difficulty || 30);
+                }
+            }
+            if (similarCount > 0) {
+                var avgSimilar = similarDiff / similarCount;
+                base = Math.round(base * 0.4 + avgSimilar * 0.6);
+            }
+        }
+        base = Math.max(5, Math.min(95, base));
+        var label, labelColor, suggestions;
+        if (base <= 25) {
+            label = currentLang === 'ar' ? '\u0633\u0647\u0644' : 'Easy';
+            labelColor = '#10b981';
+            suggestions = currentLang === 'ar' ? ['\u0627\u0643\u062a\u0628 \u0645\u0642\u0627\u0644\u0629 \u0635\u0641\u062d\u0629 800+ \u0643\u0644\u0645\u0629', '\u0627\u0633\u062a\u062e\u062f\u0645 \u0642\u0627\u0626\u0645\u062a \u0627\u0644\u0635\u0644\u0629 \u0627\u0644\u0645\u062a\u0631\u0627\u0628\u0637\u0629', '\u0632\u064a\u0627\u062f\u0629 \u0631\u0628\u0637\u0627\u062a \u062f\u0627\u062e\u0644\u064a\u0629 \u0642\u0644\u064a\u0644\u0629'] : ['Write 800+ word article', 'Use internal linking', 'Build a few backlinks'];
+        } else if (base <= 50) {
+            label = currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637' : 'Medium';
+            labelColor = '#f59e0b';
+            suggestions = currentLang === 'ar' ? ['\u0643\u062a\u0628 \u0645\u062d\u062a\u0648\u0649 1500+ \u0643\u0644\u0645\u0629', '\u0623\u0646\u0634\u0626 \u0628\u0635\u0648\u0631 \u0645\u0631\u062a\u0628\u0637\u0629', '\u062e\u0635\u0635 \u0628\u0645\u0648\u0627\u0642\u0639 \u0630\u0627\u062a \u0635\u0644\u0629'] : ['Write 1500+ words', 'Add original images', 'Target specific long-tail'];
+        } else if (base <= 70) {
+            label = currentLang === 'ar' ? '\u0635\u0639\u0628' : 'Hard';
+            labelColor = '#f97316';
+            suggestions = currentLang === 'ar' ? ['\u0645\u062d\u062a\u0648\u0649 2500+ \u0643\u0644\u0645\u0629 \u0634\u0627\u0645\u0644', '\u0628\u0646\u0627 \u0644\u0646\u0638\u0627\u0626\u0639 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0627\u0644\u0645\u0645\u064a\u0632\u0629', '\u062e\u0637\u0648\u0629 \u0639\u0646\u0627\u0635\u0631 \u0645\u0648\u062a\u0633\u0648\u0637\u0629 5-10'] : ['Write 2500+ comprehensive content', 'Target featured snippets', 'Build 5-10 quality backlinks'];
+        } else {
+            label = currentLang === 'ar' ? '\u0636\u0639\u064a\u0641 \u062c\u062f\u0627\u064b' : 'Very Hard';
+            labelColor = '#ef4444';
+            suggestions = currentLang === 'ar' ? ['\u062d\u062a\u0627\u062c\u0629 3000+ \u0643\u0644\u0645\u0629 \u0623\u0631\u0634\u062f', '\u0627\u0633\u062a\u0634\u0627\u0631\u0643 \u0641\u064a \u0645\u0648\u0627\u0642\u0639 \u0630\u0627\u062a \u0635\u0644\u0629 \u0639\u062f\u064a\u062f\u0629', '\u0628\u0646\u0627\u0621 \u062e\u0637\u0648\u0629 \u0642\u0635\u064a\u0631\u0629 \u0645\u0646 20+', '\u0627\u0633\u062a\u062e\u062f\u0645 \u0645\u062d\u062a\u0648\u0649 \u0641\u0631\u064a\u0633\u0629 \u0643\u0628\u064a\u0631\u0629'] : ['Target 3000+ word ultimate guide', 'Build 20+ quality backlinks', 'Create supporting content cluster'];
+        }
+        var svgSize = 120, svgCenter = svgSize / 2, svgRadius = 45;
+        var angle = (base / 100) * 270 - 135;
+        var radAngle = angle * Math.PI / 180;
+        var arcEndX = svgCenter + svgRadius * Math.cos(radAngle);
+        var arcEndY = svgCenter + svgRadius * Math.sin(radAngle);
+        var largeArc = base > 50 ? 1 : 0;
+        var out = document.getElementById('kr-predict-output');
+        if (!out) return;
+        var html = '<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">';
+        html += '<svg viewBox="0 0 ' + svgSize + ' ' + svgSize + '" style="width:120px;height:120px;">';
+        html += '<circle cx="' + svgCenter + '" cy="' + svgCenter + '" r="' + svgRadius + '" fill="none" stroke="#f1f5f9" stroke-width="10" stroke-dasharray="' + (svgRadius * 2 * Math.PI * 0.75) + ' ' + (svgRadius * 2 * Math.PI * 0.25) + '" transform="rotate(-225 ' + svgCenter + ' ' + svgCenter + ')" />';
+        var dashLen = svgRadius * 2 * Math.PI * 0.75 * (base / 100);
+        html += '<circle cx="' + svgCenter + '" cy="' + svgCenter + '" r="' + svgRadius + '" fill="none" stroke="' + labelColor + '" stroke-width="10" stroke-dasharray="' + dashLen + ' ' + (svgRadius * 2 * Math.PI) + '" stroke-linecap="round" transform="rotate(-225 ' + svgCenter + ' ' + svgCenter + ')" />';
+        html += '<text x="' + svgCenter + '" y="' + (svgCenter - 4) + '" text-anchor="middle" font-size="22" font-weight="800" fill="' + labelColor + '">' + base + '</text>';
+        html += '<text x="' + svgCenter + '" y="' + (svgCenter + 14) + '" text-anchor="middle" font-size="10" fill="#64748b">' + label + '</text>';
+        html += '</svg>';
+        html += '<div style="flex:1;min-width:200px;">';
+        html += '<div style="font-size:11px;color:#64748b;margin-bottom:6px;font-weight:600;">' + (currentLang === 'ar' ? '\u0627\u0644\u0627\u0642\u062a\u0631\u0627\u062d\u0627\u062a:' : 'Suggestions:') + '</div>';
+        html += '<div style="display:flex;flex-direction:column;gap:4px;">';
+        for (var s = 0; s < suggestions.length; s++) {
+            html += '<div style="font-size:12px;color:#475569;padding:4px 8px;background:#f8fafc;border-radius:4px;border-left:3px solid ' + labelColor + ';">&#8226; ' + suggestions[s] + '</div>';
+        }
+        html += '</div></div></div>';
+        out.innerHTML = html;
+    }
+    function krShowPredictor() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderKDPredictor(_krResults || []) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // SERP FEATURE DISTRIBUTION (DONUT)
+    // ==============================
+    function krRenderSerpFeatureDistribution(results) {
+        var features = { featured: 0, paa: 0, local: 0, video: 0, sitelinks: 0, ads: 0, none: 0 };
+        var totalKws = results.length;
+        for (var i = 0; i < results.length; i++) {
+            var sf = results[i].serpFeatures || {};
+            var hasFeature = false;
+            if (sf.featured) { features.featured++; hasFeature = true; }
+            if (sf.paa) { features.paa++; hasFeature = true; }
+            if (sf.local) { features.local++; hasFeature = true; }
+            if (sf.video) { features.video++; hasFeature = true; }
+            if (sf.sitelinks) { features.sitelinks++; hasFeature = true; }
+            if (sf.ads > 0) { features.ads++; hasFeature = true; }
+            if (!hasFeature) features.none++;
+        }
+        var segs = [
+            { name: 'Featured', nameAr: '\u0645\u0645\u064a\u0632\u0629', count: features.featured, color: '#8b5cf6' },
+            { name: 'PAA', nameAr: '\u064a\u0633\u0623\u0644\u0648\u0646', count: features.paa, color: '#3b82f6' },
+            { name: 'Local', nameAr: '\u0645\u062d\u0644\u064a', count: features.local, color: '#10b981' },
+            { name: 'Video', nameAr: '\u0641\u064a\u062f\u064a\u0648', count: features.video, color: '#ef4444' },
+            { name: 'Sitelinks', nameAr: '\u0631\u0648\u0627\u0628\u0637', count: features.sitelinks, color: '#f59e0b' },
+            { name: 'Ads', nameAr: '\u0625\u0639\u0644\u0627\u0646\u0627\u062a', count: features.ads, color: '#64748b' },
+            { name: 'None', nameAr: '\u0644\u0627 \u062a\u0648\u062c\u062f', count: features.none, color: '#e2e8f0' }
+        ];
+        var svgSize = 200, cx = 100, cy = 100, r = 70, innerR = 45;
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128202; ' + (currentLang === 'ar' ? '\u062a\u0648\u0632\u064a\u0639 \u0645\u0644\u0627\u062d\u0638\u0627\u062a SERP' : 'SERP Feature Distribution') + '</h4>';
+        html += '<div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;">';
+        html += '<svg viewBox="0 0 ' + svgSize + ' ' + svgSize + '" style="width:200px;height:200px;">';
+        var total = totalKws || 1;
+        var cumAngle = -90;
+        for (var s = 0; s < segs.length; s++) {
+            if (segs[s].count === 0) continue;
+            var pct = segs[s].count / total;
+            var startAngle = cumAngle;
+            var endAngle = cumAngle + pct * 360;
+            var startRad = startAngle * Math.PI / 180;
+            var endRad = endAngle * Math.PI / 180;
+            var x1o = cx + r * Math.cos(startRad);
+            var y1o = cy + r * Math.sin(startRad);
+            var x2o = cx + r * Math.cos(endRad);
+            var y2o = cy + r * Math.sin(endRad);
+            var x1i = cx + innerR * Math.cos(endRad);
+            var y1i = cy + innerR * Math.sin(endRad);
+            var x2i = cx + innerR * Math.cos(startRad);
+            var y2i = cy + innerR * Math.sin(startRad);
+            var largeArc = pct > 0.5 ? 1 : 0;
+            var path = 'M' + x1o + ',' + y1o + ' A' + r + ',' + r + ' 0 ' + largeArc + ' 1 ' + x2o + ',' + y2o;
+            path += ' L' + x1i + ',' + y1i + ' A' + innerR + ',' + innerR + ' 0 ' + largeArc + ' 0 ' + x2i + ',' + y2i + ' Z';
+            html += '<path d="' + path + '" fill="' + segs[s].color + '" />';
+            cumAngle = endAngle;
+        }
+        html += '<text x="' + cx + '" y="' + (cy - 5) + '" text-anchor="middle" font-size="18" font-weight="800" fill="#1e293b">' + total + '</text>';
+        html += '<text x="' + cx + '" y="' + (cy + 12) + '" text-anchor="middle" font-size="9" fill="#64748b">' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629' : 'Keywords') + '</text>';
+        html += '</svg>';
+        html += '<div style="display:flex;flex-direction:column;gap:6px;">';
+        for (var s = 0; s < segs.length; s++) {
+            var pct = total > 0 ? Math.round(segs[s].count / total * 100) : 0;
+            html += '<div style="display:flex;align-items:center;gap:8px;">';
+            html += '<span style="width:12px;height:12px;border-radius:3px;background:' + segs[s].color + ';flex-shrink:0;"></span>';
+            html += '<span style="font-size:12px;color:#334155;width:80px;">' + (currentLang === 'ar' ? segs[s].nameAr : segs[s].name) + '</span>';
+            html += '<span style="font-size:12px;color:#64748b;width:40px;text-align:right;">' + segs[s].count + '</span>';
+            html += '<span style="font-size:11px;color:#94a3b8;width:40px;text-align:right;">' + pct + '%</span>';
+            html += '</div>';
+        }
+        html += '</div></div></div>';
+        return html;
+    }
+    function krShowSerpDist() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderSerpFeatureDistribution(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // KEYWORD MAPPING (kws → pages)
+    // ==============================
+    function krRenderKeywordMapping(results) {
+        var pages = [];
+        var assigned = {};
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i];
+            var words = kw.keyword.toLowerCase().split(/\s+/).filter(function(w) { return w.length > 3; });
+            var foundPage = -1;
+            for (var w = 0; w < words.length; w++) {
+                if (assigned[words[w]] !== undefined) { foundPage = assigned[words[w]]; break; }
+            }
+            if (foundPage >= 0) {
+                pages[foundPage].keywords.push(kw);
+                pages[foundPage].totalVol += (kw.volume || 0);
+            } else {
+                var pageName = words.slice(0, 2).join(' ') || kw.keyword.substring(0, 20);
+                var newIdx = pages.length;
+                pages.push({ name: pageName, keywords: [kw], totalVol: kw.volume || 0 });
+                for (var w = 0; w < words.length; w++) { assigned[words[w]] = newIdx; }
+            }
+        }
+        pages.sort(function(a, b) { return b.keywords.length - a.keywords.length; });
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128221; ' + (currentLang === 'ar' ? '\u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0625\u0644\u0649 \u0635\u0641\u062d\u0627\u062a' : 'Keyword to Page Mapping') + '</h4>';
+        html += '<div style="display:flex;flex-direction:column;gap:10px;">';
+        var showPages = pages.slice(0, 15);
+        for (var p = 0; p < showPages.length; p++) {
+            var page = showPages[p];
+            var maxVol = pages.length > 0 ? pages[0].totalVol : 1;
+            var barPct = maxVol > 0 ? (page.totalVol / maxVol * 100) : 0;
+            html += '<div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+            html += '<div><strong style="color:#1e40af;font-size:13px;">&#128196; ' + esc(page.name) + '</strong></div>';
+            html += '<span style="font-size:11px;color:#64748b;">' + page.keywords.length + ' kws | ' + page.totalVol.toLocaleString() + ' vol</span>';
+            html += '</div>';
+            html += '<div style="height:4px;background:#e2e8f0;border-radius:2px;margin-bottom:8px;"><div style="height:100%;width:' + barPct + '%;background:#3b82f6;border-radius:2px;"></div></div>';
+            html += '<div style="display:flex;flex-wrap:wrap;gap:3px;">';
+            var showKws = page.keywords.slice(0, 6);
+            for (var k = 0; k < showKws.length; k++) {
+                var kd = showKws[k].difficulty || 0;
+                var kdCol = kd <= 35 ? '#10b981' : kd <= 60 ? '#f59e0b' : '#ef4444';
+                html += '<span style="font-size:10px;padding:2px 6px;background:white;border:1px solid #e2e8f0;border-radius:100px;">';
+                html += esc(showKws[k].keyword.length > 20 ? showKws[k].keyword.substring(0, 18) + '..' : showKws[k].keyword);
+                html += ' <span style="color:' + kdCol + ';font-weight:600;">KD:' + kd + '</span></span>';
+            }
+            if (page.keywords.length > 6) html += '<span style="font-size:10px;color:#94a3b8;">+' + (page.keywords.length - 6) + '</span>';
+            html += '</div></div>';
+        }
+        html += '</div></div>';
+        return html;
+    }
+    function krShowMapping() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderKeywordMapping(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // COMPETITOR TRAFFIC ESTIMATOR
+    // ==============================
+    function krRenderTrafficEstimator(results) {
+        var domainKws = {};
+        for (var i = 0; i < results.length; i++) {
+            var topDomains = results[i].topDomains || [];
+            for (var d = 0; d < Math.min(topDomains.length, 10); d++) {
+                var dom = topDomains[d].domain;
+                if (!domainKws[dom]) domainKws[dom] = { keywords: [], totalTraffic: 0 };
+                var vol = results[i].volume || 0;
+                var pos = topDomains[d].position || 10;
+                var ctrTable = { 1: 0.317, 2: 0.247, 3: 0.186, 4: 0.136, 5: 0.095, 6: 0.063, 7: 0.045, 8: 0.033, 9: 0.025, 10: 0.02 };
+                var ctr = ctrTable[pos] || 0.01;
+                var traffic = Math.round(vol * ctr * 30);
+                domainKws[dom].keywords.push({ keyword: results[i].keyword, position: pos, volume: vol, traffic: traffic });
+                domainKws[dom].totalTraffic += traffic;
+            }
+        }
+        var domList = [];
+        var dkKeys = Object.keys(domainKws);
+        for (var d = 0; d < dkKeys.length; d++) {
+            domList.push({ domain: dkKeys[d], keywords: domainKws[dkKeys[d]].keywords, totalTraffic: domainKws[dkKeys[d]].totalTraffic });
+        }
+        domList.sort(function(a, b) { return b.totalTraffic - a.totalTraffic; });
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128200; ' + (currentLang === 'ar' ? '\u062a\u0642\u062f\u064a\u0631 \u0627\u0644\u0632\u064a\u0627\u0631\u0629 \u0627\u0644\u0645\u0646\u0627\u0641\u0633\u064a\u0629' : 'Competitor Traffic Estimator') + '</h4>';
+        var top10 = domList.slice(0, 10);
+        if (top10.length > 0) {
+            var maxTraffic = top10[0].totalTraffic;
+            html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+            for (var d = 0; d < top10.length; d++) {
+                var dom = top10[d];
+                var barPct = maxTraffic > 0 ? (dom.totalTraffic / maxTraffic * 100) : 0;
+                var rankColor = d === 0 ? '#ef4444' : d === 1 ? '#f59e0b' : d === 2 ? '#3b82f6' : '#64748b';
+                html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:8px;">';
+                html += '<span style="font-size:12px;font-weight:700;color:' + rankColor + ';width:24px;">#' + (d + 1) + '</span>';
+                html += '<span style="font-size:13px;font-weight:600;color:#334155;min-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(dom.domain) + '</span>';
+                html += '<div style="flex:1;height:8px;background:#e2e8f0;border-radius:4px;min-width:100px;"><div style="height:100%;width:' + barPct + '%;background:' + rankColor + ';border-radius:4px;"></div></div>';
+                html += '<span style="font-size:12px;font-weight:700;color:#334155;width:60px;text-align:right;">' + dom.totalTraffic.toLocaleString() + '</span>';
+                html += '<span style="font-size:10px;color:#94a3b8;width:50px;text-align:right;">' + dom.keywords.length + ' kws</span>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowTrafficEstimator() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderTrafficEstimator(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // KEYWORD RANKING POTENTIAL SCORE
+    // ==============================
+    function krRenderRankingPotential(results) {
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#11088; ' + (currentLang === 'ar' ? '\u0645\u0624\u0634\u0631 \u0627\u0644\u062a\u0631\u062a\u064a\u0628 \u0641\u064a \u0627\u0644\u062a\u0631\u062a\u064a\u0628' : 'Ranking Potential Score') + '</h4>';
+        var scored = [];
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i];
+            var vol = kw.volume || 0;
+            var diff = kw.difficulty || 50;
+            var hasSerpFeatures = false;
+            var sf = kw.serpFeatures || {};
+            if (sf.featured || sf.paa) hasSerpFeatures = true;
+            var intent = kw.intent || '';
+            var volScore = Math.min(30, (Math.log10(vol + 1) / 5) * 30);
+            var diffScore = Math.max(0, (100 - diff) / 100 * 35);
+            var intentScore = (intent === 'info') ? 20 : (intent === 'nav') ? 10 : 15;
+            var featureBonus = hasSerpFeatures ? 15 : 0;
+            var total = Math.round(volScore + diffScore + intentScore + featureBonus);
+            total = Math.min(100, Math.max(0, total));
+            scored.push({ keyword: kw.keyword, score: total, volume: vol, difficulty: diff, intent: intent });
+        }
+        scored.sort(function(a, b) { return b.score - a.score; });
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;">';
+        var showScored = scored.slice(0, 20);
+        for (var s = 0; s < showScored.length; s++) {
+            var item = showScored[s];
+            var scoreColor = item.score >= 70 ? '#10b981' : item.score >= 45 ? '#f59e0b' : '#ef4444';
+            var svgSize = 60, sCx = 30, sCy = 30, sR = 22;
+            var circumference = 2 * Math.PI * sR;
+            var fillLen = circumference * (item.score / 100);
+            html += '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">';
+            html += '<svg viewBox="0 0 ' + svgSize + ' ' + svgSize + '" style="width:50px;height:50px;flex-shrink:0;">';
+            html += '<circle cx="' + sCx + '" cy="' + sCy + '" r="' + sR + '" fill="none" stroke="#f1f5f9" stroke-width="4" />';
+            html += '<circle cx="' + sCx + '" cy="' + sCy + '" r="' + sR + '" fill="none" stroke="' + scoreColor + '" stroke-width="4" stroke-dasharray="' + fillLen + ' ' + circumference + '" stroke-linecap="round" transform="rotate(-90 ' + sCx + ' ' + sCy + ')" />';
+            html += '<text x="' + sCx + '" y="' + (sCy + 4) + '" text-anchor="middle" font-size="12" font-weight="800" fill="' + scoreColor + '">' + item.score + '</text>';
+            html += '</svg>';
+            html += '<div style="flex:1;min-width:0;">';
+            html += '<div style="font-size:12px;font-weight:600;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(item.keyword) + '</div>';
+            html += '<div style="font-size:10px;color:#94a3b8;">Vol:' + item.volume.toLocaleString() + ' | KD:' + item.difficulty + '</div>';
+            html += '</div></div>';
+        }
+        html += '</div></div>';
+        return html;
+    }
+    function krShowRankingPotential() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderRankingPotential(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
     // Update the extra analysis bar with new buttons
     // ==============================
     var _krOrigRenderExtraAnalysis = krRenderExtraAnalysis;
@@ -11001,6 +11341,11 @@
         html += '<button onclick="krShowHistory()" style="padding:8px 16px;border-radius:100px;border:2px solid #64748b;background:#f8fafc;color:#334155;font-weight:700;cursor:pointer;font-size:13px;">&#128336; History</button>';
         html += '<button onclick="krShowBacklinks()" style="padding:8px 16px;border-radius:100px;border:2px solid #7c3aed;background:#f5f3ff;color:#5b21b6;font-weight:700;cursor:pointer;font-size:13px;">&#128279; Backlinks</button>';
         html += '<button onclick="krShowChecklist()" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#065f46;font-weight:700;cursor:pointer;font-size:13px;">&#9989; Checklist</button>';
+        html += '<button onclick="krShowPredictor()" style="padding:8px 16px;border-radius:100px;border:2px solid #6366f1;background:#eef2ff;color:#4338ca;font-weight:700;cursor:pointer;font-size:13px;">&#127919; Predict KD</button>';
+        html += '<button onclick="krShowSerpDist()" style="padding:8px 16px;border-radius:100px;border:2px solid #a855f7;background:#faf5ff;color:#7e22ce;font-weight:700;cursor:pointer;font-size:13px;">&#128202; SERP Dist</button>';
+        html += '<button onclick="krShowMapping()" style="padding:8px 16px;border-radius:100px;border:2px solid #0d9488;background:#f0fdfa;color:#115e59;font-weight:700;cursor:pointer;font-size:13px;">&#128221; Mapping</button>';
+        html += '<button onclick="krShowTrafficEstimator()" style="padding:8px 16px;border-radius:100px;border:2px solid #dc2626;background:#fef2f2;color:#991b1b;font-weight:700;cursor:pointer;font-size:13px;">&#128200; Traffic Est</button>';
+        html += '<button onclick="krShowRankingPotential()" style="padding:8px 16px;border-radius:100px;border:2px solid #eab308;background:#fefce8;color:#854d0e;font-weight:700;cursor:pointer;font-size:13px;">&#11088; Rank Score</button>';
         html += '<button onclick="krExportGoogleSheets(_krResults)" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#059669;font-weight:700;cursor:pointer;font-size:13px;">&#128203; Sheets</button>';
         html += '</div>';
         return html;
