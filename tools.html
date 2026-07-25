@@ -10038,6 +10038,345 @@
     }
 
     // ==============================
+    // KEYWORD DIFFICULTY DISTRIBUTION CHART
+    // ==============================
+    function krRenderDifficultyChart(results) {
+        var tiers = [
+            { label: '0-15', labelAr: '0-15 \u0633\u0647\u0644', min: 0, max: 15, color: '#10b981', kws: [] },
+            { label: '16-30', labelAr: '16-30 \u0645\u062a\u0648\u0633\u0637', min: 16, max: 30, color: '#34d399', kws: [] },
+            { label: '31-50', labelAr: '31-50 \u0645\u0639\u062a\u062f\u0644', min: 31, max: 50, color: '#f59e0b', kws: [] },
+            { label: '51-70', labelAr: '51-70 \u0635\u0639\u0628', min: 51, max: 70, color: '#f97316', kws: [] },
+            { label: '71-100', labelAr: '71-100 \u0636\u0639\u064a\u0641', min: 71, max: 100, color: '#ef4444', kws: [] }
+        ];
+        for (var i = 0; i < results.length; i++) {
+            var d = results[i].difficulty || 0;
+            for (var t = 0; t < tiers.length; t++) {
+                if (d >= tiers[t].min && d <= tiers[t].max) { tiers[t].kws.push(results[i]); break; }
+            }
+        }
+        var maxCount = 0;
+        for (var t = 0; t < tiers.length; t++) { if (tiers[t].kws.length > maxCount) maxCount = tiers[t].kws.length; }
+        var total = results.length;
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128200; ' + (currentLang === 'ar' ? '\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u0635\u0639\u0648\u0628\u0629' : 'Difficulty Distribution') + '</h4>';
+        html += '<div style="display:flex;align-items:flex-end;gap:12px;height:200px;padding-bottom:30px;position:relative;">';
+        html += '<div style="position:absolute;left:0;top:0;bottom:30px;width:1px;background:#f1f5f9;"></div>';
+        for (var t = 0; t < tiers.length; t++) {
+            var pct = maxCount > 0 ? (tiers[t].kws.length / maxCount * 100) : 0;
+            var pctTotal = total > 0 ? (tiers[t].kws.length / total * 100).toFixed(1) : 0;
+            html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">';
+            html += '<div style="font-size:11px;font-weight:700;color:' + tiers[t].color + ';">' + tiers[t].kws.length + ' (' + pctTotal + '%)</div>';
+            html += '<div style="width:100%;background:' + tiers[t].color + ';border-radius:6px 6px 0 0;height:' + Math.max(pct, 2) + '%;transition:height 0.5s;position:relative;" title="' + tiers[t].kws.length + ' keywords">';
+            html += '<div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:#64748b;white-space:nowrap;">' + tiers[t].kws.length + '</div>';
+            html += '</div>';
+            html += '<div style="font-size:10px;color:#64748b;text-align:center;white-space:nowrap;">' + (currentLang === 'ar' ? tiers[t].labelAr : tiers[t].label) + '</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+        html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">';
+        var easyPct = total > 0 ? Math.round((tiers[0].kws.length + tiers[1].kws.length) / total * 100) : 0;
+        var medPct = total > 0 ? Math.round(tiers[2].kws.length / total * 100) : 0;
+        var hardPct = total > 0 ? Math.round((tiers[3].kws.length + tiers[4].kws.length) / total * 100) : 0;
+        html += '<div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#10b981;"></span>' + (currentLang === 'ar' ? '\u0633\u0647\u0644: ' : 'Easy: ') + easyPct + '%</div>';
+        html += '<div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;"></span>' + (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637: ' : 'Medium: ') + medPct + '%</div>';
+        html += '<div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;"></span>' + (currentLang === 'ar' ? '\u0635\u0639\u0628: ' : 'Hard: ') + hardPct + '%</div>';
+        html += '</div></div>';
+        return html;
+    }
+    function krShowDifficultyChart() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderDifficultyChart(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // SERP FEATURE OPPORTUNITY FINDER
+    // ==============================
+    function krRenderSerpOpportunities(results) {
+        var featured = [], paa = [], local = [], video = [], sitelinks = [];
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i];
+            var sf = kw.serpFeatures || {};
+            if (sf.featured) featured.push(kw);
+            if (sf.paa) paa.push(kw);
+            if (sf.local) local.push(kw);
+            if (sf.video) video.push(kw);
+            if (sf.sitelinks) sitelinks.push(kw);
+        }
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#127919; ' + (currentLang === 'ar' ? '\u0641\u0631\u0635 \u0641\u0631\u0635 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a SERP' : 'SERP Feature Opportunities') + '</h4>';
+        var cards = [
+            { type: 'featured', label: 'Featured Snippet', labelAr: '\u0627\u0644\u0645\u0642\u0637\u0639\u0629 \u0627\u0644\u0645\u0645\u064a\u0632\u0629', kws: featured, color: '#8b5cf6', icon: '&#127381;' },
+            { type: 'paa', label: 'People Also Ask', labelAr: '\u064a\u0633\u0623\u0644 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u0648\u0646 \u0623\u064a\u0636\u0627', kws: paa, color: '#3b82f6', icon: '&#10067;' },
+            { type: 'local', label: 'Local Pack', labelAr: '\u0627\u0644\u062d\u0632\u0645 \u0627\u0644\u0645\u062d\u0644\u064a', kws: local, color: '#10b981', icon: '&#128205;' },
+            { type: 'video', label: 'Video Results', labelAr: '\u0646\u062a\u0627\u0626\u062c \u0627\u0644\u0641\u064a\u062f\u064a\u0648', kws: video, color: '#ef4444', icon: '&#127909;' },
+            { type: 'sitelinks', label: 'Sitelinks', labelAr: '\u0631\u0648\u0627\u0628\u0637 \u0645\u0636\u0645\u0646\u0629', kws: sitelinks, color: '#f59e0b', icon: '&#128279;' }
+        ];
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;">';
+        for (var c = 0; c < cards.length; c++) {
+            var card = cards[c];
+            html += '<div style="background:' + card.color + '08;border:1px solid ' + card.color + '33;border-radius:12px;padding:16px;">';
+            html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+            html += '<span style="font-size:20px;">' + card.icon + '</span>';
+            html += '<div><strong style="color:' + card.color + ';">' + (currentLang === 'ar' ? card.labelAr : card.label) + '</strong>';
+            html += '<div style="font-size:11px;color:#94a3b8;">' + card.kws.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0645\u0641\u062a\u0627\u062d\u0629' : 'keywords found') + '</div></div></div>';
+            if (card.kws.length > 0) {
+                html += '<div style="display:flex;flex-direction:column;gap:3px;">';
+                var show = card.kws.slice(0, 5);
+                for (var k = 0; k < show.length; k++) {
+                    var vol = show[k].volume || 0;
+                    html += '<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 6px;background:white;border-radius:4px;">';
+                    html += '<span style="color:#334155;">' + esc(show[k].keyword.length > 25 ? show[k].keyword.substring(0, 23) + '..' : show[k].keyword) + '</span>';
+                    html += '<span style="color:#94a3b8;">' + vol.toLocaleString() + '</span></div>';
+                }
+                if (card.kws.length > 5) html += '<div style="font-size:10px;color:#94a3b8;text-align:center;">+' + (card.kws.length - 5) + ' more</div>';
+                html += '</div>';
+            } else {
+                html += '<div style="font-size:12px;color:#94a3b8;text-align:center;padding:8px 0;">' + (currentLang === 'ar' ? '\u0644\u0627 \u062a\u0648\u062c\u062f \u0646\u062a\u0627\u0626\u062c' : 'No results') + '</div>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+        html += '</div>';
+        return html;
+    }
+    function krShowSerpOpportunities() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderSerpOpportunities(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // KEYWORD TAGGING SYSTEM
+    // ==============================
+    function krGetTags() {
+        try { return JSON.parse(localStorage.getItem('kr_keyword_tags') || '{}'); } catch(e) { return {}; }
+    }
+    function krSetTags(tags) { localStorage.setItem('kr_keyword_tags', JSON.stringify(tags)); }
+    function krToggleTag(keyword, tag) {
+        var tags = krGetTags();
+        if (!tags[keyword]) tags[keyword] = [];
+        var idx = tags[keyword].indexOf(tag);
+        if (idx >= 0) tags[keyword].splice(idx, 1);
+        else tags[keyword].push(tag);
+        if (tags[keyword].length === 0) delete tags[keyword];
+        krSetTags(tags);
+    }
+    var _krTagPresets = [
+        { name: 'Quick Win', color: '#10b981' },
+        { name: 'Long Term', color: '#3b82f6' },
+        { name: 'Pillar', color: '#8b5cf6' },
+        { name: 'Cluster', color: '#f59e0b' },
+        { name: 'Target', color: '#ef4444' },
+        { name: 'Low Priority', color: '#94a3b8' }
+    ];
+    function krRenderTagPanel(results) {
+        var tags = krGetTags();
+        var tagCounts = {};
+        for (var t = 0; t < _krTagPresets.length; t++) tagCounts[_krTagPresets[t].name] = 0;
+        var tagged = {}, untagged = 0;
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i].keyword;
+            if (tags[kw] && tags[kw].length > 0) {
+                for (var t = 0; t < tags[kw].length; t++) {
+                    if (tagCounts[tags[kw][t]] !== undefined) tagCounts[tags[kw][t]]++;
+                }
+                tagged[kw] = tags[kw];
+            } else {
+                untagged++;
+            }
+        }
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 12px;color:#1e293b;font-size:15px;">&#127991; ' + (currentLang === 'ar' ? '\u062a\u0635\u0646\u064a\u0641 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Keyword Tags') + '</h4>';
+        html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">';
+        for (var t = 0; t < _krTagPresets.length; t++) {
+            var tp = _krTagPresets[t];
+            html += '<span style="background:' + tp.color + '15;border:1px solid ' + tp.color + '44;border-radius:100px;padding:4px 12px;font-size:12px;color:' + tp.color + ';font-weight:600;">' + tp.name + ': ' + tagCounts[tp.name] + '</span>';
+        }
+        html += '<span style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:100px;padding:4px 12px;font-size:12px;color:#64748b;font-weight:600;">' + (currentLang === 'ar' ? '\u063a\u064a\u0631 \u0645\u0648\u0635\u0649: ' : 'Untagged: ') + untagged + '</span>';
+        html += '</div>';
+        var tagFilter = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">';
+        tagFilter += '<button onclick="krFilterByTag(\'all\')" style="padding:4px 12px;border-radius:100px;border:1px solid #d1d5db;background:white;color:#374151;font-size:11px;cursor:pointer;font-weight:600;">All</button>';
+        for (var t = 0; t < _krTagPresets.length; t++) {
+            var tp = _krTagPresets[t];
+            tagFilter += '<button onclick="krFilterByTag(\'' + tp.name + '\')" style="padding:4px 12px;border-radius:100px;border:1px solid ' + tp.color + '44;background:' + tp.color + '11;color:' + tp.color + ';font-size:11px;cursor:pointer;font-weight:600;">' + tp.name + '</button>';
+        }
+        tagFilter += '</div>';
+        html += tagFilter;
+        html += '<div id="kr-tag-list" style="max-height:300px;overflow-y:auto;">';
+        html += krRenderTagList(results, 'all');
+        html += '</div></div>';
+        return html;
+    }
+    function krRenderTagList(results, filter) {
+        var tags = krGetTags();
+        var html = '<div style="display:flex;flex-direction:column;gap:4px;">';
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i].keyword;
+            var kwTags = tags[kw] || [];
+            if (filter !== 'all' && kwTags.indexOf(filter) < 0) continue;
+            html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8fafc;border-radius:6px;font-size:12px;">';
+            html += '<span style="flex:1;color:#334155;font-weight:500;">' + esc(kw.length > 35 ? kw.substring(0, 33) + '..' : kw) + '</span>';
+            for (var t = 0; t < _krTagPresets.length; t++) {
+                var tp = _krTagPresets[t];
+                var isActive = kwTags.indexOf(tp.name) >= 0;
+                html += '<span onclick="krToggleTag(\'' + kw.replace(/'/g, "\\'") + '\',\'' + tp.name + '\');krRefreshTagList();" style="width:18px;height:18px;border-radius:50%;border:2px solid ' + tp.color + ';background:' + (isActive ? tp.color : 'transparent') + ';cursor:pointer;display:inline-block;flex-shrink:0;" title="' + tp.name + '"></span>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krFilterByTag(tag) {
+        var list = document.getElementById('kr-tag-list');
+        if (list && _krResults) list.innerHTML = krRenderTagList(_krResults, tag);
+    }
+    function krRefreshTagList() {
+        var list = document.getElementById('kr-tag-list');
+        if (list && _krResults) list.innerHTML = krRenderTagList(_krResults, 'all');
+        var tagPanel = document.getElementById('kr-tag-summary');
+        if (tagPanel && _krResults) tagPanel.innerHTML = krRenderTagPanel(_krResults);
+    }
+    function krShowTags() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderTagPanel(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // SERP POSITION TIMELINE
+    // ==============================
+    function krRenderPositionTimeline() {
+        var tracker = krGetTracker();
+        if (!tracker || tracker.length === 0) return '<p style="color:#94a3b8;">' + (currentLang === 'ar' ? '\u0644\u0645 \u062a\u0636\u0641\u0647 \u0643\u0644\u0645\u0629 \u0644\u0645\u062a\u0627\u0628\u0639\u0629 \u0627\u0644\u062a\u062a\u0628\u0639' : 'No tracked keywords yet') + '</p>';
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128338; ' + (currentLang === 'ar' ? '\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0645\u0648\u0627\u0642\u0639' : 'Position Timeline') + '</h4>';
+        var topKws = tracker.slice(0, 10);
+        var colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#14b8a6', '#6366f1'];
+        for (var k = 0; k < topKws.length; k++) {
+            var kw = topKws[k];
+            var history = kw.history || [];
+            if (history.length < 2) continue;
+            var col = colors[k % colors.length];
+            html += '<div style="margin-bottom:16px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+            html += '<strong style="font-size:13px;color:#334155;">' + esc(kw.keyword.length > 40 ? kw.keyword.substring(0, 38) + '..' : kw.keyword) + '</strong>';
+            html += '<div style="display:flex;gap:8px;font-size:11px;">';
+            var firstPos = history[0].position;
+            var lastPos = history[history.length - 1].position;
+            var change = firstPos - lastPos;
+            var chCol = change > 0 ? '#10b981' : change < 0 ? '#ef4444' : '#94a3b8';
+            var chIcon = change > 0 ? '&#9650;' : change < 0 ? '&#9660;' : '&#9654;';
+            html += '<span style="color:#94a3b8;">' + history.length + ' snapshots</span>';
+            html += '<span style="color:' + chCol + ';">' + chIcon + ' ' + Math.abs(change) + '</span>';
+            html += '<span style="color:#334155;font-weight:600;">#' + lastPos + '</span>';
+            html += '</div></div>';
+            var svgW = 500, svgH = 60, padX = 5, padY = 8;
+            var minP = 1, maxP = 100;
+            var points = [];
+            for (var h = 0; h < history.length; h++) {
+                var x = padX + (h / (history.length - 1)) * (svgW - 2 * padX);
+                var pos = Math.max(minP, Math.min(maxP, history[h].position));
+                var y = padY + ((pos - minP) / (maxP - minP)) * (svgH - 2 * padY);
+                points.push(x + ',' + y);
+            }
+            html += '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '" style="width:100%;height:60px;">';
+            html += '<defs><linearGradient id="tg' + k + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' + col + '" stop-opacity="0.3"/><stop offset="100%" stop-color="' + col + '" stop-opacity="0"/></linearGradient></defs>';
+            if (points.length > 1) {
+                var areaPath = 'M' + points[0];
+                for (var p = 1; p < points.length; p++) areaPath += ' L' + points[p];
+                areaPath += ' L' + padX + ((points.length - 1) / (points.length - 1)) * (svgW - 2 * padX) + ',' + (svgH - padY);
+                areaPath += ' L' + points[0].split(',')[0] + ',' + (svgH - padY) + ' Z';
+                html += '<path d="' + areaPath + '" fill="url(#tg' + k + ')" />';
+                html += '<polyline points="' + points.join(' ') + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+                var lastPt = points[points.length - 1].split(',');
+                html += '<circle cx="' + lastPt[0] + '" cy="' + lastPt[1] + '" r="3" fill="' + col + '"/>';
+            }
+            html += '</svg></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowTimeline() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderPositionTimeline() + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // PDF EXPORT
+    // ==============================
+    function krExportPDF() {
+        if (!_krResults || _krResults.length === 0) return;
+        var title = (currentLang === 'ar' ? '\u062a\u0642\u0631\u064a\u0631 \u0628\u062d\u062b \u0627\u0644\u0643\u0644\u0645\u0627\u062a - SEOHUB' : 'Keyword Research Report - SEOHUB');
+        var lines = [];
+        lines.push('='.repeat(60));
+        lines.push(title);
+        lines.push('Date: ' + new Date().toLocaleDateString());
+        lines.push('Keywords: ' + _krResults.length);
+        lines.push('='.repeat(60));
+        lines.push('');
+        var totalVol = 0, avgDiff = 0, intents = {};
+        for (var i = 0; i < _krResults.length; i++) {
+            totalVol += (_krResults[i].volume || 0);
+            avgDiff += (_krResults[i].difficulty || 0);
+            var intent = _krResults[i].intent || 'Unknown';
+            intents[intent] = (intents[intent] || 0) + 1;
+        }
+        avgDiff = _krResults.length > 0 ? Math.round(avgDiff / _krResults.length) : 0;
+        lines.push('SUMMARY');
+        lines.push('-'.repeat(40));
+        lines.push('Total Volume: ' + totalVol.toLocaleString());
+        lines.push('Avg Difficulty: ' + avgDiff);
+        lines.push('');
+        lines.push('INTENT BREAKDOWN:');
+        var intentKeys = Object.keys(intents);
+        for (var i = 0; i < intentKeys.length; i++) {
+            lines.push('  ' + intentKeys[i] + ': ' + intents[intentKeys[i]]);
+        }
+        lines.push('');
+        lines.push('KEYWORD TABLE');
+        lines.push('-'.repeat(40));
+        lines.push(padRight('Keyword', 40) + padRight('Vol', 10) + padRight('KD', 6) + padRight('CPC', 8) + 'Intent');
+        lines.push('-'.repeat(80));
+        for (var i = 0; i < _krResults.length; i++) {
+            var kw = _krResults[i];
+            lines.push(
+                padRight(kw.keyword.substring(0, 38), 40) +
+                padRight(String(kw.volume || 0), 10) +
+                padRight(String(kw.difficulty || 0), 6) +
+                padRight('$' + (kw.cpc || 0), 8) +
+                (kw.intent || '')
+            );
+        }
+        lines.push('');
+        lines.push('TOP 5 BY VOLUME');
+        lines.push('-'.repeat(40));
+        var sorted = _krResults.slice().sort(function(a, b) { return (b.volume || 0) - (a.volume || 0); });
+        for (var i = 0; i < Math.min(5, sorted.length); i++) {
+            lines.push((i + 1) + '. ' + sorted[i].keyword + ' (' + (sorted[i].volume || 0).toLocaleString() + ' vol, KD ' + (sorted[i].difficulty || 0) + ')');
+        }
+        lines.push('');
+        lines.push('Generated by SEOHUB - https://mmetwily1-sudo.github.io/seohub/');
+        var content = lines.join('\n');
+        var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'seohub-report-' + new Date().toISOString().split('T')[0] + '.txt';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+    function padRight(str, len) {
+        while (str.length < len) str += ' ';
+        return str;
+    }
+
+    // ==============================
     // Update the extra analysis bar with new buttons
     // ==============================
     var _krOrigRenderExtraAnalysis = krRenderExtraAnalysis;
@@ -10045,6 +10384,7 @@
         var html = '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">';
         html += '<button onclick="krShowAnalytics()" style="padding:8px 16px;border-radius:100px;border:2px solid #a855f7;background:#faf5ff;color:#7e22ce;font-weight:700;cursor:pointer;font-size:13px;">&#128202; Dashboard</button>';
         html += '<button onclick="krShowROI()" style="padding:8px 16px;border-radius:100px;border:2px solid #059669;background:#ecfdf5;color:#065f46;font-weight:700;cursor:pointer;font-size:13px;">&#128176; ROI</button>';
+        html += '<button onclick="krShowDifficultyChart()" style="padding:8px 16px;border-radius:100px;border:2px solid #f97316;background:#fff7ed;color:#c2410c;font-weight:700;cursor:pointer;font-size:13px;">&#128200; KD Dist</button>';
         html += '<button onclick="krShowMatrix()" style="padding:8px 16px;border-radius:100px;border:2px solid #f97316;background:#fff7ed;color:#c2410c;font-weight:700;cursor:pointer;font-size:13px;">&#128200; Matrix</button>';
         html += '<button onclick="krShowCloud()" style="padding:8px 16px;border-radius:100px;border:2px solid #0ea5e9;background:#f0f9ff;color:#0369a1;font-weight:700;cursor:pointer;font-size:13px;">&#9998; Cloud</button>';
         html += '<button onclick="krShowHeatmap()" style="padding:8px 16px;border-radius:100px;border:2px solid #f59e0b;background:#fffbeb;color:#92400e;font-weight:700;cursor:pointer;font-size:13px;">&#128293; Heatmap</button>';
@@ -10053,6 +10393,10 @@
         html += '<button onclick="krShowOutline()" style="padding:8px 16px;border-radius:100px;border:2px solid #3b82f6;background:#eff6ff;color:#1e40af;font-weight:700;cursor:pointer;font-size:13px;">&#128221; Outline</button>';
         html += '<button onclick="krShowSlugs()" style="padding:8px 16px;border-radius:100px;border:2px solid #f59e0b;background:#fffbeb;color:#92400e;font-weight:700;cursor:pointer;font-size:13px;">&#128279; Slugs</button>';
         html += '<button onclick="krShowCalendar()" style="padding:8px 16px;border-radius:100px;border:2px solid #8b5cf6;background:#f5f3ff;color:#6d28d9;font-weight:700;cursor:pointer;font-size:13px;">&#128197; Calendar</button>';
+        html += '<button onclick="krShowTags()" style="padding:8px 16px;border-radius:100px;border:2px solid #ec4899;background:#fdf2f8;color:#be185d;font-weight:700;cursor:pointer;font-size:13px;">&#127991; Tags</button>';
+        html += '<button onclick="krShowTimeline()" style="padding:8px 16px;border-radius:100px;border:2px solid #0ea5e9;background:#f0f9ff;color:#0369a1;font-weight:700;cursor:pointer;font-size:13px;">&#128338; Timeline</button>';
+        html += '<button onclick="krShowSerpOpportunities()" style="padding:8px 16px;border-radius:100px;border:2px solid #6366f1;background:#eef2ff;color:#4338ca;font-weight:700;cursor:pointer;font-size:13px;">&#127919; SERP Opps</button>';
+        html += '<button onclick="krExportPDF()" style="padding:8px 16px;border-radius:100px;border:2px solid #64748b;background:#f8fafc;color:#334155;font-weight:700;cursor:pointer;font-size:13px;">&#128196; PDF</button>';
         html += '<button onclick="krExportGoogleSheets(_krResults)" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#059669;font-weight:700;cursor:pointer;font-size:13px;">&#128203; Sheets</button>';
         html += '</div>';
         return html;
