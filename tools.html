@@ -6182,17 +6182,7 @@
         var allPromises = [];
 
         allPromises.push(
-            krFetchTrends(country, lang).then(function(trending) {
-                trendKeywords = trending;
-                for (var i = 0; i < trending.length; i++) {
-                    var tk = trending[i].keyword.toLowerCase();
-                    if (tk.indexOf(seed.toLowerCase()) !== -1 || seed.toLowerCase().indexOf(tk) !== -1) {
-                        rawKeywords[tk] = true;
-                        kwSources[tk] = 'trending';
-                        kwPosition[tk] = i + 1;
-                    }
-                }
-            }).catch(function() {})
+            Promise.resolve()
         );
 
         allPromises.push(
@@ -6226,17 +6216,7 @@
         );
 
         allPromises.push(
-            krFetchRedditKeywords(seed).then(function(redditKws) {
-                for (var i = 0; i < redditKws.length; i++) {
-                    var rk = redditKws[i].toLowerCase();
-                    if (rk.length > 2 && rk.length < 80 && !rawKeywords[rk]) {
-                        rawKeywords[rk] = true;
-                        kwSources[rk] = 'reddit';
-                        kwPosition[rk] = i + 1;
-                        kwExpansionCount[rk] = 1;
-                    }
-                }
-            }).catch(function() {})
+            Promise.resolve()
         );
 
         allPromises.push(
@@ -7584,10 +7564,9 @@
             }
 
             var templateList = Object.keys(templateKeywords);
-            var taskCount = 2;
+            var taskCount = 5;
             if (doAZ) taskCount++;
             if (templateList.length > 0) taskCount++;
-            taskCount += 3;
             var tasksDone = 0;
             function onTaskDone() {
                 tasksDone++;
@@ -7598,17 +7577,7 @@
             var serpResults = {};
 
             allPromises.push(
-                krFetchTrends(country, lang).then(function(trending) {
-                    trendKeywords = trending;
-                    for (var i = 0; i < trending.length; i++) {
-                        var tk = trending[i].keyword.toLowerCase();
-                        if (tk.indexOf(seed.toLowerCase()) !== -1 || seed.toLowerCase().indexOf(tk) !== -1) {
-                            rawKeywords[tk] = true;
-                            kwSources[tk] = 'trending';
-                            kwPosition[tk] = i + 1;
-                        }
-                    }
-                }).catch(function() {}).then(onTaskDone)
+                Promise.resolve().then(function() {}).then(onTaskDone)
             );
 
             allPromises.push(
@@ -7642,17 +7611,7 @@
             );
 
             allPromises.push(
-                krFetchRedditKeywords(seed).then(function(redditKws) {
-                    for (var i = 0; i < redditKws.length; i++) {
-                        var rk = redditKws[i].toLowerCase();
-                        if (rk.length > 2 && rk.length < 80 && !rawKeywords[rk]) {
-                            rawKeywords[rk] = true;
-                            kwSources[rk] = 'reddit';
-                            kwPosition[rk] = i + 1;
-                            kwExpansionCount[rk] = 1;
-                        }
-                    }
-                }).catch(function() {}).then(onTaskDone)
+                Promise.resolve().then(function() {}).then(onTaskDone)
             );
 
             allPromises.push(
