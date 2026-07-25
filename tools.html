@@ -827,10 +827,6 @@
         var localAvailable = _localProxyAvailable === true;
         if (!localAvailable) proxies = proxies.filter(function(p) { return !p.local; });
         var _blocked = false;
-        for (var bi = 0; bi < proxies.length; bi++) {
-            if (_proxyBlocked[proxies[bi].url]) { proxies.splice(bi, 1); bi--; }
-        }
-        if (proxies.length === 0) throw new Error('All proxies blocked');
         while (attempt <= retries) {
             if (_blocked) break;
             for (var i = 0; i < proxyLimit; i++) {
@@ -850,7 +846,6 @@
                         if (errJson && errJson.error) {
                             lastError = new Error(errJson.error);
                             _blocked = true;
-                            _proxyBlocked[p.url] = true;
                             break;
                         }
                         throw new Error('HTTP ' + res.status);
@@ -861,7 +856,6 @@
                         if (json.error) {
                             lastError = new Error(json.error);
                             _blocked = true;
-                            _proxyBlocked[p.url] = true;
                             break;
                         }
                         text = json.contents || '';
@@ -879,7 +873,6 @@
                     lastError = e;
                     if (e && e.message && (e.message.indexOf('blocked') !== -1 || e.message.indexOf('HTML') !== -1)) {
                         _blocked = true;
-                        _proxyBlocked[p.url] = true;
                         break;
                     }
                 }
@@ -4717,7 +4710,6 @@
     var _krFilter = 'all';
     var _suggestSource = 'unknown';
     var _googleBlocked = false;
-    var _proxyBlocked = {};
 
     function krFetchSuggestions(query, lang, country) {
         return krFetchFast(query, lang, country);
