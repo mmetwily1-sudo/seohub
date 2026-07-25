@@ -4729,7 +4729,7 @@
 
     function krFetchFast(query, lang, country) {
         return krFetchDuckDuckGo(query, lang, country)
-            .catch(function() { return krFetchBingJSONP(query, lang); })
+            .catch(function() { return krFetchBingViaProxy(query, lang); })
             .catch(function() { return krFetchGoogleViaProxy(query, lang, country); })
             .catch(function() {
                 _suggestSource = 'local';
@@ -4739,37 +4739,8 @@
 
     function krFetchDuckDuckGo(query, lang, country) {
         var url = 'https://duckduckgo.com/ac/?q=' + encodeURIComponent(query) + '&type=list';
-        return fetch(url).then(function(res) {
-            if (!res.ok) throw new Error('DDG HTTP ' + res.status);
-            return res.json();
-        }).then(function(data) {
-            var results = [];
-            if (data && data[1]) {
-                for (var i = 0; i < data[1].length; i++) {
-                    var item = data[1][i];
-                    if (item && item[0]) results.push(item[0]);
-                }
-            }
-            if (results.length === 0) throw new Error('DDG empty');
-            _suggestSource = 'duckduckgo';
-            return results;
-        });
-    }
-
-    function krFetchBingJSONP(query, lang) {
-        var cbName = '_bingCB_' + Date.now();
-        return new Promise(function(resolve, reject) {
-            var timer = setTimeout(function() {
-                cleanup();
-                reject(new Error('Bing timeout'));
-            }, 10000);
-            function cleanup() {
-                clearTimeout(timer);
-                if (script.parentNode) script.parentNode.removeChild(script);
-                try { delete window[cbName]; } catch(e) {}
-            }
-            window[cbName] = function(data) {
-                cleanup();
+        return fetchJSON(url, { timeout: 10000, retries: 0, proxyLimit: 1 })
+            .then(function(data) {
                 var results = [];
                 if (data && data[1]) {
                     for (var i = 0; i < data[1].length; i++) {
@@ -4777,16 +4748,27 @@
                         if (item && item[0]) results.push(item[0]);
                     }
                 }
-                if (results.length === 0) return reject(new Error('Bing empty'));
+                if (results.length === 0) throw new Error('DDG empty');
+                _suggestSource = 'duckduckgo';
+                return results;
+            });
+    }
+
+    function krFetchBingViaProxy(query, lang) {
+        var url = 'https://api.bing.com/osjson.aspx?query=' + encodeURIComponent(query) + '&Market=' + (lang === 'ar' ? 'ar-SA' : 'en-US');
+        return fetchJSON(url, { timeout: 10000, retries: 0, proxyLimit: 1 })
+            .then(function(data) {
+                var results = [];
+                if (data && data[1]) {
+                    for (var i = 0; i < data[1].length; i++) {
+                        var item = data[1][i];
+                        if (item && item[0]) results.push(item[0]);
+                    }
+                }
+                if (results.length === 0) throw new Error('Bing empty');
                 _suggestSource = 'bing';
-                resolve(results);
-            };
-            var url = 'https://api.bing.com/osjson.aspx?query=' + encodeURIComponent(query) + '&Market=' + (lang === 'ar' ? 'ar-SA' : 'en-US') + '&callback=' + cbName;
-            var script = document.createElement('script');
-            script.src = url;
-            script.onerror = function() { cleanup(); reject(new Error('Bing script error')); };
-            document.head.appendChild(script);
-        });
+                return results;
+            });
     }
 
     function krFetchGoogleViaProxy(query, lang, country) {
