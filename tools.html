@@ -621,6 +621,8 @@
                     <button class="kr-btn" id="kr-test-btn" onclick="krTestProxy()" style="background:#6366f1;color:#fff;margin-left:8px;font-size:12px;padding:4px 10px;">&#9889; <span data-i18n="kr_test_proxy">Test Connection</span></button>
                     <button class="kr-btn" onclick="krRunCompetitorLookup()" style="background:#f59e0b;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#127760; Competitor Lookup</button>
                     <button class="kr-btn" onclick="krRunDomainGap()" style="background:#8b5cf6;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#9878; Domain Gap</button>
+                    <button class="kr-btn" onclick="krCompareKeywords()" style="background:#d946ef;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#128200; Compare</button>
+                    <button class="kr-btn" onclick="krShowFavorites()" style="background:#f59e0b;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#9733; Favorites</button>
                 </div>
                 <details style="margin-top:8px;">
                     <summary style="cursor:pointer;font-size:12px;color:var(--gray-2);font-weight:600;">&#9881; <span data-i18n="kr_bulk_title">Bulk Keywords &amp; Advanced Options</span></summary>
@@ -652,6 +654,7 @@
                 <div class="kr-progress" id="kr-progress"><div class="kr-progress-bar" id="kr-progress-bar" style="width:0%"></div></div>
                 <div id="kr-competitor-output" style="display:none;margin-bottom:16px;"></div>
                 <div id="kr-domain-gap-output" style="display:none;margin-bottom:16px;"></div>
+                <div id="kr-favorites-output" style="display:none;margin-bottom:16px;"></div>
                 <div id="kr-view-tabs" style="display:none;"></div>
                 <div class="tool-output" id="kr-output"><div class="tool-loading"><p data-i18n="kr_loading">Enter a seed keyword above and click Research Keywords</p></div></div>
                 <div id="kr-topic-view" style="display:none;"></div>
@@ -662,6 +665,7 @@
                 <div id="kr-lists-view" style="display:none;"></div>
                 <div id="kr-intent-view" style="display:none;"></div>
                 <div id="kr-optimize-view" style="display:none;"></div>
+                <div id="kr-clusters-view" style="display:none;"></div>
             </div>
         </div>
     </section>    <section class="cta-section">
@@ -6686,7 +6690,9 @@
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'lists\')">&#128278; ' + (currentLang === 'ar' ? '\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Lists') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'intent\')">&#127919; ' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u064a\u0627\u062a' : 'By Intent') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'optimize\')">&#9998; ' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064A\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649' : 'Optimize') + '</button>';
-            viewBar += '</div>';            var viewTabsEl = document.getElementById('kr-view-tabs');
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'clusters\')">&#128230; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0627\u062a' : 'Clusters') + '</button>';
+            viewBar += '</div>';
+            var viewTabsEl = document.getElementById('kr-view-tabs');
             if (viewTabsEl) { viewTabsEl.innerHTML = exportBtns + viewBar; viewTabsEl.style.display = ''; }
             out.innerHTML = '<div style="background:#f0fdf4;border:2px solid #10b981;border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;">' +
                 '&#10003; ' + (currentLang === 'ar' ? '\u062a\u0645 \u0627\u0643\u062a\u0634\u0627\u0641 ' + allResults.length + ' \u0643\u0644\u0645\u0629 (\u0628\u0639\u062f \u0627\u0644\u062a\u0634\u0637\u064a\u0639: ' + deduped.length + ' \u0641\u0631\u064a\u062f\u0629)' : 'Found ' + allResults.length + ' keywords (' + deduped.length + ' after dedup)') +
@@ -6698,6 +6704,7 @@
         }
         btn.disabled = false;
         btn.textContent = t.kr_btn_research;
+        krSaveCurrentSession();
     }
 
     function krRunBulkExportCSV() {
@@ -7848,7 +7855,7 @@
         _krActiveView = view;
         var btns = document.querySelectorAll('.kr-view-btn');
         for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
-        var viewMap = { table: 0, topics: 1, gap: 2, plan: 3, links: 4, roadmap: 5, lists: 6, intent: 7, optimize: 8 };
+        var viewMap = { table: 0, topics: 1, gap: 2, plan: 3, links: 4, roadmap: 5, lists: 6, intent: 7, optimize: 8, clusters: 9 };
         if (btns[viewMap[view]]) btns[viewMap[view]].classList.add('active');
         var output = document.getElementById('kr-output');
         var topicView = document.getElementById('kr-topic-view');
@@ -7859,6 +7866,7 @@
         var listsView = document.getElementById('kr-lists-view');
         var intentView = document.getElementById('kr-intent-view');
         var optimizeView = document.getElementById('kr-optimize-view');
+        var clustersView = document.getElementById('kr-clusters-view');
         output.style.display = (view === 'table') ? '' : 'none';
         topicView.style.display = (view === 'topics') ? '' : 'none';
         planView.style.display = (view === 'plan') ? '' : 'none';
@@ -7868,6 +7876,7 @@
         if (listsView) listsView.style.display = (view === 'lists') ? '' : 'none';
         if (intentView) intentView.style.display = (view === 'intent') ? '' : 'none';
         if (optimizeView) optimizeView.style.display = (view === 'optimize') ? '' : 'none';
+        if (clustersView) clustersView.style.display = (view === 'clusters') ? '' : 'none';
         if (view === 'topics' && _krTopicTree.length > 0) {
             topicView.innerHTML = krRenderTopicView(_krTopicTree);
             _krActiveTopic = 0;
@@ -7886,6 +7895,8 @@
             if (intentView) intentView.innerHTML = krRenderIntentView(_krResults);
         } else if (view === 'optimize' && _krResults.length > 0) {
             if (optimizeView) optimizeView.innerHTML = krRenderContentOptimization(document.getElementById('kr-seed').value, _krResults);
+        } else if (view === 'clusters' && _krResults.length > 0) {
+            if (clustersView) clustersView.innerHTML = krRenderClustersView(_krResults);
         }
     }
 
@@ -8011,7 +8022,11 @@
             }
             html += '<tr>';
             html += '<td style="font-weight:600;color:var(--gray-1);">' + (i + 1) + '</td>';
-            html += '<td><strong>' + kw + trendingBadge + srcBadge + srcBadge2 + srcBadge3 + srcBadge4 + '</strong></td>';
+            var isFav = false;
+            var _favs = krGetFavorites();
+            for (var fi = 0; fi < _favs.length; fi++) { if (_favs[fi].keyword === d.keyword) { isFav = true; break; } }
+            var favId = 'fav-star-' + d.keyword.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_');
+            html += '<td><strong>' + kw + trendingBadge + srcBadge + srcBadge2 + srcBadge3 + srcBadge4 + '</strong> <span id="' + favId + '" onclick="krToggleFavorite(\'' + esc(d.keyword).replace(/'/g, "\\'") + '\')" style="cursor:pointer;font-size:14px;color:' + (isFav ? '#f59e0b' : '#d1d5db') + ';" title="Favorite">&#9733;</span></td>';
             html += '<td>' + volBadge + '</td>';
             html += '<td><span class="kr-badge ' + diff.cls + '" style="cursor:pointer;" onclick="krShowKDExplanation(' + i + ')" title="Click for explanation">' + diff.text + ' (' + d.difficulty + ')</span></td>';
             html += '<td><span style="color:' + keiColor + ';font-weight:700;font-size:12px;">' + keiVal + ' <span style="font-size:10px;">' + keiLabel + '</span></span></td>';
@@ -8515,6 +8530,7 @@
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'lists\')">&#128278; ' + (currentLang === 'ar' ? '\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Lists') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'intent\')">&#127919; ' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u064a\u0627\u062a' : 'By Intent') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'optimize\')">&#9998; ' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649' : 'Optimize') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'clusters\')">&#128230; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0627\u062a' : 'Clusters') + '</button>';
             viewBar += '</div>';
             var exportBtns = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
                 '<button onclick="krExportCSV(_krResults)" style="background:#10b981;color:white;border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">&#128229; CSV</button>' +
@@ -8532,6 +8548,273 @@
         }
         btn.disabled = false;
         btn.textContent = t.kr_btn_research;
+        krSaveCurrentSession();
+    }
+
+    // ==============================
+    // SERP CLUSTERS VIEW
+    // ==============================
+    function krRenderClustersView(results) {
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var serpDataMap = {};
+        for (var i = 0; i < results.length; i++) {
+            if (results[i].topDomains && results[i].topDomains.length > 0) {
+                serpDataMap[results[i].keyword] = {
+                    domains: results[i].topDomains.map(function(d) { return d.domain; }),
+                    paa: results[i].paa || [],
+                    related: results[i].related || [],
+                    topResults: results[i].topResults || []
+                };
+            }
+        }
+        var clusters = krSerpClustering(results, serpDataMap);
+        var html = '<div style="background:linear-gradient(135deg,#f0f9ff,#eff6ff);border:2px solid #3b82f6;border-radius:16px;padding:20px;margin-bottom:20px;">';
+        html += '<h3 style="margin:0 0 8px;color:#1e40af;">&#128230; ' + (currentLang === 'ar' ? '\u062a\u0635\u0646\u064a\u0641 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0628\u0645\u0634\u0627\u0628\u0647\u0629 SERP' : 'SERP-Based Keyword Clusters') + '</h3>';
+        html += '<p style="margin:0;color:#475569;font-size:13px;">' + (currentLang === 'ar' ? '\u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u062a\u064a \u062a\u0634\u062a\u0631\u0643 \u0641\u064a \u0646\u0638\u0627\u0626\u0637 \u0627\u0644\u0628\u062d\u062b \u0627\u0644\u0639\u0645\u064a\u0629 \u0645\u0634\u062a\u0627\u0628\u0647\u0629' : 'Keywords that share similar search results are grouped together') + '</p>';
+        html += '<div style="margin-top:10px;font-size:13px;color:#3b82f6;font-weight:700;">' + clusters.length + ' ' + (currentLang === 'ar' ? '\u0645\u062c\u0645\u0648\u0639\u0629' : 'clusters') + ' | ' + results.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629' : 'keywords') + '</div>';
+        html += '</div>';
+        if (clusters.length === 0) {
+            html += '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;text-align:center;color:#64748b;">';
+            html += (currentLang === 'ar' ? '\u0644\u0645 \u064a\u062a\u0645 \u0627\u0643\u062a\u0634\u0627\u0641 \u0645\u062c\u0627\u0645\u064a\u0639 \u0628\u0639\u062f \u0627\u0644\u062a\u0634\u0637\u064a\u0639' : 'No clusters found after scraping') + '</div>';
+            return html;
+        }
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;">';
+        for (var c = 0; c < clusters.length; c++) {
+            var cluster = clusters[c];
+            var totalVol = 0;
+            var avgDiff = 0;
+            var intents = {};
+            for (var k = 0; k < cluster.keywords.length; k++) {
+                var kw = cluster.keywords[k];
+                if (typeof kw === 'string') {
+                    for (var r = 0; r < results.length; r++) {
+                        if (results[r].keyword === kw) { kw = results[r]; break; }
+                    }
+                }
+                if (kw.volume) totalVol += kw.volume;
+                if (kw.difficulty) avgDiff += kw.difficulty;
+                if (kw.intent) intents[kw.intent] = (intents[kw.intent] || 0) + 1;
+            }
+            avgDiff = Math.round(avgDiff / cluster.keywords.length);
+            var topIntent = '';
+            var topIntentCount = 0;
+            var iKeys = Object.keys(intents);
+            for (var i = 0; i < iKeys.length; i++) {
+                if (intents[iKeys[i]] > topIntentCount) { topIntentCount = intents[iKeys[i]]; topIntent = iKeys[i]; }
+            }
+            var diffCls = avgDiff <= 35 ? 'easy' : avgDiff <= 60 ? 'medium' : 'hard';
+            var colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#ef4444'];
+            var bgColor = colors[c % colors.length];
+            html += '<div style="background:white;border:2px solid ' + bgColor + '22;border-radius:14px;overflow:hidden;">';
+            html += '<div style="background:' + bgColor + ';color:white;padding:12px 16px;font-weight:700;font-size:14px;">';
+            html += '&#128204; ' + esc(cluster.topic) + '</div>';
+            html += '<div style="padding:12px 16px;">';
+            html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">';
+            html += '<span style="background:#f0fdf4;color:#059669;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;">Vol: ' + totalVol + '</span>';
+            html += '<span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;">Avg KD: ' + avgDiff + '</span>';
+            html += '<span style="background:#ede9fe;color:#7c3aed;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;">' + topIntent + '</span>';
+            html += '</div>';
+            html += '<ul style="list-style:none;padding:0;margin:0;">';
+            for (var k = 0; k < cluster.keywords.length; k++) {
+                var kwItem = cluster.keywords[k];
+                var kwText = typeof kwItem === 'string' ? kwItem : kwItem.keyword;
+                html += '<li style="padding:4px 0;font-size:13px;color:#334155;border-bottom:1px solid #f1f5f9;">&#8226; ' + esc(kwText) + '</li>';
+            }
+            html += '</ul></div></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+
+    // ==============================
+    // KEYWORD COMPARISON
+    // ==============================
+    function krCompareKeywords() {
+        if (!_krResults || _krResults.length < 2) {
+            alert(currentLang === 'ar' ? '\u0627\u062d\u062a\u0627\u062c \u0639\u0644\u0649 \u062c\u0648\u062f\u064a\u0646 \u0643\u0644\u0645\u0629 \u0643\u0648\u064a\u0646\u0629 \u0639\u0644\u0649 \u0627\u0644\u0623\u0642\u0644' : 'Need at least 2 keywords in results to compare');
+            return;
+        }
+        var container = document.getElementById('kr-domain-gap-output');
+        if (!container) return;
+        var sorted = _krResults.slice().sort(function(a, b) { return (b.volume || 0) - (a.volume || 0); });
+        var top5 = sorted.slice(0, 5);
+        var html = '<div style="background:linear-gradient(135deg,#fdf4ff,#faf5ff);border:2px solid #d946ef;border-radius:16px;padding:20px;">';
+        html += '<h3 style="margin:0 0 12px;color:#a21caf;">&#128200; ' + (currentLang === 'ar' ? '\u0645\u0642\u0627\u0631\u0646\u0629 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0623\u0648\u0644\u064a\u0629' : 'Top 5 Keywords Comparison') + '</h3>';
+        html += '<div style="overflow-x:auto;">';
+        html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+        html += '<thead><tr style="border-bottom:2px solid #e9d5ff;">';
+        html += '<th style="padding:8px 12px;text-align:left;">' + (currentLang === 'ar' ? '\u0627\u0644\u0643\u0644\u0645\u0629' : 'Keyword') + '</th>';
+        html += '<th style="padding:8px 12px;text-align:center;">' + (currentLang === 'ar' ? '\u0627\u0644\u062d\u062c\u0645' : 'Volume') + '</th>';
+        html += '<th style="padding:8px 12px;text-align:center;">KD</th>';
+        html += '<th style="padding:8px 12px;text-align:center;">CPC</th>';
+        html += '<th style="padding:8px 12px;text-align:center;">' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u064a\u0629' : 'Intent') + '</th>';
+        html += '<th style="padding:8px 12px;text-align:center;">SERP</th>';
+        html += '<th style="padding:8px 12px;text-align:center;">PAA</th>';
+        html += '<th style="padding:8px 12px;text-align:center;">' + (currentLang === 'ar' ? '\u0627\u0644\u062a\u0631\u0646\u062f' : 'Trend') + '</th>';
+        html += '<th style="padding:8px 12px;text-align:center;">' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0627\u0642\u0639' : 'Top Domain') + '</th>';
+        html += '</tr></thead><tbody>';
+        var maxVol = 0;
+        for (var i = 0; i < top5.length; i++) { if ((top5[i].volume || 0) > maxVol) maxVol = top5[i].volume; }
+        for (var i = 0; i < top5.length; i++) {
+            var kw = top5[i];
+            var diffCls = kw.difficulty <= 35 ? '#059669' : kw.difficulty <= 60 ? '#d97706' : '#ef4444';
+            var volBar = maxVol > 0 ? Math.round(((kw.volume || 0) / maxVol) * 100) : 0;
+            var trendIcon = '';
+            if (kw.trendDirection) {
+                if (kw.trendDirection === 'rising' || kw.trendDirection === '\u0645\u0647\u062a\u0645') trendIcon = '&#128200;';
+                else if (kw.trendDirection === 'declining') trendIcon = '&#128201;';
+                else trendIcon = '&#128203;';
+            }
+            html += '<tr style="border-bottom:1px solid #f3e8ff;">';
+            html += '<td style="padding:8px 12px;font-weight:700;">' + esc(kw.keyword) + '</td>';
+            html += '<td style="padding:8px 12px;text-align:center;"><div style="background:#f3e8ff;border-radius:4px;height:6px;width:100%;position:relative;"><div style="background:#a855f7;border-radius:4px;height:6px;width:' + volBar + '%;"></div></div><span style="font-weight:700;color:#7c3aed;">' + (kw.volume || 0) + '</span></td>';
+            html += '<td style="padding:8px 12px;text-align:center;"><span style="color:' + diffCls + ';font-weight:700;">' + (kw.difficulty || 0) + '</span></td>';
+            html += '<td style="padding:8px 12px;text-align:center;">$' + (kw.cpc || 0) + '</td>';
+            html += '<td style="padding:8px 12px;text-align:center;"><span style="font-size:11px;padding:2px 8px;border-radius:100px;background:#ede9fe;color:#7c3aed;">' + (kw.intent || '-') + '</span></td>';
+            html += '<td style="padding:8px 12px;text-align:center;">' + (kw.serpFeatures || 0) + '</td>';
+            html += '<td style="padding:8px 12px;text-align:center;">' + ((kw.paa || []).length) + '</td>';
+            html += '<td style="padding:8px 12px;text-align:center;">' + trendIcon + '</td>';
+            var topDom = (kw.topDomains && kw.topDomains.length > 0) ? kw.topDomains[0].domain : '-';
+            html += '<td style="padding:8px 12px;text-align:center;font-size:12px;">' + esc(topDom) + '</td>';
+            html += '</tr>';
+        }
+        html += '</tbody></table></div>';
+        html += '<div style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;">';
+        var avgVol = 0, avgDiff = 0, avgCpc = 0;
+        for (var i = 0; i < top5.length; i++) { avgVol += (top5[i].volume || 0); avgDiff += (top5[i].difficulty || 0); avgCpc += parseFloat(top5[i].cpc) || 0; }
+        html += '<div style="text-align:center;padding:8px;background:white;border-radius:8px;"><div style="font-size:20px;font-weight:800;color:#a855f7;">' + Math.round(avgVol / top5.length) + '</div><div style="font-size:11px;color:#64748b;">Avg Volume</div></div>';
+        html += '<div style="text-align:center;padding:8px;background:white;border-radius:8px;"><div style="font-size:20px;font-weight:800;color:#d97706;">' + Math.round(avgDiff / top5.length) + '</div><div style="font-size:11px;color:#64748b;">Avg KD</div></div>';
+        html += '<div style="text-align:center;padding:8px;background:white;border-radius:8px;"><div style="font-size:20px;font-weight:800;color:#059669;">$' + (avgCpc / top5.length).toFixed(2) + '</div><div style="font-size:11px;color:#64748b;">Avg CPC</div></div>';
+        html += '</div></div>';
+        container.innerHTML = html;
+        container.style.display = '';
+    }
+
+    // ==============================
+    // FAVORITES (localStorage)
+    // ==============================
+    function krGetFavorites() {
+        try { return JSON.parse(localStorage.getItem('kr_favorites') || '[]'); } catch(e) { return []; }
+    }
+    function krSaveFavorites(favs) {
+        try { localStorage.setItem('kr_favorites', JSON.stringify(favs)); } catch(e) {}
+    }
+    function krToggleFavorite(keyword) {
+        var favs = krGetFavorites();
+        var found = -1;
+        for (var i = 0; i < favs.length; i++) {
+            if (favs[i].keyword === keyword) { found = i; break; }
+        }
+        if (found !== -1) { favs.splice(found, 1); } else {
+            var kwData = null;
+            for (var i = 0; i < _krResults.length; i++) {
+                if (_krResults[i].keyword === keyword) { kwData = _krResults[i]; break; }
+            }
+            favs.push({ keyword: keyword, data: kwData, savedAt: new Date().toISOString() });
+        }
+        krSaveFavorites(favs);
+        var star = document.getElementById('fav-star-' + keyword.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_'));
+        if (star) {
+            var isFav = found === -1;
+            star.innerHTML = isFav ? '&#9733;' : '&#9734;';
+            star.style.color = isFav ? '#f59e0b' : '#94a3b8';
+        }
+    }
+    function krRenderFavoritesView() {
+        var favs = krGetFavorites();
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var html = '<div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #f59e0b;border-radius:16px;padding:20px;margin-bottom:20px;">';
+        html += '<h3 style="margin:0 0 8px;color:#d97706;">&#9733; ' + (currentLang === 'ar' ? '\u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0641\u0636\u0644\u0629' : 'Favorite Keywords') + ' (' + favs.length + ')</h3>';
+        html += '</div>';
+        if (favs.length === 0) {
+            html += '<div style="text-align:center;padding:30px;color:#94a3b8;">' + (currentLang === 'ar' ? '\u0644\u0645 \u062a\u0636\u0641 \u0639\u0646\u0627\u0635\u0631 \u0645\u0641\u0636\u0644\u0629 \u0628\u0639\u062f' : 'No favorites added yet. Click the star icon next to any keyword.') + '</div>';
+            return html;
+        }
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;">';
+        for (var i = 0; i < favs.length; i++) {
+            var f = favs[i];
+            var d = f.data || {};
+            html += '<div style="background:white;border:1px solid #fde68a;border-radius:12px;padding:14px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+            html += '<strong style="font-size:14px;">' + esc(f.keyword) + '</strong>';
+            html += '<span onclick="krToggleFavorite(\'' + esc(f.keyword).replace(/'/g, "\\'") + '\');krRenderFavorites();" style="cursor:pointer;color:#f59e0b;font-size:18px;">&#9733;</span>';
+            html += '</div>';
+            if (d.volume !== undefined) {
+                html += '<div style="margin-top:8px;font-size:12px;color:#64748b;display:flex;gap:8px;flex-wrap:wrap;">';
+                html += '<span>Vol: <b>' + d.volume + '</b></span>';
+                html += '<span>KD: <b>' + (d.difficulty || '-') + '</b></span>';
+                html += '<span>CPC: <b>$' + (d.cpc || '0') + '</b></span>';
+                html += '<span>' + (d.intent || '') + '</span>';
+                html += '</div>';
+            }
+            html += '<div style="margin-top:6px;font-size:11px;color:#94a3b8;">' + (f.savedAt ? new Date(f.savedAt).toLocaleDateString() : '') + '</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krRenderFavorites() {
+        var existing = document.getElementById('kr-favorites-bar');
+        if (existing) existing.innerHTML = krRenderFavoritesView();
+    }
+
+    // ==============================
+    // SESSION HISTORY (localStorage)
+    // ==============================
+    function krGetHistory() {
+        try { return JSON.parse(localStorage.getItem('kr_history') || '[]'); } catch(e) { return []; }
+    }
+    function krSaveSession(seed, results) {
+        var history = krGetHistory();
+        history.unshift({
+            seed: seed,
+            count: results.length,
+            date: new Date().toISOString(),
+            topKeywords: results.slice(0, 5).map(function(r) { return { keyword: r.keyword, volume: r.volume, difficulty: r.difficulty }; })
+        });
+        if (history.length > 20) history = history.slice(0, 20);
+        try { localStorage.setItem('kr_history', JSON.stringify(history)); } catch(e) {}
+    }
+    function krRenderHistory() {
+        var history = krGetHistory();
+        if (history.length === 0) return '';
+        var html = '<details style="margin-top:12px;">';
+        html += '<summary style="cursor:pointer;font-size:13px;color:#6366f1;font-weight:600;">&#128197; ' + (currentLang === 'ar' ? '\u0627\u0644\u0628\u062d\u062b\u0648\u062b \u0627\u0644\u0633\u0627\u0628\u0642 (' + history.length + ')' : 'Recent Searches (' + history.length + ')') + '</summary>';
+        html += '<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">';
+        for (var i = 0; i < Math.min(history.length, 10); i++) {
+            var h = history[i];
+            html += '<div onclick="krLoadHistory(\'' + esc(h.seed).replace(/'/g, "\\'") + '\')" style="cursor:pointer;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;transition:0.2s;" onmouseover="this.style.borderColor=\'#6366f1\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">';
+            html += '<span><strong>' + esc(h.seed) + '</strong> <span style="color:#64748b;">(' + h.count + ' keywords)</span></span>';
+            html += '<span style="color:#94a3b8;font-size:11px;">' + new Date(h.date).toLocaleDateString() + '</span>';
+            html += '</div>';
+        }
+        html += '</div></details>';
+        return html;
+    }
+    function krLoadHistory(seed) {
+        var input = document.getElementById('kr-seed');
+        if (input) input.value = seed;
+        krRunResearch();
+    }
+    function krClearResearchHistory() {
+        try { localStorage.removeItem('kr_history'); } catch(e) {}
+        alert(currentLang === 'ar' ? '\u062a\u0645 \u0645\u0633\u062d \u0627\u0644\u0628\u062d\u062b\u0648\u062b' : 'History cleared');
+    }
+    function krSaveCurrentSession() {
+        if (_krResults && _krResults.length > 0) {
+            var seed = document.getElementById('kr-seed');
+            if (seed && seed.value) krSaveSession(seed.value, _krResults);
+        }
+    }
+    function krShowFavorites() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        if (container.style.display === 'none' || !container.innerHTML) {
+            container.innerHTML = krRenderFavoritesView();
+            container.style.display = '';
+        } else {
+            container.style.display = 'none';
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
