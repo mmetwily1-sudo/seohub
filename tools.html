@@ -620,6 +620,7 @@
                     <label class="kr-opt"><input type="checkbox" id="kr-opt-comparisons" checked> <span data-i18n="kr_opt_compare">Comparisons</span></label>
                     <button class="kr-btn" id="kr-test-btn" onclick="krTestProxy()" style="background:#6366f1;color:#fff;margin-left:8px;font-size:12px;padding:4px 10px;">&#9889; <span data-i18n="kr_test_proxy">Test Connection</span></button>
                     <button class="kr-btn" onclick="krRunCompetitorLookup()" style="background:#f59e0b;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#127760; Competitor Lookup</button>
+                    <button class="kr-btn" onclick="krRunDomainGap()" style="background:#8b5cf6;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#9878; Domain Gap</button>
                 </div>
                 <details style="margin-top:8px;">
                     <summary style="cursor:pointer;font-size:12px;color:var(--gray-2);font-weight:600;">&#9881; <span data-i18n="kr_bulk_title">Bulk Keywords &amp; Advanced Options</span></summary>
@@ -650,6 +651,7 @@
                 </details>
                 <div class="kr-progress" id="kr-progress"><div class="kr-progress-bar" id="kr-progress-bar" style="width:0%"></div></div>
                 <div id="kr-competitor-output" style="display:none;margin-bottom:16px;"></div>
+                <div id="kr-domain-gap-output" style="display:none;margin-bottom:16px;"></div>
                 <div id="kr-view-tabs" style="display:none;"></div>
                 <div class="tool-output" id="kr-output"><div class="tool-loading"><p data-i18n="kr_loading">Enter a seed keyword above and click Research Keywords</p></div></div>
                 <div id="kr-topic-view" style="display:none;"></div>
@@ -659,6 +661,7 @@
                 <div id="kr-roadmap-view" style="display:none;"></div>
                 <div id="kr-lists-view" style="display:none;"></div>
                 <div id="kr-intent-view" style="display:none;"></div>
+                <div id="kr-optimize-view" style="display:none;"></div>
             </div>
         </div>
     </section>    <section class="cta-section">
@@ -6140,6 +6143,210 @@
         });
     }
 
+    function krRunDomainGap() {
+        var d1 = prompt(currentLang === 'ar' ? '\u0623\u062f\u062e\u0644 \u0627\u0644\u0645\u0648\u0642\u0639 \u0627\u0644\u0623\u0648\u0644 (e.g. amazon.sa):' : 'Enter first domain (e.g. amazon.sa):');
+        if (!d1 || !d1.trim()) return;
+        var d2 = prompt(currentLang === 'ar' ? '\u0623\u062f\u062e\u0644 \u0627\u0644\u0645\u0648\u0642\u0639 \u0627\u0644\u062b\u0627\u0646\u064A (e.g. jarir.com):' : 'Enter second domain (e.g. jarir.com):');
+        if (!d2 || !d2.trim()) return;
+        d1 = d1.trim().replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/.*$/, '');
+        d2 = d2.trim().replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/.*$/, '');
+        var lang = document.getElementById('kr-lang').value;
+        var country = document.getElementById('kr-country').value;
+        var out = document.getElementById('kr-domain-gap-output');
+        if (!out) return;
+        out.style.display = 'block';
+        out.innerHTML = '<div class="tool-loading"><p>\u23F3 ' + (currentLang === 'ar' ? '\u062c\u0627\u0631\u064d \u0645\u0642\u0627\u0631\u0646\u0629 ' + d1 + ' \u0645\u0639 ' + d2 + '...' : 'Comparing ' + d1 + ' vs ' + d2 + '...') + '</p></div>';
+        Promise.all([
+            krCompetitorLookup(d1, lang, country),
+            krCompetitorLookup(d2, lang, country)
+        ]).then(function(results) {
+            var r1 = results[0], r2 = results[1];
+            var kw1 = {}, kw2 = {};
+            for (var i = 0; i < r1.keywords.length; i++) kw1[r1.keywords[i].toLowerCase()] = true;
+            for (var i = 0; i < r2.keywords.length; i++) kw2[r2.keywords[i].toLowerCase()] = true;
+            var t1 = {}, t2 = {};
+            for (var i = 0; i < r1.titles.length; i++) { var words = r1.titles[i].toLowerCase().split(/\s+/); for (var w = 0; w < words.length; w++) { if (words[w].length > 3) t1[words[w]] = true; } }
+            for (var i = 0; i < r2.titles.length; i++) { var words = r2.titles[i].toLowerCase().split(/\s+/); for (var w = 0; w < words.length; w++) { if (words[w].length > 3) t2[words[w]] = true; } }
+            var only1 = [], only2 = [], shared = [];
+            var allKeys1 = Object.keys(kw1);
+            var allKeys2 = Object.keys(kw2);
+            for (var i = 0; i < allKeys1.length; i++) {
+                if (kw2[allKeys1[i]]) shared.push(allKeys1[i]); else only1.push(allKeys1[i]);
+            }
+            for (var i = 0; i < allKeys2.length; i++) {
+                if (!kw1[allKeys2[i]]) only2.push(allKeys2[i]);
+            }
+            var catOverlap = 0;
+            var cat1 = {}, cat2 = {};
+            for (var i = 0; i < r1.categories.length; i++) cat1[r1.categories[i].segment] = true;
+            for (var i = 0; i < r2.categories.length; i++) cat2[r2.categories[i].segment] = true;
+            var c1Keys = Object.keys(cat1), c2Keys = Object.keys(cat2);
+            for (var i = 0; i < c1Keys.length; i++) { if (cat2[c1Keys[i]]) catOverlap++; }
+            var html = '<div style="background:linear-gradient(135deg,#ede9fe,#f5f3ff);border:2px solid #8b5cf6;border-radius:16px;padding:20px;margin-bottom:16px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+            html += '<h3 style="margin:0;color:#6d28d9;">&#9878; ' + (currentLang === 'ar' ? '\u0645\u0642\u0627\u0631\u0646\u0629 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Keyword Gap') + ': ' + esc(d1) + ' vs ' + esc(d2) + '</h3>';
+            html += '<button onclick="document.getElementById(\'kr-domain-gap-output\').style.display=\'none\';" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6d28d9;">&times;</button>';
+            html += '</div>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px;">';
+            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:22px;font-weight:800;color:#6d28d9;">' + only1.length + '</span><br><span style="font-size:11px;color:#64748b;">' + esc(d1) + ' Only</span></div>';
+            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:22px;font-weight:800;color:#10b981;">' + shared.length + '</span><br><span style="font-size:11px;color:#64748b;">' + (currentLang === 'ar' ? '\u0645\u0634\u062a\u0631\u0643\u0629' : 'Shared') + '</span></div>';
+            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:22px;font-weight:800;color:#ef4444;">' + only2.length + '</span><br><span style="font-size:11px;color:#64748b;">' + esc(d2) + ' Only</span></div>';
+            html += '<div style="background:white;border-radius:10px;padding:12px;text-align:center;"><span style="font-size:22px;font-weight:800;color:#f59e0b;">' + catOverlap + '</span><br><span style="font-size:11px;color:#64748b;">Category Overlap</span></div>';
+            html += '</div>';
+            html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">';
+            html += '<div style="background:white;border-radius:12px;padding:14px;"><h4 style="margin:0 0 8px;color:#6d28d9;font-size:13px;">&#127919; ' + esc(d1) + ' Only (' + only1.length + ')</h4><div style="max-height:200px;overflow-y:auto;">';
+            for (var i = 0; i < Math.min(only1.length, 15); i++) html += '<div style="padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:12px;">' + esc(only1[i]) + '</div>';
+            if (only1.length > 15) html += '<div style="padding:4px 0;font-size:11px;color:#64748b;">+' + (only1.length - 15) + ' more</div>';
+            html += '</div></div>';
+            html += '<div style="background:white;border-radius:12px;padding:14px;"><h4 style="margin:0 0 8px;color:#10b981;font-size:13px;">&#128901; Shared (' + shared.length + ')</h4><div style="max-height:200px;overflow-y:auto;">';
+            for (var i = 0; i < Math.min(shared.length, 15); i++) html += '<div style="padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:12px;">' + esc(shared[i]) + '</div>';
+            if (shared.length > 15) html += '<div style="padding:4px 0;font-size:11px;color:#64748b;">+' + (shared.length - 15) + ' more</div>';
+            html += '</div></div>';
+            html += '<div style="background:white;border-radius:12px;padding:14px;"><h4 style="margin:0 0 8px;color:#ef4444;font-size:13px;">&#127919; ' + esc(d2) + ' Only (' + only2.length + ')</h4><div style="max-height:200px;overflow-y:auto;">';
+            for (var i = 0; i < Math.min(only2.length, 15); i++) html += '<div style="padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:12px;">' + esc(only2[i]) + '</div>';
+            if (only2.length > 15) html += '<div style="padding:4px 0;font-size:11px;color:#64748b;">+' + (only2.length - 15) + ' more</div>';
+            html += '</div></div>';
+            html += '</div></div>';
+            out.innerHTML = html;
+        }).catch(function() {
+            out.innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:12px;padding:16px;color:#991b1b;">' + (currentLang === 'ar' ? '\u2716 \u0641\u0634\u0644 \u0627\u0644\u0645\u0642\u0627\u0631\u0646\u0629' : 'Comparison failed') + '</div>';
+        });
+    }
+
+    function krOptimizeContent(url, seed, results) {
+        var data = { url: url, title: '', metaDesc: '', h1: '', h2s: [], bodyText: '', wordCount: 0, images: 0, internalLinks: 0, externalLinks: 0, keywordDensity: {}, recommendations: [], score: 0 };
+        return fetchHTML(url).then(function(html) {
+            if (!html || typeof html !== 'string') return data;
+            var titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
+            if (titleMatch) data.title = titleMatch[1].replace(/<[^>]+>/g, '').replace(/&[^;]+;/g, ' ').trim();
+            var metaMatch = html.match(/<meta\s+name="description"\s+content="([^"]+)"/i);
+            if (metaMatch) data.metaDesc = metaMatch[1].replace(/<[^>]+>/g, '').replace(/&[^;]+;/g, ' ').trim();
+            var h1Match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
+            if (h1Match) data.h1 = h1Match[1].replace(/<[^>]+>/g, '').replace(/&[^;]+;/g, ' ').trim();
+            var h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
+            var h2m;
+            while ((h2m = h2Regex.exec(html)) !== null) data.h2s.push(h2m[1].replace(/<[^>]+>/g, '').replace(/&[^;]+;/g, ' ').trim());
+            var bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+            if (bodyMatch) data.bodyText = bodyMatch[1].replace(/<script[\s\S]*?script>/gi, '').replace(/<style[\s\S]*?style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
+            data.wordCount = data.bodyText.split(/\s+/).length;
+            data.images = (html.match(/<img/gi) || []).length;
+            var intLinkMatch = html.match(/href="[^"]*"/gi) || [];
+            for (var i = 0; i < intLinkMatch.length; i++) { if (intLinkMatch[i].indexOf('http') === -1) data.internalLinks++; else data.externalLinks++; }
+            var lower = data.bodyText.toLowerCase();
+            var seedLower = seed.toLowerCase();
+            var seedWords = seedLower.split(/\s+/);
+            for (var i = 0; i < seedWords.length; i++) {
+                if (seedWords[i].length > 2) {
+                    var regex = new RegExp(seedWords[i], 'gi');
+                    var count = (lower.match(regex) || []).length;
+                    data.keywordDensity[seedWords[i]] = data.wordCount > 0 ? ((count / data.wordCount) * 100).toFixed(2) : 0;
+                }
+            }
+            var score = 0;
+            if (data.title.length > 0) score += 10;
+            if (data.title.indexOf(seedLower) !== -1 || data.title.indexOf(seedLower.split(' ')[0]) !== -1) score += 10;
+            if (data.title.length >= 30 && data.title.length <= 60) score += 5;
+            if (data.metaDesc.length > 0) score += 10;
+            if (data.metaDesc.indexOf(seedLower) !== -1 || data.metaDesc.indexOf(seedLower.split(' ')[0]) !== -1) score += 5;
+            if (data.metaDesc.length >= 120 && data.metaDesc.length <= 160) score += 5;
+            if (data.h1.length > 0) score += 10;
+            if (data.h1.indexOf(seedLower) !== -1 || data.h1.indexOf(seedLower.split(' ')[0]) !== -1) score += 5;
+            if (data.h2s.length >= 2) score += 5;
+            if (data.wordCount >= 300) score += 10;
+            if (data.wordCount >= 800) score += 5;
+            if (data.images >= 1) score += 5;
+            if (data.internalLinks >= 3) score += 5;
+            if (data.images >= 3) score += 5;
+            data.score = Math.min(score, 100);
+            var totalSeedDensity = 0;
+            var dKeys = Object.keys(data.keywordDensity);
+            for (var i = 0; i < dKeys.length; i++) totalSeedDensity += parseFloat(data.keywordDensity[dKeys[i]]);
+            if (totalSeedDensity < 0.5) data.recommendations.push({ type: 'critical', msg: currentLang === 'ar' ? '\u0643\u062a\u0627\u0628\u0629 \u0627\u0644\u0645\u0641\u062a\u0627\u062d \u0645\u0646\u062e\u0641\u0636\u0629 (\u0623\u0642\u0644 \u0645\u0646 0.5%)' : 'Keyword density too low (<0.5%)' });
+            else if (totalSeedDensity > 3) data.recommendations.push({ type: 'warning', msg: currentLang === 'ar' ? '\u0643\u062a\u0627\u0628\u0629 \u0627\u0644\u0645\u0641\u062a\u0627\u062D \u0639\u0627\u0644\u064A\u0629 (\u0623\u0643\u062b\u0631 \u0645\u0646 3%)' : 'Keyword density too high (>3%)' });
+            else data.recommendations.push({ type: 'good', msg: currentLang === 'ar' ? '\u0643\u062a\u0627\u0628\u0629 \u0627\u0644\u0645\u0641\u062a\u0627\u062D \u0645\u0646\u0627\u0633\u0628\u0629' : 'Keyword density OK' });
+            if (!data.title) data.recommendations.push({ type: 'critical', msg: currentLang === 'ar' ? '\u062a\u0631\u0641\u0633 \u0645\u0646\u0635\u0648\u0631' : 'Missing title tag' });
+            if (data.title && data.title.length < 30) data.recommendations.push({ type: 'warning', msg: currentLang === 'ar' ? '\u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0642\u0635\u064A\u0631 (\u0623\u0642\u0644 \u0645\u0646 30 \u062d\u0631\u0641)' : 'Title too short (<30 chars)' });
+            if (data.title && data.title.length > 60) data.recommendations.push({ type: 'warning', msg: currentLang === 'ar' ? '\u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0637\u0648\u064A\u0644 (\u0623\u0643\u062b\u0631 \u0645\u0646 60 \u062d\u0631\u0641)' : 'Title too long (>60 chars)' });
+            if (!data.metaDesc) data.recommendations.push({ type: 'critical', msg: currentLang === 'ar' ? '\u0645\u0641\u062a\u0627\u0648\u0636 \u0627\u0644\u0648\u0635\u0641 \u0627\u0644\u0645\u062A\u0631\u062C\u0645 \u0645\u0646\u0635\u0648\u0631' : 'Missing meta description' });
+            if (data.metaDesc && data.metaDesc.length > 160) data.recommendations.push({ type: 'warning', msg: currentLang === 'ar' ? '\u0627\u0644\u0648\u0635\u0641 \u0627\u0644\u0645\u062A\u0631\u062C\u0645 \u0637\u0648\u064A\u0644' : 'Meta description too long' });
+            if (!data.h1) data.recommendations.push({ type: 'critical', msg: currentLang === 'ar' ? '\u0645\u0641\u062a\u0627\u0648\u0636 H1 \u0645\u0646\u0635\u0648\u0631' : 'Missing H1 tag' });
+            if (data.h2s.length < 2) data.recommendations.push({ type: 'warning', msg: currentLang === 'ar' ? '\u0627\u0644\u0645\u062d\u062A\u0648\u064A \u0627\u0644\u0641\u0631\u0639\u064A H2 \u0642\u0644\u064A\u0644 (\u0627\u0644\u0645\u0646\u0635\u062D \u0627\u0644\u0645\u062B\u0644 \u0627\u0644\u0623\u0642\u0644)' : 'Few H2 headings (recommended 3+)' });
+            if (data.wordCount < 300) data.recommendations.push({ type: 'critical', msg: currentLang === 'ar' ? '\u0639\u062F\u062F \u0627\u0644\u0643\u0644\u0645\u0627\u062A \u0642\u0644\u064A\u0644 (' + data.wordCount + ')' : 'Content too short (' + data.wordCount + ' words)' });
+            if (data.wordCount >= 300 && data.wordCount < 800) data.recommendations.push({ type: 'info', msg: currentLang === 'ar' ? '\u0645\u0633\u0627\u0648\u0639 \u0627\u0644\u0643\u0644\u0645\u0627\u062A \u0645\u062A\u0648\u0633\u0637 (' + data.wordCount + '\u060C \u0627\u0644\u0645\u0646\u0635\u062D 800+)' : 'Moderate word count (' + data.wordCount + ', recommended 800+)' });
+            if (data.images === 0) data.recommendations.push({ type: 'warning', msg: currentLang === 'ar' ? '\u0644\u0627 \u062a\u0648\u062c\u062F \u0635\u0648\u0631' : 'No images found' });
+            if (data.internalLinks < 3) data.recommendations.push({ type: 'warning', msg: currentLang === 'ar' ? '\u0631\u0628\u0637\u0627\u062A \u062F\u0627\u062E\u0644\u064A\u0629 \u0642\u0644\u064A\u0644\u0629 (' + data.internalLinks + ')' : 'Few internal links (' + data.internalLinks + ')' });
+            var topKws = results.slice(0, 5).map(function(r) { return r.keyword; });
+            var missingKws = [];
+            for (var i = 0; i < topKws.length; i++) {
+                if (lower.indexOf(topKws[i].toLowerCase()) === -1) missingKws.push(topKws[i]);
+            }
+            if (missingKws.length > 0) data.recommendations.push({ type: 'info', msg: (currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a \u0645\u0641\u0642\u0648\u062F\u0629 \u0641\u064A \u0627\u0644\u0645\u062d\u062A\u0648\u0649: ' : 'Missing top keywords: ') + missingKws.join(', ') });
+            return data;
+        }).catch(function() { return data; });
+    }
+
+    function krRenderContentOptimization(seed, results) {
+        var html = '<div style="background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border:2px solid #10b981;border-radius:16px;padding:20px;margin-bottom:16px;">';
+        html += '<h3 style="margin:0 0 12px;color:#059669;">&#9998; ' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064A\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649' : 'Content Optimization') + '</h3>';
+        html += '<div style="display:flex;gap:8px;margin-bottom:12px;">';
+        html += '<input type="text" id="kr-optimize-url" style="flex:1;padding:8px 12px;border:2px solid #d1fae5;border-radius:8px;font-size:13px;" placeholder="' + (currentLang === 'ar' ? '\u0623\u062f\u062e\u0644 URL \u0627\u0644\u0635\u0641\u062D\u0629' : 'Enter page URL to optimize') + '">';
+        html += '<button onclick="krRunContentOptimization()" style="background:#10b981;color:white;border:none;border-radius:100px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;">' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064A\u0644' : 'Analyze') + '</button>';
+        html += '</div>';
+        html += '<div id="kr-optimize-result"></div></div>';
+        return html;
+    }
+
+    function krRunContentOptimization() {
+        var url = document.getElementById('kr-optimize-url').value.trim();
+        if (!url) return;
+        if (url.indexOf('http') !== 0) url = 'https://' + url;
+        var seed = document.getElementById('kr-seed').value.trim();
+        var out = document.getElementById('kr-optimize-result');
+        if (!out) return;
+        out.innerHTML = '<div style="text-align:center;padding:12px;color:#64748b;">\u23F3 ' + (currentLang === 'ar' ? '\u062c\u0627\u0631\u064d \u062a\u062d\u0644\u064A\u0644...' : 'Analyzing...') + '</div>';
+        krOptimizeContent(url, seed, _krResults).then(function(data) {
+            var html = '<div style="margin-top:12px;">';
+            var scoreColor = data.score >= 70 ? '#10b981' : data.score >= 40 ? '#f59e0b' : '#ef4444';
+            html += '<div style="text-align:center;margin-bottom:16px;">';
+            html += '<div style="width:80px;height:80px;border-radius:50%;border:4px solid ' + scoreColor + ';display:inline-flex;align-items:center;justify-content:center;"><span style="font-size:24px;font-weight:800;color:' + scoreColor + ';">' + data.score + '</span></div>';
+            html += '<div style="font-size:12px;color:#64748b;margin-top:4px;">SEO Score</div></div>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;">';
+            html += '<div style="background:#f8fafc;padding:10px;border-radius:8px;"><div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;">Title</div><div style="font-size:13px;font-weight:600;color:#1e293b;margin-top:2px;">' + esc(data.title || '-') + ' <span style="font-size:10px;color:#94a3b8;">(' + (data.title ? data.title.length : 0) + ')</span></div></div>';
+            html += '<div style="background:#f8fafc;padding:10px;border-radius:8px;"><div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;">Meta Desc</div><div style="font-size:13px;color:#1e293b;margin-top:2px;">' + esc(data.metaDesc || '-') + ' <span style="font-size:10px;color:#94a3b8;">(' + (data.metaDesc ? data.metaDesc.length : 0) + ')</span></div></div>';
+            html += '<div style="background:#f8fafc;padding:10px;border-radius:8px;"><div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;">H1</div><div style="font-size:13px;font-weight:600;color:#1e293b;margin-top:2px;">' + esc(data.h1 || '-') + '</div></div>';
+            html += '<div style="background:#f8fafc;padding:10px;border-radius:8px;"><div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;">Words</div><div style="font-size:13px;font-weight:600;color:#1e293b;margin-top:2px;">' + data.wordCount + '</div></div>';
+            html += '<div style="background:#f8fafc;padding:10px;border-radius:8px;"><div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;">Images</div><div style="font-size:13px;font-weight:600;color:#1e293b;margin-top:2px;">' + data.images + '</div></div>';
+            html += '<div style="background:#f8fafc;padding:10px;border-radius:8px;"><div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;">Links (In/Out)</div><div style="font-size:13px;font-weight:600;color:#1e293b;margin-top:2px;">' + data.internalLinks + ' / ' + data.externalLinks + '</div></div>';
+            html += '</div>';
+            if (data.h2s.length > 0) {
+                html += '<div style="margin-bottom:12px;"><div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;margin-bottom:6px;">H2 Headings (' + data.h2s.length + ')</div>';
+                for (var i = 0; i < Math.min(data.h2s.length, 8); i++) html += '<div style="padding:4px 10px;margin-bottom:2px;background:#f0fdf4;border-radius:6px;font-size:12px;border-left:3px solid #10b981;">' + esc(data.h2s[i]) + '</div>';
+                html += '</div>';
+            }
+            if (Object.keys(data.keywordDensity).length > 0) {
+                html += '<div style="margin-bottom:12px;"><div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Keyword Density</div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
+                var kdKeys = Object.keys(data.keywordDensity);
+                for (var i = 0; i < kdKeys.length; i++) {
+                    var density = parseFloat(data.keywordDensity[kdKeys[i]]);
+                    var kdColor = density >= 0.5 && density <= 3 ? '#10b981' : density < 0.5 ? '#f59e0b' : '#ef4444';
+                    html += '<span style="background:#f8fafc;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:600;border:1px solid ' + kdColor + '30;color:' + kdColor + ';">' + esc(kdKeys[i]) + ': ' + data.keywordDensity[kdKeys[i]] + '%</span>';
+                }
+                html += '</div></div>';
+            }
+            html += '<div style="margin-bottom:8px;"><div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Recommendations</div>';
+            for (var i = 0; i < data.recommendations.length; i++) {
+                var rec = data.recommendations[i];
+                var recColor = rec.type === 'critical' ? '#ef4444' : rec.type === 'warning' ? '#f59e0b' : rec.type === 'good' ? '#10b981' : '#3b82f6';
+                var recIcon = rec.type === 'critical' ? '\u2716' : rec.type === 'warning' ? '\u26A0' : rec.type === 'good' ? '\u2714' : '\u2139';
+                html += '<div style="padding:6px 10px;margin-bottom:4px;background:' + recColor + '08;border-left:3px solid ' + recColor + ';border-radius:4px;font-size:12px;color:#334155;">' + recIcon + ' ' + rec.msg + '</div>';
+            }
+            html += '</div></div>';
+            out.innerHTML = html;
+        }).catch(function() {
+            out.innerHTML = '<div style="padding:12px;color:#ef4444;">' + (currentLang === 'ar' ? '\u0641\u0634\u0644 \u0627\u0644\u062a\u062d\u0644\u064A\u0644' : 'Analysis failed. Check the URL.') + '</div>';
+        });
+    }
+
     function krRenderIntentView(results) {
         var groups = { transactional: [], commercial: [], informational: [], navigational: [] };
         for (var i = 0; i < results.length; i++) {
@@ -6521,9 +6728,8 @@
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'roadmap\')">&#128640; ' + (currentLang === 'ar' ? '\u0627\u0644\u062e\u0637\u0629' : 'Roadmap') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'lists\')">&#128278; ' + (currentLang === 'ar' ? '\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Lists') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'intent\')">&#127919; ' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u064a\u0627\u062a' : 'By Intent') + '</button>';
-            viewBar += '</div>';
-
-            var viewTabsEl = document.getElementById('kr-view-tabs');
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'optimize\')">&#9998; ' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064A\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649' : 'Optimize') + '</button>';
+            viewBar += '</div>';            var viewTabsEl = document.getElementById('kr-view-tabs');
             if (viewTabsEl) { viewTabsEl.innerHTML = exportBtns + viewBar; viewTabsEl.style.display = ''; }
             out.innerHTML = '<div style="background:#f0fdf4;border:2px solid #10b981;border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;">' +
                 '&#10003; ' + (currentLang === 'ar' ? '\u062a\u0645 \u0627\u0643\u062a\u0634\u0627\u0641 ' + allResults.length + ' \u0643\u0644\u0645\u0629 (\u0628\u0639\u062f \u0627\u0644\u062a\u0634\u0637\u064a\u0639: ' + deduped.length + ' \u0641\u0631\u064a\u062f\u0629)' : 'Found ' + allResults.length + ' keywords (' + deduped.length + ' after dedup)') +
@@ -7463,6 +7669,48 @@
             }
             html += '</div></div>';
         }
+        var shoppingKws = results.filter(function(r) { return r.shoppingResults; });
+        var featuredKws = results.filter(function(r) { return r.featured; });
+        var localKws = results.filter(function(r) { return r.localPack; });
+        var videoKws = results.filter(function(r) { return r.videoCarousel; });
+        var seasonalKws = results.filter(function(r) { return r.seasonality && r.seasonality !== 'year-round'; });
+        if (shoppingKws.length > 0 || featuredKws.length > 0 || localKws.length > 0 || videoKws.length > 0) {
+            html += '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:16px;">';
+            html += '<h4 style="margin:0 0 12px;color:#1e293b;">&#128200; ' + (currentLang === 'ar' ? '\u062a\u0642\u0633\u064a\u0645 \u0645\u064a\u0632\u0627\u0646\u064a\u0627\u062a SERP' : 'SERP Feature Breakdown') + '</h4>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;">';
+            if (shoppingKws.length > 0) html += '<div style="background:#f0fdf4;padding:12px;border-radius:8px;border-left:3px solid #10b981;"><div style="font-size:20px;font-weight:800;color:#10b981;">' + shoppingKws.length + '</div><div style="font-size:12px;color:#64748b;">' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a Shopping' : 'Shopping Keywords') + '</div></div>';
+            if (featuredKws.length > 0) html += '<div style="background:#eff6ff;padding:12px;border-radius:8px;border-left:3px solid #3b82f6;"><div style="font-size:20px;font-weight:800;color:#3b82f6;">' + featuredKws.length + '</div><div style="font-size:12px;color:#64748b;">' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a Featured Snippet' : 'Featured Snippet') + '</div></div>';
+            if (localKws.length > 0) html += '<div style="background:#fef3c7;padding:12px;border-radius:8px;border-left:3px solid #f59e0b;"><div style="font-size:20px;font-weight:800;color:#f59e0b;">' + localKws.length + '</div><div style="font-size:12px;color:#64748b;">' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a Local Pack' : 'Local Pack') + '</div></div>';
+            if (videoKws.length > 0) html += '<div style="background:#fdf2f8;padding:12px;border-radius:8px;border-left:3px solid #ec4899;"><div style="font-size:20px;font-weight:800;color:#ec4899;">' + videoKws.length + '</div><div style="font-size:12px;color:#64748b;">' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0627\u062a \u0641\u064a\u062f\u064A\u0648' : 'Video Keywords') + '</div></div>';
+            html += '</div></div>';
+        }
+        if (seasonalKws.length > 0) {
+            html += '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:16px;">';
+            html += '<h4 style="margin:0 0 12px;color:#1e293b;">&#128197; ' + (currentLang === 'ar' ? '\u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u0645\u0648\u0633\u0645\u064a\u0629' : 'Seasonal Keywords') + '</h4>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">';
+            for (var si = 0; si < seasonalKws.length; si++) {
+                var sk = seasonalKws[si];
+                var sLabel = sk.seasonality === 'seasonal-winter' ? (currentLang === 'ar' ? '\u0634\u062a\u0627\u0621' : 'Winter') : sk.seasonality === 'seasonal-summer' ? (currentLang === 'ar' ? '\u0635\u064a\u0641' : 'Summer') : (currentLang === 'ar' ? '\u0631\u0627\u0626\u062C' : 'Trending');
+                html += '<div style="background:#f8fafc;padding:8px 12px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:600;">' + esc(sk.keyword) + '</span><span style="font-size:11px;color:#64748b;">' + sLabel + '</span></div>';
+            }
+            html += '</div></div>';
+        }
+        var competitorKws = results.filter(function(r) { return r.competitors && r.competitors.brandCount > 0; });
+        if (competitorKws.length > 0) {
+            html += '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:16px;">';
+            html += '<h4 style="margin:0 0 12px;color:#1e293b;">&#128736; ' + (currentLang === 'ar' ? '\u0645\u0642\u0627\u0631\u0646\u0629 \u0627\u0644\u0639\u0644\u0627\u0645\u0627\u062a \u0627\u0644\u062a\u062c\u0627\u0631\u064A\u0629' : 'Brand Competition Analysis') + '</h4>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;">';
+            for (var ci = 0; ci < Math.min(competitorKws.length, 10); ci++) {
+                var ck = competitorKws[ci];
+                var compLevel = ck.competitors.competitionLevel || 'low';
+                var compColor = compLevel === 'high' ? '#ef4444' : compLevel === 'medium' ? '#f59e0b' : '#10b981';
+                html += '<div style="background:#f8fafc;padding:10px 14px;border-radius:8px;border-left:3px solid ' + compColor + ';">';
+                html += '<div style="font-size:13px;font-weight:600;color:#1e293b;">' + esc(ck.keyword) + '</div>';
+                html += '<div style="font-size:11px;color:#64748b;margin-top:2px;">' + ck.competitors.brandCount + ' ' + (currentLang === 'ar' ? '\u0639\u0644\u0627\u0645\u0629 \u062a\u062c\u0627\u0631\u064A\u0629' : 'brands') + ' / ' + ck.competitors.uniqueDomains + ' ' + (currentLang === 'ar' ? '\u0645\u0648\u0627\u0642\u0639' : 'domains') + '</div>';
+                html += '</div>';
+            }
+            html += '</div></div>';
+        }
         return html;
     }
 
@@ -7643,7 +7891,7 @@
         _krActiveView = view;
         var btns = document.querySelectorAll('.kr-view-btn');
         for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
-        var viewMap = { table: 0, topics: 1, gap: 2, plan: 3, links: 4, roadmap: 5, lists: 6, intent: 7 };
+        var viewMap = { table: 0, topics: 1, gap: 2, plan: 3, links: 4, roadmap: 5, lists: 6, intent: 7, optimize: 8 };
         if (btns[viewMap[view]]) btns[viewMap[view]].classList.add('active');
         var output = document.getElementById('kr-output');
         var topicView = document.getElementById('kr-topic-view');
@@ -7653,6 +7901,7 @@
         var gapView = document.getElementById('kr-gap-view');
         var listsView = document.getElementById('kr-lists-view');
         var intentView = document.getElementById('kr-intent-view');
+        var optimizeView = document.getElementById('kr-optimize-view');
         output.style.display = (view === 'table') ? '' : 'none';
         topicView.style.display = (view === 'topics') ? '' : 'none';
         planView.style.display = (view === 'plan') ? '' : 'none';
@@ -7661,6 +7910,7 @@
         if (gapView) gapView.style.display = (view === 'gap') ? '' : 'none';
         if (listsView) listsView.style.display = (view === 'lists') ? '' : 'none';
         if (intentView) intentView.style.display = (view === 'intent') ? '' : 'none';
+        if (optimizeView) optimizeView.style.display = (view === 'optimize') ? '' : 'none';
         if (view === 'topics' && _krTopicTree.length > 0) {
             topicView.innerHTML = krRenderTopicView(_krTopicTree);
             _krActiveTopic = 0;
@@ -7677,6 +7927,8 @@
             if (listsView) listsView.innerHTML = krRenderKeywordLists(_krResults);
         } else if (view === 'intent' && _krResults.length > 0) {
             if (intentView) intentView.innerHTML = krRenderIntentView(_krResults);
+        } else if (view === 'optimize' && _krResults.length > 0) {
+            if (optimizeView) optimizeView.innerHTML = krRenderContentOptimization(document.getElementById('kr-seed').value, _krResults);
         }
     }
 
@@ -7768,7 +8020,7 @@
         html += '</div>';
         html += '<div class="kr-table-wrap"><table class="kr-table" id="kr-table">';
         html += '<thead><tr>';
-        var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_volume, t.kr_difficulty, 'KEI', currentLang === 'ar' ? '\u0627\u0644\u0641\u0631\u0635' : 'Opp.', t.kr_intent, t.kr_cpc, currentLang === 'ar' ? '\u062a\u0631\u0646\u062f' : 'Trend', currentLang === 'ar' ? '\u0645\u064a\u0632\u0627\u0646\u064a\u0627\u062a SERP' : 'SERP'];
+        var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_volume, t.kr_difficulty, 'KEI', currentLang === 'ar' ? '\u0627\u0644\u0641\u0631\u0635' : 'Opp.', t.kr_intent, t.kr_cpc, currentLang === 'ar' ? '\u062a\u0631\u0646\u062f' : 'Trend', currentLang === 'ar' ? '\u062a\u062c\u0627\u0631\u064A' : 'Shop', currentLang === 'ar' ? '\u0627\u0644\u0641\u0636\u0648\u0644\u0629' : 'Season', currentLang === 'ar' ? '\u0645\u0646\u0627\u0641\u0633 SERP' : 'SERP'];
         for (var i = 0; i < cols.length; i++) {
             var arrow = '';
             if (_krSortCol === i) arrow = _krSortAsc ? ' \u25B2' : ' \u25BC';
@@ -7812,6 +8064,12 @@
             html += '<td><span class="kr-badge ' + intent.cls + '">' + intent.text + '</span></td>';
             html += '<td>' + d.cpc + '</td>';
             html += '<td>' + trendHtml + '</td>';
+            var shopHtml = d.shoppingResults ? '<span style="color:#10b981;font-weight:700;font-size:11px;">&#9989; Shopping</span>' : '<span style="color:#d1d5db;font-size:11px;">-</span>';
+            html += '<td>' + shopHtml + '</td>';
+            var seasonLabels = { 'year-round': currentLang === 'ar' ? '\u0639\u0645\u0631\u064a' : 'Year-round', 'seasonal-winter': currentLang === 'ar' ? '\u0634\u062a\u0627\u0621' : 'Winter', 'seasonal-summer': currentLang === 'ar' ? '\u0635\u064a\u0641' : 'Summer', 'trending-year': currentLang === 'ar' ? '\u0631\u0627\u0626\u062C' : 'Trending' };
+            var seasonColors = { 'year-round': '#64748b', 'seasonal-winter': '#3b82f6', 'seasonal-summer': '#f59e0b', 'trending-year': '#ef4444' };
+            var seasonVal = d.seasonality || 'year-round';
+            html += '<td><span style="font-size:11px;font-weight:600;color:' + (seasonColors[seasonVal] || '#64748b') + ';">' + (seasonLabels[seasonVal] || seasonVal) + '</span></td>';
             html += '<td>' + serpHtml + '</td>';
             html += '</tr>';
         }
@@ -7862,8 +8120,14 @@
             else if (col === 5) { va = a.opportunity || 0; vb = b.opportunity || 0; }
             else if (col === 6) { va = a.intent; vb = b.intent; }
             else if (col === 7) { va = parseFloat(String(a.cpc).replace(/[^0-9.]/g, '')) || 0; vb = parseFloat(String(b.cpc).replace(/[^0-9.]/g, '')) || 0; }
-            else if (col === 8) { va = a.serpFeatures || 0; vb = b.serpFeatures || 0; }
-            else if (col === 9) { va = a.serpFeatures || 0; vb = b.serpFeatures || 0; }
+            else if (col === 8) { va = a.trendDir && a.trendDir.score ? a.trendDir.score : 0; vb = b.trendDir && b.trendDir.score ? b.trendDir.score : 0; }
+            else if (col === 9) { va = a.shoppingResults ? 1 : 0; vb = b.shoppingResults ? 1 : 0; }
+            else if (col === 10) {
+                var sOrder = { 'trending-year': 0, 'seasonal-winter': 1, 'seasonal-summer': 2, 'year-round': 3 };
+                va = sOrder[a.seasonality] !== undefined ? sOrder[a.seasonality] : 4;
+                vb = sOrder[b.seasonality] !== undefined ? sOrder[b.seasonality] : 4;
+            }
+            else if (col === 11) { va = a.serpFeatures || 0; vb = b.serpFeatures || 0; }
             else { va = a.keyword; vb = b.keyword; }
             if (typeof va === 'string') return _krSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
             return _krSortAsc ? va - vb : vb - va;
@@ -8293,6 +8557,7 @@
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'roadmap\')">&#128640; ' + (currentLang === 'ar' ? '\u0627\u0644\u062e\u0637\u062a\u0629' : 'Roadmap') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'lists\')">&#128278; ' + (currentLang === 'ar' ? '\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Lists') + '</button>';
             viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'intent\')">&#127919; ' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u064a\u0627\u062a' : 'By Intent') + '</button>';
+            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'optimize\')">&#9998; ' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649' : 'Optimize') + '</button>';
             viewBar += '</div>';
             var exportBtns = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
                 '<button onclick="krExportCSV(_krResults)" style="background:#10b981;color:white;border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">&#128229; CSV</button>' +
