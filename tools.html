@@ -6708,6 +6708,7 @@
         btn.textContent = t.kr_btn_research;
         krSaveCurrentSession();
         krSnapshotSerpFeatures(document.getElementById('kr-seed').value);
+        krSaveResearchToHistory(_krResults, document.getElementById('kr-seed').value);
     }
 
     function krRunBulkExportCSV() {
@@ -8660,6 +8661,7 @@
         btn.textContent = t.kr_btn_research;
         krSaveCurrentSession();
         krSnapshotSerpFeatures(document.getElementById('kr-seed').value);
+        krSaveResearchToHistory(_krResults, document.getElementById('kr-seed').value);
     }
 
     // ==============================
@@ -10695,6 +10697,279 @@
     }
 
     // ==============================
+    // INTERNAL LINKING SUGGESTIONS
+    // ==============================
+    function krRenderInternalLinks(results) {
+        var clusters = {};
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i].keyword;
+            var words = kw.toLowerCase().split(/\s+/);
+            for (var w = 0; w < words.length; w++) {
+                if (words[w].length > 3) {
+                    if (!clusters[words[w]]) clusters[words[w]] = [];
+                    clusters[words[w]].push(results[i]);
+                }
+            }
+        }
+        var links = [];
+        var keys = Object.keys(clusters);
+        for (var k = 0; k < keys.length; k++) {
+            var g = clusters[keys[k]];
+            if (g.length >= 2) {
+                var source = g[0];
+                var targets = g.slice(1, 4);
+                links.push({ source: source.keyword, targets: targets, sharedWord: keys[k] });
+            }
+        }
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128279; ' + (currentLang === 'ar' ? '\u0627\u0642\u062a\u0631\u0627\u062d\u0627\u062a \u062f\u0627\u062e\u0644\u064a\u0629' : 'Internal Linking Suggestions') + '</h4>';
+        if (links.length === 0) {
+            html += '<div style="text-align:center;padding:20px;color:#94a3b8;">' + (currentLang === 'ar' ? '\u0644\u0627 \u062a\u0648\u062c\u062f \u0631\u0635\u0644 \u062f\u0627\u062e\u0644\u064a\u0629 \u0645\u0645\u0643\u0646\u0629' : 'No internal linking opportunities found') + '</div>';
+        } else {
+            html += '<div style="display:flex;flex-direction:column;gap:10px;">';
+            var showLinks = links.slice(0, 12);
+            for (var l = 0; l < showLinks.length; l++) {
+                var link = showLinks[l];
+                html += '<div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">';
+                html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:12px;">';
+                html += '<span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:100px;font-weight:600;">&#128196; ' + esc(link.source.length > 30 ? link.source.substring(0, 28) + '..' : link.source) + '</span>';
+                html += '<span style="color:#94a3b8;">&#8594;</span>';
+                html += '<span style="background:#e2e8f0;color:#475569;padding:2px 8px;border-radius:100px;font-size:10px;">shared: "' + esc(link.sharedWord) + '"</span>';
+                html += '</div>';
+                html += '<div style="display:flex;flex-direction:column;gap:4px;">';
+                for (var t = 0; t < link.targets.length; t++) {
+                    var target = link.targets[t];
+                    html += '<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;background:white;border-radius:6px;font-size:11px;">';
+                    html += '<span style="color:#94a3b8;">&#8594;</span>';
+                    html += '<span style="color:#334155;">' + esc(target.keyword.length > 35 ? target.keyword.substring(0, 33) + '..' : target.keyword) + '</span>';
+                    html += '<span style="margin-left:auto;color:#94a3b8;">KD:' + (target.difficulty || 0) + '</span>';
+                    html += '</div>';
+                }
+                html += '</div></div>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowInternalLinks() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderInternalLinks(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // SERP FEATURE CTR IMPACT
+    // ==============================
+    function krRenderSerpCtrImpact(results) {
+        var baseCtr = { 1: 31.7, 2: 24.7, 3: 18.6, 4: 13.6, 5: 9.5, 6: 6.3, 7: 4.5, 8: 3.3, 9: 2.5, 10: 2.0 };
+        var impactData = [];
+        for (var i = 0; i < results.length; i++) {
+            var kw = results[i];
+            var sf = kw.serpFeatures || {};
+            var featuredReduction = sf.featured ? 25 : 0;
+            var paaReduction = sf.paa ? 8 : 0;
+            var videoReduction = sf.video ? 6 : 0;
+            var localReduction = sf.local ? 12 : 0;
+            var totalReduction = featuredReduction + paaReduction + videoReduction + localReduction;
+            var features = [];
+            if (sf.featured) features.push({ name: 'Featured', reduction: featuredReduction, color: '#8b5cf6' });
+            if (sf.paa) features.push({ name: 'PAA', reduction: paaReduction, color: '#3b82f6' });
+            if (sf.video) features.push({ name: 'Video', reduction: videoReduction, color: '#ef4444' });
+            if (sf.local) features.push({ name: 'Local', reduction: localReduction, color: '#10b981' });
+            impactData.push({ keyword: kw.keyword, volume: kw.volume || 0, totalReduction: totalReduction, features: features });
+        }
+        impactData.sort(function(a, b) { return b.totalReduction - a.totalReduction; });
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128200; ' + (currentLang === 'ar' ? '\u062a\u0623\u062b\u0631 SERP \u0639\u0644\u0649 CTR' : 'SERP Feature CTR Impact') + '</h4>';
+        html += '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:#64748b;">';
+        html += '&#128161; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0644\u0627\u062d\u0638\u0627\u062a SERP \u062a\u0642\u0644\u0644 CTR \u0627\u0644\u0639\u062f\u0648\u064a \u0644\u0644\u0646\u062a\u0627\u0626\u062c \u0627\u0644\u0639\u0646\u0639\u0648\u0631\u064a\u0629 \u0627\u0644\u0645\u062c\u0627\u0646\u064a\u0629' : 'SERP features reduce organic CTR for non-ad results') + '</div>';
+        html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+        var showData = impactData.slice(0, 15);
+        for (var d = 0; d < showData.length; d++) {
+            var item = showData[d];
+            var impactColor = item.totalReduction >= 40 ? '#ef4444' : item.totalReduction >= 20 ? '#f59e0b' : '#10b981';
+            html += '<div style="padding:10px;background:#f8fafc;border-radius:8px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+            html += '<span style="font-size:13px;font-weight:600;color:#334155;">' + esc(item.keyword.length > 40 ? item.keyword.substring(0, 38) + '..' : item.keyword) + '</span>';
+            html += '<span style="font-size:11px;color:' + impactColor + ';font-weight:700;">-' + item.totalReduction + '% CTR</span>';
+            html += '</div>';
+            html += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+            for (var f = 0; f < item.features.length; f++) {
+                html += '<span style="background:' + item.features[f].color + '22;color:' + item.features[f].color + ';padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600;">' + item.features[f].name + ' (-' + item.features[f].reduction + '%)</span>';
+            }
+            html += '<span style="background:#f1f5f9;color:#64748b;padding:2px 8px;border-radius:100px;font-size:10px;">Vol: ' + item.volume.toLocaleString() + '</span>';
+            html += '</div></div>';
+        }
+        html += '</div></div>';
+        return html;
+    }
+    function krShowCtrImpact() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderSerpCtrImpact(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // RESEARCH HISTORY
+    // ==============================
+    function krGetResearchHistory() {
+        try { return JSON.parse(localStorage.getItem('kr_research_history') || '[]'); } catch(e) { return []; }
+    }
+    function krSaveResearchToHistory(results, query) {
+        var history = krGetResearchHistory();
+        history.unshift({ query: query, date: new Date().toISOString(), count: results.length, keywords: results.slice(0, 20).map(function(r) { return r.keyword; }) });
+        if (history.length > 30) history = history.slice(0, 30);
+        localStorage.setItem('kr_research_history', JSON.stringify(history));
+    }
+    function krRenderResearchHistory() {
+        var history = krGetResearchHistory();
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
+        html += '<h4 style="margin:0;color:#1e293b;font-size:15px;">&#128336; ' + (currentLang === 'ar' ? '\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0628\u062d\u062b' : 'Research History') + '</h4>';
+        if (history.length > 0) {
+            html += '<button onclick="localStorage.removeItem(\'kr_research_history\');krShowHistory();" style="padding:4px 12px;border-radius:100px;border:1px solid #ef4444;background:#fef2f2;color:#ef4444;font-size:11px;cursor:pointer;">Clear All</button>';
+        }
+        html += '</div>';
+        if (history.length === 0) {
+            html += '<div style="text-align:center;padding:30px;color:#94a3b8;">' + (currentLang === 'ar' ? '\u0644\u0645 \u064a\u0639\u0645\u0644 \u0628\u062d\u062b \u0628\u0639\u062f' : 'No research history yet') + '</div>';
+        } else {
+            html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+            for (var i = 0; i < history.length; i++) {
+                var h = history[i];
+                var d = new Date(h.date);
+                var dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString().substring(0, 5);
+                var timeAgo = '';
+                var diffMs = Date.now() - d.getTime();
+                var diffMins = Math.floor(diffMs / 60000);
+                if (diffMins < 1) timeAgo = 'just now';
+                else if (diffMins < 60) timeAgo = diffMins + 'm ago';
+                else if (diffMins < 1440) timeAgo = Math.floor(diffMins / 60) + 'h ago';
+                else timeAgo = Math.floor(diffMins / 1440) + 'd ago';
+                html += '<div style="padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">';
+                html += '<div>';
+                html += '<div style="font-size:13px;font-weight:600;color:#334155;">' + esc(h.query || 'Research #' + (i + 1)) + '</div>';
+                html += '<div style="font-size:11px;color:#94a3b8;">' + h.count + ' keywords &middot; ' + dateStr + '</div>';
+                if (h.keywords && h.keywords.length > 0) {
+                    html += '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;">';
+                    var showKws = h.keywords.slice(0, 5);
+                    for (var k = 0; k < showKws.length; k++) {
+                        html += '<span style="font-size:10px;background:#e2e8f0;color:#475569;padding:1px 6px;border-radius:100px;">' + esc(showKws[k].length > 18 ? showKws[k].substring(0, 16) + '..' : showKws[k]) + '</span>';
+                    }
+                    if (h.keywords.length > 5) html += '<span style="font-size:10px;color:#94a3b8;">+' + (h.keywords.length - 5) + '</span>';
+                    html += '</div>';
+                }
+                html += '</div>';
+                html += '<div style="text-align:right;"><span style="font-size:11px;color:#94a3b8;">' + timeAgo + '</span></div>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    function krShowHistory() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderResearchHistory() + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // BACKLINK OPPORTUNITY FINDER
+    // ==============================
+    function krRenderBacklinkOpportunities(results) {
+        var resourceTypes = [
+            { name: 'Guest Posts', nameAr: '\u0645\u0642\u0627\u0644\u0627\u062a \u0636\u064a\u0641\u0629', icon: '&#128221;', templates: ['write for us', 'guest post', 'contribute'] },
+            { name: 'Resource Pages', nameAr: '\u0635\u0641\u062d\u0627\u062a \u0645\u0635\u0627\u062f\u0631', icon: '&#128218;', templates: ['resources', 'useful links', 'recommended tools'] },
+            { name: 'Directory Listings', nameAr: '\u0642\u0627\u0626\u0645\u0627\u062a', icon: '&#128194;', templates: ['directory', 'listing', 'submit your site'] },
+            { name: 'Broken Link Building', nameAr: '\u0631\u0628\u0637 \u0645u0643\u0633\u0648\u0631', icon: '&#128279;', templates: ['broken link', '404', 'not found'] },
+            { name: 'Infographic Outreach', nameAr: '\u0627\u0646\u0641\u0648\u063a\u0631\u0627\u0641\u064a\u0643', icon: '&#128202;', templates: ['infographic', 'visual content', 'share this'] }
+        ];
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#128279; ' + (currentLang === 'ar' ? '\u0641\u0631\u0635 \u0628\u0631\u0627\u0626\u0639 \u0627\u0644\u0631\u0628\u0637\u0627\u062a' : 'Backlink Opportunity Finder') + '</h4>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">';
+        for (var r = 0; r < resourceTypes.length; r++) {
+            var rt = resourceTypes[r];
+            html += '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;">';
+            html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">';
+            html += '<span style="font-size:20px;">' + rt.icon + '</span>';
+            html += '<strong style="font-size:13px;color:#334155;">' + (currentLang === 'ar' ? rt.nameAr : rt.name) + '</strong>';
+            html += '</div>';
+            html += '<div style="font-size:11px;color:#64748b;margin-bottom:6px;">' + (currentLang === 'ar' ? '\u062c\u0642\u0637\u0627\u0639 \u0628\u062d\u062b:' : 'Search queries:') + '</div>';
+            html += '<div style="display:flex;flex-direction:column;gap:3px;">';
+            for (var t = 0; t < rt.templates.length; t++) {
+                var seedKw = results.length > 0 ? results[0].keyword.split(' ')[0] : 'seo';
+                var query = '"' + seedKw + ' ' + rt.templates[t] + '"';
+                html += '<div style="padding:4px 8px;background:white;border-radius:4px;font-size:11px;font-family:monospace;color:#1e40af;">' + esc(query) + '</div>';
+            }
+            html += '</div>';
+            var estimatedLinks = Math.round(results.length * (rt.templates.length * 0.3));
+            html += '<div style="margin-top:8px;font-size:10px;color:#94a3b8;">~' + estimatedLinks + ' ' + (currentLang === 'ar' ? '\u0641\u0631\u0635 \u0645\u0648\u0642\u0639\u0629' : 'potential opportunities') + '</div>';
+            html += '</div>';
+        }
+        html += '</div></div>';
+        return html;
+    }
+    function krShowBacklinks() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderBacklinkOpportunities(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
+    // SEO CHECKLIST GENERATOR
+    // ==============================
+    function krRenderSEOChecklist(results) {
+        var topKws = results.slice(0, 5);
+        var html = '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 16px;color:#1e293b;font-size:15px;">&#9989; ' + (currentLang === 'ar' ? '\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u062a\u0642\u064a\u064a\u0645 SEO' : 'SEO Checklist Generator') + '</h4>';
+        var sections = [
+            { title: 'Title Tag', titleAr: '\u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u0639\u0646\u0648\u0627\u0646', color: '#3b82f6', items: ['Include primary keyword in title', 'Keep under 60 characters', 'Add brand name at end', 'Make it compelling and click-worthy', 'Front-load the target keyword'] },
+            { title: 'Meta Description', titleAr: '\u0627\u0644\u0648\u0635\u0641 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a', color: '#10b981', items: ['Include target keyword naturally', 'Keep under 155 characters', 'Include a clear CTA', 'Address user intent directly', 'Add unique value proposition'] },
+            { title: 'Content', titleAr: '\u0627\u0644\u0645\u062d\u062a\u0648\u0649', color: '#8b5cf6', items: ['Target word count based on competition', 'Use keyword in first 100 words', 'Include related keywords naturally', 'Add subheadings with secondary keywords', 'Include images with alt text'] },
+            { title: 'Technical', titleAr: '\u0627\u0644\u0641\u0646\u064a\u0629', color: '#f59e0b', items: ['Clean URL structure', 'Mobile responsive design', 'Fast page load speed', 'Proper heading hierarchy (H1-H6)', 'Internal linking to related content'] },
+            { title: 'Off-Page', titleAr: '\u062e\u0627\u0631\u062c \u0627\u0644\u0635\u0641\u062d\u0629', color: '#ef4444', items: ['Build quality backlinks', 'Social media sharing', 'Local citations (if applicable)', 'Google Business Profile', 'Brand mentions and reviews'] }
+        ];
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">';
+        for (var s = 0; s < sections.length; s++) {
+            var sec = sections[s];
+            html += '<div style="border:2px solid ' + sec.color + '33;border-radius:10px;padding:14px;">';
+            html += '<h5 style="margin:0 0 10px;color:' + sec.color + ';font-size:14px;">' + sec.color + ' ' + (currentLang === 'ar' ? sec.titleAr : sec.title) + '</h5>';
+            html += '<div style="display:flex;flex-direction:column;gap:6px;">';
+            for (var item = 0; item < sec.items.length; item++) {
+                var itemText = sec.items[item];
+                if (item < topKws.length && s === 0) {
+                    itemText += ' <span style="color:#94a3b8;">(\'' + esc(topKws[item].keyword) + '\')</span>';
+                }
+                html += '<label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#475569;cursor:pointer;">';
+                html += '<input type="checkbox" style="margin-top:2px;accent-color:' + sec.color + ';" />';
+                html += '<span>' + itemText + '</span>';
+                html += '</label>';
+            }
+            html += '</div></div>';
+        }
+        html += '</div>';
+        html += '<div style="margin-top:16px;padding:12px;background:#f0fdf4;border:1px solid #d1fae5;border-radius:8px;">';
+        html += '<div style="font-size:12px;color:#065f46;font-weight:600;margin-bottom:4px;">Target Keywords:</div>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+        for (var k = 0; k < topKws.length; k++) {
+            html += '<span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;">' + esc(topKws[k].keyword) + '</span>';
+        }
+        html += '</div></div></div>';
+        return html;
+    }
+    function krShowChecklist() {
+        var container = document.getElementById('kr-favorites-output');
+        if (!container || !_krResults) return;
+        container.innerHTML = '<div style="padding:16px;">' + krRenderSEOChecklist(_krResults) + '</div>';
+        container.style.display = '';
+    }
+
+    // ==============================
     // Update the extra analysis bar with new buttons
     // ==============================
     var _krOrigRenderExtraAnalysis = krRenderExtraAnalysis;
@@ -10721,6 +10996,11 @@
         html += '<button onclick="krShowContentLength()" style="padding:8px 16px;border-radius:100px;border:2px solid #0d9488;background:#f0fdfa;color:#115e59;font-weight:700;cursor:pointer;font-size:13px;">&#128221; Length</button>';
         html += '<button onclick="krShowAnchors()" style="padding:8px 16px;border-radius:100px;border:2px solid #2563eb;background:#eff6ff;color:#1e40af;font-weight:700;cursor:pointer;font-size:13px;">&#128279; Anchors</button>';
         html += '<button onclick="krShowMeta()" style="padding:8px 16px;border-radius:100px;border:2px solid #059669;background:#ecfdf5;color:#065f46;font-weight:700;cursor:pointer;font-size:13px;">&#128196; Meta</button>';
+        html += '<button onclick="krShowInternalLinks()" style="padding:8px 16px;border-radius:100px;border:2px solid #2563eb;background:#eff6ff;color:#1e40af;font-weight:700;cursor:pointer;font-size:13px;">&#128279; Links</button>';
+        html += '<button onclick="krShowCtrImpact()" style="padding:8px 16px;border-radius:100px;border:2px solid #dc2626;background:#fef2f2;color:#991b1b;font-weight:700;cursor:pointer;font-size:13px;">&#128200; CTR</button>';
+        html += '<button onclick="krShowHistory()" style="padding:8px 16px;border-radius:100px;border:2px solid #64748b;background:#f8fafc;color:#334155;font-weight:700;cursor:pointer;font-size:13px;">&#128336; History</button>';
+        html += '<button onclick="krShowBacklinks()" style="padding:8px 16px;border-radius:100px;border:2px solid #7c3aed;background:#f5f3ff;color:#5b21b6;font-weight:700;cursor:pointer;font-size:13px;">&#128279; Backlinks</button>';
+        html += '<button onclick="krShowChecklist()" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#065f46;font-weight:700;cursor:pointer;font-size:13px;">&#9989; Checklist</button>';
         html += '<button onclick="krExportGoogleSheets(_krResults)" style="padding:8px 16px;border-radius:100px;border:2px solid #10b981;background:#ecfdf5;color:#059669;font-weight:700;cursor:pointer;font-size:13px;">&#128203; Sheets</button>';
         html += '</div>';
         return html;
