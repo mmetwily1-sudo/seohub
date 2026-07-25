@@ -51,29 +51,45 @@ export default {
       headers['Referer'] = 'https://www.google.com/';
       headers['Origin'] = 'https://www.google.com';
       headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+      headers['Cookie'] = 'CONSENT=YES+cb.20210328-17-p0.en+FX+' + Math.floor(Date.now() / 1000);
     } else {
       headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
     }
 
+    const isGoogleSearch = isGoogleDomain && target.includes('/search');
+
     try {
       const resp = await fetch(target, { headers, redirect: 'follow' });
       const body = await resp.text();
-      
+      const trimmed = body.trim();
+      const looksLikeHtml = trimmed.charAt(0) === '<';
+      const lowerBody = trimmed.toLowerCase();
+
       if (expectsJson) {
-        const trimmed = body.trim();
-        const looksLikeHtml = trimmed.charAt(0) === '<';
         const isBlocked = looksLikeHtml || trimmed.indexOf('Sorry...') !== -1 || trimmed.indexOf('captcha') !== -1;
-        
         if (isBlocked) {
+          console.log('BLOCKED JSON request to:', target, '- response starts with:', trimmed.substring(0, 200));
           return new Response(JSON.stringify({ 
             error: 'Upstream returned HTML instead of JSON (likely blocked)',
             status: resp.status
           }), {
             status: 502,
-            headers: {
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
-            }
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+          });
+        }
+      }
+
+      if (isGoogleSearch && looksLikeHtml) {
+        const isConsent = lowerBody.indexOf('consent.google') !== -1 || lowerBody.indexOf('sorry') !== -1 || lowerBody.indexOf('unusual traffic') !== -1 || lowerBody.indexOf('captcha') !== -1 || lowerBody.indexOf('enable javascript') !== -1 || lowerBody.indexOf('before you continue') !== -1 || lowerBody.indexOf('before you proceed') !== -1;
+        if (isConsent || resp.status === 429 || resp.status === 503) {
+          console.log('BLOCKED Google Search - consent/captcha page. URL:', target, 'Status:', resp.status, 'First 300 chars:', trimmed.substring(0, 300));
+          return new Response(JSON.stringify({ 
+            error: 'Google returned consent/captcha page (datacenter IP blocked)',
+            blocked: true,
+            status: resp.status
+          }), {
+            status: 502,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
           });
         }
       }
@@ -87,6 +103,7 @@ export default {
         }
       });
     } catch (e) {
+      console.log('FETCH ERROR for', target, ':', e.message);
       return new Response(JSON.stringify({ error: e.message }), {
         status: 502,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
