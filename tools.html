@@ -4733,17 +4733,8 @@
     }
 
     function krFetchFast(query, lang, country) {
-        if (_googleBlocked) {
-            return krFetchDuckDuckGo(query, lang, country)
-                .catch(function() { return krFetchBingViaProxy(query, lang); })
-                .catch(function() {
-                    _suggestSource = 'local';
-                    return krLocalSuggestions(query, lang);
-                });
-        }
         return krFetchDuckDuckGo(query, lang, country)
             .catch(function() { return krFetchBingViaProxy(query, lang); })
-            .catch(function() { return krFetchGoogleViaProxy(query, lang, country); })
             .catch(function() {
                 _suggestSource = 'local';
                 return krLocalSuggestions(query, lang);
@@ -4785,6 +4776,10 @@
     }
 
     function krFetchGoogleViaProxy(query, lang, country) {
+        if (_googleBlocked) {
+            _suggestSource = 'local';
+            return Promise.resolve(krLocalSuggestions(query, lang));
+        }
         var base = 'https://suggestqueries.google.com/complete/search';
         var params = 'client=firefox&q=' + encodeURIComponent(query);
         if (lang) params += '&hl=' + lang;
