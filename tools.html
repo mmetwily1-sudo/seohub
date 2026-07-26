@@ -4954,6 +4954,14 @@
         if (settings.useTrends === false) return Promise.resolve({});
         geo = geo || '';
         lang = lang || 'en';
+        var geoMap = {
+            'SA': 'SA', 'AE': 'AE', 'KW': 'KW', 'QA': 'QA', 'BH': 'BH', 'OM': 'OM',
+            'EG': 'EG', 'JO': 'JO', 'LB': 'LB', 'IQ': 'IQ', 'MA': 'MA', 'TN': 'TN',
+            'DZ': 'DZ', 'LY': 'LY', 'SD': 'SD', 'PS': 'PS', 'SY': 'SY', 'YE': 'YE',
+            'US': 'US', 'GB': 'GB', 'CA': 'CA', 'AU': 'AU', 'DE': 'DE', 'FR': 'FR',
+            'TR': 'TR', 'IN': 'IN', 'PK': 'PK', 'ID': 'ID', 'MY': 'MY', 'BR': 'BR'
+        };
+        geo = geoMap[geo] || geo;
         var batches = [];
         var batchSize = 5;
         for (var b = 0; b < keywords.length; b += batchSize) {
@@ -4980,10 +4988,11 @@
         });
         var req = JSON.stringify({ comparisonItem: comparisonItems, category: 0, property: '' });
         var url = 'https://trends.google.com/trends/api/widgetdata/multiline?hl=' + lang + '&tz=-480&req=' + encodeURIComponent(req);
-        return fetchHTML(url, { timeout: 15000, retries: 1, proxyLimit: 2 }).then(function(text) {
+        return fetchHTML(url, { timeout: 15000, retries: 2, proxyLimit: 3 }).then(function(text) {
             var result = {};
             try {
                 var cleaned = text;
+                if (typeof cleaned !== 'string') return result;
                 if (cleaned.indexOf(")]}'") === 0) cleaned = cleaned.substring(5);
                 var data = JSON.parse(cleaned);
                 if (data && data.default && data.default.timelineData) {
@@ -5182,13 +5191,47 @@
     }
 
     function krFetchFast(query, lang, country) {
-        return krFetchYouTubeSuggest(query, lang, country)
-            .catch(function() { return krFetchDuckDuckGo(query, lang, country); })
-            .catch(function() { return krFetchBingViaProxy(query, lang); })
-            .catch(function() {
-                _suggestSource = 'local';
-                return krLocalSuggestions(query, lang);
-            });
+        return new Promise(function(resolve) {
+            var settled = false;
+            var allResults = [];
+            function finish() {
+                if (settled) return;
+                settled = true;
+                if (allResults.length > 0) {
+                    resolve(allResults);
+                } else {
+                    _suggestSource = 'local';
+                    resolve(krLocalSuggestions(query, lang));
+                }
+            }
+            function addResults(source, results) {
+                for (var i = 0; i < results.length; i++) {
+                    var r = results[i].toLowerCase().trim();
+                    if (r.length > 2 && allResults.indexOf(r) === -1) allResults.push(r);
+                }
+                if (!_suggestSource || _suggestSource === 'local') _suggestSource = source;
+            }
+            var sources = 0;
+            var sourcesDone = 0;
+            function checkDone() {
+                sourcesDone++;
+                if (sourcesDone >= sources) finish();
+            }
+            sources = 4;
+            krFetchYouTubeSuggest(query, lang, country).then(function(s) {
+                addResults('google-jsonp', s);
+            }).catch(function() {}).then(function() { checkDone(); });
+            krFetchBingViaProxy(query, lang).then(function(s) {
+                addResults('bing', s);
+            }).catch(function() {}).then(function() { checkDone(); });
+            krFetchDuckDuckGo(query, lang, country).then(function(s) {
+                addResults('duckduckgo', s);
+            }).catch(function() {}).then(function() { checkDone(); });
+            krFetchRedditSuggestions(query, lang).then(function(s) {
+                addResults('reddit', s);
+            }).catch(function() {}).then(function() { checkDone(); });
+            setTimeout(finish, 12000);
+        });
     }
 
     function krFetchDuckDuckGo(query, lang, country) {
@@ -5223,6 +5266,38 @@
                 _suggestSource = 'bing';
                 return results;
             });
+    }
+
+    function krFetchRedditSuggestions(query, lang) {
+        var searchUrl = 'https://www.reddit.com/search.json?q=' + encodeURIComponent(query) + '&limit=25&sort=relevance&t=year';
+        return fetchJSON(searchUrl, { timeout: 12000, retries: 1, proxyLimit: 2 }).then(function(data) {
+            var results = [];
+            if (data && data.data && data.data.children) {
+                var children = data.data.children;
+                for (var i = 0; i < children.length; i++) {
+                    var post = children[i].data;
+                    if (post && post.title) {
+                        var title = post.title.toLowerCase().trim();
+                        if (title.length > 4 && title.length < 120) {
+                            if (results.indexOf(title) === -1) results.push(title);
+                        }
+                    }
+                    if (post && post.selftext) {
+                        var words = post.selftext.toLowerCase().split(/[\s,;.!?]+/);
+                        for (var w = 0; w < words.length; w++) {
+                            if (words[w].length > 5 && words[w].indexOf(query.toLowerCase()) !== -1) {
+                                if (results.indexOf(words[w]) === -1 && results.length < 30) {
+                                    results.push(words[w]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (results.length === 0) throw new Error('Reddit empty');
+            _suggestSource = 'reddit';
+            return results;
+        });
     }
 
     function krFetchGoogleViaProxy(query, lang, country) {
@@ -5527,6 +5602,108 @@
         });
     }
 
+    function krScrapeBingSerp(keyword, lang, country) {
+        var market = (lang === 'ar' ? 'ar-' : '') + ((country || 'us').toUpperCase());
+        var url = 'https://www.bing.com/search?q=' + encodeURIComponent(keyword) + '&mkt=' + market + '&count=10';
+        return fetchHTML(url).then(function(html) {
+            var result = { paa: [], related: [], topDomains: [], topResults: [], featured: false, featuredSnippet: '', knowledgePanel: false, shoppingResults: false, localPack: false, videoCarousel: false, imagePack: false, newsResults: false, serpFeatures: 0, resultCount: 0, organicCount: 0 };
+            if (!html || typeof html !== 'string') return result;
+            var lowerHtml = html.toLowerCase();
+            if (lowerHtml.indexOf('b_algo') !== -1) result.organicCount++;
+            if (lowerHtml.indexOf('b_ans') !== -1 || lowerHtml.indexOf('b_research') !== -1) { result.featured = true; result.serpFeatures++; }
+            if (lowerHtml.indexOf('b_tpanel') !== -1 || lowerHtml.indexOf('knowledge') !== -1) { result.knowledgePanel = true; result.serpFeatures++; }
+            if (lowerHtml.indexOf('b_vList') !== -1 || lowerHtml.indexOf('pa-carousel') !== -1 || lowerHtml.indexOf('related-question') !== -1) { result.serpFeatures++; }
+            if (lowerHtml.indexOf('b_algo') !== -1 && lowerHtml.indexOf('shop') !== -1) { result.shoppingResults = true; result.serpFeatures++; }
+            if (lowerHtml.indexOf('b_vList') !== -1 || lowerHtml.indexOf('video') !== -1 && lowerHtml.indexOf('b_algo') !== -1) { result.videoCarousel = true; result.serpFeatures++; }
+            if (lowerHtml.indexOf('b_nws') !== -1) { result.newsResults = true; result.serpFeatures++; }
+            var domainRegex = /https?:\/\/(?:www\.)?([^/"\s<>]+)\//g;
+            var domainMatch;
+            var domainCounts = {};
+            var bingDomains = ['bing.com', 'microsoft.com', 'msn.com'];
+            while ((domainMatch = domainRegex.exec(html)) !== null) {
+                var domain = domainMatch[1].toLowerCase();
+                var isBing = false;
+                for (var b = 0; b < bingDomains.length; b++) {
+                    if (domain.indexOf(bingDomains[b]) !== -1) { isBing = true; break; }
+                }
+                if (!isBing && domain.length > 3 && domain.indexOf('.') !== -1) {
+                    domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+                }
+            }
+            var sortedDomains = [];
+            var dKeys = Object.keys(domainCounts);
+            for (var d = 0; d < dKeys.length; d++) {
+                sortedDomains.push({ domain: dKeys[d], count: domainCounts[dKeys[d]] });
+            }
+            sortedDomains.sort(function(a, b) { return b.count - a.count; });
+            result.topDomains = sortedDomains.slice(0, 10);
+            result.resultCount = sortedDomains.length;
+            if (result.organicCount === 0) result.organicCount = sortedDomains.length;
+            var titleRegex = /<h2[^>]*>(.*?)<\/h2>/g;
+            var titleMatch;
+            var topResults = [];
+            var seenDomains = {};
+            while ((titleMatch = titleRegex.exec(html)) !== null) {
+                var titleText = titleMatch[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&#[\d]+;/g, '').trim();
+                if (titleText.length > 5 && titleText.length < 200) {
+                    var nearbyUrl = html.substring(Math.max(0, titleMatch.index - 800), titleMatch.index);
+                    var urlMatch = nearbyUrl.match(/href="(https?:\/\/[^"]+)"/);
+                    var resultUrl = urlMatch ? urlMatch[1] : '';
+                    var resultDomain = '';
+                    if (resultUrl) {
+                        var dm = resultUrl.match(/https?:\/\/(?:www\.)?([^/]+)/);
+                        if (dm) resultDomain = dm[1].toLowerCase();
+                    }
+                    if (!seenDomains[resultDomain] && resultDomain) {
+                        seenDomains[resultDomain] = true;
+                        topResults.push({ title: titleText, url: resultUrl, domain: resultDomain });
+                    }
+                }
+            }
+            result.topResults = topResults.slice(0, 10);
+            var relatedCandidates = [];
+            var relRegex = /<a[^>]*href="https?:\/\/www\.bing\.com\/search[^"]*"[^>]*>([^<]+)<\/a/g;
+            var relMatch;
+            while ((relMatch = relRegex.exec(html)) !== null) {
+                var rw = relMatch[1].replace(/<[^>]+>/g, '').trim();
+                if (rw && rw.length > 3 && rw.length < 100) relatedCandidates.push(rw);
+            }
+            var seenRel = {};
+            for (var r = 0; r < relatedCandidates.length; r++) {
+                var rl = relatedCandidates[r].toLowerCase();
+                if (!seenRel[rl] && rl !== keyword.toLowerCase()) {
+                    seenRel[rl] = true;
+                    result.related.push(relatedCandidates[r]);
+                }
+            }
+            result.related = result.related.slice(0, 10);
+            return result;
+        }).catch(function(err) {
+            console.log('[KR] krScrapeBingSerp error for "' + keyword + '":', err);
+            return { paa: [], related: [], topDomains: [], topResults: [], featured: false, featuredSnippet: '', knowledgePanel: false, shoppingResults: false, localPack: false, videoCarousel: false, imagePack: false, newsResults: false, serpFeatures: 0, resultCount: 0, organicCount: 0 };
+        });
+    }
+
+    function krScrapeBothSerp(keyword, lang, country) {
+        return krScrapeSerp(keyword, lang, country).then(function(googleResult) {
+            if (googleResult.serpFeatures > 0 || (googleResult.topDomains && googleResult.topDomains.length > 0)) {
+                return googleResult;
+            }
+            return krScrapeBingSerp(keyword, lang, country).then(function(bingResult) {
+                if (bingResult.serpFeatures > googleResult.serpFeatures) return bingResult;
+                googleResult.serpFeatures = Math.max(googleResult.serpFeatures, bingResult.serpFeatures);
+                if (googleResult.topDomains.length === 0) googleResult.topDomains = bingResult.topDomains;
+                if (googleResult.topResults.length === 0) googleResult.topResults = bingResult.topResults;
+                if (bingResult.featured) googleResult.featured = true;
+                if (bingResult.knowledgePanel) googleResult.knowledgePanel = true;
+                if (bingResult.shoppingResults) googleResult.shoppingResults = true;
+                if (bingResult.videoCarousel) googleResult.videoCarousel = true;
+                if (bingResult.newsResults) googleResult.newsResults = true;
+                return googleResult;
+            });
+        });
+    }
+
     function krBatchScrapeSerp(keywords, lang, country, onProgress) {
         var serpData = {};
         var toScrape = keywords.slice(0, 20);
@@ -5538,7 +5715,7 @@
             var promises = [];
             for (var i = 0; i < batch.length; i++) {
                 (function(kw) {
-                    promises.push(krScrapeSerp(kw, lang, country).then(function(data) {
+                    promises.push(krScrapeBothSerp(kw, lang, country).then(function(data) {
                         serpData[kw.toLowerCase()] = data;
                         done++;
                         if (onProgress) onProgress(Math.round((done / toScrape.length) * 100));
@@ -7336,10 +7513,12 @@
 
     function krExportCSV(results) {
         if (!results || results.length === 0) return;
-        var headers = ['#', 'Keyword', 'Score', 'Score Level', 'Difficulty', 'KEI', 'Opportunity', 'Intent', 'CPC', 'Trend', 'SERP Features', 'Source'];
+        var headers = ['#', 'Keyword', 'Score', 'Score Level', 'Difficulty', 'KEI', 'Opportunity', 'Intent', 'CPC', 'Trend', 'SERP Features', 'Source', 'Confidence', 'Data Source'];
         var csvRows = [headers.join(',')];
         for (var i = 0; i < results.length; i++) {
             var r = results[i];
+            var conf = r.confidence || 30;
+            var ds = (r.dataSource && r.dataSource.length > 0) ? r.dataSource.join('+') : 'estimated';
             var row = [
                 r.idx,
                 '"' + (r.keyword || '').replace(/"/g, '""') + '"',
@@ -7352,7 +7531,9 @@
                 r.cpc,
                 r.trendDir,
                 r.serpFeatures,
-                r.source
+                r.source,
+                conf,
+                '"' + ds + '"'
             ];
             csvRows.push(row.join(','));
         }
@@ -7632,7 +7813,7 @@
         );
 
         allPromises.push(
-            krScrapeSerp(seed, lang, country).then(function(serp) {
+            krScrapeBothSerp(seed, lang, country).then(function(serp) {
                 serpResults[seed.toLowerCase()] = serp;
                 var seedSugs = serp.paa.concat(serp.related);
                 for (var i = 0; i < seedSugs.length; i++) {
@@ -7690,6 +7871,22 @@
                         kwExpansionCount[yk] = 1;
                     } else if (rawKeywords[yk]) {
                         kwExpansionCount[yk] = (kwExpansionCount[yk] || 0) + 1;
+                    }
+                }
+            }).catch(function() {})
+        );
+
+        allPromises.push(
+            krFetchRedditSuggestions(seed, lang).then(function(redditSuggestions) {
+                for (var i = 0; i < redditSuggestions.length; i++) {
+                    var rk = redditSuggestions[i].toLowerCase();
+                    if (rk.length > 4 && rk.length < 120 && !rawKeywords[rk]) {
+                        rawKeywords[rk] = true;
+                        kwSources[rk] = 'reddit';
+                        kwPosition[rk] = i + 1;
+                        kwExpansionCount[rk] = 1;
+                    } else if (rawKeywords[rk]) {
+                        kwExpansionCount[rk] = (kwExpansionCount[rk] || 0) + 1;
                     }
                 }
             }).catch(function() {})
@@ -9252,12 +9449,14 @@
         var t = currentLang === 'ar' ? translations.ar : translations.en;
         var volLabel = t.kr_volume;
         var rows = [
-            ['Keyword', volLabel, 'Volume Level', t.kr_difficulty, 'KEI', t.kr_intent, t.kr_cpc, 'Trending', 'Source', 'SERP Features', 'PAA Count', 'Related Count', 'Shopping', 'Local Pack', 'Video', 'Seasonality', 'Top Domain']
+            ['Keyword', volLabel, 'Volume Level', t.kr_difficulty, 'KEI', t.kr_intent, t.kr_cpc, 'Trending', 'Source', 'SERP Features', 'PAA Count', 'Related Count', 'Shopping', 'Local Pack', 'Video', 'Seasonality', 'Top Domain', 'Confidence', 'Data Source']
         ];
         for (var i = 0; i < _krResults.length; i++) {
             var d = _krResults[i];
             var topDom = (d.topDomains && d.topDomains.length > 0) ? d.topDomains[0].domain : '';
-            rows.push([d.keyword, d.volume, d.volumeLevel || '', d.difficulty, d.kei || 0, d.intent, d.cpc, d.trending ? 'Yes' : '', d.source || '', d.serpFeatures || 0, (d.paa || []).length, (d.related || []).length, d.shoppingResults ? 'Yes' : '', d.localPack ? 'Yes' : '', d.videoCarousel ? 'Yes' : '', d.seasonality || '', topDom]);
+            var conf = d.confidence || 30;
+            var ds = (d.dataSource && d.dataSource.length > 0) ? d.dataSource.join('+') : 'estimated';
+            rows.push([d.keyword, d.volume, d.volumeLevel || '', d.difficulty, d.kei || 0, d.intent, d.cpc, d.trending ? 'Yes' : '', d.source || '', d.serpFeatures || 0, (d.paa || []).length, (d.related || []).length, d.shoppingResults ? 'Yes' : '', d.localPack ? 'Yes' : '', d.videoCarousel ? 'Yes' : '', d.seasonality || '', topDom, conf + '%', ds]);
         }
         var csv = '';
         for (var i = 0; i < rows.length; i++) {
@@ -9351,6 +9550,12 @@
             addResult('Bing', true, s.length);
         }).catch(function() {
             addResult('Bing', false, 0);
+        }).then(function() {
+            return krFetchRedditSuggestions(testQ, 'en');
+        }).then(function(s) {
+            addResult('Reddit', true, s.length);
+        }).catch(function() {
+            addResult('Reddit', false, 0);
         }).then(function() {
             testEl.style.background = '#064e3b';
             testEl.style.color = '#a7f3d0';
