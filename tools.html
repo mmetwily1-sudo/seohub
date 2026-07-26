@@ -241,33 +241,42 @@
         @media(max-width:480px){.chat-window{width:calc(100% - 16px);right:8px;bottom:90px;max-height:70vh}.seo-tooltip{width:220px;left:auto;right:-20px;transform:none}}
         .lang-toggle{padding:6px 14px;border:2px solid var(--gray-4);border-radius:100px;background:var(--white);font-weight:700;cursor:pointer;font-size:13px;transition:var(--transition);margin-left:8px}
         .lang-toggle:hover{border-color:var(--primary);color:var(--primary)}
-        .kr-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+        .kr-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
         .kr-controls .kr-field{display:flex;flex-direction:column;gap:4px}
-        .kr-controls label{font-size:12px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px}
-        .kr-controls input,.kr-controls select{padding:10px 14px;border:2px solid var(--gray-4);border-radius:12px;font-size:14px;font-family:inherit;outline:none;transition:var(--transition);background:var(--white)}
+        .kr-controls label{font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px}
+        .kr-controls input,.kr-controls select{padding:10px 14px;border:2px solid var(--gray-4);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:var(--transition);background:var(--white)}
         .kr-controls input:focus,.kr-controls select:focus{border-color:var(--primary)}
         .kr-keyword-input{flex:1;min-width:250px}
-        .kr-btn{padding:12px 24px;background:var(--primary);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:var(--transition);white-space:nowrap}
+        .kr-keyword-input input{width:100%;box-sizing:border-box}
+        .kr-btn{padding:10px 20px;background:var(--primary);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:var(--transition);white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
         .kr-btn:hover{background:var(--primary-dark);transform:translateY(-1px)}
         .kr-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .kr-btn-run{padding:12px 28px;font-size:15px;border-radius:12px;box-shadow:0 4px 12px rgba(37,99,235,.3)}
+        .kr-btn-run:hover{box-shadow:0 6px 20px rgba(37,99,235,.4)}
         .kr-btn-export{background:#10b981}
         .kr-btn-export:hover{background:#059669}
         .kr-btn-copy{background:#6366f1}
         .kr-btn-copy:hover{background:#4f46e5}
-        .kr-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
-        .kr-stat{background:var(--gray-5);border-radius:12px;padding:16px;text-align:center;border:1px solid var(--gray-4)}
-        .kr-stat-num{font-size:28px;font-weight:800;color:var(--primary);display:block}
-        .kr-stat-label{font-size:12px;color:var(--gray-2);font-weight:600;text-transform:uppercase;margin-top:4px}
+        .kr-btn-sm{padding:6px 12px;font-size:11px;border-radius:8px}
+        .kr-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:var(--gray-5);border:1px solid var(--gray-4);border-radius:12px;align-items:center}
+        .kr-toolbar-sep{width:1px;height:24px;background:var(--gray-4);margin:0 4px;flex-shrink:0}
+        .kr-toolbar-label{font-size:10px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;margin-right:2px;flex-shrink:0}
+        .kr-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+        .kr-stat{background:var(--gray-5);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--gray-4);transition:var(--transition)}
+        .kr-stat:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 4px 12px rgba(37,99,235,.08)}
+        .kr-stat-num{font-size:26px;font-weight:800;color:var(--primary);display:block}
+        .kr-stat-label{font-size:11px;color:var(--gray-2);font-weight:600;text-transform:uppercase;margin-top:4px;letter-spacing:.3px}
         .kr-progress{width:100%;height:6px;background:var(--gray-4);border-radius:100px;overflow:hidden;margin-bottom:16px;display:none}
         .kr-progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),#8b5cf6);border-radius:100px;transition:width .3s}
         .kr-table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--gray-4)}
         .kr-table{width:100%;border-collapse:collapse;font-size:13px}
-        .kr-table th{background:var(--gray-5);padding:12px 14px;text-align:left;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray-2);border-bottom:2px solid var(--gray-4);cursor:pointer;white-space:nowrap;user-select:none}
+        .kr-table th{background:var(--gray-5);padding:10px 12px;text-align:left;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray-2);border-bottom:2px solid var(--gray-4);cursor:pointer;white-space:nowrap;user-select:none}
         .kr-table th:hover{color:var(--primary)}
         .kr-table th .sort-arrow{margin-left:4px;font-size:10px}
-        .kr-table td{padding:10px 14px;border-bottom:1px solid var(--gray-5);white-space:nowrap}
+        .kr-table td{padding:8px 12px;border-bottom:1px solid var(--gray-5);white-space:nowrap}
         .kr-table tr:hover td{background:var(--gray-5)}
-        .kr-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700}
+        .kr-table tr.selected td{background:rgba(37,99,235,.06)}
+        .kr-badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700}
         .kr-badge-easy{background:#d1fae5;color:#065f46}
         .kr-badge-medium{background:#fef3c7;color:#92400e}
         .kr-badge-hard{background:#fee2e2;color:#991b1b}
@@ -278,69 +287,76 @@
         .kr-badge-trend-up{background:#dcfce7;color:#166534}
         .kr-badge-trend-stable{background:#e0e7ff;color:#3730a3}
         .kr-badge-trend-down{background:#fee2e2;color:#991b1b}
-        .kr-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-        .kr-filter-btn{padding:6px 14px;border:2px solid var(--gray-4);border-radius:100px;background:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:var(--transition)}
+        .kr-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+        .kr-filter-btn{padding:5px 12px;border:2px solid var(--gray-4);border-radius:100px;background:var(--white);font-size:11px;font-weight:600;cursor:pointer;transition:var(--transition)}
         .kr-filter-btn.active,.kr-filter-btn:hover{background:var(--primary);color:white;border-color:var(--primary)}
-        .kr-cluster-box{background:var(--gray-5);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid var(--gray-4)}
-        .kr-cluster-title{font-weight:700;font-size:14px;color:var(--primary);margin-bottom:8px}
-        .kr-cluster-kws{display:flex;flex-wrap:wrap;gap:6px}
-        .kr-cluster-tag{padding:4px 10px;background:var(--white);border:1px solid var(--gray-4);border-radius:100px;font-size:12px}
-        .kr-options{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-        .kr-opt{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500}
-        .kr-opt input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary)}
-        .kr-view-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
-        .kr-view-btn{padding:8px 16px;border:2px solid var(--gray-4);border-radius:10px;background:var(--white);font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition)}
-        .kr-view-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-        .kr-view-btn:hover:not(.active){border-color:var(--primary);color:var(--primary)}
-        .kr-topic-layout{display:grid;grid-template-columns:280px 1fr;gap:16px;min-height:400px}
-        .kr-topic-sidebar{background:var(--gray-5);border:1px solid var(--gray-4);border-radius:12px;padding:12px;max-height:600px;overflow-y:auto}
-        .kr-topic-sidebar-search{width:100%;padding:8px 12px;border:1px solid var(--gray-4);border-radius:8px;font-size:13px;margin-bottom:10px;font-family:inherit}
-        .kr-topic-item{padding:10px 12px;border-radius:8px;cursor:pointer;transition:var(--transition);margin-bottom:2px;display:flex;justify-content:space-between;align-items:center}
+        .kr-cluster-box{background:var(--gray-5);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--gray-4)}
+        .kr-cluster-title{font-weight:700;font-size:13px;color:var(--primary);margin-bottom:6px}
+        .kr-cluster-kws{display:flex;flex-wrap:wrap;gap:5px}
+        .kr-cluster-tag{padding:3px 8px;background:var(--white);border:1px solid var(--gray-4);border-radius:100px;font-size:11px}
+        .kr-options{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;background:var(--white);border:1px solid var(--gray-4);border-radius:10px}
+        .kr-opt{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--gray-1)}
+        .kr-opt input[type=checkbox]{width:15px;height:15px;accent-color:var(--primary)}
+        .kr-view-bar{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap;padding:4px;background:var(--gray-5);border-radius:12px;border:1px solid var(--gray-4)}
+        .kr-view-btn{padding:7px 14px;border:none;border-radius:8px;background:transparent;font-size:12px;font-weight:600;cursor:pointer;transition:var(--transition);color:var(--gray-2)}
+        .kr-view-btn.active{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.2)}
+        .kr-view-btn:hover:not(.active){color:var(--primary);background:var(--white)}
+        .kr-topic-layout{display:grid;grid-template-columns:260px 1fr;gap:14px;min-height:400px}
+        .kr-topic-sidebar{background:var(--gray-5);border:1px solid var(--gray-4);border-radius:12px;padding:10px;max-height:600px;overflow-y:auto}
+        .kr-topic-sidebar-search{width:100%;padding:8px 12px;border:1px solid var(--gray-4);border-radius:8px;font-size:12px;margin-bottom:8px;font-family:inherit}
+        .kr-topic-item{padding:8px 10px;border-radius:8px;cursor:pointer;transition:var(--transition);margin-bottom:2px;display:flex;justify-content:space-between;align-items:center}
         .kr-topic-item:hover{background:var(--white);border:1px solid var(--gray-4)}
         .kr-topic-item.active{background:var(--primary);color:#fff;border:1px solid var(--primary)}
-        .kr-topic-item-name{font-weight:600;font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        .kr-topic-item-count{font-size:11px;background:rgba(0,0,0,.08);padding:2px 8px;border-radius:100px;font-weight:700;margin-left:6px;flex-shrink:0}
+        .kr-topic-item-name{font-weight:600;font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .kr-topic-item-count{font-size:10px;background:rgba(0,0,0,.08);padding:2px 6px;border-radius:100px;font-weight:700;margin-left:6px;flex-shrink:0}
         .kr-topic-item.active .kr-topic-item-count{background:rgba(255,255,255,.25)}
-        .kr-topic-detail{background:var(--white);border:1px solid var(--gray-4);border-radius:12px;padding:20px}
-        .kr-topic-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
-        .kr-topic-title{font-size:20px;font-weight:800;color:var(--primary)}
-        .kr-topic-meta{display:flex;gap:8px;flex-wrap:wrap}
-        .kr-topic-pill{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:700;background:var(--gray-5);border:1px solid var(--gray-4)}
-        .kr-topic-kw-row{display:flex;align-items:center;padding:8px 12px;border-radius:8px;margin-bottom:2px;font-size:13px;transition:var(--transition)}
+        .kr-topic-detail{background:var(--white);border:1px solid var(--gray-4);border-radius:12px;padding:16px}
+        .kr-topic-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+        .kr-topic-title{font-size:18px;font-weight:800;color:var(--primary)}
+        .kr-topic-meta{display:flex;gap:6px;flex-wrap:wrap}
+        .kr-topic-pill{padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;background:var(--gray-5);border:1px solid var(--gray-4)}
+        .kr-topic-kw-row{display:flex;align-items:center;padding:6px 10px;border-radius:6px;margin-bottom:2px;font-size:12px;transition:var(--transition)}
         .kr-topic-kw-row:hover{background:var(--gray-5)}
         .kr-topic-kw-word{flex:1;font-weight:500}
-        .kr-topic-kw-metrics{display:flex;gap:10px;align-items:center;flex-shrink:0}
-        .kr-subtopic-title{font-size:14px;font-weight:700;color:var(--gray-2);margin:16px 0 8px;padding-left:20px;border-left:3px solid var(--primary)}
-        .kr-content-plan{display:grid;gap:12px}
-        .kr-article-card{background:var(--gray-5);border:1px solid var(--gray-4);border-radius:12px;padding:16px;transition:var(--transition)}
+        .kr-topic-kw-metrics{display:flex;gap:8px;align-items:center;flex-shrink:0}
+        .kr-subtopic-title{font-size:13px;font-weight:700;color:var(--gray-2);margin:12px 0 6px;padding-left:16px;border-left:3px solid var(--primary)}
+        .kr-content-plan{display:grid;gap:10px}
+        .kr-article-card{background:var(--gray-5);border:1px solid var(--gray-4);border-radius:10px;padding:14px;transition:var(--transition)}
         .kr-article-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(37,99,235,.08)}
-        .kr-article-type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:inline-block;padding:2px 8px;border-radius:100px}
+        .kr-article-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;display:inline-block;padding:2px 7px;border-radius:100px}
         .kr-article-type.pillar{background:#ede9fe;color:#5b21b6}
         .kr-article-type.supporting{background:#dbeafe;color:#1e40af}
         .kr-article-type.faq{background:#fef3c7;color:#92400e}
         .kr-article-type.howto{background:#d1fae5;color:#065f46}
-        .kr-article-title{font-size:15px;font-weight:700;margin-bottom:4px}
-        .kr-article-desc{font-size:12px;color:var(--gray-1);margin-bottom:8px}
-        .kr-article-kws{display:flex;flex-wrap:wrap;gap:4px}
-        .kr-article-kw-tag{font-size:11px;padding:2px 8px;background:var(--white);border:1px solid var(--gray-4);border-radius:100px}
-        .kr-roadmap-item{display:flex;gap:12px;padding:12px;border:1px solid var(--gray-4);border-radius:10px;margin-bottom:8px;align-items:flex-start}
-        .kr-roadmap-week{background:var(--primary);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;white-space:nowrap;flex-shrink:0}
+        .kr-article-title{font-size:14px;font-weight:700;margin-bottom:3px}
+        .kr-article-desc{font-size:11px;color:var(--gray-1);margin-bottom:6px}
+        .kr-article-kws{display:flex;flex-wrap:wrap;gap:3px}
+        .kr-article-kw-tag{font-size:10px;padding:2px 6px;background:var(--white);border:1px solid var(--gray-4);border-radius:100px}
+        .kr-roadmap-item{display:flex;gap:10px;padding:10px;border:1px solid var(--gray-4);border-radius:8px;margin-bottom:6px;align-items:flex-start}
+        .kr-roadmap-week{background:var(--primary);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0}
         .kr-roadmap-content{flex:1}
-        .kr-roadmap-title{font-weight:700;font-size:14px;margin-bottom:4px}
-        .kr-roadmap-kws{font-size:12px;color:var(--gray-1)}
-        .kr-link-suggestion{background:var(--gray-5);border:1px solid var(--gray-4);border-radius:10px;padding:12px;margin-bottom:8px}
-        .kr-link-from{font-weight:700;color:var(--primary);font-size:13px}
-        .kr-link-arrow{color:var(--gray-1);margin:0 6px}
-        .kr-link-to{font-weight:600;font-size:13px}
-        .kr-link-reason{font-size:12px;color:var(--gray-1);margin-top:4px}
-        .kr-gap-item{display:flex;align-items:center;padding:10px;border:1px dashed var(--gray-4);border-radius:8px;margin-bottom:6px}
-        .kr-gap-icon{margin-right:8px;font-size:16px}
-        .kr-gap-text{font-size:13px;font-weight:500}
-        .kr-coverage-bar{height:12px;background:var(--gray-4);border-radius:100px;overflow:hidden;margin:8px 0}
+        .kr-roadmap-title{font-weight:700;font-size:13px;margin-bottom:3px}
+        .kr-roadmap-kws{font-size:11px;color:var(--gray-1)}
+        .kr-link-suggestion{background:var(--gray-5);border:1px solid var(--gray-4);border-radius:8px;padding:10px;margin-bottom:6px}
+        .kr-link-from{font-weight:700;color:var(--primary);font-size:12px}
+        .kr-link-arrow{color:var(--gray-1);margin:0 5px}
+        .kr-link-to{font-weight:600;font-size:12px}
+        .kr-link-reason{font-size:11px;color:var(--gray-1);margin-top:3px}
+        .kr-gap-item{display:flex;align-items:center;padding:8px;border:1px dashed var(--gray-4);border-radius:6px;margin-bottom:5px}
+        .kr-gap-icon{margin-right:6px;font-size:14px}
+        .kr-gap-text{font-size:12px;font-weight:500}
+        .kr-coverage-bar{height:10px;background:var(--gray-4);border-radius:100px;overflow:hidden;margin:6px 0}
         .kr-coverage-fill{height:100%;border-radius:100px;transition:width .5s}
-        .kr-coverage-score{font-size:28px;font-weight:800}
-        @media(max-width:768px){.kr-topic-layout{grid-template-columns:1fr}.kr-topic-sidebar{max-height:250px}}
-        @media(max-width:600px){.kr-controls{flex-direction:column}.kr-keyword-input{min-width:100%}.kr-stats{grid-template-columns:repeat(2,1fr)}}
+        .kr-coverage-score{font-size:24px;font-weight:800}
+        .kr-advanced-toggle{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--gray-5);border:1px solid var(--gray-4);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--gray-2);transition:var(--transition);margin-bottom:10px}
+        .kr-advanced-toggle:hover{border-color:var(--primary);color:var(--primary)}
+        .kr-advanced-toggle .arrow{transition:transform .2s;font-size:10px}
+        .kr-advanced-toggle.open .arrow{transform:rotate(90deg)}
+        .kr-advanced-body{display:none;padding:12px;background:var(--gray-5);border:1px solid var(--gray-4);border-radius:12px;margin-bottom:14px}
+        .kr-advanced-body.open{display:block}
+        .kr-section-title{font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--gray-4)}
+        @media(max-width:768px){.kr-topic-layout{grid-template-columns:1fr}.kr-topic-sidebar{max-height:200px}.kr-toolbar{flex-direction:column;align-items:stretch}.kr-toolbar-sep{display:none}.kr-toolbar-label{display:none}}
+        @media(max-width:600px){.kr-controls{flex-direction:column}.kr-keyword-input{min-width:100%}.kr-stats{grid-template-columns:repeat(2,1fr)}.kr-view-bar{flex-wrap:wrap}.kr-options{flex-direction:column}}
     </style>
 </head><body>
     <header class="header">
@@ -551,114 +567,120 @@
                 <div class="tool-output" id="crawl-output"><div class="tool-loading"><p data-i18n="load_crawl">Enter your store URL above and click Scan Products to extract all product data</p></div></div>
             </div>
             <div class="tool-panel" id="tab-keyword-research">
-                <h3 style="margin-bottom:4px;">&#128270; <span data-i18n="kr_title">Keyword Research Tool</span></h3>
-                <p style="color:var(--gray-1);margin-bottom:16px;font-size:14px;" data-i18n="kr_desc">Discover high-value keywords using real Google Autocomplete data. Find long-tail keywords, questions, and content ideas.</p>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
+                    <h3 style="margin:0;">&#128270; <span data-i18n="kr_title">Keyword Research Tool</span></h3>
+                    <button class="kr-btn kr-btn-sm" onclick="krShowSettings()" style="background:var(--gray-5);color:var(--gray-1);border:1px solid var(--gray-4);margin-left:auto;" title="API Keys &amp; Settings">&#9881;</button>
+                </div>
+                <p style="color:var(--gray-1);margin-bottom:14px;font-size:13px;" data-i18n="kr_desc">Discover high-value keywords using real Google Autocomplete data. Find long-tail keywords, questions, and content ideas.</p>
+                
                 <div class="kr-controls">
                     <div class="kr-field kr-keyword-input">
-                        <label data-i18n="kr_label_keyword">Seed Keyword</label>
-                        <input type="text" id="kr-seed" placeholder="e.g. seo tools, digital marketing..." data-i18n-ph="kr_ph_keyword" onkeypress="if(event.key==='Enter')runKeywordResearch()">
+                        <input type="text" id="kr-seed" placeholder="&#128270; Enter seed keyword... (e.g. shoes, seo tools, digital marketing)" data-i18n-ph="kr_ph_keyword" onkeypress="if(event.key==='Enter')runKeywordResearch()" style="padding:12px 16px;font-size:15px;border-radius:12px;">
                     </div>
                     <div class="kr-field">
-                        <label data-i18n="kr_label_lang">Language</label>
                         <select id="kr-lang">
-                            <option value="en">English</option>
-                            <option value="ar">&#1593;&#1585;&#1576;&#1610;</option>
-                            <option value="fr">Fran&#231;ais</option>
-                            <option value="es">Espa&#241;ol</option>
-                            <option value="de">Deutsch</option>
-                            <option value="tr">T&#252;rk&#231;e</option>
-                            <option value="hi">&#2361;&#2367;&#2306;&#2346;&#2368;</option>
-                            <option value="id">Bahasa Indonesia</option>
-                            <option value="pt">Portugu&#234;s</option>
-                            <option value="ja">&#26085;&#26412;&#35486;</option>
-                            <option value="zh">&#20013;&#25991;</option>
+                            <option value="en">&#127482; English</option>
+                            <option value="ar" selected>&#127480;&#127462; &#1593;&#1585;&#1576;&#1610;</option>
+                            <option value="fr">&#127467;&#127479; Fran&#231;ais</option>
+                            <option value="es">&#127466;&#127480; Espa&#241;ol</option>
+                            <option value="de">&#127465;&#127466; Deutsch</option>
+                            <option value="tr">&#127481;&#127479; T&#252;rk&#231;e</option>
+                            <option value="hi">&#127470;&#127475; &#2361;&#2367;&#2306;&#2346;&#2368;</option>
+                            <option value="id">&#127470;&#127465; Bahasa Indonesia</option>
+                            <option value="pt">&#127463;&#127479; Portugu&#234;s</option>
+                            <option value="ja">&#127471;&#127477; &#26085;&#26412;&#35486;</option>
+                            <option value="zh">&#127464;&#127475; &#20013;&#25991;</option>
                         </select>
                     </div>
                     <div class="kr-field">
-                        <label data-i18n="kr_label_country">Country</label>
                         <select id="kr-country" onchange="krAutoLang()">
-                            <option value="">All / &#1575;&#1604;&#1603;&#1604;</option>
-                            <option value="SA" selected>&#1575;&#1604;&#1605;&#1605;&#1604;&#1603;&#1609; &#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577; &#1575;&#1604;&#1587;&#1593;&#1608;&#1583;&#1610;&#1577;</option>
-                            <option value="AE">&#1575;&#1604;&#1573;&#1605;&#1575;&#1585;&#1575;&#1578; &#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577; &#1575;&#1604;&#1605;&#1578;&#1581;&#1583;&#1577;</option>
-                            <option value="KW">&#1575;&#1604;&#1603;&#1608;&#1610;&#1578;</option>
-                            <option value="QA">&#1602;&#1591;&#1585;</option>
-                            <option value="BH">&#1575;&#1604;&#1576;&#1581;&#1585;&#1610;&#1606;</option>
-                            <option value="OM">&#1593;&#1605;&#1575;&#1606;</option>
-                            <option value="JO">&#1575;&#1604;&#1571;&#1585;&#1583;&#1606;</option>
-                            <option value="LB">&#1604;&#1576;&#1606;&#1575;&#1606;</option>
-                            <option value="IQ">&#1575;&#1604;&#1593;&#1585;&#1575;&#1602;</option>
-                            <option value="EG">&#1605;&#1589;&#1585;</option>
-                            <option value="MA">&#1575;&#1604;&#1605;&#1594;&#1585;&#1576;</option>
-                            <option value="TN">&#1578;&#1608;&#1606;&#1587;</option>
-                            <option value="DZ">&#1575;&#1604;&#1580;&#1586;&#1575;&#1574;&#1585;</option>
-                            <option value="LY">&#1604;&#1610;&#1576;&#1610;&#1575;</option>
-                            <option value="SD">&#1575;&#1604;&#1587;&#1608;&#1583;&#1575;&#1606;</option>
-                            <option value="PS">&#1601;&#1604;&#1587;&#1591;&#1610;&#1606;</option>
-                            <option value="SY">&#1587;&#1608;&#1585;&#1610;&#1575;</option>
-                            <option value="YE">&#1575;&#1604;&#1610;&#1605;&#1606;</option>
-                            <option value="MR">&#1605;&#1608;&#1585;&#1610;&#1578;&#1575;&#1606;&#1610;&#1575;</option>
-                            <option value="DJ">&#1580;&#1610;&#1576;&#1608;&#1578;&#1610;</option>
-                            <option value="KM">&#1580;&#1586;&#1610;&#1585; &#1575;&#1604;&#1602;&#1605;&#1585;</option>
-                            <option value="SO">&#1575;&#1604;&#1589;&#1608;&#1605;&#1575;&#1604;</option>
-                            <option value="UG">&#1571;&#1608;&#1594;&#1606;&#1583;&#1575;</option>
-                            <option value="US">United States</option>
-                            <option value="GB">United Kingdom</option>
-                            <option value="DE">Germany</option>
-                            <option value="FR">France</option>
-                            <option value="TR">Turkey</option>
+                            <option value="">All</option>
+                            <option value="SA" selected>&#127480;&#127462; &#1575;&#1604;&#1605;&#1605;&#1604;&#1603;&#1609;</option>
+                            <option value="AE">&#127462;&#127466; &#1575;&#1604;&#1573;&#1605;&#1575;&#1585;&#1575;&#1578;</option>
+                            <option value="EG">&#127466;&#127468; &#1605;&#1589;&#1585;</option>
+                            <option value="MA">&#127474;&#127462; &#1575;&#1604;&#1605;&#1594;&#1585;&#1576;</option>
+                            <option value="IQ">&#127470;&#127475; &#1575;&#1604;&#1593;&#1585;&#1575;&#1602;</option>
+                            <option value="JO">&#127471;&#127477; &#1575;&#1604;&#1571;&#1585;&#1583;&#1606;</option>
+                            <option value="LB">&#127472;&#127478; &#1604;&#1576;&#1606;&#1575;&#1606;</option>
+                            <option value="KW">&#127472;&#127477; &#1575;&#1604;&#1603;&#1608;&#1610;&#1578;</option>
+                            <option value="QA">&#127462;&#127466; &#1602;&#1591;&#1585;</option>
+                            <option value="BH">&#127463;&#127473; &#1575;&#1604;&#1576;&#1581;&#1585;&#1610;&#1606;</option>
+                            <option value="OM">&#127462;&#127482; &#1593;&#1605;&#1575;&#1606;</option>
+                            <option value="TN">&#127481;&#127475; &#1578;&#1608;&#1606;&#1587;</option>
+                            <option value="DZ">&#127462;&#127475; &#1575;&#1604;&#1580;&#1586;&#1575;&#1574;&#1585;</option>
+                            <option value="LY">&#127472;&#127478; &#1604;&#1610;&#1576;&#1610;&#1575;</option>
+                            <option value="SD">&#127480;&#127475; &#1575;&#1604;&#1587;&#1608;&#1583;&#1575;&#1606;</option>
+                            <option value="PS">&#127477;&#127479; &#1601;&#1604;&#1587;&#1591;&#1610;&#1606;</option>
+                            <option value="SY">&#127480;&#127475; &#1587;&#1608;&#1585;&#1610;&#1575;</option>
+                            <option value="YE">&#127484;&#127483; &#1575;&#1604;&#1610;&#1605;&#1606;</option>
+                            <option value="US">&#127482;&#127480; United States</option>
+                            <option value="GB">&#127468;&#127463; United Kingdom</option>
+                            <option value="DE">&#127465;&#127466; Germany</option>
+                            <option value="FR">&#127467;&#127479; France</option>
+                            <option value="TR">&#127481;&#127479; Turkey</option>
                         </select>
                     </div>
                     <div class="kr-field">
-                        <label>&nbsp;</label>
-                        <button class="kr-btn" id="kr-run-btn" onclick="runKeywordResearch()" data-i18n="kr_btn_research">&#128270; Research Keywords</button>
+                        <button class="kr-btn kr-btn-run" id="kr-run-btn" onclick="runKeywordResearch()" data-i18n="kr_btn_research">&#128270; Research</button>
                     </div>
                 </div>
+                
                 <div class="kr-options">
-                    <label class="kr-opt"><input type="checkbox" id="kr-opt-az" checked> <span data-i18n="kr_opt_az">A-Z Expansion</span></label>
-                    <label class="kr-opt"><input type="checkbox" id="kr-opt-questions" checked> <span data-i18n="kr_opt_questions">Question Keywords</span></label>
+                    <label class="kr-opt"><input type="checkbox" id="kr-opt-az" checked> <span data-i18n="kr_opt_az">A-Z</span></label>
+                    <label class="kr-opt"><input type="checkbox" id="kr-opt-questions" checked> <span data-i18n="kr_opt_questions">Questions</span></label>
                     <label class="kr-opt"><input type="checkbox" id="kr-opt-prepositions" checked> <span data-i18n="kr_opt_prep">Prepositions</span></label>
                     <label class="kr-opt"><input type="checkbox" id="kr-opt-comparisons" checked> <span data-i18n="kr_opt_compare">Comparisons</span></label>
-                    <button class="kr-btn" id="kr-test-btn" onclick="krTestProxy()" style="background:#6366f1;color:#fff;margin-left:8px;font-size:12px;padding:4px 10px;">&#9889; <span data-i18n="kr_test_proxy">Test Connection</span></button>
-                    <button class="kr-btn" onclick="krRunCompetitorLookup()" style="background:#f59e0b;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#127760; Competitor Lookup</button>
-                    <button class="kr-btn" onclick="krRunDomainGap()" style="background:#8b5cf6;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#9878; Domain Gap</button>
-                    <button class="kr-btn" onclick="krCompareKeywords()" style="background:#d946ef;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#128200; Compare</button>
-                    <button class="kr-btn" onclick="krShowFavorites()" style="background:#f59e0b;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#9733; Favorites</button>
-                    <button class="kr-btn" onclick="krShowPositionTracker()" style="background:#8b5cf6;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#128200; Tracker</button>
-                    <button class="kr-btn" onclick="krShowSerpTracker()" style="background:#10b981;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#128202; SERP Track</button>
-                    <button class="kr-btn" onclick="krShowSettings()" style="background:#475569;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#9881; API Keys</button>
-                    <label class="kr-btn" style="background:#0d9488;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;cursor:pointer;">&#128194; <input type="file" id="kr-import-gkp" accept=".csv" onchange="krImportGKP(this)" style="display:none;"> Import GKP CSV</label>
                 </div>
-                <details style="margin-top:8px;">
-                    <summary style="cursor:pointer;font-size:12px;color:var(--gray-2);font-weight:600;">&#9881; <span data-i18n="kr_bulk_title">Bulk Keywords &amp; Advanced Options</span></summary>
-                    <div style="margin-top:8px;">
-                        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
-                            <button onclick="krLoadEcommerceTemplate('categories')" style="background:#8b5cf6;color:white;border:none;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">&#128193; Categories</button>
-                            <button onclick="krLoadEcommerceTemplate('brands')" style="background:#ec4899;color:white;border:none;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">&#128085; Brands</button>
-                            <button onclick="krLoadEcommerceTemplate('products')" style="background:#f59e0b;color:white;border:none;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">&#128722; Products</button>
-                            <button onclick="krLoadEcommerceTemplate('modifiers')" style="background:#06b6d4;color:white;border:none;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">&#128295; Modifiers</button>
-                            <label style="background:#64748b;color:white;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
-                                &#128194; <input type="file" id="kr-import-file" accept=".txt,.csv" onchange="krImportFromFile(this)" style="display:none;"> Import
-                            </label>
-                            <button onclick="krImportFromClipboard()" style="background:#64748b;color:white;border:none;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">&#128203; Paste</button>
-                        </div>
-                        <label style="font-size:12px;font-weight:600;color:var(--gray-2);display:block;margin-bottom:4px;" data-i18n="kr_bulk_label">Seed Keywords (one per line or comma-separated):</label>
-                        <textarea id="kr-seed-multi" style="width:100%;min-height:80px;max-height:200px;padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-family:monospace;font-size:12px;resize:vertical;background:var(--card-bg);color:var(--text);" placeholder="seo tools&#10;digital marketing&#10;ecommerce seo&#10;..."></textarea>
-                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center;">
-                            <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
-                                <input type="checkbox" id="kr-opt-dryrun"> <span data-i18n="kr_dryrun">Dry Run (simulate only)</span>
-                            </label>
-                            <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
-                                <input type="checkbox" id="kr-opt-skip-existing" checked> <span data-i18n="kr_skip_existing">Skip already researched</span>
-                            </label>
-                            <button onclick="krRunBulkResearch()" style="background:#10b981;color:white;border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">&#128640; <span data-i18n="kr_btn_bulk">Bulk Research</span></button>
-                            <button onclick="krClearResearchHistory()" style="background:#ef4444;color:white;border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">&#128465; <span data-i18n="kr_clear_history">Clear History</span></button>
-                        </div>
+                
+                <div class="kr-toolbar">
+                    <span class="kr-toolbar-label">Analysis</span>
+                    <button class="kr-btn kr-btn-sm" onclick="krRunCompetitorLookup()" style="background:#f59e0b;">&#127760; Competitor</button>
+                    <button class="kr-btn kr-btn-sm" onclick="krRunDomainGap()" style="background:#8b5cf6;">&#9878; Domain Gap</button>
+                    <button class="kr-btn kr-btn-sm" onclick="krCompareKeywords()" style="background:#d946ef;">&#128200; Compare</button>
+                    <div class="kr-toolbar-sep"></div>
+                    <span class="kr-toolbar-label">Track</span>
+                    <button class="kr-btn kr-btn-sm" onclick="krShowFavorites()" style="background:#f59e0b;">&#9733; Favorites</button>
+                    <button class="kr-btn kr-btn-sm" onclick="krShowPositionTracker()" style="background:#8b5cf6;">&#128200; Position</button>
+                    <button class="kr-btn kr-btn-sm" onclick="krShowSerpTracker()" style="background:#10b981;">&#128202; SERP</button>
+                    <div class="kr-toolbar-sep"></div>
+                    <span class="kr-toolbar-label">Data</span>
+                    <button class="kr-btn kr-btn-sm" id="kr-test-btn" onclick="krTestProxy()" style="background:#6366f1;">&#9889; Test</button>
+                    <label class="kr-btn kr-btn-sm" style="background:#0d9488;cursor:pointer;">&#128194; <input type="file" id="kr-import-gkp" accept=".csv" onchange="krImportGKP(this)" style="display:none;"> GKP CSV</label>
+                </div>
+                
+                <div class="kr-advanced-toggle" id="kr-adv-toggle" onclick="krToggleAdvanced()">
+                    <span class="arrow">&#9654;</span>
+                    <span data-i18n="kr_bulk_title">Bulk Keywords &amp; Advanced Options</span>
+                    <span style="margin-left:auto;font-size:11px;color:var(--gray-2);">Click to expand</span>
+                </div>
+                <div class="kr-advanced-body" id="kr-adv-body">
+                    <div class="kr-section-title">E-commerce Templates</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">
+                        <button onclick="krLoadEcommerceTemplate('categories')" class="kr-btn kr-btn-sm" style="background:#8b5cf6;">&#128193; Categories</button>
+                        <button onclick="krLoadEcommerceTemplate('brands')" class="kr-btn kr-btn-sm" style="background:#ec4899;">&#128085; Brands</button>
+                        <button onclick="krLoadEcommerceTemplate('products')" class="kr-btn kr-btn-sm" style="background:#f59e0b;">&#128722; Products</button>
+                        <button onclick="krLoadEcommerceTemplate('modifiers')" class="kr-btn kr-btn-sm" style="background:#06b6d4;">&#128295; Modifiers</button>
+                        <label class="kr-btn kr-btn-sm" style="background:#64748b;cursor:pointer;">&#128194; <input type="file" id="kr-import-file" accept=".txt,.csv" onchange="krImportFromFile(this)" style="display:none;"> Import</label>
+                        <button onclick="krImportFromClipboard()" class="kr-btn kr-btn-sm" style="background:#64748b;">&#128203; Paste</button>
                     </div>
-                </details>
+                    <div class="kr-section-title">Bulk Research</div>
+                    <textarea id="kr-seed-multi" style="width:100%;min-height:70px;max-height:180px;padding:8px 12px;border:1px solid var(--gray-4);border-radius:8px;font-family:monospace;font-size:12px;resize:vertical;background:var(--white);color:var(--text);margin-bottom:8px;" placeholder="seo tools&#10;digital marketing&#10;ecommerce seo&#10;..."></textarea>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;font-weight:600;">
+                            <input type="checkbox" id="kr-opt-dryrun"> <span data-i18n="kr_dryrun">Dry Run</span>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;font-weight:600;">
+                            <input type="checkbox" id="kr-opt-skip-existing" checked> <span data-i18n="kr_skip_existing">Skip existing</span>
+                        </label>
+                        <button onclick="krRunBulkResearch()" class="kr-btn kr-btn-sm" style="background:#10b981;">&#128640; <span data-i18n="kr_btn_bulk">Bulk Research</span></button>
+                        <button onclick="krClearResearchHistory()" class="kr-btn kr-btn-sm" style="background:#ef4444;">&#128465; <span data-i18n="kr_clear_history">Clear History</span></button>
+                    </div>
+                </div>
+                
                 <div class="kr-progress" id="kr-progress"><div class="kr-progress-bar" id="kr-progress-bar" style="width:0%"></div></div>
-                <div id="kr-competitor-output" style="display:none;margin-bottom:16px;"></div>
-                <div id="kr-domain-gap-output" style="display:none;margin-bottom:16px;"></div>
-                <div id="kr-favorites-output" style="display:none;margin-bottom:16px;"></div>
+                <div id="kr-competitor-output" style="display:none;margin-bottom:12px;"></div>
+                <div id="kr-domain-gap-output" style="display:none;margin-bottom:12px;"></div>
+                <div id="kr-favorites-output" style="display:none;margin-bottom:12px;"></div>
                 <div id="kr-view-tabs" style="display:none;"></div>
                 <div class="tool-output" id="kr-output"><div class="tool-loading"><p data-i18n="kr_loading">Enter a seed keyword above and click Research Keywords</p></div></div>
                 <div id="kr-topic-view" style="display:none;"></div>
@@ -9498,6 +9520,13 @@
             document.body.removeChild(ta);
             alert(currentLang === 'ar' ? '\u062a\u0645 \u0627\u0644\u0646\u0633\u062e \u0628\u0646\u062c\u0627\u062d!' : 'Copied to clipboard!');
         }
+    }
+
+    function krToggleAdvanced() {
+        var toggle = document.getElementById('kr-adv-toggle');
+        var body = document.getElementById('kr-adv-body');
+        toggle.classList.toggle('open');
+        body.classList.toggle('open');
     }
 
     function krAutoLang() {
