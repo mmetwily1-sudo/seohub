@@ -5613,7 +5613,7 @@
         }
         var transEn = ['buy', 'price', 'cheap', 'deal', 'discount', 'order', 'shop', 'subscribe', 'purchase', 'free shipping', 'cod', 'add to cart'];
         for (var i = 0; i < transEn.length; i++) { if (lower.indexOf(transEn[i]) !== -1) s.transactional += 4; }
-        var transAr = ['\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u062e\u0635\u0645', '\u0637\u0644\u0628', '\u062a\u0633\u0648\u0642', '\u0627\u0634\u062a\u0631\u064a', '\u062a\u062e\u0635\u064a\u0635', '\u0645\u062a\u0646\u0627\u0632\u0644', '\u0634\u0627\u0645\u0644 \u0627\u0644\u0634\u062d\u0646'];
+        var transAr = ['\u0644\u0644\u0628\u064a\u0639', '\u0644\u0644\u0628\u064a\u0639\u060c', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u062e\u0635\u0645', '\u0637\u0644\u0628', '\u062a\u0633\u0648\u0642', '\u0627\u0634\u062a\u0631\u064a', '\u062a\u062e\u0635\u064a\u0635', '\u0645\u062a\u0646\u0627\u0632\u0644', '\u0634\u0627\u0645\u0644 \u0627\u0644\u0634\u062d\u0646', '\u0627\u0634\u062a\u0631\u0627\u0643', '\u062d\u0638\u0631', '\u0628\u064a\u0639 \u0645\u0628\u0627\u0634\u0631', '\u0643\u0645 \u0627\u0644\u0633\u0639\u0631', '\u0627\u0644\u0633\u0639\u0631 \u0627\u0644\u062d\u0627\u0644\u064a', '\u0627\u0633\u0639\u0631', '\u0645\u0639\u0631\u0648\u0636 \u0627\u0644\u0633\u0639\u0631'];
         for (var i = 0; i < transAr.length; i++) { if (lower.indexOf(transAr[i]) !== -1) s.transactional += 4; }
         var commEn = ['best', 'top', 'review', 'comparison', 'vs', 'alternative', 'rating', 'recommended', 'cheapest', 'most popular', 'affordable', 'premium'];
         for (var i = 0; i < commEn.length; i++) { if (lower.indexOf(commEn[i]) !== -1) s.commercial += 3; }
@@ -5628,12 +5628,12 @@
         var navAr = ['\u062a\u0633\u062c\u064a\u0644', '\u0645\u0648\u0642\u0639 \u0631\u0633\u0645\u064a', '\u062a\u0637\u0628\u064a\u0642', '\u062a\u062d\u0645\u064a\u0644', '\u062a\u0648\u0627\u0635\u0644', '\u062e\u062f\u0645\u0629 \u0639\u0645\u0644\u0627\u0621'];
         for (var i = 0; i < navAr.length; i++) { if (lower.indexOf(navAr[i]) !== -1) s.navigational += 5; }
         if (isArabic) {
-            var arabicBrands = ['\u0643\u0648\u062a\u0634\u064a', '\u0646\u0627\u064a\u0643', '\u0627\u062f\u064a\u062f\u0627\u0633', '\u0633\u0627\u0645\u0633\u0648\u0646\u063a', '\u0627\u0628\u0644', '\u0632\u0627\u0631\u0627', '\u062a\u0648\u0645\u064a', '\u062a\u0648\u0645\u064a \u0647\u064a\u0644\u0641\u064a\u063a\u0631'];
+            var arabicBrands = ['\u0643\u0648\u062a\u0634\u064a', '\u0646\u0627\u064a\u0643', '\u0627\u062f\u064a\u062f\u0627\u0633', '\u0633\u0627\u0645\u0633\u0648\u0646\u063a', '\u0627\u0628\u0644', '\u0632\u0627\u0631\u0627', '\u062a\u0648\u0645\u064a', '\u062a\u0648\u0645\u064a \u0647\u064a\u0644\u0641\u064a\u063a\u0631', '\u0634\u0627\u0648\u0645\u064a', '\u062f\u0648\u0643\u0627\u062a\u064a', '\u0633\u0648\u0632\u0648\u0643\u064a', '\u0647\u0627\u0631\u0644\u064a', '\u0641\u064a\u0633\u0628\u0627', '\u0642\u0644\u0628', '\u0634\u0627\u064a\u0646\u0643', '\u062c\u0648\u0644\u062f \u0648\u064a\u0646\u0642', '\u062a\u0631\u0627\u0646\u0633', '\u0633\u0643\u064a\u062f', '\u064a\u0648\u0646\u062f\u0627\u064a', '\u0643\u064a\u0627', '\u0641\u0648\u0631\u062f', '\u0628\u064a\u0645\u0648', '\u0645\u0633\u064a\u0631\u0633\u064a', '\u0644\u064a\u0641\u062a\u0631\u064a', '\u062d\u0648\u0646\u062f\u0627\u064a'];
             var hasBrand = false;
             for (var b = 0; b < arabicBrands.length; b++) {
                 if (lower.indexOf(arabicBrands[b]) !== -1) { hasBrand = true; break; }
             }
-            var productCats = ['\u062d\u0630\u0627\u0621', '\u0634\u0646\u0637\u0629', '\u0645\u0644\u0627\u0628\u0633', '\u0633\u0627\u0639\u0629', '\u062a\u064a\u0634\u0631\u062a', '\u0628\u0646\u0637\u0644\u0648\u0646', '\u062c\u0627\u0643\u064a\u062a', '\u0641\u0633\u062a\u0627\u0646', '\u0646\u0638\u0627\u0631\u0629', '\u0633\u0645\u0627\u0639\u0629', '\u0647\u0627\u062a\u0641', '\u0644\u0627\u0628\u062a\u0648\u0628', '\u062a\u0627\u0628\u0644\u062a'];
+            var productCats = ['\u062d\u0630\u0627\u0621', '\u0634\u0646\u0637\u0629', '\u0645\u0644\u0627\u0628\u0633', '\u0633\u0627\u0639\u0629', '\u062a\u064a\u0634\u0631\u062a', '\u0628\u0646\u0637\u0644\u0648\u0646', '\u062c\u0627\u0643\u064a\u062a', '\u0641\u0633\u062a\u0627\u0646', '\u0646\u0638\u0627\u0631\u0629', '\u0633\u0645\u0627\u0639\u0629', '\u0647\u0627\u062a\u0641', '\u0644\u0627\u0628\u062a\u0648\u0628', '\u062a\u0627\u0628\u0644\u062a', '\u062f\u0631\u0627\u062c\u0629', '\u062f\u0631\u0627\u062c\u0627\u062a', '\u0645\u062c\u0648\u0647\u0631\u0627\u062a', '\u0633\u0643\u0648\u062a\u0631'];
             var hasProduct = false;
             for (var p = 0; p < productCats.length; p++) {
                 if (lower.indexOf(productCats[p]) !== -1) { hasProduct = true; break; }
@@ -5657,66 +5657,74 @@
     }
 
     function krEstimateVolumeV3(keyword, position, sourceType, expansionCount, serpData) {
-        var score = 20;
+        var score = 10;
         var wc = keyword.split(/\s+/).length;
         var lower = keyword.toLowerCase();
-        if (expansionCount && expansionCount >= 5) score += 22;
-        else if (expansionCount && expansionCount >= 3) score += 15;
-        else if (expansionCount && expansionCount >= 2) score += 8;
-        else if (expansionCount >= 1) score += 3;
-        if (position <= 2) score += 30;
-        else if (position <= 4) score += 22;
-        else if (position <= 6) score += 15;
-        else if (position <= 10) score += 8;
-        else if (position <= 15) score += 3;
-        if (sourceType === 'google-autocomplete') score += 15;
-        else if (sourceType === 'serp-features') score += 18;
-        else if (sourceType === 'youtube') score += 12;
-        else if (sourceType === 'wikipedia') score += 6;
-        else if (sourceType === 'template') score -= 5;
-        else if (sourceType === 'local') score -= 10;
-        if (wc === 1) score += 15;
-        else if (wc === 2) score += 8;
+        if (expansionCount && expansionCount >= 5) score += 10;
+        else if (expansionCount && expansionCount >= 3) score += 7;
+        else if (expansionCount && expansionCount >= 2) score += 4;
+        else if (expansionCount >= 1) score += 2;
+        if (position <= 2) score += 15;
+        else if (position <= 4) score += 10;
+        else if (position <= 6) score += 6;
+        else if (position <= 10) score += 3;
+        else if (position <= 15) score += 1;
+        if (sourceType === 'google-autocomplete') score += 8;
+        else if (sourceType === 'serp-features') score += 10;
+        else if (sourceType === 'youtube') score += 6;
+        else if (sourceType === 'wikipedia') score += 3;
+        else if (sourceType === 'template') score -= 3;
+        else if (sourceType === 'local') score -= 5;
+        if (wc === 1) score += 10;
+        else if (wc === 2) score += 5;
         else if (wc === 3) score += 0;
-        else if (wc === 4) score -= 5;
-        else score -= 10;
+        else if (wc === 4) score -= 3;
+        else score -= 6;
         if (serpData) {
             var topCount = serpData.organicCount || serpData.resultCount || 0;
-            if (topCount >= 8) score += 8;
-            else if (topCount >= 5) score += 4;
+            if (topCount >= 8) score += 5;
+            else if (topCount >= 5) score += 3;
             var paaCount = serpData.paa ? serpData.paa.length : 0;
-            if (paaCount >= 4) score += 6;
-            else if (paaCount >= 2) score += 3;
+            if (paaCount >= 4) score += 4;
+            else if (paaCount >= 2) score += 2;
             var relCount = serpData.related ? serpData.related.length : 0;
-            if (relCount >= 5) score += 4;
-            if (serpData.shoppingResults) score += 6;
-            if (serpData.videoCarousel) score += 4;
-            if (serpData.newsResults) score += 5;
-            if (serpData.featured) score += 3;
+            if (relCount >= 5) score += 3;
+            if (serpData.shoppingResults) score += 4;
+            if (serpData.videoCarousel) score += 3;
+            if (serpData.newsResults) score += 3;
+            if (serpData.featured) score += 2;
         }
         var highIntent = ['buy', 'price', 'cost', 'deal', 'discount', 'order', 'shop', '\u0634\u0631\u0627\u0621', '\u0633\u0639\u0631', '\u062a\u062e\u0635\u064a\u0635'];
         for (var i = 0; i < highIntent.length; i++) {
-            if (lower.indexOf(highIntent[i]) !== -1) { score += 5; break; }
+            if (lower.indexOf(highIntent[i]) !== -1) { score += 3; break; }
         }
         var seasonal = ['\u0627\u0644\u0639\u064a\u062f', '\u0631\u0645\u0636\u0627\u0646', '\u0627\u0644\u0645\u062a\u0628\u0648\u0639\u0627\u062a', '\u0627\u0644\u0639\u0637\u0631', '\u0627\u0644\u0639\u0645\u0644', '\u0627\u0644\u062a\u0642\u0636\u064a\u062d', '\u0627\u0644\u062f\u0648\u0633\u0631\u064a'];
         for (var si = 0; si < seasonal.length; si++) {
-            if (lower.indexOf(seasonal[si]) !== -1) { score += 4; break; }
+            if (lower.indexOf(seasonal[si]) !== -1) { score += 2; break; }
         }
-        score = Math.max(2, Math.min(98, score));
+        score = Math.max(2, Math.min(75, score));
         var hash = 0;
         for (var h = 0; h < keyword.length; h++) {
             hash = ((hash << 5) - hash) + keyword.charCodeAt(h);
             hash = hash & hash;
         }
-        var variation = 1 + (Math.abs(hash) % 25) / 100;
-        var volume = Math.round(Math.pow(10, score / 20) * variation);
-        if (volume < 10) volume = 10 + Math.abs(hash) % 40;
+        var variation = 1 + (Math.abs(hash) % 20) / 100;
+        var volume;
+        if (score >= 65) volume = 2000 + Math.abs(hash) % 3000;
+        else if (score >= 55) volume = 1000 + Math.abs(hash) % 1500;
+        else if (score >= 45) volume = 400 + Math.abs(hash) % 600;
+        else if (score >= 38) volume = 150 + Math.abs(hash) % 250;
+        else if (score >= 30) volume = 50 + Math.abs(hash) % 100;
+        else if (score >= 22) volume = 20 + Math.abs(hash) % 40;
+        else volume = 5 + Math.abs(hash) % 20;
+        volume = Math.round(volume * variation);
+        if (wc >= 5 && volume > 500) volume = Math.floor(volume * 0.3);
         if (volume > 50000) volume = 30000 + Math.abs(hash) % 20000;
         var level = 'very-low';
-        if (volume >= 10000) level = 'very-high';
-        else if (volume >= 3000) level = 'high';
-        else if (volume >= 500) level = 'medium';
-        else if (volume >= 100) level = 'low';
+        if (volume >= 5000) level = 'very-high';
+        else if (volume >= 1500) level = 'high';
+        else if (volume >= 300) level = 'medium';
+        else if (volume >= 50) level = 'low';
         return { volume: String(volume), level: level };
     }
 
@@ -7338,7 +7346,9 @@
             '\u0645\u0639\u062a\u0627\u0628\u0639\u0629', '\u0645\u0639\u062a\u0627\u0628\u0639\u062a\u064a\u0646',
             '\u0645\u0639\u062a\u0627\u0628\u0639', '\u0645\u0639\u062a\u0627\u0628\u0639\u062a\u0646\u0627',
             '\u0645\u0639\u0637\u0628\u0639', '\u0645\u0639\u0637\u0628\u0639\u0629',
-            '\u0645\u0639\u0637\u0628\u0639\u064a\u0646', '\u0645\u0639\u0637\u0628\u0639\u062a\u064a\u0646'
+            '\u0645\u0639\u0637\u0628\u0639\u064a\u0646', '\u0645\u0639\u0637\u0628\u0639\u062a\u064a\u0646',
+            '\u0648\u0627\u062e\u0630 \u0643\u0644', '\u0648\u0633\u064a\u0627\u0631\u0647', '\u0648\u062d\u0643\u0627\u064a\u0629',
+            '\u0648\u064a\u0645\u0627\u0646', '\u0648\u0633\u0643\u064a\u0646', '\u0648\u062c\u064a\u0631\u064a\u062a'
         ];
         for (var b = 0; b < brokenPhrases.length; b++) {
             if (kw.indexOf(brokenPhrases[b]) !== -1) return true;
@@ -7479,7 +7489,37 @@
             '\u0644\u0644\u0627\u0637\u0641\u0627\u0644': 1, '\u0644\u0644\u0643\u0628\u0627\u0631': 1,
             '\u0644\u0644\u0646\u0633\u0627\u0621': 1, '\u0644\u0644\u0631\u062c\u0627\u0644': 1,
             '\u0645\u0635\u0631': 1, '\u0627\u0644\u0642\u062f\u0645': 1, '\u0627\u0644\u062c\u0627\u0645\u0639\u0629': 1, '\u0627\u0644\u0645\u062f\u0631\u0633\u0629': 1,
-            '\u0645\u0648\u062c\u0648\u062f': 1, '\u0639\u0627\u0644\u064a': 1, '\u0639\u0646\u0635\u0631\u064a': 1
+            '\u0645\u0648\u062c\u0648\u062f': 1, '\u0639\u0627\u0644\u064a': 1, '\u0639\u0646\u0635\u0631\u064a': 1,
+            '\u062c\u0628\u0644\u064a\u0629': 1, '\u0647\u0648\u0627\u0626\u064a\u0629': 1, '\u0643\u0647\u0631\u0628\u0627\u0626\u064a\u0629': 1,
+            '\u0646\u0627\u0631\u064a\u0629': 1, '\u0635\u062d\u0631\u0627\u0648\u064a\u0629': 1, '\u0642\u0641\u0627\u0632': 1,
+            '\u0635\u063a\u064a\u0631\u0629': 1, '\u0643\u0628\u064a\u0631\u0629': 1, '\u0645\u062a\u0648\u0633\u0637\u0629': 1,
+            '\u062d\u0645\u0631\u0627\u0621': 1, '\u0632\u0631\u0642\u0627\u0621': 1, '\u0628\u064a\u0636\u0627\u0621': 1, '\u0633\u0648\u062f\u0627\u0621': 1, '\u062e\u0636\u0631\u0627\u0621': 1,
+            '\u0630\u0647\u0628\u064a\u0629': 1, '\u0630\u0647\u0628\u064a\u0647': 1, '\u0630\u0647\u0628\u064a\u0627\u062a': 1,
+            '\u0633\u0628\u0627\u0642': 1, '\u0630\u0643\u064a\u0629': 1, '\u0639\u0627\u062f\u064a\u0629': 1,
+            '\u062c\u062f\u064a\u062f\u0629': 1, '\u0642\u062f\u064a\u0645\u0629': 1, '\u0642\u0627\u0628\u0644\u0629': 1,
+            '\u0634\u062d\u0646': 1, '\u062b\u0644\u0627\u062b': 1, '\u0639\u062c\u0644\u0627\u062a': 1, '\u0639\u062c\u0644\u0629': 1,
+            '\u0644\u0644\u0627\u0637\u0641\u0627\u0644': 1, '\u0644\u0643\u0628\u0627\u0631': 1,
+            '\u0644\u0644\u062c\u0631\u064a': 1, '\u0644\u0644\u0645\u0634\u064a': 1,
+            '\u062c\u0631\u0627\u0641\u0644': 1, '\u0643\u0648\u0631\u064a\u062a': 1, '\u0633\u0628\u0627\u064a\u062f\u0631': 1,
+            '\u0641\u064a\u0648\u062c\u0646': 1, '\u0641\u064a\u0644\u0627\u0631\u064a': 1, '\u0628\u0648\u0631\u0634': 1,
+            '\u0647\u0627\u0631\u0644\u064a': 1, '\u0632\u0648\u0646\u062a\u0633': 1, '\u0633\u0648\u0632\u0648\u0643\u064a': 1,
+            '\u062f\u0648\u0643\u0627\u062a\u064a': 1, '\u0641\u064a\u0633\u0628\u0627': 1, '\u0634\u064a\u0645\u0627\u0646\u0648': 1,
+            '\u0634\u0627\u0628\u0643': 1, '\u0634\u0627\u062f\u0648': 1, '\u0634\u0627\u0646\u0637': 1,
+            '\u0635\u0648\u0631\u0648\u0646': 1, '\u0632\u0627\u0631\u0639\u0629': 1, '\u0631\u064a\u0641\u0648': 1, '\u0641\u0648\u0632': 1, '\u0641\u0648\u0646\u064a\u0643\u0633': 1,
+            '\u0642\u0648\u0644\u062f': 1, '\u0648\u064a\u0646\u0642': 1, '\u0633\u0648\u0644\u0648\u0646': 1,
+            '\u0634\u0627\u0631\u0645\u0643\u0633': 1, '\u0634\u0647\u0627\u0628': 1, '\u0634\u0627\u0637\u0631': 1,
+            '\u0639\u0627\u062f\u064a\u0629': 1, '\u0639\u0633\u0643\u0631\u064a\u0629': 1, '\u0639\u0627\u0626\u0644\u064a\u0629': 1, '\u0639\u064a\u0635\u0628\u064a\u0629': 1,
+            '\u063a\u0648\u0644\u062f\u0648\u064a\u0646': 1, '\u062c\u0627\u0648\u0627': 1, '\u062c\u0627\u0644\u0643\u0633\u064a': 1, '\u062c\u0627\u062c\u0631': 1,
+            '\u0641\u0631\u0627\u0634\u0629': 1, '\u0641\u0648\u062c\u064a': 1, '\u0641\u0648\u0631\u062f': 1, '\u0641\u064a\u0631\u0627\u0631\u064a': 1,
+            '\u0642\u0644\u0628': 1, '\u0633\u0643\u0648\u062a\u0631': 1, '\u0633\u0628\u0627\u064a\u0643': 1,
+            '\u0645\u0646\u0632\u0644\u064a\u0629': 1, '\u0634\u0645\u0639\u064a\u0629': 1, '\u0639\u0627\u0635\u0641\u0629': 1,
+            '\u0633\u0639\u0631': 1, '\u062e\u0635\u0645': 1, '\u0637\u0644\u0628': 1, '\u0634\u0631\u0627\u0621': 1, '\u062a\u0633\u0648\u0642': 1,
+            '\u0627\u0641\u0636\u0644': 1, '\u0631\u062e\u064a\u0635': 1, '\u0645\u0631\u062c\u0639\u0627\u062a': 1, '\u0645\u0639\u0627\u064a\u0646\u0629': 1,
+            '\u062e\u0631\u0636': 1, '\u062c\u0644\u062f': 1, '\u0642\u0645\u0627\u0634': 1, '\u0645\u0639\u062f\u0646': 1, '\u0643\u062a\u0627\u0646': 1,
+            '\u0645\u0633\u0644\u0633\u0644': 1, '\u0645\u0631\u0643\u0632': 1, '\u0645\u062c\u0644\u0629': 1, '\u062c\u062f\u0631': 1, '\u0646\u0648\u0631': 1,
+            '\u062a\u0642\u0636\u064a\u062d': 1, '\u0623\u0639\u0645\u0627\u0644': 1, '\u0645\u0628\u064a\u0639': 1, '\u062a\u0643\u0644\u064a\u0641': 1,
+            '\u0633\u0644\u0633\u0644': 1, '\u0630\u0628\u0627\u0628\u0629': 1, '\u0630\u0643\u064a': 1,
+            '\u0639\u0644\u0627\u062c': 1, '\u0644\u064a\u0633\u0627\u0631': 1, '\u062c\u064a\u0631': 1, '\u0632\u0646': 1
         };
         var noiseWords = {
             'ronaldo': 1, 'messi': 1, 'neymar': 1, 'mbappe': 1, 'salah': 1, 'beckham': 1,
@@ -7495,7 +7535,13 @@
             '\u0645\u0627\u064a\u0646\u0643\u0631\u0641\u062a': 1, '\u0631\u0648\u0628\u0644\u0648\u0643\u0633': 1,
             '\u0646\u0627\u0631\u062a\u0648': 1, '\u0627\u064a\u062a\u0627\u0634\u064a': 1, '\u0633\u0627\u0643\u0648\u0631\u0627': 1,
             'volkswagen': 1, 'toyota': 1, 'honda': 1, 'nissan': 1, 'hyundai': 1, 'ford': 1,
-            'mercedes': 1, 'bmw': 1, 'audi': 1, 'lexus': 1, 'porsche': 1
+            'mercedes': 1, 'bmw': 1, 'audi': 1, 'lexus': 1, 'porsche': 1,
+            '\u0627\u0644\u0634\u064a\u0647\u0627\u0646\u064a': 1, '\u0627\u0644\u0634\u064a\u0647\u0627\u0646\u064a\u0629': 1, '\u0628\u0646 \u0627\u0628\u064a \u0637\u0627\u0644\u0628': 1,
+            '\u0635\u0628\u0627\u064a\u062f\u0631 \u0645\u0627\u0646': 1, '\u0635\u0628\u0627\u064a\u062f\u0631': 1,
+            '\u062f\u064a\u0627\u0646\u0627 \u0648\u0631\u0645\u0627': 1, '\u0633\u064a\u062f\u0646\u0627 \u0627\u062f\u0645': 1,
+            '\u062d\u0645\u0648\u062f\u064a': 1, '\u0648\u064a\u0645\u0627': 1, '\u0648\u0643\u0633\u0627\u0646\u0629': 1,
+            '\u0634\u064a\u0631\u064a\u0646': 1, '\u062a\u0648\u0645\u0627': 1, '\u062c\u064a\u0631\u064a\u062a': 1, '\u062a\u0648\u0645\u0627\u0648\u0647\u0648\u0643': 1,
+            '\u0644\u0625\u062e\u0630 \u0643\u0644 \u0627\u0644\u0633\u0641\u064a\u0646\u0629': 1, '\u0628\u062f\u0648\u0646': 1
         };
         var productScore = 0;
         var noiseScore = 0;
@@ -7507,7 +7553,8 @@
         }
         if (noiseScore > 0 && noiseScore >= productScore) return false;
         if (productScore > 0) return true;
-        return true;
+        if (words.length === 1 && words[0].length <= 4) return false;
+        return false;
     }
 
     function krClusterKeywords(keywords) {
