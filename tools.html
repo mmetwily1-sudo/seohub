@@ -625,6 +625,8 @@
                     <button class="kr-btn" onclick="krShowFavorites()" style="background:#f59e0b;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#9733; Favorites</button>
                     <button class="kr-btn" onclick="krShowPositionTracker()" style="background:#8b5cf6;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#128200; Tracker</button>
                     <button class="kr-btn" onclick="krShowSerpTracker()" style="background:#10b981;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#128202; SERP Track</button>
+                    <button class="kr-btn" onclick="krShowSettings()" style="background:#475569;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;">&#9881; API Keys</button>
+                    <label class="kr-btn" style="background:#0d9488;color:#fff;margin-left:4px;font-size:12px;padding:4px 10px;cursor:pointer;">&#128194; <input type="file" id="kr-import-gkp" accept=".csv" onchange="krImportGKP(this)" style="display:none;"> Import GKP CSV</label>
                 </div>
                 <details style="margin-top:8px;">
                     <summary style="cursor:pointer;font-size:12px;color:var(--gray-2);font-weight:600;">&#9881; <span data-i18n="kr_bulk_title">Bulk Keywords &amp; Advanced Options</span></summary>
@@ -4725,6 +4727,366 @@
     var _googleBlocked = false;
     var _fetchJSONBlocked = {};
 
+    // ==============================
+    // SETTINGS & API KEYS
+    // ==============================
+    function krGetSettings() {
+        try { return JSON.parse(localStorage.getItem('seohub_api_settings') || '{}'); } catch(e) { return {}; }
+    }
+    function krSaveSettings(s) {
+        try { localStorage.setItem('seohub_api_settings', JSON.stringify(s)); } catch(e) {}
+    }
+    function krGetGKPData() {
+        try { return JSON.parse(localStorage.getItem('seohub_gkp_data') || '{}'); } catch(e) { return {}; }
+    }
+    function krSaveGKPData(d) {
+        try { localStorage.setItem('seohub_gkp_data', JSON.stringify(d)); } catch(e) {}
+    }
+    function krShowSettings() {
+        var s = krGetSettings();
+        var existing = document.getElementById('kr-settings-modal');
+        if (existing) { existing.style.display = existing.style.display === 'none' ? 'flex' : 'none'; return; }
+        var modal = document.createElement('div');
+        modal.id = 'kr-settings-modal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+        var gkpData = krGetGKPData();
+        var gkpStatus = gkpData.keywords ? Object.keys(gkpData.keywords).length + ' keywords loaded' : 'No data imported';
+        var html = '<div style="background:white;border-radius:16px;padding:24px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
+        html += '<h3 style="margin:0;">&#9881; API Keys &amp; Data Import</h3>';
+        html += '<button onclick="this.closest(\'#kr-settings-modal\').style.display=\'none\'" style="background:none;border:none;font-size:20px;cursor:pointer;">&times;</button>';
+        html += '</div>';
+        html += '<div style="background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:16px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 8px;color:#166534;">&#128203; Google Keyword Planner CSV Import</h4>';
+        html += '<p style="margin:0 0 8px;font-size:13px;color:#3f6212;">Export CSV from Google Keyword Planner &rarr; Import here for <strong>100% accurate</strong> volume, CPC &amp; competition data.</p>';
+        html += '<p style="margin:0 0 8px;font-size:12px;color:#3f6212;"><strong>Status:</strong> ' + gkpStatus + '</p>';
+        html += '<input type="file" id="kr-settings-csv" accept=".csv" onchange="krImportGKP(this)" style="display:none;">';
+        html += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+        html += '<button onclick="document.getElementById(\'kr-settings-csv\').click()" style="background:#16a34a;color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;">&#128194; Import CSV</button>';
+        if (gkpData.keywords && Object.keys(gkpData.keywords).length > 0) {
+            html += '<button onclick="krClearGKPData()" style="background:#ef4444;color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;">&#128465; Clear Data</button>';
+        }
+        html += '</div></div>';
+        html += '<div style="background:#eff6ff;border:2px solid #93c5fd;border-radius:12px;padding:16px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 8px;color:#1e40af;">&#127760; Semrush API (Optional)</h4>';
+        html += '<p style="margin:0 0 8px;font-size:13px;color:#1e3a5f;">Real KD, Volume, CPC &amp; SERP features from Semrush. Get API key from <a href="https://www.semrush.com/api-analytics/" target="_blank" style="color:#2563eb;">semrush.com/api-analytics</a></p>';
+        html += '<input type="password" id="kr-setting-semrush" value="' + esc(s.semrushKey || '') + '" placeholder="Paste Semrush API key here..." style="width:100%;padding:8px 12px;border:2px solid #bfdbfe;border-radius:8px;font-size:13px;box-sizing:border-box;">';
+        html += '</div>';
+        html += '<div style="background:#fef3c7;border:2px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 8px;color:#92400e;">&#128200; Ahrefs API (Optional)</h4>';
+        html += '<p style="margin:0 0 8px;font-size:13px;color:#78350f;">Real KD, Volume &amp; backlink data from Ahrefs. Get API token from <a href="https://ahrefs.com/api" target="_blank" style="color:#d97706;">ahrefs.com/api</a></p>';
+        html += '<input type="password" id="kr-setting-ahrefs" value="' + esc(s.ahrefsToken || '') + '" placeholder="Paste Ahrefs API token here..." style="width:100%;padding:8px 12px;border:2px solid #fde68a;border-radius:8px;font-size:13px;box-sizing:border-box;">';
+        html += '</div>';
+        html += '<div style="background:#fdf4ff;border:2px solid #d8b4fe;border-radius:12px;padding:16px;margin-bottom:16px;">';
+        html += '<h4 style="margin:0 0 8px;color:#7e22ce;">&#128202; Google Trends</h4>';
+        html += '<p style="margin:0 0 8px;font-size:13px;color:#581c87;">Real relative interest data from Google Trends (free, no API key needed). Automatically used when available.</p>';
+        html += '<label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="kr-setting-trends" ' + (s.useTrends !== false ? 'checked' : '') + '> Enable Google Trends data (slower but more accurate)</label>';
+        html += '</div>';
+        html += '<button onclick="krSaveSettingsFromModal()" style="width:100%;padding:12px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">&#128190; Save Settings</button>';
+        html += '</div>';
+        modal.innerHTML = html;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', function(e) { if (e.target === modal) modal.style.display = 'none'; });
+    }
+    function krSaveSettingsFromModal() {
+        var s = {
+            semrushKey: (document.getElementById('kr-setting-semrush') || {}).value || '',
+            ahrefsToken: (document.getElementById('kr-setting-ahrefs') || {}).value || '',
+            useTrends: (document.getElementById('kr-setting-trends') || {}).checked !== false
+        };
+        krSaveSettings(s);
+        var modal = document.getElementById('kr-settings-modal');
+        if (modal) modal.style.display = 'none';
+        alert('Settings saved!');
+    }
+    function krImportGKP(input) {
+        var file = input.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var text = e.target.result;
+            var lines = text.split(/\r?\n/);
+            if (lines.length < 2) { alert('CSV file appears empty'); return; }
+            var header = lines[0].toLowerCase();
+            var delimiter = header.indexOf('\t') !== -1 ? '\t' : ',';
+            var cols = lines[0].split(delimiter).map(function(c) { return c.trim().replace(/^"|"$/g, ''); });
+            var kwCol = -1, volCol = -1, cpcCol = -1, compCol = -1, rangeCol = -1;
+            for (var c = 0; c < cols.length; c++) {
+                var h = cols[c].toLowerCase();
+                if (h.indexOf('keyword') !== -1 && h.indexOf('plan') === -1) kwCol = c;
+                if ((h.indexOf('search volume') !== -1 || h === 'volume' || h.indexOf('avg. monthly searches') !== -1) && volCol === -1) volCol = c;
+                if (h.indexOf('top of page bid') !== -1 || h.indexOf('high range') !== -1 || (h.indexOf('cpc') !== -1 && cpcCol === -1)) cpcCol = c;
+                if (h.indexOf('competition') !== -1 && compCol === -1) compCol = c;
+                if (h.indexOf('range') !== -1 && rangeCol === -1) rangeCol = c;
+            }
+            if (kwCol === -1) { alert('Could not find keyword column. Headers: ' + cols.join(', ')); return; }
+            var gkpData = { keywords: {}, importedAt: new Date().toISOString(), count: 0 };
+            for (var i = 1; i < lines.length; i++) {
+                var line = lines[i].trim();
+                if (!line) continue;
+                var cells = [];
+                var inQuote = false;
+                var cell = '';
+                for (var ch = 0; ch < line.length; ch++) {
+                    if (line[ch] === '"') { inQuote = !inQuote; continue; }
+                    if (line[ch] === delimiter && !inQuote) { cells.push(cell.trim()); cell = ''; continue; }
+                    cell += line[ch];
+                }
+                cells.push(cell.trim());
+                var kw = cells[kwCol] ? cells[kwCol].replace(/^"|"$/g, '').toLowerCase().trim() : '';
+                if (!kw) continue;
+                var vol = volCol !== -1 ? parseInt(cells[volCol]) : 0;
+                if (isNaN(vol)) vol = 0;
+                var cpc = cpcCol !== -1 ? parseFloat(cells[cpcCol]) : 0;
+                if (isNaN(cpc)) cpc = 0;
+                var comp = compCol !== -1 ? parseFloat(cells[compCol]) : 0;
+                if (isNaN(comp)) comp = 0;
+                var volRange = rangeCol !== -1 ? cells[rangeCol] : '';
+                gkpData.keywords[kw] = { volume: vol, cpc: cpc, competition: comp, range: volRange };
+                gkpData.count++;
+            }
+            krSaveGKPData(gkpData);
+            alert('Imported ' + gkpData.count + ' keywords from Google Keyword Planner!');
+            var modal = document.getElementById('kr-settings-modal');
+            if (modal) { modal.style.display = 'none'; krShowSettings(); }
+        };
+        reader.readAsText(file);
+    }
+    function krClearGKPData() {
+        localStorage.removeItem('seohub_gkp_data');
+        alert('GKP data cleared');
+        var modal = document.getElementById('kr-settings-modal');
+        if (modal) { modal.style.display = 'none'; krShowSettings(); }
+    }
+
+    // ==============================
+    // API FETCH: SEMRUSH
+    // ==============================
+    function krFetchSemrushData(keywords, lang, country) {
+        var s = krGetSettings();
+        if (!s.semrushKey) return Promise.resolve({});
+        var db = lang === 'ar' ? 'ae' : (country ? country.toLowerCase() : 'us');
+        var batchPromises = [];
+        var batchSize = 5;
+        for (var b = 0; b < keywords.length; b += batchSize) {
+            var batch = keywords.slice(b, b + batchSize);
+            var kwString = batch.join(',');
+            var url = 'https://api.semrush.com/?type=phrase_this&key=' + encodeURIComponent(s.semrushKey) + '&phrase=' + encodeURIComponent(kwString) + '&database=' + db + '&export_columns=Ph,Nq,Cp,Co,Nr&display_limit=' + batchSize + '&export_format=json';
+            batchPromises.push(
+                fetchJSON(url, { timeout: 20000, retries: 2, proxyLimit: 2 }).then(function(data) {
+                    var result = {};
+                    if (data && data.rows) {
+                        for (var r = 0; r < data.rows.length; r++) {
+                            var row = data.rows[r];
+                            var kw = (row.Phrase || '').toLowerCase().trim();
+                            result[kw] = { volume: row.Nq || 0, cpc: row.Cp || 0, competition: row.Co || 0, serpRank: row.Nr || 0, source: 'semrush' };
+                        }
+                    } else if (data && Array.isArray(data)) {
+                        for (var r2 = 0; r2 < data.length; r2++) {
+                            var row2 = data[r2];
+                            var kw2 = (row2.Phrase || '').toLowerCase().trim();
+                            result[kw2] = { volume: row2.Nq || 0, cpc: row2.Cp || 0, competition: row2.Co || 0, source: 'semrush' };
+                        }
+                    }
+                    return result;
+                }).catch(function(e) { console.log('[KR] Semrush API error:', e.message); return {}; })
+            );
+        }
+        return Promise.all(batchPromises).then(function(results) {
+            var merged = {};
+            for (var i = 0; i < results.length; i++) {
+                var keys = Object.keys(results[i]);
+                for (var k = 0; k < keys.length; k++) merged[keys[k]] = results[i][keys[k]];
+            }
+            return merged;
+        });
+    }
+
+    // ==============================
+    // API FETCH: AHREFS
+    // ==============================
+    function krFetchAhrefsData(keywords, lang, country) {
+        var s = krGetSettings();
+        if (!s.ahrefsToken) return Promise.resolve({});
+        var countryMap = { 'SA': 'sa', 'AE': 'ae', 'EG': 'eg', 'US': 'us', 'GB': 'gb', '': 'us' };
+        var countryLower = countryMap[country] || (country ? country.toLowerCase() : 'us');
+        var batchPromises = [];
+        var batchSize = 3;
+        for (var b = 0; b < keywords.length; b += batchSize) {
+            var batch = keywords.slice(b, b + batchSize);
+            var kwString = batch.join(',');
+            var url = 'https://apiv2.ahrefs.com?token=' + encodeURIComponent(s.ahrefsToken) + '&from=keywords_overview&country=' + countryLower + '&keywords=' + encodeURIComponent(kwString) + '&output=json';
+            batchPromises.push(
+                fetchJSON(url, { timeout: 20000, retries: 2, proxyLimit: 2 }).then(function(data) {
+                    var result = {};
+                    if (data && data.keywords) {
+                        var kwList = Object.keys(data.keywords);
+                        for (var k = 0; k < kwList.length; k++) {
+                            var kwData = data.keywords[kwList[k]];
+                            result[kwList[k].toLowerCase()] = { volume: kwData.volume || kwData.search_volume || 0, cpc: kwData.cpc || 0, kd: kwData.kd || kwData.keyword_difficulty || 0, source: 'ahrefs' };
+                        }
+                    } else if (data && data.data) {
+                        for (var dk = 0; dk < data.data.length; dk++) {
+                            var item = data.data[dk];
+                            var kw = (item.keyword || '').toLowerCase();
+                            result[kw] = { volume: item.volume || item.search_volume || 0, cpc: item.cpc || 0, kd: item.kd || 0, source: 'ahrefs' };
+                        }
+                    }
+                    return result;
+                }).catch(function(e) { console.log('[KR] Ahrefs API error:', e.message); return {}; })
+            );
+        }
+        return Promise.all(batchPromises).then(function(results) {
+            var merged = {};
+            for (var i = 0; i < results.length; i++) {
+                var keys = Object.keys(results[i]);
+                for (var k = 0; k < keys.length; k++) merged[keys[k]] = results[i][keys[k]];
+            }
+            return merged;
+        });
+    }
+
+    // ==============================
+    // GOOGLE TRENDS: REAL RELATIVE INTEREST
+    // ==============================
+    function krFetchGoogleTrendsBatch(keywords, geo, lang) {
+        var settings = krGetSettings();
+        if (settings.useTrends === false) return Promise.resolve({});
+        geo = geo || '';
+        lang = lang || 'en';
+        var batches = [];
+        var batchSize = 5;
+        for (var b = 0; b < keywords.length; b += batchSize) {
+            batches.push(keywords.slice(b, b + batchSize));
+        }
+        var allPromises = [];
+        for (var i = 0; i < batches.length; i++) {
+            allPromises.push(
+                krFetchGoogleTrendsBatchSingle(batches[i], geo, lang)
+            );
+        }
+        return Promise.all(allPromises).then(function(results) {
+            var merged = {};
+            for (var r = 0; r < results.length; r++) {
+                var keys = Object.keys(results[r]);
+                for (var k = 0; k < keys.length; k++) merged[keys[k]] = results[r][keys[k]];
+            }
+            return merged;
+        });
+    }
+    function krFetchGoogleTrendsBatchSingle(keywords, geo, lang) {
+        var comparisonItems = keywords.map(function(kw) {
+            return { keyword: kw, geo: geo || '', time: 'today 12-m' };
+        });
+        var req = JSON.stringify({ comparisonItem: comparisonItems, category: 0, property: '' });
+        var url = 'https://trends.google.com/trends/api/widgetdata/multiline?hl=' + lang + '&tz=-480&req=' + encodeURIComponent(req);
+        return fetchHTML(url, { timeout: 15000, retries: 1, proxyLimit: 2 }).then(function(text) {
+            var result = {};
+            try {
+                var cleaned = text;
+                if (cleaned.indexOf(")]}'") === 0) cleaned = cleaned.substring(5);
+                var data = JSON.parse(cleaned);
+                if (data && data.default && data.default.timelineData) {
+                    var timeline = data.default.timelineData;
+                    if (timeline.length > 0) {
+                        var latest = timeline[timeline.length - 1];
+                        if (latest && latest.value) {
+                            for (var v = 0; v < keywords.length && v < latest.value.length; v++) {
+                                result[keywords[v].toLowerCase()] = { trendInterest: latest.value[v] || 0, source: 'google-trends' };
+                            }
+                        }
+                    }
+                }
+            } catch(e) {
+                console.log('[KR] Google Trends parse error:', e.message);
+            }
+            return result;
+        }).catch(function(e) {
+            console.log('[KR] Google Trends fetch error:', e.message);
+            return {};
+        });
+    }
+
+    // ==============================
+    // MERGE REAL DATA INTO RESULTS
+    // ==============================
+    function krMergeRealData(results, callback) {
+        var keywords = results.map(function(r) { return r.keyword.toLowerCase(); });
+        var settings = krGetSettings();
+        var gkpData = krGetGKPData();
+        var hasGKP = gkpData.keywords && Object.keys(gkpData.keywords).length > 0;
+        var hasSemrush = !!settings.semrushKey;
+        var hasAhrefs = !!settings.ahrefsToken;
+        var useTrends = settings.useTrends !== false;
+        var apiPromises = [];
+        if (hasSemrush) apiPromises.push(krFetchSemrushData(keywords, document.getElementById('kr-lang').value, document.getElementById('kr-country').value));
+        else apiPromises.push(Promise.resolve({}));
+        if (hasAhrefs) apiPromises.push(krFetchAhrefsData(keywords, document.getElementById('kr-lang').value, document.getElementById('kr-country').value));
+        else apiPromises.push(Promise.resolve({}));
+        if (useTrends && keywords.length > 0) apiPromises.push(krFetchGoogleTrendsBatch(keywords, document.getElementById('kr-country').value, document.getElementById('kr-lang').value));
+        else apiPromises.push(Promise.resolve({}));
+        Promise.all(apiPromises).then(function(apiResults) {
+            var semrushData = apiResults[0] || {};
+            var ahrefsData = apiResults[1] || {};
+            var trendsData = apiResults[2] || {};
+            var semrushKeys = Object.keys(semrushData);
+            var ahrefsKeys = Object.keys(ahrefsData);
+            var trendsKeys = Object.keys(trendsData);
+            var gkpKeys = hasGKP ? Object.keys(gkpData.keywords) : [];
+            var maxTrend = 0;
+            for (var t = 0; t < trendsKeys.length; t++) {
+                if (trendsData[trendsKeys[t]].trendInterest > maxTrend) maxTrend = trendsData[trendsKeys[t]].trendInterest;
+            }
+            for (var i = 0; i < results.length; i++) {
+                var kw = results[i].keyword.toLowerCase().trim();
+                var realSources = 0;
+                if (gkpData.keywords[kw]) realSources++;
+                if (semrushData[kw]) realSources++;
+                if (ahrefsData[kw]) realSources++;
+                if (trendsData[kw]) realSources++;
+                results[i].confidence = realSources > 0 ? Math.min(95, 50 + realSources * 15) : results[i].confidence || 30;
+                results[i].dataSource = [];
+                if (gkpData.keywords[kw]) {
+                    var g = gkpData.keywords[kw];
+                    results[i].volume = g.volume || results[i].volume;
+                    results[i].cpc = g.cpc || results[i].cpc;
+                    results[i].competition = g.competition;
+                    results[i].dataSource.push('gkp');
+                    results[i].confidence = Math.max(results[i].confidence, 95);
+                }
+                if (semrushData[kw]) {
+                    var sr = semrushData[kw];
+                    if (sr.volume > 0) { results[i].volume = sr.volume; results[i].dataSource.push('semrush'); results[i].confidence = Math.max(results[i].confidence, 90); }
+                    if (sr.cpc > 0) results[i].cpc = sr.cpc.toFixed(2);
+                    if (sr.competition > 0) results[i].competition = sr.competition;
+                }
+                if (ahrefsData[kw]) {
+                    var ah = ahrefsData[kw];
+                    if (ah.volume > 0) { results[i].volume = ah.volume; results[i].dataSource.push('ahrefs'); results[i].confidence = Math.max(results[i].confidence, 88); }
+                    if (ah.cpc > 0) results[i].cpc = ah.cpc.toFixed(2);
+                    if (ah.kd) results[i].difficulty = ah.kd;
+                }
+                if (trendsData[kw]) {
+                    var tr = trendsData[kw];
+                    results[i].trendInterest = tr.trendInterest;
+                    results[i].dataSource.push('google-trends');
+                    results[i].confidence = Math.max(results[i].confidence, 70);
+                    if (maxTrend > 0 && tr.trendInterest > 0) {
+                        var trendRatio = tr.trendInterest / maxTrend;
+                        if (results[i].dataSource.indexOf('gkp') === -1 && results[i].dataSource.indexOf('semrush') === -1) {
+                            var baseVol = parseInt(results[i].volume) || 100;
+                            results[i].volume = Math.round(baseVol * (0.5 + trendRatio));
+                        }
+                    }
+                }
+                if (results[i].dataSource && results[i].dataSource.length === 0) results[i].dataSource.push('estimated');
+            }
+            if (callback) callback(results);
+        }).catch(function() {
+            if (callback) callback(results);
+        });
+    }
+
     function krFetchSuggestions(query, lang, country) {
         return krFetchFast(query, lang, country);
     }
@@ -8733,7 +9095,7 @@
         html += krRenderExtraAnalysis(data);
         html += '<div class="kr-table-wrap"><table class="kr-table" id="kr-table">';
         html += '<thead><tr>';
-        var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_volume, t.kr_difficulty, 'KEI', currentLang === 'ar' ? '\u0627\u0644\u0641\u0631\u0635' : 'Opp.', t.kr_intent, t.kr_cpc, currentLang === 'ar' ? '\u062a\u0631\u0646\u062f' : 'Trend', currentLang === 'ar' ? '\u062a\u062c\u0627\u0631\u064A' : 'Shop', currentLang === 'ar' ? '\u0627\u0644\u0641\u0636\u0648\u0644\u0629' : 'Season', currentLang === 'ar' ? '\u0645\u0646\u0627\u0641\u0633 SERP' : 'SERP'];
+        var cols = ['#', t.kr_label_keyword || 'Keyword', t.kr_volume, t.kr_difficulty, 'KEI', currentLang === 'ar' ? '\u0627\u0644\u0641\u0631\u0635' : 'Opp.', t.kr_intent, t.kr_cpc, currentLang === 'ar' ? '\u062a\u0631\u0646\u062f' : 'Trend', currentLang === 'ar' ? '\u062a\u062c\u0627\u0631\u064A' : 'Shop', currentLang === 'ar' ? '\u0627\u0644\u0641\u0636\u0648\u0644\u0629' : 'Season', currentLang === 'ar' ? '\u0645\u0646\u0627\u0641\u0633 SERP' : 'SERP', '&#9889; Data'];
         for (var i = 0; i < cols.length; i++) {
             var arrow = '';
             if (_krSortCol === i) arrow = _krSortAsc ? ' \u25B2' : ' \u25BC';
@@ -8788,6 +9150,11 @@
             var seasonVal = d.seasonality || 'year-round';
             html += '<td><span style="font-size:11px;font-weight:600;color:' + (seasonColors[seasonVal] || '#64748b') + ';">' + (seasonLabels[seasonVal] || seasonVal) + '</span></td>';
             html += '<td>' + serpHtml + '</td>';
+            var conf = d.confidence || 30;
+            var confColor = conf >= 80 ? '#059669' : conf >= 50 ? '#d97706' : '#64748b';
+            var confLabel = conf >= 80 ? 'GKP/SERP' : conf >= 50 ? 'Trends' : 'Est.';
+            var dataSrc = (d.dataSource && d.dataSource.length > 0) ? d.dataSource[0] : 'estimated';
+            html += '<td><span style="font-size:11px;font-weight:700;color:' + confColor + ';">' + conf + '% ' + confLabel + '</span></td>';
             html += '</tr>';
         }
         html += '</tbody></table></div>';
@@ -9256,46 +9623,88 @@
             _krResults = results;
             _krClusters = krSerpClustering(results, serpResults);
             _krTopicTree = krExtractTopics(results, seed);
-            krUpdateProgress(100);
-            var proxyWarning = '';
-            if (!googleAccessible) {
-                proxyWarning = '<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:13px;">' +
-                    (currentLang === 'ar'
-                        ? '\u26a0\ufe0f \u0625\u0634\u0627\u0631\u0629: \u0644\u0645 \u064a\u062a\u0645 \u0627\u0644\u062a\u0648\u0635\u0644 \u0628\u0646\u0638\u0627\u0645 Google. \u0627\u0644\u0646\u062a\u0627\u0626\u062c \u0627\u0644\u0645\u0639\u0631\u0648\u0636\u0629 \u0645\u0628\u0646\u064a\u0629 \u0645\u0646 \u0627\u0644\u0642\u0627\u0644\u0628 \u0641\u0642\u0637. \u0644\u0644\u062d\u0635\u0648\u0644 \u0639\u0644\u0649 \u0628\u064a\u0627\u0646\u0627\u062a Google \u062d\u064a\u0648\u064a\u0629: <code>node proxy-server.js</code>'
-                        : 'Warning: Could not connect to Google. Results below are generated from templates only. For live Google data, run: <code>node proxy-server.js</code>') +
+
+            krUpdateProgress(97);
+            out.innerHTML = '<div class="tool-loading"><p>' + (currentLang === 'ar' ? '\u062c\u0627\u0631\u064d \u062c\u0644\u0628 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u062d\u0642\u064a\u0642\u064a\u0629 \u0645\u0646 Google Trends \u0648\u0627\u0644\u0645\u0635\u062f\u0631\u0627\u062a...' : 'Fetching real data from APIs and Google Trends...') + '</p></div>';
+            krMergeRealData(_krResults, function(mergedResults) {
+                _krResults = mergedResults;
+                for (var ri = 0; ri < _krResults.length; ri++) {
+                    var vol2 = krEstimateVolumeV3(_krResults[ri].keyword, _krResults[ri].position, _krResults[ri].source, _krResults[ri].expansionCount, null);
+                    if (!_krResults[ri].volume || _krResults[ri].volume === vol2.volume) {
+                        _krResults[ri].volume = mergedResults[ri].volume;
+                        var newVol2 = krEstimateVolumeV3(_krResults[ri].keyword, _krResults[ri].position, _krResults[ri].source, _krResults[ri].expansionCount, null);
+                        _krResults[ri].volumeLevel = newVol2.level;
+                    }
+                }
+                _krResults.sort(function(a, b) {
+                    var order = { 'very-high': 0, 'high': 1, 'medium': 2, 'low': 3, 'very-low': 4 };
+                    var oa = order[a.volumeLevel] || 5;
+                    var ob = order[b.volumeLevel] || 5;
+                    if (oa !== ob) return oa - ob;
+                    var intentOrder = { transactional: 0, commercial: 1, informational: 2, navigational: 3 };
+                    return (intentOrder[a.intent] || 5) - (intentOrder[b.intent] || 5);
+                });
+                for (var ri2 = 0; ri2 < _krResults.length; ri2++) _krResults[ri2].idx = ri2 + 1;
+                krUpdateProgress(100);
+                var proxyWarning = '';
+                if (!googleAccessible) {
+                    proxyWarning = '<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:13px;">' +
+                        (currentLang === 'ar'
+                            ? '\u26a0\ufe0f \u0625\u0634\u0627\u0631\u0629: \u0644\u0645 \u064a\u062a\u0645 \u0627\u0644\u062a\u0648\u0635\u0644 \u0628\u0646\u0638\u0627\u0645 Google. \u0627\u0644\u0646\u062a\u0627\u0626\u062c \u0627\u0644\u0645\u0639\u0631\u0648\u0636\u0629 \u0645\u0628\u0646\u064a\u0629 \u0645\u0646 \u0627\u0644\u0642\u0627\u0644\u0628 \u0641\u0642\u0637. \u0644\u0644\u062d\u0635\u0648\u0644 \u0639\u0644\u0649 \u0628\u064a\u0627\u0646\u0627\u062a Google \u062d\u064a\u0648\u064a\u0629: <code>node proxy-server.js</code>'
+                            : 'Warning: Could not connect to Google. Results below are generated from templates only. For live Google data, run: <code>node proxy-server.js</code>') +
+                        '</div>';
+                }
+                var dataSourceNote = '';
+                var hasRealData = false;
+                for (var di = 0; di < _krResults.length; di++) {
+                    if (_krResults[di].dataSource && _krResults[di].dataSource.indexOf('estimated') === -1) { hasRealData = true; break; }
+                }
+                var gkpData2 = krGetGKPData();
+                var s2 = krGetSettings();
+                var sources = [];
+                if (gkpData2.keywords && Object.keys(gkpData2.keywords).length > 0) sources.push('GKP (' + Object.keys(gkpData2.keywords).length + ' keywords)');
+                if (s2.semrushKey) sources.push('Semrush API');
+                if (s2.ahrefsToken) sources.push('Ahrefs API');
+                if (s2.useTrends !== false) sources.push('Google Trends');
+                if (sources.length > 0) {
+                    dataSourceNote = '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 16px;margin-bottom:12px;font-size:13px;color:#166534;">' +
+                        '&#9989; <strong>' + (currentLang === 'ar' ? '\u0628\u064a\u0627\u0646\u0627\u062a \u062d\u0642\u064a\u0642\u064a\u0629 \u0645\u0646:' : 'Real data from:') + '</strong> ' + sources.join(', ') + '</div>';
+                }
+                var viewBar = '<div class="kr-view-bar">';
+                viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'table\')">&#128202; ' + (currentLang === 'ar' ? '\u062c\u062f\u0648\u0644' : 'Table') + '</button>';
+                viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'topics\')">&#128193; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0627\u0636\u0639 (' + _krTopicTree.length + ')' : 'Topics (' + _krTopicTree.length + ')') + '</button>';
+                viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'gap\')">&#9878; ' + (currentLang === 'ar' ? '\u0627\u0644\u062a\u062d\u0644\u064a\u0644' : 'Gap Analysis') + '</button>';
+                viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'plan\')">&#128197; ' + (currentLang === 'ar' ? '\u062e\u0637\u0629 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'Content Plan') + '</button>';
+                viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'links\')">&#128279; ' + (currentLang === 'ar' ? '\u0627\u0644\u0631\u0628\u0637\u0627\u062a' : 'Links') + '</button>';
+                viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'roadmap\')">&#128640; ' + (currentLang === 'ar' ? '\u0627\u0644\u062e\u0637\u0629' : 'Roadmap') + '</button>';
+                viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'lists\')">&#128278; ' + (currentLang === 'ar' ? '\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Lists') + '</button>';
+                viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'intent\')">&#127919; ' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u064a\u0627\u062a' : 'By Intent') + '</button>';
+                viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'optimize\')">&#9998; ' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649' : 'Optimize') + '</button>';
+                viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'clusters\')">&#128230; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0627\u062a' : 'Clusters') + '</button>';
+                viewBar += '</div>';
+                var exportBtns = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
+                    '<button onclick="krExportCSV(_krResults)" style="background:#10b981;color:white;border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">&#128229; CSV</button>' +
+                    '<button onclick="krExportSheetsFormat(_krResults)" style="background:#3b82f6;color:white;border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">&#128203; Sheets TSV</button>' +
                     '</div>';
-            }
-            var viewBar = '<div class="kr-view-bar">';
-            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'table\')">&#128202; ' + (currentLang === 'ar' ? '\u062c\u062f\u0648\u0644' : 'Table') + '</button>';
-            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'topics\')">&#128193; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0627\u0636\u0639 (' + _krTopicTree.length + ')' : 'Topics (' + _krTopicTree.length + ')') + '</button>';
-            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'gap\')">&#9878; ' + (currentLang === 'ar' ? '\u0627\u0644\u062a\u062d\u0644\u064a\u0644' : 'Gap Analysis') + '</button>';
-            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'plan\')">&#128197; ' + (currentLang === 'ar' ? '\u062e\u0637\u0629 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'Content Plan') + '</button>';
-            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'links\')">&#128279; ' + (currentLang === 'ar' ? '\u0627\u0644\u0631\u0628\u0637\u0627\u062a' : 'Links') + '</button>';
-            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'roadmap\')">&#128640; ' + (currentLang === 'ar' ? '\u0627\u0644\u062e\u0637\u062a\u0629' : 'Roadmap') + '</button>';
-            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'lists\')">&#128278; ' + (currentLang === 'ar' ? '\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062a' : 'Lists') + '</button>';
-            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'intent\')">&#127919; ' + (currentLang === 'ar' ? '\u0627\u0644\u0646\u064a\u0627\u062a' : 'By Intent') + '</button>';
-            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'optimize\')">&#9998; ' + (currentLang === 'ar' ? '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649' : 'Optimize') + '</button>';
-            viewBar += '<button class="kr-view-btn" onclick="krSwitchView(\'clusters\')">&#128230; ' + (currentLang === 'ar' ? '\u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0627\u062a' : 'Clusters') + '</button>';
-            viewBar += '</div>';
-            var exportBtns = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
-                '<button onclick="krExportCSV(_krResults)" style="background:#10b981;color:white;border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">&#128229; CSV</button>' +
-                '<button onclick="krExportSheetsFormat(_krResults)" style="background:#3b82f6;color:white;border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">&#128203; Sheets TSV</button>' +
-                '</div>';
-            out.innerHTML = proxyWarning + krRenderTable(results);
-            var viewTabsEl = document.getElementById('kr-view-tabs');
-            if (viewTabsEl) { viewTabsEl.innerHTML = exportBtns + viewBar; viewTabsEl.style.display = ''; }
-            setTimeout(function() {
-                var prog = document.getElementById('kr-progress');
-                if (prog) prog.style.display = 'none';
-            }, 1000);
+                out.innerHTML = proxyWarning + dataSourceNote + krRenderTable(_krResults);
+                var viewTabsEl = document.getElementById('kr-view-tabs');
+                if (viewTabsEl) { viewTabsEl.innerHTML = exportBtns + viewBar; viewTabsEl.style.display = ''; }
+                setTimeout(function() {
+                    var prog = document.getElementById('kr-progress');
+                    if (prog) prog.style.display = 'none';
+                }, 1000);
+                btn.disabled = false;
+                btn.textContent = t.kr_btn_research;
+                krSaveCurrentSession();
+                krSnapshotSerpFeatures(document.getElementById('kr-seed').value);
+                krSaveResearchToHistory(_krResults, document.getElementById('kr-seed').value);
+            });
         } catch (e) {
-            out.innerHTML = '<div class="tool-loading"><p>' + t.kr_no_results + ' (' + esc(e.message) + ')</p></div>';
+            var outEl = document.getElementById('kr-output');
+            if (outEl) outEl.innerHTML = '<div class="tool-loading"><p>' + (currentLang === 'ar' ? '\u0644\u0645 \u064a\u062a\u0645 \u0627\u0643\u062a\u0634\u0627\u0641 \u062c\u062f\u0648\u0644' : 'No results found') + ' (' + esc(e.message) + ')</p></div>';
         }
         btn.disabled = false;
         btn.textContent = t.kr_btn_research;
-        krSaveCurrentSession();
-        krSnapshotSerpFeatures(document.getElementById('kr-seed').value);
-        krSaveResearchToHistory(_krResults, document.getElementById('kr-seed').value);
     }
 
     // ==============================
