@@ -5787,6 +5787,170 @@
         return clusters;
     }
 
+    function krSemanticClustering(results) {
+        var arStop = {'\u0627\u0644\u0630\u064a':1,'\u0627\u0644\u062a\u064a':1,'\u0627\u0644\u0644\u0630\u064a':1,'\u0645\u0646':1,'\u0641\u064a':1,'\u0639\u0644\u0649':1,'\u0645\u0639':1,'\u0628\u062f\u0648\u0646':1,'\u0628\u0639\u062f':1,'\u0623\u0648':1,'\u0648':1,'\u0644':1,'\u0647\u0644':1,'\u0643\u064a\u0641':1,'\u0636\u0631\u0648\u0631\u0629':1,'\u0623\u0646':1,'\u0647\u0630\u0627':1,'\u0628\u064a\u0646':1,'\u0628\u0646':1,'\u0627\u0644\u062a\u064a':1,'\u062c\u062f\u064a\u062f':1,'\u0642\u062f':1,'\u0645\u0645\u0643\u0646':1,'\u0639\u0646\u062f\u0645\u0627':1,'\u0643\u0648\u0644':1};
+        var enStop = {'the':1,'and':1,'for':1,'are':1,'but':1,'not':1,'you':1,'all':1,'can':1,'her':1,'was':1,'one':1,'our':1,'out':1,'has':1,'his':1,'how':1,'its':1,'may':1,'new':1,'now':1,'old':1,'see':1,'way':1,'who':1,'did':1,'get':1,'let':1,'say':1,'she':1,'too':1,'use':1,'what':1,'when':1,'with':1,'that':1,'this':1,'from':1,'than':1,'then':1,'they':1,'been':1,'have':1,'will':1,'your':1,'which':1,'there':1,'their':1,'about':1,'would':1,'make':1,'like':1,'just':1,'over':1,'such':1,'take':1,'into':1,'also':1,'some':1,'very':1,'more':1};
+        var seed = '';
+        if (_krResults && _krResults.length > 0) {
+            var seedEl = document.getElementById('kr-seed');
+            seed = seedEl ? seedEl.value.toLowerCase().trim() : '';
+        }
+        var isAr = /[\u0600-\u06FF]/.test(seed);
+        var stop = isAr ? arStop : enStop;
+        function extractWords(kw) {
+            var w = kw.toLowerCase().replace(/[^\u0600-\u06FF\w]+/g, ' ').split(/\s+/);
+            var significant = [];
+            for (var i = 0; i < w.length; i++) {
+                if (w[i].length > 1 && !stop[w[i]]) significant.push(w[i]);
+            }
+            return significant;
+        }
+        var kwWords = {};
+        for (var i = 0; i < results.length; i++) {
+            kwWords[results[i].keyword] = extractWords(results[i].keyword);
+        }
+        var adjacency = {};
+        for (var i = 0; i < results.length; i++) adjacency[results[i].keyword] = [];
+        for (var i = 0; i < results.length; i++) {
+            var k1 = results[i].keyword;
+            var w1 = kwWords[k1];
+            if (w1.length === 0) continue;
+            for (var j = i + 1; j < results.length; j++) {
+                var k2 = results[j].keyword;
+                var w2 = kwWords[k2];
+                if (w2.length === 0) continue;
+                var overlap = 0;
+                var shorter = w1.length < w2.length ? w1 : w2;
+                var longer = w1.length >= w2.length ? w1 : w2;
+                for (var a = 0; a < shorter.length; a++) {
+                    for (var b = 0; b < longer.length; b++) {
+                        if (shorter[a] === longer[b]) { overlap++; break; }
+                    }
+                }
+                var minLen = shorter.length < longer.length ? shorter.length : longer.length;
+                var jaccard = minLen > 0 ? overlap / (shorter.length + longer.length - overlap) : 0;
+                if (overlap >= 2 || (overlap >= 1 && minLen <= 2 && jaccard >= 0.4)) {
+                    adjacency[k1].push(k2);
+                    adjacency[k2].push(k1);
+                }
+            }
+        }
+        var visited = {};
+        var clusters = [];
+        for (var i = 0; i < results.length; i++) {
+            var start = results[i].keyword;
+            if (visited[start]) continue;
+            var queue = [start];
+            var group = [];
+            visited[start] = true;
+            while (queue.length > 0) {
+                var current = queue.shift();
+                group.push(current);
+                var neighbors = adjacency[current] || [];
+                for (var n = 0; n < neighbors.length; n++) {
+                    if (!visited[neighbors[n]]) {
+                        visited[neighbors[n]] = true;
+                        queue.push(neighbors[n]);
+                    }
+                }
+            }
+            if (group.length >= 2) {
+                var wordFreq = {};
+                for (var g = 0; g < group.length; g++) {
+                    var words = kwWords[group[g]];
+                    for (var w = 0; w < words.length; w++) {
+                        wordFreq[words[w]] = (wordFreq[words[w]] || 0) + 1;
+                    }
+                }
+                var sortedWords = [];
+                var wfKeys = Object.keys(wordFreq);
+                for (var f = 0; f < wfKeys.length; f++) {
+                    sortedWords.push({ word: wfKeys[f], count: wordFreq[wfKeys[f]] });
+                }
+                sortedWords.sort(function(a, b) { return b.count - a.count; });
+                var topicWords = sortedWords.slice(0, 3).map(function(s) { return s.word; });
+                var topic = topicWords.join(' ');
+                var totalVol = 0, avgDiff = 0, intents = {};
+                for (var g = 0; g < group.length; g++) {
+                    for (var r = 0; r < results.length; r++) {
+                        if (results[r].keyword === group[g]) {
+                            totalVol += results[r].volume || 0;
+                            avgDiff += results[r].difficulty || 0;
+                            intents[results[r].intent] = (intents[results[r].intent] || 0) + 1;
+                            break;
+                        }
+                    }
+                }
+                avgDiff = Math.round(avgDiff / group.length);
+                var topIntent = '';
+                var topCount = 0;
+                var ik = Object.keys(intents);
+                for (var t = 0; t < ik.length; t++) {
+                    if (intents[ik[t]] > topCount) { topCount = intents[ik[t]]; topIntent = ik[t]; }
+                }
+                clusters.push({
+                    topic: topic,
+                    keywords: group,
+                    totalVolume: totalVol,
+                    avgDifficulty: avgDiff,
+                    topIntent: topIntent,
+                    size: group.length
+                });
+            }
+        }
+        clusters.sort(function(a, b) { return b.totalVolume - a.totalVolume; });
+        return clusters;
+    }
+
+    function krRenderSemanticClusters(clusters, allResults) {
+        var t = currentLang === 'ar' ? translations.ar : translations.en;
+        var colors = ['#3b82f6','#8b5cf6','#ec4899','#f59e0b','#10b981','#06b6d4','#ef4444','#f97316','#14b8a6','#a855f7'];
+        var html = '<div style="background:linear-gradient(135deg,#f0f9ff,#eff6ff);border:2px solid #3b82f6;border-radius:16px;padding:20px;margin-bottom:20px;">';
+        html += '<h3 style="margin:0 0 8px;color:#1e40af;">&#128230; ' + (currentLang === 'ar' ? '\u062a\u0635\u0646\u064a\u0641 \u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u062f\u0644\u0627\u0644\u064a' : 'Semantic Keyword Clusters') + '</h3>';
+        html += '<p style="margin:0;color:#475569;font-size:13px;">' + (currentLang === 'ar' ? '\u0627\u0644\u0643\u0644\u0645\u0627\u062a \u0627\u0644\u062a\u064a \u062a\u0634\u062a\u0631\u0643 \u0641\u064a \u0645\u0639\u0627\u0646\u064a \u0645\u0634\u062a\u0627\u0628\u0647\u0629 \u062a\u0644\u0627\u0628\u0642 \u062a\u062c\u0645\u0639\u064b\u0627 \u0645\u0639\u0627 \u0627\u0644\u0646\u064a\u0627\u062a \u0627\u0644\u062c\u0645\u0639\u064a\u0629' : 'Keywords sharing similar words and intents are grouped together') + '</p>';
+        html += '<div style="margin-top:10px;font-size:13px;color:#3b82f6;font-weight:700;">' + clusters.length + ' ' + (currentLang === 'ar' ? '\u0645\u062c\u0645\u0648\u0639\u0629' : 'clusters') + ' | ' + allResults.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629' : 'keywords') + '</div>';
+        html += '</div>';
+        if (clusters.length === 0) {
+            html += '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;text-align:center;color:#64748b;">';
+            html += (currentLang === 'ar' ? '\u0644\u0645 \u064a\u062a\u0645 \u0627\u0643\u062a\u0634\u0627\u0641 \u0645\u062c\u0627\u0645\u064a\u0639' : 'No clusters found') + '</div>';
+            return html;
+        }
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;">';
+        for (var c = 0; c < clusters.length; c++) {
+            var cl = clusters[c];
+            var bgColor = colors[c % colors.length];
+            var diffCls = cl.avgDifficulty <= 35 ? '#059669' : cl.avgDifficulty <= 60 ? '#d97706' : '#ef4444';
+            html += '<div style="background:white;border:2px solid ' + bgColor + '22;border-radius:14px;overflow:hidden;">';
+            html += '<div style="background:' + bgColor + ';color:white;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">';
+            html += '<span style="font-weight:700;font-size:14px;">&#128204; ' + esc(cl.topic) + '</span>';
+            html += '<span style="background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:100px;font-size:11px;">' + cl.size + '</span>';
+            html += '</div>';
+            html += '<div style="padding:12px 16px;">';
+            html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">';
+            html += '<span style="background:#f0fdf4;color:#059669;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;">Vol: ' + cl.totalVolume + '</span>';
+            html += '<span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;">Avg KD: ' + cl.avgDifficulty + '</span>';
+            if (cl.topIntent) html += '<span style="background:#ede9fe;color:#7c3aed;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;">' + cl.topIntent + '</span>';
+            html += '</div>';
+            html += '<ul style="list-style:none;padding:0;margin:0;max-height:200px;overflow-y:auto;">';
+            for (var k = 0; k < cl.keywords.length; k++) {
+                var kwItem = null;
+                for (var r = 0; r < allResults.length; r++) {
+                    if (allResults[r].keyword === cl.keywords[k]) { kwItem = allResults[r]; break; }
+                }
+                var volBadge = kwItem ? '<span style="color:#059669;font-size:11px;margin-left:4px;">' + (kwItem.volume || 0) + '</span>' : '';
+                var diffBadge = kwItem ? '<span style="color:' + (kwItem.difficulty <= 35 ? '#059669' : kwItem.difficulty <= 60 ? '#d97706' : '#ef4444') + ';font-size:11px;margin-left:4px;">KD' + (kwItem.difficulty || 0) + '</span>' : '';
+                var intentBadge = kwItem ? '<span style="color:#7c3aed;font-size:10px;margin-left:4px;">' + (kwItem.intent || '') + '</span>' : '';
+                html += '<li style="padding:4px 0;font-size:13px;color:#334155;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">';
+                html += '<span>&#8226; ' + esc(cl.keywords[k]) + '</span>';
+                html += '<span>' + volBadge + diffBadge + intentBadge + '</span>';
+                html += '</li>';
+            }
+            html += '</ul></div></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+
     function krDeepExtractPAA(serpResultsMap, seed, lang, country) {
         var allPAA = {};
         var keys = Object.keys(serpResultsMap);
@@ -6287,8 +6451,12 @@
     }
 
     function krFetchWikipediaKeywords(seed) {
-        var url = 'https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(seed);
-        return fetchJSON(url, { timeout: 12000, retries: 2, proxyLimit: 2 }).then(function(data) {
+        var isArabic = /[\u0600-\u06FF]/.test(seed);
+        var langPrefix = isArabic ? 'ar.wikipedia.org' : 'en.wikipedia.org';
+        var summaryUrl = 'https://' + langPrefix + '/api/rest_v1/page/summary/' + encodeURIComponent(seed);
+        var sectionsUrl = 'https://' + langPrefix + '/api/rest_v1/page/sections/' + encodeURIComponent(seed);
+        var pageUrl = 'https://' + langPrefix + '/api/rest_v1/page/html/' + encodeURIComponent(seed);
+        return fetchJSON(summaryUrl, { timeout: 12000, retries: 2, proxyLimit: 2 }).then(function(data) {
             var keywords = [];
             if (data.extract) {
                 var text = data.extract.toLowerCase();
@@ -6306,8 +6474,27 @@
                     keywords.push(seed + ' ' + sorted[s].word);
                 }
             }
-            if (data.title && data.title !== seed) keywords.push(data.title.toLowerCase());
-            return keywords.slice(0, 10);
+            if (data.title && data.title.toLowerCase() !== seed.toLowerCase()) keywords.push(data.title.toLowerCase());
+            if (data.description) {
+                var descWords = data.description.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF\s]/g, ' ').split(/\s+/);
+                for (var dw = 0; dw < descWords.length; dw++) {
+                    if (descWords[dw].length > 3 && keywords.indexOf(seed + ' ' + descWords[dw]) === -1) {
+                        keywords.push(seed + ' ' + descWords[dw]);
+                    }
+                }
+            }
+            return fetchJSON(sectionsUrl, { timeout: 10000, retries: 1, proxyLimit: 1 }).then(function(secData) {
+                if (secData && secData.length > 0) {
+                    for (var si = 0; si < Math.min(secData.length, 15); si++) {
+                        var heading = (secData[si].line || '').toLowerCase().replace(/<[^>]+>/g, '');
+                        if (heading.length > 2 && heading.length < 60) {
+                            var clean = heading.replace(/[^a-z0-9\u0600-\u06FF\s]/g, '').trim();
+                            if (clean.length > 2) keywords.push(clean);
+                        }
+                    }
+                }
+                return keywords.slice(0, 20);
+            });
         }).catch(function() { return []; });
     }
 
@@ -7110,6 +7297,22 @@
                         kwSources[sk] = 'google-autocomplete';
                         kwPosition[sk] = i + 1;
                         kwExpansionCount[sk] = 1;
+                    }
+                }
+            }).catch(function() {})
+        );
+
+        allPromises.push(
+            krFetchYouTubeSuggest(seed, lang, country).then(function(ytSuggestions) {
+                for (var i = 0; i < ytSuggestions.length; i++) {
+                    var yk = ytSuggestions[i].toLowerCase();
+                    if (yk.length > 2 && yk.length < 100 && !rawKeywords[yk]) {
+                        rawKeywords[yk] = true;
+                        kwSources[yk] = 'youtube';
+                        kwPosition[yk] = i + 1;
+                        kwExpansionCount[yk] = 1;
+                    } else if (rawKeywords[yk]) {
+                        kwExpansionCount[yk] = (kwExpansionCount[yk] || 0) + 1;
                     }
                 }
             }).catch(function() {})
@@ -8434,7 +8637,10 @@
         } else if (view === 'optimize' && _krResults.length > 0) {
             if (optimizeView) optimizeView.innerHTML = krRenderContentOptimization(document.getElementById('kr-seed').value, _krResults);
         } else if (view === 'clusters' && _krResults.length > 0) {
-            if (clustersView) clustersView.innerHTML = krRenderClustersView(_krResults);
+            if (clustersView) {
+                var semClusters = krSemanticClustering(_krResults);
+                clustersView.innerHTML = krRenderSemanticClusters(semClusters, _krResults);
+            }
         }
     }
 
