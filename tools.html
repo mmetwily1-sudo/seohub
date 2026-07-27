@@ -833,6 +833,8 @@
                         <div class="auto-progress" id="auto-progress" style="display:none;"><div class="auto-progress-bar" id="auto-progress-bar" style="width:0%"></div></div>
                         <div class="auto-summary" id="auto-summary" style="display:none;"></div>
 
+                        <div id="auto-agent-output" style="display:none;"></div>
+
                         <div class="auto-results" id="auto-results" style="display:none;">
                             <div class="auto-results-header" id="auto-results-header"></div>
                             <div class="auto-results-body" id="auto-results-body"></div>
@@ -13859,16 +13861,17 @@
         { id: 'images',    name: 'Images',     nameAr: '\u0627\u0644\u0635\u0648\u0631',                    icon: '\uD83D\uDDBC\uFE0F', fn: 'runImages',    urlInput: 'img-url',       outDiv: 'img-output' },
         { id: 'links',     name: 'Links',      nameAr: '\u0627\u0644\u0631\u0648\u0627\u0628\u0637',        icon: '\uD83D\uDD17', fn: 'runLinks',     urlInput: 'link-url',      outDiv: 'link-output' },
         { id: 'sitemap',   name: 'Sitemap',    nameAr: '\u062E\u0631\u064A\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639', icon: '\uD83D\uDDFA\uFE0F', fn: 'runSitemap',   urlInput: 'sm-url',        outDiv: 'sm-output' },
-        { id: 'report',    name: 'Report',     nameAr: '\u0627\u0644\u062A\u0642\u0631\u064A\u0631',        icon: '\uD83D\uDCC4', fn: 'runReport',    urlInput: 'rpt-url',       outDiv: 'rpt-output' }
+        { id: 'report',    name: 'Report',     nameAr: '\u0627\u0644\u062A\u0642\u0631\u064A\u0631',        icon: '\uD83D\uDCC4', fn: 'runReport',    urlInput: 'rpt-url',       outDiv: 'rpt-output' },
+        { id: 'ai-agent',  name: 'AI Agent',   nameAr: '\u0627\u0644\u0645\u0633\u0627\u0639\u062F \u0627\u0644\u0630\u0643\u064A', icon: '\uD83E\uDD16', fn: 'autoRunAgentStep', urlInput: null, outDiv: 'auto-agent-output' }
     ];
 
     var _autoTemplates = {
-        quick:      ['score','meta','audit'],
-        full:       ['score','meta','headings','audit','speed','content','keywords','images','links','sitemap'],
-        content:    ['content','keywords','images'],
-        technical:  ['sitemap','links','speed','audit'],
-        prepublish: ['meta','headings','content','keywords','images'],
-        competitor: ['score','content','keywords','report'],
+        quick:      ['score','meta','audit','ai-agent'],
+        full:       ['score','meta','headings','audit','speed','content','keywords','images','links','sitemap','ai-agent'],
+        content:    ['content','keywords','images','ai-agent'],
+        technical:  ['sitemap','links','speed','audit','ai-agent'],
+        prepublish: ['meta','headings','content','keywords','images','ai-agent'],
+        competitor: ['score','content','keywords','report','ai-agent'],
         custom:     []
     };
 
@@ -14098,6 +14101,10 @@
     }
 
     async function autoRunStep(step, url) {
+        if (step.id === 'ai-agent') {
+            await autoRunAgentStep();
+            return;
+        }
         var origInput = document.getElementById(step.urlInput);
         var origOutput = document.getElementById(step.outDiv);
         if (origInput) origInput.value = url;
@@ -14117,6 +14124,212 @@
             outHtml = '<p style="color:var(--gray-2);font-style:italic;">Step completed (output captured from original tool).</p>';
         }
         _autoResults[step.id] = outHtml;
+    }
+
+    async function autoRunAgentStep() {
+        var isArA = currentLang === 'ar';
+        var allResults = {};
+        var totalTools = 0;
+        var passedTools = 0;
+        var failedTools = 0;
+        var allIssues = [];
+        var allWarnings = [];
+        var allPassed = [];
+        var scoreVal = null;
+        var urlVal = document.getElementById('auto-url').value.trim() || '';
+
+        for (var i = 0; i < _autoPipeline.length; i++) {
+            var s = _autoPipeline[i];
+            if (s.id === 'ai-agent') continue;
+            var content = _autoResults[s.id] || '';
+            if (!content) continue;
+            totalTools++;
+            if (s.status === 'done') passedTools++;
+            else if (s.status === 'error') failedTools++;
+
+            var div = document.createElement('div');
+            div.innerHTML = content;
+            var text = div.textContent || div.innerText || '';
+
+            if (s.id === 'score') {
+                var m = text.match(/(\d+)/);
+                if (m) scoreVal = parseInt(m[1]);
+            }
+
+            var passM = text.match(/(\d+)\s*(Passed|pass|Success|\u0646\u062C\u0627\u062D)/i);
+            var failM = text.match(/(\d+)\s*(Failed|fail|Error|\u0641\u0634\u0644)/i);
+            var warnM = text.match(/(\d+)\s*(Warning|Warn|\u062A\u0646\u0628\u064A\u0647)/i);
+
+            if (passM) allPassed.push({ tool: isArA ? s.nameAr : s.name, count: parseInt(passM[1]) });
+            if (failM) allIssues.push({ tool: isArA ? s.nameAr : s.name, count: parseInt(failM[1]), content: text });
+            if (warnM) allWarnings.push({ tool: isArA ? s.nameAr : s.name, count: parseInt(warnM[1]), content: text });
+
+            if (s.id === 'meta') {
+                if (text.indexOf('Title: N/A') !== -1 || text.indexOf('\u0627\u0644\u0639\u0646\u0648\u0627\u0646: N/A') !== -1) allIssues.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'Missing title tag' });
+                if (text.indexOf('Description: N/A') !== -1 || text.indexOf('\u0627\u0644\u0648\u0635\u0641: N/A') !== -1) allIssues.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'Missing meta description' });
+                if (text.indexOf('OG Image: N/A') !== -1) allWarnings.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'Missing OG image' });
+            }
+            if (s.id === 'headings') {
+                if (text.indexOf('H1') === -1) allIssues.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'No H1 tag found' });
+                if (text.match(/H1.*\d+/) && parseInt((text.match(/H1:?\s*(\d+)/) || ['','0'])[1]) > 1) allIssues.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'Multiple H1 tags' });
+            }
+            if (s.id === 'images') {
+                var noAltM = text.match(/(\d+)\s*(?:images?|صور)\s*(?:missing|without|بدون)\s*(?:alt|ALt)/i);
+                if (noAltM) allIssues.push({ tool: isArA ? s.nameAr : s.name, count: parseInt(noAltM[1]), content: 'Images missing alt text' });
+            }
+            if (s.id === 'speed') {
+                if (text.indexOf('404') !== -1) allIssues.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'Speed check returned 404' });
+            }
+            if (s.id === 'audit') {
+                if (text.indexOf('SSL') !== -1 && text.indexOf('valid') === -1 && text.indexOf('\u0635\u0627\u0644\u062D') === -1) allWarnings.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'SSL status unclear' });
+            }
+            if (s.id === 'sitemap') {
+                if (text.indexOf('No') !== -1 || text.indexOf('\u0644\u0627') !== -1) {
+                    if (text.indexOf('itemap') !== -1 || text.indexOf('\u062E\u0631\u064A\u0637') !== -1) allWarnings.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'Sitemap may be missing' });
+                }
+            }
+            if (s.id === 'links') {
+                var brokenM = text.match(/(\d+)\s*(?:broken|dead|404)/i);
+                if (brokenM) allIssues.push({ tool: isArA ? s.nameAr : s.name, count: parseInt(brokenM[1]), content: 'Broken links found' });
+            }
+        }
+
+        var totalIssues = 0;
+        var totalWarnings = 0;
+        var totalPassed = 0;
+        for (var j = 0; j < allIssues.length; j++) totalIssues += allIssues[j].count;
+        for (var k = 0; k < allWarnings.length; k++) totalWarnings += allWarnings[k].count;
+        for (var l = 0; l < allPassed.length; l++) totalPassed += allPassed[l].count;
+
+        if (scoreVal === null) {
+            if (totalIssues === 0) scoreVal = 90;
+            else if (totalIssues <= 3) scoreVal = 70;
+            else if (totalIssues <= 6) scoreVal = 50;
+            else scoreVal = 30;
+            if (totalWarnings > 3) scoreVal = Math.max(scoreVal - 10, 10);
+        }
+
+        var scoreColor = scoreVal >= 80 ? '#059669' : (scoreVal >= 60 ? '#d97706' : '#dc2626');
+        var scoreEmoji = scoreVal >= 80 ? '\uD83C\uDF1F' : (scoreVal >= 60 ? '\u26A0\uFE0F' : '\uD83D\uDEA8');
+        var scoreLabel = scoreVal >= 80 ? (isArA ? '\u0645\u0645\u062A\u0627\u0632' : 'Excellent') :
+                         scoreVal >= 60 ? (isArA ? '\u064A\u062D\u062A\u0627\u062C \u062A\u062D\u0633\u064A\u0646' : 'Needs Improvement') :
+                         (isArA ? '\u063A\u064A\u0631 \u0645\u0642\u0628\u0648\u0644' : 'Critical');
+
+        var html = '';
+        html += '<div style="background:linear-gradient(135deg,#1e1b4b,#7c3aed);color:white;border-radius:16px;padding:24px 28px;margin-bottom:20px;">';
+        html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">';
+        html += '<div style="width:52px;height:52px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;">\uD83E\uDD16</div>';
+        html += '<div><h2 style="margin:0;font-size:18px;font-weight:700;">' + (isArA ? '\u062A\u0642\u0631\u064A\u0631 \u0627\u0644\u0645\u0633\u0627\u0639\u062F \u0627\u0644\u0630\u0643\u064A' : 'AI Agent Analysis') + '</h2>';
+        html += '<p style="margin:2px 0 0;opacity:0.8;font-size:12px;">' + (isArA ? '\u062A\u0642\u0631\u064A\u0631 \u0634\u0627\u0645\u0644 \u0645\u0646 \u0646\u062A\u0627\u0626\u062C \u0627\u0644\u0623\u062F\u0648\u0627\u062A' : 'Comprehensive analysis of all results') + '</p>';
+        html += '</div></div>';
+        html += '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
+        html += '<div style="background:rgba(255,255,255,0.15);border-radius:12px;padding:14px 18px;flex:1;min-width:120px;text-align:center;">';
+        html += '<div style="font-size:28px;font-weight:800;">' + scoreEmoji + ' ' + scoreVal + '</div>';
+        html += '<div style="font-size:11px;opacity:0.8;margin-top:2px;">' + (isArA ? '\u0627\u0644\u0646\u062a\u064A\u062C\u0629 \u0627\u0644\u0639\u0627\u0645\u0629' : 'Overall Score') + '</div>';
+        html += '<div style="font-size:12px;font-weight:600;margin-top:4px;">' + scoreLabel + '</div>';
+        html += '</div>';
+        html += '<div style="background:rgba(255,255,255,0.15);border-radius:12px;padding:14px 18px;flex:1;min-width:100px;text-align:center;">';
+        html += '<div style="font-size:28px;font-weight:800;color:#86efac;">' + totalPassed + '</div>';
+        html += '<div style="font-size:11px;opacity:0.8;">' + (isArA ? '\u0646\u062C\u0627\u062D' : 'Passed') + '</div>';
+        html += '</div>';
+        html += '<div style="background:rgba(255,255,255,0.15);border-radius:12px;padding:14px 18px;flex:1;min-width:100px;text-align:center;">';
+        html += '<div style="font-size:28px;font-weight:800;color:#fca5a5;">' + totalIssues + '</div>';
+        html += '<div style="font-size:11px;opacity:0.8;">' + (isArA ? '\u0645\u0634\u0643\u0644\u0627\u062A' : 'Issues') + '</div>';
+        html += '</div>';
+        html += '<div style="background:rgba(255,255,255,0.15);border-radius:12px;padding:14px 18px;flex:1;min-width:100px;text-align:center;">';
+        html += '<div style="font-size:28px;font-weight:800;color:#fde68a;">' + totalWarnings + '</div>';
+        html += '<div style="font-size:11px;opacity:0.8;">' + (isArA ? '\u062A\u0646\u0628\u064A\u0647\u0627\u062A' : 'Warnings') + '</div>';
+        html += '</div>';
+        html += '<div style="background:rgba(255,255,255,0.15);border-radius:12px;padding:14px 18px;flex:1;min-width:100px;text-align:center;">';
+        html += '<div style="font-size:28px;font-weight:800;">' + totalTools + '</div>';
+        html += '<div style="font-size:11px;opacity:0.8;">' + (isArA ? '\u0627\u0644\u0623\u062F\u0648\u0627\u062A' : 'Tools Run') + '</div>';
+        html += '</div>';
+        html += '</div></div>';
+
+        if (allIssues.length > 0) {
+            html += '<div style="background:#fef2f2;border-left:4px solid #dc2626;border-radius:0 12px 12px 0;padding:16px 20px;margin-bottom:16px;">';
+            html += '<h3 style="margin:0 0 12px;font-size:15px;color:#991b1b;">\uD83D\uDEA8 ' + (isArA ? '\u0645\u0634\u0643\u0644\u0627\u062A \u0639\u0645\u064A\u0632\u0629 (' + totalIssues + ')' : 'Critical Issues (' + totalIssues + ')') + '</h3>';
+            for (var ii = 0; ii < allIssues.length; ii++) {
+                html += '<div style="padding:8px 0;border-bottom:1px solid #fecaca;">';
+                html += '<span style="font-weight:600;color:#991b1b;">' + esc(allIssues[ii].tool) + '</span>';
+                html += ' <span style="background:#dc2626;color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;">' + allIssues[ii].count + '</span>';
+                html += '<div style="color:#7f1d1d;font-size:13px;margin-top:4px;">' + esc(allIssues[ii].content) + '</div>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+
+        if (allWarnings.length > 0) {
+            html += '<div style="background:#fefce8;border-left:4px solid #d97706;border-radius:0 12px 12px 0;padding:16px 20px;margin-bottom:16px;">';
+            html += '<h3 style="margin:0 0 12px;font-size:15px;color:#854d0e;">\u26A0\uFE0F ' + (isArA ? '\u062A\u0646\u0628\u064A\u0647\u0627\u062A (' + totalWarnings + ')' : 'Warnings (' + totalWarnings + ')') + '</h3>';
+            for (var jj = 0; jj < allWarnings.length; jj++) {
+                html += '<div style="padding:8px 0;border-bottom:1px solid #fde68a;">';
+                html += '<span style="font-weight:600;color:#854d0e;">' + esc(allWarnings[jj].tool) + '</span>';
+                html += ' <span style="background:#d97706;color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;">' + allWarnings[jj].count + '</span>';
+                html += '<div style="color:#78350f;font-size:13px;margin-top:4px;">' + esc(allWarnings[jj].content) + '</div>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+
+        if (allPassed.length > 0) {
+            html += '<div style="background:#ecfdf5;border-left:4px solid #059669;border-radius:0 12px 12px 0;padding:16px 20px;margin-bottom:16px;">';
+            html += '<h3 style="margin:0 0 12px;font-size:15px;color:#065f46;">\u2705 ' + (isArA ? '\u0627\u0644\u0646\u062A\u0627\u0626\u062C \u0627\u0644\u0625\u062C\u0627\u0628\u064A\u0629 (' + totalPassed + ')' : 'Passed Checks (' + totalPassed + ')') + '</h3>';
+            for (var kk = 0; kk < allPassed.length; kk++) {
+                html += '<div style="padding:6px 0;">';
+                html += '<span style="font-weight:600;color:#065f46;">' + esc(allPassed[kk].tool) + '</span>';
+                html += ' <span style="background:#059669;color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;">' + allPassed[kk].count + '</span>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+
+        var recommendations = [];
+        if (scoreVal < 60) recommendations.push({ priority: '\uD83D\uDEA8', text: isArA ? '\u064A\u064F\u0646\u0638\u0631 \u062A\u062D\u0633\u064A\u0646 \u0627\u0644\u0645\u0634\u0643\u0644\u0627\u062A \u0627\u0644\u0639\u0645\u064A\u0632\u0629 \u0623\u0648\u0644\u0627\u064B \u0642\u0628\u0644 \u0627\u0644\u0631\u0641\u0639' : 'Fix critical issues before deployment' });
+        if (totalWarnings > 3) recommendations.push({ priority: '\u26A0\uFE0F', text: isArA ? '\u062A\u062D\u0644\u064A\u0644 \u0627\u0644\u062A\u0646\u0628\u064A\u0647\u0627\u062A \u064A\u064F\u062D\u0633\u0651\u0646 \u062C\u0627\u0631\u064A \u0627\u0644\u0623\u062F\u0627\u0621' : 'Warnings reduce overall quality score' });
+
+        if (scoreVal < 60) {
+            if (!allIssues.some(function(x){ return x.content.indexOf('title') !== -1 || x.content.indexOf('\u0627\u0644\u0639\u0646\u0648\u0627\u0646') !== -1; }))
+                recommendations.push({ priority: '\uD83D\uDD11', text: isArA ? '\u0623\u0636\u0641 \u0639\u0646\u0648\u0627\u0646 \u0631\u0626\u064A\u0633\u064A \u0648\u0635\u0641 \u0648\u0635\u0641 \u0645\u0648\u0635\u0649 \u0644\u0644\u0645\u062D\u062A\u0648\u0649' : 'Add unique title and meta description for each page' });
+            if (!allIssues.some(function(x){ return x.content.indexOf('H1') !== -1; }))
+                recommendations.push({ priority: '\uD83D\uDCC9', text: isArA ? '\u062A\u0623\u0643\u064A\u062F \u0627\u0644\u062A\u0634\u0627\u0628\u0647 \u0628\u0648\u0627\u0633\u0637\u0629 H1 \u0648\u0627\u062D\u062F' : 'Ensure single H1 heading per page' });
+            if (!allIssues.some(function(x){ return x.content.indexOf('alt') !== -1; }))
+                recommendations.push({ priority: '\uD83D\uDDBC\uFE0F', text: isArA ? '\u0623\u0636\u0641 \u0646\u0635\u0648\u0635 alt \u0644\u062C\u0645\u064A\u0639 \u0627\u0644\u0635\u0648\u0631' : 'Add descriptive alt text to all images' });
+        }
+
+        recommendations.push({ priority: '\uD83D\uDD17', text: isArA ? '\u062A\u062D\u0642\u0642 \u0645\u0646 \u0627\u0644\u0631\u0648\u0627\u0628\u0637 \u0627\u0644\u0645\u0643\u0633\u0631\u0631\u0629 \u0648\u0627\u0644\u0645\u062D\u0644\u064A\u0629' : 'Fix broken links and redirects' });
+        recommendations.push({ priority: '\uD83D\uDDFA\uFE0F', text: isArA ? '\u062A\u0623\u0643\u064A\u062F \u0625\u0646\u0634\u0627\u0621 \u062E\u0631\u064A\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639 \u0641\u064A Google Search Console' : 'Submit sitemap to Google Search Console' });
+        if (totalWarnings > 2) recommendations.push({ priority: '\u26A1', text: isArA ? '\u062D\u0633\u0651\u0646 \u0633\u0631\u0639\u0629 \u062A\u062D\u0645\u064A\u0644 \u0627\u0644\u0635\u0641\u062D\u0629' : 'Improve page load speed' });
+
+        if (recommendations.length > 0) {
+            html += '<div style="background:#f5f3ff;border-left:4px solid #7c3aed;border-radius:0 12px 12px 0;padding:16px 20px;margin-bottom:16px;">';
+            html += '<h3 style="margin:0 0 12px;font-size:15px;color:#5b21b6;">\uD83D\uDCA1 ' + (isArA ? '\u062A\u0648\u0635\u064A\u0627\u062A \u0627\u0644\u0645\u0633\u0627\u0639\u062F' : 'AI Recommendations') + '</h3>';
+            for (var rr = 0; rr < recommendations.length; rr++) {
+                html += '<div style="padding:8px 0;' + (rr < recommendations.length - 1 ? 'border-bottom:1px solid #ddd6fe;' : '') + '">';
+                html += '<span style="margin-right:6px;">' + recommendations[rr].priority + '</span>';
+                html += '<span style="font-size:14px;color:#4c1d95;">' + esc(recommendations[rr].text) + '</span>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+
+        html += '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px;">';
+        html += '<h3 style="margin:0 0 8px;font-size:14px;color:var(--gray-1);">' + (isArA ? '\uD83D\uDCCB \u0645\u0644\u062E\u0635 \u0627\u0644\u062A\u0642\u0631\u064A\u0631' : 'Report Summary') + '</h3>';
+        html += '<div style="font-size:13px;color:var(--gray-1);line-height:1.8;">';
+        html += (isArA ? '\u062A\u0645 \u062A\u062D\u0644\u064A\u0644 <strong>' + totalTools + '</strong> \u0623\u062F\u0648\u0627\u062A' : 'Analyzed <strong>' + totalTools + '</strong> tools');
+        html += (isArA ? ' \u0628\u0646\u062C\u0627\u062D <strong>' + totalPassed + '</strong>' : ' with <strong>' + totalPassed + '</strong> passed');
+        html += ', <span style="color:#dc2626;font-weight:600;">' + totalIssues + ' ' + (isArA ? '\u0645\u0634\u0643\u0644\u0629' : 'issues') + '</span>';
+        html += ', <span style="color:#d97706;font-weight:600;">' + totalWarnings + ' ' + (isArA ? '\u062A\u0646\u0628\u064A\u0647' : 'warnings') + '</span>.';
+        html += '<br><strong>' + (isArA ? '\u0627\u0644\u0646\u062A\u064A\u062C\u0629 \u0627\u0644\u0639\u0627\u0645\u0629:' : 'Overall Score:') + '</strong> ';
+        html += '<span style="color:' + scoreColor + ';font-weight:700;font-size:16px;">' + scoreVal + '/100</span> (' + scoreLabel + ')';
+        html += '</div></div>';
+
+        var outDiv = document.getElementById('auto-agent-output');
+        if (outDiv) {
+            outDiv.innerHTML = html;
+            outDiv.style.display = 'block';
+        }
+        _autoResults['ai-agent'] = html;
     }
 
     document.addEventListener('DOMContentLoaded', function() {
