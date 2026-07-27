@@ -386,7 +386,7 @@
         .auto-results-tab .auto-tab-status.running{background:#f59e0b;animation:autoPulse 1s infinite}
         .auto-results-tab .auto-tab-status.error{background:#ef4444}
         .auto-results-tab .auto-tab-status.pending{background:var(--gray-4)}
-        .auto-results-body{padding:16px;min-height:100px;max-height:600px;overflow-y:auto;font-size:13px}
+        .auto-results-body{padding:16px;min-height:200px;max-height:800px;overflow-y:auto;font-size:13px}
         .auto-add-dropdown{position:absolute;background:var(--white);border:1px solid var(--gray-4);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;padding:8px;max-height:300px;overflow-y:auto;width:220px}
         .auto-add-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;transition:var(--transition)}
         .auto-add-item:hover{background:var(--gray-5)}
@@ -427,6 +427,18 @@
         .auto-agent-chip:hover{border-color:#6366f1;color:#6366f1}
         @media(max-width:900px){.auto-split{grid-template-columns:1fr}.auto-agent{height:420px}}
         @media(max-width:768px){.auto-pipeline{flex-direction:column;align-items:stretch}.auto-arrow{transform:rotate(90deg);text-align:center}.auto-step{justify-content:center}}
+        .auto-combined-section{margin-bottom:16px;border:1px solid var(--gray-4);border-radius:10px;overflow:hidden}
+        .auto-combined-header{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--gray-5);border-bottom:1px solid var(--gray-4)}
+        .auto-combined-icon{font-size:18px;flex-shrink:0}
+        .auto-combined-title{font-weight:700;font-size:14px;color:var(--primary);flex:1}
+        .auto-combined-status{font-size:16px;flex-shrink:0}
+        .auto-combined-body{padding:14px;font-size:13px;line-height:1.6}
+        .auto-combined-body table{width:100%;border-collapse:collapse;margin:8px 0}
+        .auto-combined-body table th{background:var(--gray-5);padding:8px 10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;border-bottom:2px solid var(--gray-4)}
+        .auto-combined-body table td{padding:7px 10px;border-bottom:1px solid var(--gray-5);font-size:12px}
+        .auto-combined-body .issue-pass{color:#10b981;font-weight:700}
+        .auto-combined-body .issue-fail{color:#ef4444;font-weight:700}
+        .auto-combined-body .issue-warn{color:#f59e0b;font-weight:700}
     </style>
 </head><body>
     <header class="header">
@@ -13993,16 +14005,15 @@
 
         autoUpdateProgress(total, total);
         autoRenderResultsHeader();
-        if (_autoResults[Object.keys(_autoResults)[0]]) {
-            autoShowResultTab(Object.keys(_autoResults)[0]);
-        }
+        autoShowResultTab('__combined__');
 
         var summEl = document.getElementById('auto-summary');
         summEl.innerHTML = '';
-        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val">' + total + '</span><span class="auto-summary-label">Total Steps</span></div>';
-        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val" style="color:#10b981;">' + passed + '</span><span class="auto-summary-label">Passed</span></div>';
-        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val" style="color:#ef4444;">' + failed + '</span><span class="auto-summary-label">Failed</span></div>';
-        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val">' + (passed > 0 ? Math.round(passed / total * 100) + '%' : '0%') + '</span><span class="auto-summary-label">Success Rate</span></div>';
+        var isArA = currentLang === 'ar';
+        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val">' + total + '</span><span class="auto-summary-label">' + (isArA ? '\u0625\u062C\u0645\u0627\u0644\u064A' : 'Total') + '</span></div>';
+        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val" style="color:#10b981;">' + passed + '</span><span class="auto-summary-label">' + (isArA ? '\u0646\u062C\u0627\u062D' : 'Passed') + '</span></div>';
+        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val" style="color:#ef4444;">' + failed + '</span><span class="auto-summary-label">' + (isArA ? '\u0641\u0634\u0644' : 'Failed') + '</span></div>';
+        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val">' + (passed > 0 ? Math.round(passed / total * 100) + '%' : '0%') + '</span><span class="auto-summary-label">' + (isArA ? '\u0646\u0628\u0631\u0629 \u0627\u0644\u0646\u062C\u0627\u062D' : 'Success') + '</span></div>';
 
         _autoRunning = false;
         document.getElementById('auto-run-btn').style.display = 'inline-flex';
@@ -14023,14 +14034,21 @@
 
     function autoRenderResultsHeader() {
         var header = document.getElementById('auto-results-header');
-        var html = '';
+        var isArH = currentLang === 'ar';
+        var doneCount = 0;
+        for (var i = 0; i < _autoPipeline.length; i++) {
+            if (_autoPipeline[i].status === 'done') doneCount++;
+        }
+        var html = '<div class="auto-results-tab active" onclick="autoShowResultTab(\'__combined__\')">';
+        html += '<span class="auto-tab-status ' + (doneCount === _autoPipeline.length ? 'done' : (doneCount > 0 ? 'running' : 'pending')) + '"></span>';
+        html += '&#128196; ' + (isArH ? '\u0627\u0644\u0643\u0644' : 'All Results');
+        if (doneCount > 0) html += ' (' + doneCount + '/' + _autoPipeline.length + ')';
+        html += '</div>';
         for (var i = 0; i < _autoPipeline.length; i++) {
             var s = _autoPipeline[i];
-            var activeClass = '';
-            if (_autoResults[s.id]) activeClass = ' active';
-            html += '<div class="auto-results-tab' + activeClass + '" onclick="autoShowResultTab(\'' + s.id + '\')">';
+            html += '<div class="auto-results-tab" onclick="autoShowResultTab(\'' + s.id + '\')">';
             html += '<span class="auto-tab-status ' + s.status + '"></span>';
-            html += s.icon + ' ' + (currentLang === 'ar' ? s.nameAr : s.name);
+            html += s.icon + ' ' + (isArH ? s.nameAr : s.name);
             html += '</div>';
         }
         header.innerHTML = html;
@@ -14040,6 +14058,36 @@
         var tabs = document.querySelectorAll('.auto-results-tab');
         tabs.forEach(function(t) { t.classList.remove('active'); });
         var body = document.getElementById('auto-results-body');
+
+        if (toolId === '__combined__') {
+            var isArC = currentLang === 'ar';
+            var html = '<div style="padding:4px 0;">';
+            html += '<div style="text-align:center;margin-bottom:20px;"><h2 style="margin:0;font-size:18px;color:var(--primary);">&#128202; ' + (isArC ? '\u062A\u0642\u0631\u064A\u0631 \u0627\u0644\u062A\u062D\u0644\u064A\u0644 \u0627\u0644\u0645\u062C\u0645\u0639' : 'Combined Analysis Report') + '</h2>';
+            var urlVal = document.getElementById('auto-url').value.trim();
+            if (urlVal) html += '<p style="color:var(--gray-1);font-size:13px;margin-top:4px;">' + esc(urlVal) + '</p>';
+            html += '</div>';
+            for (var i = 0; i < _autoPipeline.length; i++) {
+                var s = _autoPipeline[i];
+                var content = _autoResults[s.id] || '';
+                var statusIcon = s.status === 'done' ? '&#9989;' : (s.status === 'error' ? '&#10060;' : '&#9203;');
+                html += '<div class="auto-combined-section">';
+                html += '<div class="auto-combined-header">';
+                html += '<span class="auto-combined-icon">' + s.icon + '</span>';
+                html += '<span class="auto-combined-title">' + (isArC ? s.nameAr : s.name) + '</span>';
+                html += '<span class="auto-combined-status">' + statusIcon + '</span>';
+                html += '</div>';
+                html += '<div class="auto-combined-body">' + (content || '<p style="color:var(--gray-2);font-style:italic;">' + (isArC ? '\u0644\u0645 \u064A\u062A\u0645 \u0627\u0644\u062A\u0634\u063A\u064A\u0644 \u0628\u0639\u062F' : 'Not completed') + '</p>') + '</div>';
+                html += '</div>';
+            }
+            html += '</div>';
+            body.innerHTML = html;
+            tabs.forEach(function(t) {
+                if (t.textContent.indexOf(isArC ? '\u0627\u0644\u0643\u0644' : 'All Results') !== -1) t.classList.add('active');
+            });
+            body.scrollTop = 0;
+            return;
+        }
+
         var tool = autoGetTool(toolId);
         if (_autoResults[toolId]) {
             body.innerHTML = _autoResults[toolId];
@@ -14053,7 +14101,7 @@
             }
         }
         tabs.forEach(function(t) {
-            if (t.textContent.indexOf(tool ? (currentLang === 'ar' ? tool.nameAr : tool.name) : '') !== -1) t.classList.add('active');
+            if (tool && t.textContent.indexOf(currentLang === 'ar' ? tool.nameAr : tool.name) !== -1) t.classList.add('active');
         });
     }
 
