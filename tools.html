@@ -13537,8 +13537,8 @@
         autoAgentAddMsg(welcome, 'agent');
         setTimeout(function() {
             var tips = isAr
-                ? 'يمكنك كتابة أوامر مثل:<br>&#8226; <code>حلل example.com</code><br>&#8226; <code>audit</code> - تحليل شامل<br>&#8226; <code>سرعة</code> - فحص السرعة<br>&#8226; <code>محتوى</code> - تحليل المحتوى<br>&#8226; <code>مساعدة</code> - عرض الأوامر'
-                : 'You can type commands like:<br>&#8226; <code>analyze example.com</code><br>&#8226; <code>full audit</code> - comprehensive analysis<br>&#8226; <code>speed</code> - check speed<br>&#8226; <code>content</code> - content analysis<br>&#8226; <code>help</code> - show all commands';
+                ? 'يمكنك كتابة أوامر مثل:<br>&#8226; <code>حلل example.com</code><br>&#8226; <code>audit</code> - تحليل شامل<br>&#8226; <code>سرعة</code> - فحص السرعة<br>&#8226; <code>محتوى</code> - تحليل المحتوى<br>&#8226; <code>هيكل</code> - فحص الهيكل<br>&#8226; <code>بوت</code> - فحص robots.txt<br>&#8226; <code>منافس</code> - تحليل المنافس<br>&#8226; <code>منتجات</code> - رصد المنتجات<br>&#8226; <code>بحث</code> - بحث كلمات مفتاحية<br>&#8226; <code>مساعدة</code> - عرض جميع الأوامر'
+                : 'You can type commands like:<br>&#8226; <code>analyze example.com</code><br>&#8226; <code>full audit</code> - comprehensive analysis<br>&#8226; <code>speed</code> - check speed<br>&#8226; <code>content</code> - content analysis<br>&#8226; <code>schema</code> - structured data<br>&#8226; <code>robots</code> - robots.txt<br>&#8226; <code>competitor</code> - competitor analysis<br>&#8226; <code>products</code> - product monitoring<br>&#8226; <code>research</code> - keyword research<br>&#8226; <code>help</code> - show all commands';
             autoAgentAddMsg(tips, 'agent');
         }, 600);
         setTimeout(function() {
@@ -13584,31 +13584,41 @@
             // HELP
             if (lower === 'help' || lower === 'مساعدة' || lower === '?') {
                 var h = isAr
-                    ? '&#128295; <b>الأوامر المتاحة:</b><br><br>' +
+                    ? '&#128295; <b>الأوامر المتاحة (18 أداة):</b><br><br>' +
                       '<code>حلل [url]</code> - تحليل سريع للموقع<br>' +
                       '<code>audit</code> - تحليل شامل كامل<br>' +
+                      '<code>شامل</code> / <code>full</code> - تحليل شامل (كل الأدوات)<br>' +
                       '<code>سرعة</code> / <code>speed</code> - فحص سرعة التحميل<br>' +
                       '<code>محتوى</code> / <code>content</code> - تحليل المحتوى<br>' +
                       '<code>كلمات</code> / <code>keywords</code> - استخراج الكلمات المفتاحية<br>' +
                       '<code>صور</code> / <code>images</code> - فحص الصور<br>' +
                       '<code>روابط</code> / <code>links</code> - تحليل الروابط<br>' +
                       '<code>عنوان</code> / <code>headings</code> - فحص العناوين<br>' +
-                       '<code>خريطة</code> / <code>sitemap</code> - فحص خريطة الموقع<br>' +
-                       '<code>تقرير</code> / <code>report</code> - تقرير مفصل<br>' +
-                       '<code>منتجات</code> / <code>products</code> - رصد المنتجات<br>' +
-                       '<code>بحث</code> / <code>research</code> - بحث الكلمات المفتاحية<br>' +
-                       '<code>شامل</code> / <code>full</code> - تحليل شامل (كل الأدوات)<br><br>' +
-                       'يمكنك also write رابط الموقع مباشرة لبدء التحليل السريع.'
-                    : '&#128295; <b>Available Commands:</b><br><br>' +
+                      '<code>هيكل</code> / <code>schema</code> - فحص الهيكل (Structured Data)<br>' +
+                      '<code>بوت</code> / <code>robots</code> - فحص robots.txt<br>' +
+                      '<code>خريطة</code> / <code>sitemap</code> - فحص خريطة الموقع<br>' +
+                      '<code>النتيجة</code> / <code>score</code> - فحص النتيجة<br>' +
+                      '<code>وسوم</code> / <code>meta</code> - فحص الوسوم<br>' +
+                      '<code>منافس</code> / <code>competitor</code> - تحليل المنافس<br>' +
+                      '<code>تقرير</code> / <code>report</code> - تقرير مفصل<br>' +
+                      '<code>منتجات</code> / <code>products</code> - رصد المنتجات<br>' +
+                      '<code>بحث</code> / <code>research</code> - بحث الكلمات المفتاحية<br><br>' +
+                      'يمكنك also write رابط الموقع مباشرة لبدء التحليل السريع.'
+                    : '&#128295; <b>Available Commands (18 tools):</b><br><br>' +
                       '<code>analyze [url]</code> - Quick SEO scan<br>' +
                       '<code>audit</code> / <code>full audit</code> - Full comprehensive audit<br>' +
+                      '<code>score</code> - SEO score check<br>' +
+                      '<code>meta</code> - Meta tags check<br>' +
                       '<code>speed</code> - Page speed check<br>' +
                       '<code>content</code> - Content analysis<br>' +
                       '<code>keywords</code> - Extract keywords<br>' +
                       '<code>images</code> - Image analysis<br>' +
                       '<code>links</code> - Link analysis<br>' +
                       '<code>headings</code> - Heading structure<br>' +
+                      '<code>schema</code> - Structured data check<br>' +
+                      '<code>robots</code> - robots.txt check<br>' +
                       '<code>sitemap</code> - Sitemap check<br>' +
+                      '<code>competitor</code> - Competitor analysis<br>' +
                       '<code>report</code> - Full report<br>' +
                       '<code>products</code> / <code>store</code> - Product monitoring<br>' +
                       '<code>research</code> - Keyword research<br><br>' +
@@ -13617,7 +13627,11 @@
                 autoAgentSetChips([
                     { label: isAr ? '&#128269; تحليل سريع' : '&#128269; Quick Scan', fn: "autoAgentCmd('quick')" },
                     { label: isAr ? '&#128200; تحليل شامل' : '&#128200; Full Audit', fn: "autoAgentCmd('full')" },
-                    { label: isAr ? '&#9889; فحص السرعة' : '&#9889; Speed Check', fn: "autoAgentCmd('speed')" }
+                    { label: isAr ? '&#9889; فحص السرعة' : '&#9889; Speed Check', fn: "autoAgentCmd('speed')" },
+                    { label: isAr ? '&#128270; هيكل' : '&#128270; Schema', fn: "autoAgentCmd('schema')" },
+                    { label: isAr ? '&#129302; بوت' : '&#129302; Robots', fn: "autoAgentCmd('robots')" },
+                    { label: isAr ? '&#128722; منتجات' : '&#128722; Products', fn: "autoAgentCmd('products')" },
+                    { label: isAr ? '&#128270; بحث كلمات' : '&#128270; KW Research', fn: "autoAgentCmd('research')" }
                 ]);
                 return;
             }
@@ -13664,6 +13678,36 @@
             // KEYWORDS
             if (lower.indexOf('keyword') !== -1 || lower.indexOf('كلمات') !== -1 || lower.indexOf('الكلمات') !== -1) {
                 autoAgentRunSingleTool('keywords', url, isAr, isAr ? 'استخراج الكلمات' : 'Keywords Extraction');
+                return;
+            }
+
+            // SCHEMA
+            if (lower.indexOf('schema') !== -1 || lower.indexOf('هيكل') !== -1 || lower.indexOf('هيكلي') !== -1) {
+                autoAgentRunSingleTool('schema', url, isAr, isAr ? 'فحص الهيكل' : 'Schema Check');
+                return;
+            }
+
+            // ROBOTS
+            if (lower.indexOf('robots') !== -1 || lower.indexOf('روبوت') !== -1 || lower.indexOf('بوت') !== -1) {
+                autoAgentRunSingleTool('robots', url, isAr, isAr ? 'فحص البوت' : 'Robots Check');
+                return;
+            }
+
+            // COMPETITOR
+            if (lower.indexOf('competitor') !== -1 || lower.indexOf('منافس') !== -1 || lower.indexOf('المنافس') !== -1) {
+                autoAgentRunSingleTool('competitor', url, isAr, isAr ? 'تحليل المنافس' : 'Competitor Analysis');
+                return;
+            }
+
+            // SCORE
+            if (lower.indexOf('score') !== -1 || lower.indexOf('النتيجة') !== -1 || lower.indexOf('نقط') !== -1) {
+                autoAgentRunSingleTool('score', url, isAr, isAr ? 'فحص النتيجة' : 'Score Check');
+                return;
+            }
+
+            // META
+            if (lower.indexOf('meta') !== -1 || lower.indexOf('وسوم') !== -1 || lower.indexOf('الوسوم') !== -1) {
+                autoAgentRunSingleTool('meta', url, isAr, isAr ? 'فحص الوسوم' : 'Meta Tags Check');
                 return;
             }
 
@@ -13731,7 +13775,9 @@
 
     function autoAgentMatchCommand(lower) {
         var cmds = ['analyze','audit','full','speed','content','keywords','images','links','headings','sitemap','report','quick',
-                     'حلل','تحليل','شامل','سرعة','محتوى','المحتوى','كلمات','الكلمات','صور','الصور','روابط','الروابط','عنوان','العناوين','خريطة','الخريطة','تقرير','سريع'];
+                     'schema','robots','competitor','products','store','shop','research','score','meta',
+                     'حلل','تحليل','شامل','سرعة','محتوى','المحتوى','كلمات','الكلمات','صور','الصور','روابط','الروابط','عنوان','العناوين','خريطة','الخريطة','تقرير','سريع',
+                     'هيكل','هيكلي','روبوت','بوت','منافس','المنافس','منتجات','المتجر','بحث','مفتاح','النتيجة','الوسوم'];
         for (var i = 0; i < cmds.length; i++) {
             if (lower.indexOf(cmds[i]) !== -1) return true;
         }
