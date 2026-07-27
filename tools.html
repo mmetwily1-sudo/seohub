@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8973,7 +8973,7 @@
         for (var i = 0; i < topics.length; i++) {
             var topic = topics[i];
             if (topic.subTopics && topic.subTopics.length < 3 && topic.keywords.length > 8) {
-                gaps.push({ topic: topic.name, reason: currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0636\u0648\u0639 \u064a\u062d\u062a\u0648\u064a \u0639\u0644\u0649 \u0645\u0632\u064a\u062f \u0645\u0646 ' + topic.subTopics.length + ' \u0645\u0648\u0636\u0648\u0639 \u0641\u0631\u0639\u064a \u0644\u0646 ' + topic.keywords.length + ' \u0643\u0644\u0645\u0629 \u0645\u0641\u062a\u0627\u062d\u064a\u0629' : 'Only ' + topic.subTopics.length + ' sub-topics for ' + topic.keywords.length + ' keywords — needs more depth' });
+                gaps.push({ topic: topic.name, reason: currentLang === 'ar' ? '\u0627\u0644\u0645\u0648\u0636\u0648\u0639 \u064a\u062d\u062a\u0648\u064a \u0639\u0644\u0649 \u0645\u0632\u064a\u062f \u0645\u0646 ' + topic.subTopics.length + ' \u0645\u0648\u0636\u0648\u0639 \u0641\u0631\u0639\u064a \u0644\u0646 ' + topic.keywords.length + ' \u0643\u0644\u0645\u0629 \u0645\u0641\u062a\u0627\u062d\u064a\u0629' : 'Only ' + topic.subTopics.length + ' sub-topics for ' + topic.keywords.length + ' keywords - needs more depth' });
             }
             if (topic.metrics.avgDifficulty < 30 && topic.metrics.totalVolume > 500) {
                 gaps.push({ topic: topic.name, reason: currentLang === 'ar' ? '\u0641\u0631\u0635 \u0630\u0647\u0628\u064a: \u0635\u0639\u0648\u0628\u0629 \u0645\u0646\u062e\u0641\u0636\u0629 (' + topic.metrics.avgDifficulty + ') \u0648\u062d\u0633\u0645 \u0645\u0631\u062a\u0641\u0639 (' + topic.metrics.totalVolume + ')' : 'Quick win: Low KD (' + topic.metrics.avgDifficulty + ') with decent volume (' + topic.metrics.totalVolume + ')' });
@@ -11170,7 +11170,7 @@
         if (!out) return;
         var html = '<div style="background:white;border:1px solid #dbeafe;border-radius:12px;padding:20px;">';
         html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
-        html += '<strong style="font-size:16px;color:#1e40af;">' + esc(seed) + ' — ' + (currentLang === 'ar' ? '\u0645\u062d\u062a\u0648\u0649' : 'Outline') + '</strong>';
+        html += '<strong style="font-size:16px;color:#1e40af;">' + esc(seed) + ' - ' + (currentLang === 'ar' ? '\u0645\u062d\u062a\u0648\u0649' : 'Outline') + '</strong>';
         html += '<button onclick="krCopyOutline()" style="padding:4px 12px;border-radius:100px;border:1px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;">Copy</button>';
         html += '</div>';
         html += '<div style="margin-bottom:12px;padding:10px;background:#eff6ff;border-radius:8px;font-size:13px;">';
@@ -11308,9 +11308,9 @@
         html += '<div style="background:#f0fdf4;border:1px solid #d1fae5;border-radius:10px;padding:12px;">';
         html += '<h5 style="margin:0 0 8px;font-size:13px;color:#065f46;">&#128161; ' + (currentLang === 'ar' ? '\u062a\u0648\u0635\u064a\u0629' : 'Insights') + '</h5>';
         html += '<div style="font-size:13px;color:#475569;display:flex;flex-direction:column;gap:6px;">';
-        html += '<div>&#8226; ' + tierKws.easy.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0633\u0647\u0644\u0629 — \u0645\u0646\u0627\u0633\u0628 \u0644\u0644\u0627\u0633\u062a\u0647\u062f\u0627\u0641 \u0627\u0644\u0633\u0631\u064a\u0639' : 'easy keywords — best for quick wins') + '</div>';
-        html += '<div>&#8226; ' + tierKws.medium.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0645\u062a\u0648\u0633\u0637\u0629 — \u062a\u0637\u0644\u0628 \u0645\u062c\u0647\u0648\u062f\u0629 \u0645\u0646 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'medium keywords — need moderate effort') + '</div>';
-        html += '<div>&#8226; ' + tierKws.hard.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0635\u0639\u0628\u0629 — \u062a\u062d\u062a\u0627\u062c \u0645\u0645\u062a\u0632' : 'hard keywords — long-term investment') + '</div>';
+        html += '<div>&#8226; ' + tierKws.easy.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0633\u0647\u0644\u0629 - \u0645\u0646\u0627\u0633\u0628 \u0644\u0644\u0627\u0633\u062a\u0647\u062f\u0627\u0641 \u0627\u0644\u0633\u0631\u064a\u0639' : 'easy keywords - best for quick wins') + '</div>';
+        html += '<div>&#8226; ' + tierKws.medium.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0645\u062a\u0648\u0633\u0637\u0629 - \u062a\u0637\u0644\u0628 \u0645\u062c\u0647\u0648\u062f\u0629 \u0645\u0646 \u0627\u0644\u0645\u062d\u062a\u0648\u0627\u0621' : 'medium keywords - need moderate effort') + '</div>';
+        html += '<div>&#8226; ' + tierKws.hard.length + ' ' + (currentLang === 'ar' ? '\u0643\u0644\u0645\u0629 \u0635\u0639\u0628\u0629 - \u062a\u062d\u062a\u0627\u062c \u0645\u0645\u062a\u0632' : 'hard keywords - long-term investment') + '</div>';
         html += '<div>&#8226; ' + (currentLang === 'ar' ? '\u0645\u062a\u0648\u0633\u0637 CPC: $' + avgCpc + ' \u0644\u0644\u0643\u0644\u0645\u0629 \u0627\u0644\u0648\u062d\u062f\u0629' : 'Avg CPC: $' + avgCpc + ' per keyword') + '</div>';
         html += '<div>&#8226; ' + (currentLang === 'ar' ? '\u0627\u0644\u0639\u0627\u0626\u062f\u0629 \u0627\u0644\u0639\u0637\u0645\u064a\u0629 \u062a\u0639\u0648\u0636 ' + (revenue12m > adSpend12m ? '\u0627\u0644\u0633\u0648\u0642 \u0627\u0644\u0639\u0637\u0645\u064a' : '\u0627\u0644\u0625\u0639\u0644\u0627\u0646\u0627\u062a') + ' بـ $' + Math.abs(revenue12m - adSpend12m).toLocaleString() + '/year' : 'Organic beats ' + (revenue12m > adSpend12m ? 'ads' : 'ads beat you') + ' by $' + Math.abs(revenue12m - adSpend12m).toLocaleString() + '/year') + '</div>';
         html += '</div></div></div>';
@@ -13154,7 +13154,7 @@
         var oppColor = organicPct > 60 ? '#10b981' : organicPct > 35 ? '#f59e0b' : '#ef4444';
         var oppColorAr = organicPct > 60 ? '\u0639\u0627\u0644\u064a\u0629' : organicPct > 35 ? '\u0645\u062a\u0648\u0633\u0637\u0629' : '\u0645\u0646\u062e\u0641\u0636\u0629';
         html += '<div style="padding:12px;background:' + oppColor + '11;border:1px solid ' + oppColor + '33;border-radius:8px;">';
-        html += '<div style="font-size:13px;color:' + oppColor + ';font-weight:700;">' + (currentLang === 'ar' ? '\u0627\u0644\u0641\u0631\u0635: ' + oppColorAr : 'Opportunity: ' + oppLevel) + ' — ' + organicPct + '% ' + (currentLang === 'ar' ? '\u0645\u0646\u0627\u0635\u0629 \u0644\u0644\u0645\u062d\u062a\u0648\u0649 \u0627\u0644\u0639\u0646\u0639\u0648\u0631\u064a' : 'organic visibility available') + '</div>';
+        html += '<div style="font-size:13px;color:' + oppColor + ';font-weight:700;">' + (currentLang === 'ar' ? '\u0627\u0644\u0641\u0631\u0635: ' + oppColorAr : 'Opportunity: ' + oppLevel) + ' - ' + organicPct + '% ' + (currentLang === 'ar' ? '\u0645\u0646\u0627\u0635\u0629 \u0644\u0644\u0645\u062d\u062a\u0648\u0649 \u0627\u0644\u0639\u0646\u0639\u0648\u0631\u064a' : 'organic visibility available') + '</div>';
         html += '</div></div>';
         return html;
     }
@@ -13498,9 +13498,10 @@
         return html;
     };
 
-    // ===== AI AGENT =====
+    // ===== AI AGENT (Reason-Act-Observe) =====
     var _agentHistory = [];
     var _agentWelcomeSent = false;
+    var _agentContext = { url: null, lastTool: null, lastResults: null, stepsRun: [], intent: null };
 
     function autoAgentTime() {
         var d = new Date();
@@ -13563,22 +13564,22 @@
         _agentWelcomeSent = true;
         var isAr = currentLang === 'ar';
         var welcome = isAr
-            ? '&#129302; <b>مرحباً! أنا مساعد SEO Agent الذكي.</b><br><br>يمكنني مساعدتك في تحليل أي موقع باستخدام أدوات SEOHub. فقط أرسل لي رابط الموقع أو اكتب أمر باللغة العربية أو الإنجليزية.'
-            : '&#129302; <b>Hi! I\'m the SEO Agent.</b><br><br>I can help you analyze any website using SEOHub tools. Just send me a URL or type a command in English or Arabic.';
+            ? '&#129302; <b>مرحباً! أنا SEO Agent الذكي.</b><br><br>أنا أعمل مثل موظف ذكي - أفهم طلبك، أختار الأدوات المناسبة، أنفذها، أحلل النتيجة، ثم أقرر ماذا أفعل بعد ذلك.<br><br>أرسل لي رابط الموقع وأنا أتكفل الباقي.'
+            : '&#129302; <b>Hi! I\'m the Smart SEO Agent.</b><br><br>I work like an intelligent employee - I understand your request, choose the right tools, execute them, analyze results, and decide what to do next.<br><br>Send me a URL and I\'ll handle the rest.';
         autoAgentAddMsg(welcome, 'agent');
         setTimeout(function() {
             var tips = isAr
-                ? 'يمكنك كتابة أوامر مثل:<br>&#8226; <code>حلل example.com</code><br>&#8226; <code>audit</code> - تحليل شامل<br>&#8226; <code>سرعة</code> - فحص السرعة<br>&#8226; <code>محتوى</code> - تحليل المحتوى<br>&#8226; <code>هيكل</code> - فحص الهيكل<br>&#8226; <code>بوت</code> - فحص robots.txt<br>&#8226; <code>منافس</code> - تحليل المنافس<br>&#8226; <code>منتجات</code> - رصد المنتجات<br>&#8226; <code>بحث</code> - بحث كلمات مفتاحية<br>&#8226; <code>مساعدة</code> - عرض جميع الأوامر'
-                : 'You can type commands like:<br>&#8226; <code>analyze example.com</code><br>&#8226; <code>full audit</code> - comprehensive analysis<br>&#8226; <code>speed</code> - check speed<br>&#8226; <code>content</code> - content analysis<br>&#8226; <code>schema</code> - structured data<br>&#8226; <code>robots</code> - robots.txt<br>&#8226; <code>competitor</code> - competitor analysis<br>&#8226; <code>products</code> - product monitoring<br>&#8226; <code>research</code> - keyword research<br>&#8226; <code>help</code> - show all commands';
+                ? '&#128161; <b>كيف أعمل:</b><br>&#128204; أولاً أفهم ماذا تريد<br>&#9881; أختار الأدوات المناسبة<br>&#9654; أ执行 كل أداة<br>&#128269; أحلل النتيجة<br>&#128260; أقرر إن كنت أحتاج أدوات أخرى<br>&#128221; أكتب التقرير النهائي<br><br>جرب اكتب: <code>حلل example.com</code> أو <code>audit</code> أو <code>.help</code>'
+                : '&#128161; <b>How I work:</b><br>&#128204; First I understand what you want<br>&#9881; I choose the right tools<br>&#9654; I execute each tool<br>&#128269; I analyze the result<br>&#128260; I decide if I need more tools<br>&#128221; I write the final report<br><br>Try: <code>analyze example.com</code> or <code>audit</code> or <code>help</code>';
             autoAgentAddMsg(tips, 'agent');
         }, 600);
         setTimeout(function() {
             autoAgentSetChips([
-                { label: isAr ? '&#128269; تحليل سريع' : '&#128269; Quick Scan', fn: "autoAgentCmd('quick')" },
+                { label: isAr ? '&#128269; حلل موقعي' : '&#128269; Analyze My Site', fn: "autoAgentCmd('__url_scan__')" },
                 { label: isAr ? '&#128200; تحليل شامل' : '&#128200; Full Audit', fn: "autoAgentCmd('full')" },
-                { label: isAr ? '&#9889; فحص السرعة' : '&#9889; Speed Check', fn: "autoAgentCmd('speed')" },
-                { label: isAr ? '&#128221; تحليل المحتوى' : '&#128221; Content', fn: "autoAgentCmd('content')" },
-                { label: isAr ? '&#128273; استخراج الكلمات' : '&#128273; Keywords', fn: "autoAgentCmd('keywords')" },
+                { label: isAr ? '&#9889; فحص سريع' : '&#9889; Quick Check', fn: "autoAgentCmd('quick')" },
+                { label: isAr ? '&#128722; رصد منتجات' : '&#128722; Products', fn: "autoAgentCmd('products')" },
+                { label: isAr ? '&#128270; بحث كلمات' : '&#128270; KW Research', fn: "autoAgentCmd('research')" },
                 { label: isAr ? '&#128196; تقرير كامل' : '&#128196; Full Report', fn: "autoAgentCmd('report')" }
             ]);
         }, 1200);
@@ -13616,209 +13617,391 @@
         autoAgentProcessInput(cmd);
     }
 
-    function autoAgentProcessInput(text) {
+    // ===== REASON ENGINE =====
+    function autoAgentReason(text) {
         var lower = text.toLowerCase().trim();
         var isAr = /[\u0600-\u06FF]/.test(text);
-        autoAgentShowTyping();
-
         var urlMatch = lower.match(/https?:\/\/[^\s]+/);
         if (!urlMatch) urlMatch = lower.match(/(?:www\.)?([a-z0-9\-]+\.[a-z]{2,})/);
         var url = urlMatch ? urlMatch[0] : null;
         if (url && url.indexOf('http') !== 0) url = 'https://' + url;
 
+        if (url) _agentContext.url = url;
+
+        var intent = { type: null, tools: [], template: null, url: url, isAr: isAr, reasoning: '' };
+
+        if (lower === 'help' || lower === 'مساعدة' || lower === '?' || lower === '.help') {
+            intent.type = 'help';
+            return intent;
+        }
+
+        if (lower === '__url_scan__') {
+            intent.type = 'url_scan';
+            return intent;
+        }
+
+        // COMPLEX INTENTS - multiple tools needed
+        if (lower.indexOf('competitor') !== -1 || lower.indexOf('منافس') !== -1 || lower.indexOf('المنافس') !== -1) {
+            intent.type = 'multi';
+            intent.tools = ['score', 'content', 'keywords', 'meta', 'competitor'];
+            intent.reasoning = 'Competitor analysis needs content + keywords + meta comparison';
+            return intent;
+        }
+
+        if (lower.indexOf('ecommerce') !== -1 || lower.indexOf('متجر') !== -1 || lower.indexOf('تجر') !== -1 || lower.indexOf('shop') !== -1 || lower.indexOf('store') !== -1) {
+            intent.type = 'multi';
+            intent.tools = ['score', 'meta', 'headings', 'schema', 'content', 'images', 'links', 'product-monitor', 'kw-research'];
+            intent.reasoning = 'E-commerce audit needs product + SEO tools';
+            return intent;
+        }
+
+        if (lower.indexOf('prepublish') !== -1 || lower.indexOf('قبل النشر') !== -1 || lower.indexOf('نشر') !== -1) {
+            intent.type = 'multi';
+            intent.tools = ['meta', 'headings', 'schema', 'content', 'keywords', 'images'];
+            intent.reasoning = 'Pre-publish check needs content + meta + structure tools';
+            return intent;
+        }
+
+        if (lower.indexOf('technical') !== -1 || lower.indexOf('تقني') !== -1) {
+            intent.type = 'multi';
+            intent.tools = ['schema', 'robots', 'sitemap', 'links', 'speed', 'audit'];
+            intent.reasoning = 'Technical SEO needs crawlability + performance tools';
+            return intent;
+        }
+
+        if (lower.indexOf('full') !== -1 || lower.indexOf('audit') !== -1 || lower.indexOf('شامل') !== -1 || lower.indexOf('tقرير') !== -1 || lower.indexOf('report') !== -1 || lower.indexOf('تقرير') !== -1) {
+            intent.type = 'template';
+            intent.template = 'full';
+            intent.reasoning = 'Full audit requires all available tools';
+            return intent;
+        }
+
+        if (lower.indexOf('content') !== -1 || lower.indexOf('محتوى') !== -1 || lower.indexOf('المحتوى') !== -1) {
+            intent.type = 'multi';
+            intent.tools = ['content', 'keywords', 'kw-research', 'images', 'headings'];
+            intent.reasoning = 'Content analysis needs text + keywords + images + headings';
+            return intent;
+        }
+
+        // SINGLE TOOL INTENTS
+        var singleMap = [
+            { keys: ['speed', 'سرعة', 'fast', 'أداء'], id: 'speed', nameAr: 'فحص السرعة', nameEn: 'Speed Check' },
+            { keys: ['keyword', 'كلمات', 'الكلمات', 'مفتاح'], id: 'keywords', nameAr: 'استخراج الكلمات', nameEn: 'Keywords Extraction' },
+            { keys: ['schema', 'هيكل', 'هيكلي', 'structured'], id: 'schema', nameAr: 'فحص الهيكل', nameEn: 'Schema Check' },
+            { keys: ['robots', 'روبوت', 'بوت'], id: 'robots', nameAr: 'فحص البوت', nameEn: 'Robots Check' },
+            { keys: ['score', 'النتيجة', 'نقط', 'نقاط'], id: 'score', nameAr: 'فحص النتيجة', nameEn: 'Score Check' },
+            { keys: ['meta', 'وسوم', 'الوسوم', 'title', 'description'], id: 'meta', nameAr: 'فحص الوسوم', nameEn: 'Meta Tags Check' },
+            { keys: ['image', 'صور', 'الصور', 'صورة'], id: 'images', nameAr: 'فحص الصور', nameEn: 'Image Analysis' },
+            { keys: ['link', 'روابط', 'الروابط', 'رابط'], id: 'links', nameAr: 'تحليل الروابط', nameEn: 'Link Analysis' },
+            { keys: ['heading', 'عنوان', 'العناوين', 'headings', 'h1', 'h2'], id: 'headings', nameAr: 'فحص العناوين', nameEn: 'Headings Check' },
+            { keys: ['sitemap', 'خريطة', 'الخريطة'], id: 'sitemap', nameAr: 'فحص خريطة الموقع', nameEn: 'Sitemap Check' },
+            { keys: ['research', 'بحث', 'مفتاح', 'seo keywords'], id: 'kw-research', nameAr: 'بحث كلمات مفتاحية', nameEn: 'Keyword Research', template: 'kw-research' },
+            { keys: ['product', 'منتجات', 'المنتجات', 'رصد'], id: 'product-monitor', nameAr: 'رصد المنتجات', nameEn: 'Product Monitor', template: 'ecommerce' }
+        ];
+
+        for (var i = 0; i < singleMap.length; i++) {
+            var s = singleMap[i];
+            for (var j = 0; j < s.keys.length; j++) {
+                if (lower.indexOf(s.keys[j]) !== -1) {
+                    intent.type = 'single';
+                    intent.tools = [s.id];
+                    intent.toolName = isAr ? s.nameAr : s.nameEn;
+                    if (s.template) intent.template = s.template;
+                    intent.reasoning = 'User wants ' + s.id;
+                    return intent;
+                }
+            }
+        }
+
+        if (url && !autoAgentMatchCommand(lower)) {
+            intent.type = 'url_scan';
+            return intent;
+        }
+
+        if ((lower.indexOf('analyze') !== -1 || lower.indexOf('حلل') !== -1 || lower.indexOf('تحليل') !== -1) && url) {
+            intent.type = 'url_scan';
+            return intent;
+        }
+
+        if (lower.indexOf('quick') !== -1 || lower.indexOf('سريع') !== -1) {
+            intent.type = 'template';
+            intent.template = 'quick';
+            return intent;
+        }
+
+        intent.type = 'unknown';
+        return intent;
+    }
+
+    // ===== ACT ENGINE =====
+    function autoAgentAct(intent) {
+        var isAr = intent.isAr;
+        var url = intent.url || _agentContext.url || document.getElementById('auto-url').value.trim();
+
+        if (intent.type === 'help') {
+            var h = isAr
+                ? '&#128295; <b>الأوامر المتاحة (18 أداة):</b><br><br>' +
+                  '<code>حلل [url]</code> - تحليل سريع للموقع<br>' +
+                  '<code>audit</code> - تحليل شامل كامل<br>' +
+                  '<code>شامل</code> / <code>full</code> - تحليل شامل (كل الأدوات)<br>' +
+                  '<code>سرعة</code> / <code>speed</code> - فحص سرعة التحميل<br>' +
+                  '<code>محتوى</code> / <code>content</code> - تحليل المحتوى<br>' +
+                  '<code>كلمات</code> / <code>keywords</code> - استخراج الكلمات المفتاحية<br>' +
+                  '<code>صور</code> / <code>images</code> - فحص الصور<br>' +
+                  '<code>روابط</code> / <code>links</code> - تحليل الروابط<br>' +
+                  '<code>عنوان</code> / <code>headings</code> - فحص العناوين<br>' +
+                  '<code>هيكل</code> / <code>schema</code> - فحص الهيكل (Structured Data)<br>' +
+                  '<code>بوت</code> / <code>robots</code> - فحص robots.txt<br>' +
+                  '<code>خريطة</code> / <code>sitemap</code> - فحص خريطة الموقع<br>' +
+                  '<code>النتيجة</code> / <code>score</code> - فحص النتيجة<br>' +
+                  '<code>وسوم</code> / <code>meta</code> - فحص الوسوم<br>' +
+                  '<code>منافس</code> / <code>competitor</code> - تحليل المنافس<br>' +
+                  '<code>تقرير</code> / <code>report</code> - تقرير مفصل<br>' +
+                  '<code>منتجات</code> / <code>products</code> - رصد المنتجات<br>' +
+                  '<code>بحث</code> / <code>research</code> - بحث الكلمات المفتاحية<br><br>' +
+                  '💡 يمكنك كتابة أمر حر مثل: <code>حلل speed و content لموقعي</code>'
+                : '&#128295; <b>Available Commands (18 tools):</b><br><br>' +
+                  '<code>analyze [url]</code> - Quick SEO scan<br>' +
+                  '<code>audit</code> / <code>full audit</code> - Full comprehensive audit<br>' +
+                  '<code>score</code> - SEO score check<br>' +
+                  '<code>meta</code> - Meta tags check<br>' +
+                  '<code>speed</code> - Page speed check<br>' +
+                  '<code>content</code> - Content analysis<br>' +
+                  '<code>keywords</code> - Extract keywords<br>' +
+                  '<code>images</code> - Image analysis<br>' +
+                  '<code>links</code> - Link analysis<br>' +
+                  '<code>headings</code> - Heading structure<br>' +
+                  '<code>schema</code> - Structured data check<br>' +
+                  '<code>robots</code> - robots.txt check<br>' +
+                  '<code>sitemap</code> - Sitemap check<br>' +
+                  '<code>competitor</code> - Competitor analysis<br>' +
+                  '<code>report</code> - Full report<br>' +
+                  '<code>products</code> / <code>store</code> - Product monitoring<br>' +
+                  '<code>research</code> - Keyword research<br><br>' +
+                  '💡 You can also write free-form commands like: <code>run speed and content on my site</code>';
+            autoAgentAddMsg(h, 'agent');
+            autoAgentSetChips([
+                { label: isAr ? '&#128269; تحليل سريع' : '&#128269; Quick Scan', fn: "autoAgentCmd('quick')" },
+                { label: isAr ? '&#128200; تحليل شامل' : '&#128200; Full Audit', fn: "autoAgentCmd('full')" },
+                { label: isAr ? '&#9889; فحص السرعة' : '&#9889; Speed', fn: "autoAgentCmd('speed')" },
+                { label: isAr ? '&#128221; محتوى' : '&#128221; Content', fn: "autoAgentCmd('content')" },
+                { label: isAr ? '&#128722; منتجات' : '&#128722; Products', fn: "autoAgentCmd('products')" },
+                { label: isAr ? '&#128270; بحث كلمات' : '&#128270; Research', fn: "autoAgentCmd('research')" }
+            ]);
+            return;
+        }
+
+        if (intent.type === 'url_scan') {
+            autoAgentSetUrlAndRun(url || '', 'quick', isAr);
+            return;
+        }
+
+        if (intent.type === 'template') {
+            autoAgentSetUrlAndRun(url || '', intent.template, isAr);
+            return;
+        }
+
+        if (intent.type === 'single') {
+            var toolId = intent.tools[0];
+            if (intent.template) {
+                autoAgentSetUrlAndRun(url || '', intent.template, isAr);
+            } else {
+                autoAgentRunSingleTool(toolId, url, isAr, intent.toolName);
+            }
+            return;
+        }
+
+        if (intent.type === 'multi') {
+            _agentContext.intent = intent;
+            _agentContext.stepsRun = [];
+            autoAgentRunMultiStep(intent, url, isAr);
+            return;
+        }
+
+        var noMatch = isAr
+            ? '&#10067; لم أفهم الأمر "<code>' + esc(text) + '</code>". اكتب <code>مساعدة</code> لعرض الأوامر.'
+            : '&#10067; I didn\'t understand "<code>' + esc(text) + '</code>". Type <code>help</code> to see commands.';
+        autoAgentAddMsg(noMatch, 'agent');
+        autoAgentSetChips([
+            { label: isAr ? '&#128269; تحليل' : '&#128269; Analyze', fn: "autoAgentCmd('quick')" },
+            { label: isAr ? '&#128200; شامل' : '&#128200; Full', fn: "autoAgentCmd('full')" },
+            { label: isAr ? '&#128722; منتجات' : '&#128722; Products', fn: "autoAgentCmd('products')" },
+            { label: isAr ? '&#128270; بحث' : '&#128270; Research', fn: "autoAgentCmd('research')" }
+        ]);
+    }
+
+    function autoAgentRunMultiStep(intent, url, isAr) {
+        if (!url) {
+            autoAgentAddMsg(isAr ? '&#9888; أدخل رابط الموقع أولاً. مثال: <code>تحليل example.com</code>' : '&#9888; Please provide a URL first. Example: <code>analyze example.com</code>', 'agent');
+            return;
+        }
+        if (!/^https?:\/\//.test(url)) url = 'https://' + url;
+        _agentContext.url = url;
+        document.getElementById('auto-url').value = url;
+
+        var toolNames = [];
+        var pipeline = [];
+        for (var i = 0; i < intent.tools.length; i++) {
+            var tool = autoGetTool(intent.tools[i]);
+            if (tool) {
+                pipeline.push({ id: tool.id, name: tool.name, nameAr: tool.nameAr, icon: tool.icon, fn: tool.fn, urlInput: tool.urlInput, outDiv: tool.outDiv, status: 'pending' });
+                toolNames.push(tool.icon + ' ' + (isAr ? tool.nameAr : tool.name));
+            }
+        }
+
+        _autoPipeline = pipeline;
+        autoRenderPipeline();
+        document.querySelectorAll('.auto-tpl').forEach(function(b) { b.classList.remove('active'); });
+
+        var reasoningMsg = isAr
+            ? '&#129504; <b>أفكاري:</b> ' + esc(intent.reasoning) + '<br>&#9881; سأ执行 <b>' + pipeline.length + '</b> أدوات بالترتيب:<br>' + toolNames.join(' → ')
+            : '&#129504; <b>Reasoning:</b> ' + esc(intent.reasoning) + '<br>&#9881; I\'ll run <b>' + pipeline.length + '</b> tools:<br>' + toolNames.join(' → ');
+        autoAgentAddMsg(reasoningMsg, 'agent');
+
+        autoAgentRunPipelineChain(intent, 0, isAr);
+    }
+
+    function autoAgentRunPipelineChain(intent, index, isAr) {
+        if (index >= _autoPipeline.length) {
+            setTimeout(function() { autoAgentObserve(intent, isAr); }, 500);
+            return;
+        }
+        var step = _autoPipeline[index];
+        autoAgentAddMsg((isAr ? '&#9654; جاري تشغيل: ' : '&#9654; Running: ') + step.icon + ' <b>' + (isAr ? step.nameAr : step.name) + '</b>...', 'agent');
+
+        autoRunStep(step, _agentContext.url).then(function() {
+            _agentContext.stepsRun.push(step.id);
+            _agentContext.lastTool = step.id;
+            _agentContext.lastResults = _autoResults[step.id];
+            setTimeout(function() { autoAgentRunPipelineChain(intent, index + 1, isAr); }, 300);
+        }).catch(function() {
+            setTimeout(function() { autoAgentRunPipelineChain(intent, index + 1, isAr); }, 300);
+        });
+    }
+
+    // ===== OBSERVE ENGINE =====
+    function autoAgentObserve(intent, isAr) {
+        var done = 0; var errs = 0;
+        for (var i = 0; i < _autoPipeline.length; i++) {
+            if (_autoPipeline[i].status === 'done') done++;
+            if (_autoPipeline[i].status === 'error') errs++;
+        }
+
+        var observations = [];
+        var criticalIssues = [];
+        var warnings = [];
+        var passed = [];
+
+        for (var j = 0; j < _autoPipeline.length; j++) {
+            var step = _autoPipeline[j];
+            if (step.status !== 'done') continue;
+            var content = _autoResults[step.id] || '';
+            var div = document.createElement('div');
+            div.innerHTML = content;
+            var text = div.textContent || div.innerText || '';
+
+            if (step.id === 'score') {
+                var sm = text.match(/(\d{1,3})/);
+                if (sm) {
+                    var sc = parseInt(sm[1]);
+                    observations.push({ tool: step.nameAr || step.name, finding: 'Score: ' + sc + '/100', severity: sc >= 80 ? 'pass' : (sc >= 50 ? 'warn' : 'critical') });
+                    if (sc < 50) criticalIssues.push('النتيجة منخفضة جداً (' + sc + '/100)');
+                    else if (sc < 80) warnings.push('النتيجة متوسطة (' + sc + '/100) - مجال للتحسين');
+                    else passed.push('نتيجة ممتازة (' + sc + '/100)');
+                }
+            }
+            if (step.id === 'meta') {
+                if (text.indexOf('Title: N/A') !== -1 || text.indexOf('العنوان: N/A') !== -1) criticalIssues.push('العنوان (Title Tag) مفقود');
+                else passed.push('العنوان موجود');
+                if (text.indexOf('Description: N/A') !== -1 || text.indexOf('الوصف: N/A') !== -1) criticalIssues.push('الوصف (Meta Description) مفقود');
+                else passed.push('الوصف موجود');
+            }
+            if (step.id === 'headings') {
+                if (text.indexOf('H1') === -1 || text.indexOf('No H1') !== -1) criticalIssues.push('لا يوجد عنوان H1 رئيسي');
+                else passed.push('عنوان H1 موجود');
+            }
+            if (step.id === 'images') {
+                var altM = text.match(/(\d+)\s*(?:missing|بدون)/i);
+                if (altM) warnings.push(altM[1] + ' صورة بدون نص بديل Alt');
+                else passed.push('جميع الصور لها نص بديل');
+            }
+            if (step.id === 'links') {
+                var bm = text.match(/(\d+)\s*(?:broken|dead|404)/i);
+                if (bm) criticalIssues.push(bm[1] + ' رابط مكسور');
+            }
+            if (step.id === 'speed') {
+                if (text.indexOf('404') !== -1) warnings.push('فحص السرعة أرجع خطأ 404');
+                else passed.push('فحص السرعة تم بنجاح');
+            }
+            if (step.id === 'schema') {
+                if (text.indexOf('No schema') !== -1 || text.indexOf('لم يتم') !== -1) warnings.push('لا يوجد Structured Data');
+                else passed.push('Structured Data موجود');
+            }
+            if (step.id === 'robots') {
+                if (text.indexOf('Not Found') !== -1 || text.indexOf('غير موجود') !== -1) warnings.push('robots.txt غير موجود');
+                else passed.push('robots.txt موجود');
+            }
+            if (step.id === 'content') {
+                var wcM = text.match(/(\d[\d,]*)\s*(words|كلمة)/);
+                if (wcM) {
+                    var wc = parseInt(wcM[1].replace(/,/g, ''));
+                    if (wc < 300) warnings.push('المحتوى قصير جداً (' + wc + ' كلمة)');
+                    else passed.push('المحتوى كافٍ (' + wc + ' كلمة)');
+                }
+            }
+        }
+
+        var report = '';
+        report += '&#128269; <b>' + (isAr ? 'مرحلة الملاحظة:' : 'Observation Phase:') + '</b><br><br>';
+        report += '&#128202; ' + (isAr ? 'تم تنفيذ' : 'Executed') + ': <b>' + done + '/' + _autoPipeline.length + '</b> ' + (isAr ? 'أدوات' : 'tools');
+
+        if (passed.length > 0) {
+            report += '<br><br>&#9989; <b>' + (isAr ? 'الإيجابيات:' : 'Passed:') + '</b><br>';
+            for (var p = 0; p < Math.min(passed.length, 5); p++) report += '&#8226; ' + passed[p] + '<br>';
+        }
+        if (warnings.length > 0) {
+            report += '<br>&#9888;&#65039; <b>' + (isAr ? 'تحذيرات:' : 'Warnings:') + '</b><br>';
+            for (var w = 0; w < Math.min(warnings.length, 5); w++) report += '&#8226; ' + warnings[w] + '<br>';
+        }
+        if (criticalIssues.length > 0) {
+            report += '<br>&#128308; <b>' + (isAr ? 'مشاكل حرجة:' : 'Critical Issues:') + '</b><br>';
+            for (var c = 0; c < Math.min(criticalIssues.length, 5); c++) report += '&#8226; ' + criticalIssues[c] + '<br>';
+        }
+
+        var recs = [];
+        if (criticalIssues.length > 0) recs.push(isAr ? '&#128680; يُنصح بإصلاح المشاكل الحرجة فوراً' : '&#128680; Fix critical issues immediately');
+        if (warnings.length > 2) recs.push(isAr ? '&#128200; هناك مجال واسع للتحسين' : '&#128200; Significant room for improvement');
+        if (passed.length > 3 && criticalIssues.length === 0) recs.push(isAr ? '&#127881; الموقع في حالة جيدة بشكل عام!' : '&#127881; Site is in good shape overall!');
+
+        if (recs.length > 0) {
+            report += '<br><br>&#128161; <b>' + (isAr ? 'التوصيات:' : 'Recommendations:') + '</b><br>';
+            for (var r = 0; r < recs.length; r++) report += recs[r] + '<br>';
+        }
+
+        autoAgentAddMsg(report, 'agent');
+
+        var nextChips = [];
+        if (criticalIssues.length > 0) nextChips.push({ label: isAr ? '&#128680; إصلاح المشاكل' : '&#128680; Fix Issues', fn: "autoAgentCmd('full')" });
+        nextChips.push({ label: isAr ? '&#128196; تقرير مفصل' : '&#128196; Detailed Report', fn: "autoAgentCmd('report')" });
+        if (warnings.length > 0) nextChips.push({ label: isAr ? '&#128221; تحليل المحتوى' : '&#128221; Content', fn: "autoAgentCmd('content')" });
+        nextChips.push({ label: isAr ? '&#128270; بحث كلمات' : '&#128270; KW Research', fn: "autoAgentCmd('research')" });
+        nextChips.push({ label: isAr ? '&#128269; تحليل آخر' : '&#128269; Analyze Another', fn: "autoAgentCmd('__url_scan__')" });
+        autoAgentSetChips(nextChips);
+
+        _autoShowResults();
+    }
+
+    // ===== MAIN PROCESS =====
+    function autoAgentProcessInput(text) {
+        var isAr = /[\u0600-\u06FF]/.test(text);
+        autoAgentShowTyping();
+
         setTimeout(function() {
             autoAgentHideTyping();
-
-            // HELP
-            if (lower === 'help' || lower === 'مساعدة' || lower === '?') {
-                var h = isAr
-                    ? '&#128295; <b>الأوامر المتاحة (18 أداة):</b><br><br>' +
-                      '<code>حلل [url]</code> - تحليل سريع للموقع<br>' +
-                      '<code>audit</code> - تحليل شامل كامل<br>' +
-                      '<code>شامل</code> / <code>full</code> - تحليل شامل (كل الأدوات)<br>' +
-                      '<code>سرعة</code> / <code>speed</code> - فحص سرعة التحميل<br>' +
-                      '<code>محتوى</code> / <code>content</code> - تحليل المحتوى<br>' +
-                      '<code>كلمات</code> / <code>keywords</code> - استخراج الكلمات المفتاحية<br>' +
-                      '<code>صور</code> / <code>images</code> - فحص الصور<br>' +
-                      '<code>روابط</code> / <code>links</code> - تحليل الروابط<br>' +
-                      '<code>عنوان</code> / <code>headings</code> - فحص العناوين<br>' +
-                      '<code>هيكل</code> / <code>schema</code> - فحص الهيكل (Structured Data)<br>' +
-                      '<code>بوت</code> / <code>robots</code> - فحص robots.txt<br>' +
-                      '<code>خريطة</code> / <code>sitemap</code> - فحص خريطة الموقع<br>' +
-                      '<code>النتيجة</code> / <code>score</code> - فحص النتيجة<br>' +
-                      '<code>وسوم</code> / <code>meta</code> - فحص الوسوم<br>' +
-                      '<code>منافس</code> / <code>competitor</code> - تحليل المنافس<br>' +
-                      '<code>تقرير</code> / <code>report</code> - تقرير مفصل<br>' +
-                      '<code>منتجات</code> / <code>products</code> - رصد المنتجات<br>' +
-                      '<code>بحث</code> / <code>research</code> - بحث الكلمات المفتاحية<br><br>' +
-                      'يمكنك also write رابط الموقع مباشرة لبدء التحليل السريع.'
-                    : '&#128295; <b>Available Commands (18 tools):</b><br><br>' +
-                      '<code>analyze [url]</code> - Quick SEO scan<br>' +
-                      '<code>audit</code> / <code>full audit</code> - Full comprehensive audit<br>' +
-                      '<code>score</code> - SEO score check<br>' +
-                      '<code>meta</code> - Meta tags check<br>' +
-                      '<code>speed</code> - Page speed check<br>' +
-                      '<code>content</code> - Content analysis<br>' +
-                      '<code>keywords</code> - Extract keywords<br>' +
-                      '<code>images</code> - Image analysis<br>' +
-                      '<code>links</code> - Link analysis<br>' +
-                      '<code>headings</code> - Heading structure<br>' +
-                      '<code>schema</code> - Structured data check<br>' +
-                      '<code>robots</code> - robots.txt check<br>' +
-                      '<code>sitemap</code> - Sitemap check<br>' +
-                      '<code>competitor</code> - Competitor analysis<br>' +
-                      '<code>report</code> - Full report<br>' +
-                      '<code>products</code> / <code>store</code> - Product monitoring<br>' +
-                      '<code>research</code> - Keyword research<br><br>' +
-                      'You can also just paste a URL to start a quick scan.';
-                autoAgentAddMsg(h, 'agent');
-                autoAgentSetChips([
-                    { label: isAr ? '&#128269; تحليل سريع' : '&#128269; Quick Scan', fn: "autoAgentCmd('quick')" },
-                    { label: isAr ? '&#128200; تحليل شامل' : '&#128200; Full Audit', fn: "autoAgentCmd('full')" },
-                    { label: isAr ? '&#9889; فحص السرعة' : '&#9889; Speed Check', fn: "autoAgentCmd('speed')" },
-                    { label: isAr ? '&#128270; هيكل' : '&#128270; Schema', fn: "autoAgentCmd('schema')" },
-                    { label: isAr ? '&#129302; بوت' : '&#129302; Robots', fn: "autoAgentCmd('robots')" },
-                    { label: isAr ? '&#128722; منتجات' : '&#128722; Products', fn: "autoAgentCmd('products')" },
-                    { label: isAr ? '&#128270; بحث كلمات' : '&#128270; KW Research', fn: "autoAgentCmd('research')" }
-                ]);
-                return;
-            }
-
-            // URL-only → quick scan
-            if (url && !autoAgentMatchCommand(lower)) {
-                autoAgentSetUrlAndRun(url, 'quick', isAr);
-                return;
-            }
-
-            // ANALYZE with URL
-            if ((lower.indexOf('analyze') !== -1 || lower.indexOf('حلل') !== -1 || lower.indexOf('تحليل') !== -1) && url) {
-                autoAgentSetUrlAndRun(url, 'quick', isAr);
-                return;
-            }
-
-            // FULL AUDIT
-            if (lower.indexOf('full') !== -1 || lower.indexOf('audit') !== -1 || lower.indexOf('شامل') !== -1 || lower.indexOf('audit full') !== -1) {
-                if (url) {
-                    autoAgentSetUrlAndRun(url, 'full', isAr);
-                } else {
-                    var urlField = document.getElementById('auto-url');
-                    if (urlField && urlField.value.trim()) {
-                        autoAgentSetUrlAndRun(urlField.value.trim(), 'full', isAr);
-                    } else {
-                        autoAgentAddMsg(isAr ? '&#9888; أدخل رابط الموقع أولاً. مثال: <code>audit example.com</code>' : '&#9888; Please provide a URL. Example: <code>audit example.com</code>', 'agent');
-                    }
-                }
-                return;
-            }
-
-            // SPEED
-            if (lower.indexOf('speed') !== -1 || lower.indexOf('سرعة') !== -1 || lower.indexOf('fast') !== -1) {
-                autoAgentRunSingleTool('speed', url, isAr, isAr ? 'فحص السرعة' : 'Speed Check');
-                return;
-            }
-
-            // CONTENT
-            if (lower.indexOf('content') !== -1 || lower.indexOf('محتوى') !== -1 || lower.indexOf('المحتوى') !== -1) {
-                autoAgentRunSingleTool('content', url, isAr, isAr ? 'تحليل المحتوى' : 'Content Analysis');
-                return;
-            }
-
-            // KEYWORDS
-            if (lower.indexOf('keyword') !== -1 || lower.indexOf('كلمات') !== -1 || lower.indexOf('الكلمات') !== -1) {
-                autoAgentRunSingleTool('keywords', url, isAr, isAr ? 'استخراج الكلمات' : 'Keywords Extraction');
-                return;
-            }
-
-            // SCHEMA
-            if (lower.indexOf('schema') !== -1 || lower.indexOf('هيكل') !== -1 || lower.indexOf('هيكلي') !== -1) {
-                autoAgentRunSingleTool('schema', url, isAr, isAr ? 'فحص الهيكل' : 'Schema Check');
-                return;
-            }
-
-            // ROBOTS
-            if (lower.indexOf('robots') !== -1 || lower.indexOf('روبوت') !== -1 || lower.indexOf('بوت') !== -1) {
-                autoAgentRunSingleTool('robots', url, isAr, isAr ? 'فحص البوت' : 'Robots Check');
-                return;
-            }
-
-            // COMPETITOR
-            if (lower.indexOf('competitor') !== -1 || lower.indexOf('منافس') !== -1 || lower.indexOf('المنافس') !== -1) {
-                autoAgentRunSingleTool('competitor', url, isAr, isAr ? 'تحليل المنافس' : 'Competitor Analysis');
-                return;
-            }
-
-            // SCORE
-            if (lower.indexOf('score') !== -1 || lower.indexOf('النتيجة') !== -1 || lower.indexOf('نقط') !== -1) {
-                autoAgentRunSingleTool('score', url, isAr, isAr ? 'فحص النتيجة' : 'Score Check');
-                return;
-            }
-
-            // META
-            if (lower.indexOf('meta') !== -1 || lower.indexOf('وسوم') !== -1 || lower.indexOf('الوسوم') !== -1) {
-                autoAgentRunSingleTool('meta', url, isAr, isAr ? 'فحص الوسوم' : 'Meta Tags Check');
-                return;
-            }
-
-            // IMAGES
-            if (lower.indexOf('image') !== -1 || lower.indexOf('صور') !== -1 || lower.indexOf('الصور') !== -1) {
-                autoAgentRunSingleTool('images', url, isAr, isAr ? 'فحص الصور' : 'Image Analysis');
-                return;
-            }
-
-            // LINKS
-            if (lower.indexOf('link') !== -1 || lower.indexOf('روابط') !== -1 || lower.indexOf('الروابط') !== -1) {
-                autoAgentRunSingleTool('links', url, isAr, isAr ? 'تحليل الروابط' : 'Link Analysis');
-                return;
-            }
-
-            // HEADINGS
-            if (lower.indexOf('heading') !== -1 || lower.indexOf('عنوان') !== -1 || lower.indexOf('العناوين') !== -1 || lower.indexOf('headings') !== -1) {
-                autoAgentRunSingleTool('headings', url, isAr, isAr ? 'فحص العناوين' : 'Headings Check');
-                return;
-            }
-
-            // SITEMAP
-            if (lower.indexOf('sitemap') !== -1 || lower.indexOf('خريطة') !== -1 || lower.indexOf('الخريطة') !== -1) {
-                autoAgentRunSingleTool('sitemap', url, isAr, isAr ? 'فحص خريطة الموقع' : 'Sitemap Check');
-                return;
-            }
-
-            // PRODUCT MONITOR
-            if (lower.indexOf('product') !== -1 || lower.indexOf('منتجات') !== -1 || lower.indexOf('المنتجات') !== -1 || lower.indexOf('رصد') !== -1 || lower.indexOf('monitor') !== -1 || lower.indexOf('متجر') !== -1 || lower.indexOf('store') !== -1 || lower.indexOf('shop') !== -1) {
-                autoAgentSetUrlAndRun(url || document.getElementById('auto-url').value.trim(), 'ecommerce', isAr);
-                return;
-            }
-
-            // KEYWORD RESEARCH
-            if (lower.indexOf('research') !== -1 || lower.indexOf('بحث') !== -1 || lower.indexOf('مفتاح') !== -1 || lower.indexOf('seo keywords') !== -1) {
-                autoAgentSetUrlAndRun(url || document.getElementById('auto-url').value.trim(), 'kw-research', isAr);
-                return;
-            }
-
-            // REPORT
-            if (lower.indexOf('report') !== -1 || lower.indexOf('تقرير') !== -1) {
-                autoAgentSetUrlAndRun(url || document.getElementById('auto-url').value.trim(), 'full', isAr);
-                return;
-            }
-
-            // QUICK
-            if (lower.indexOf('quick') !== -1 || lower.indexOf('سريع') !== -1) {
-                autoAgentSetUrlAndRun(url || document.getElementById('auto-url').value.trim(), 'quick', isAr);
-                return;
-            }
-
-            // NO MATCH
-            var noMatch = isAr
-                ? '&#10067; لم أفهم الأمر. اكتب <code>مساعدة</code> لعرض جميع الأوامر المتاحة.'
-                : '&#10067; I didn\'t understand that. Type <code>help</code> to see all available commands.';
-            autoAgentAddMsg(noMatch, 'agent');
-            autoAgentSetChips([
-                { label: isAr ? '&#128269; تحليل' : '&#128269; Analyze', fn: "autoAgentCmd('quick')" },
-                { label: isAr ? '&#128200; شامل' : '&#128200; Full Audit', fn: "autoAgentCmd('full')" },
-                { label: isAr ? '&#128722; منتجات' : '&#128722; Products', fn: "autoAgentCmd('products')" },
-                { label: isAr ? '&#128270; بحث كلمات' : '&#128270; KW Research', fn: "autoAgentCmd('research')" }
-            ]);
-        }, 800 + Math.random() * 600);
+            var intent = autoAgentReason(text);
+            _agentHistory.push({ text: text, intent: intent.type, time: new Date() });
+            autoAgentAct(intent);
+        }, 600 + Math.random() * 500);
     }
 
     function autoAgentMatchCommand(lower) {
@@ -13838,9 +14021,10 @@
             return;
         }
         if (!/^https?:\/\//.test(url)) url = 'https://' + url;
+        _agentContext.url = url;
         document.getElementById('auto-url').value = url;
         autoLoadTemplate(template);
-        var tplNames = { quick: isAr ? 'التحليل السريع' : 'Quick SEO Check', full: isAr ? 'التحليل الشامل' : 'Full Site Audit', content: isAr ? 'تحليل المحتوى' : 'Content Analysis', technical: isAr ? 'التحليل التقني' : 'Technical SEO', prepublish: isAr ? 'قبل النشر' : 'Pre-Publish', custom: isAr ? 'مخصص' : 'Custom' };
+        var tplNames = { quick: isAr ? 'التحليل السريع' : 'Quick SEO Check', full: isAr ? 'التحليل الشامل' : 'Full Site Audit', content: isAr ? 'تحليل المحتوى' : 'Content Analysis', technical: isAr ? 'التحليل التقني' : 'Technical SEO', prepublish: isAr ? 'قبل النشر' : 'Pre-Publish', ecommerce: isAr ? 'تحليل المتجر' : 'E-commerce Audit', custom: isAr ? 'مخصص' : 'Custom' };
         var msg = isAr
             ? '&#9889; جاري تحديد <b>' + (tplNames[template] || template) + '</b> للموقع<br><code>' + esc(url) + '</code><br><br>اضغط <b>Run</b> لبدء التحليل.'
             : '&#9889; Set up <b>' + (tplNames[template] || template) + '</b> for<br><code>' + esc(url) + '</code><br><br>Click <b>Run</b> to start the analysis.';
@@ -13857,6 +14041,7 @@
     function autoAgentRunSingleTool(toolId, url, isAr, label) {
         if (url) {
             if (!/^https?:\/\//.test(url)) url = 'https://' + url;
+            _agentContext.url = url;
             document.getElementById('auto-url').value = url;
         }
         var tool = autoGetTool(toolId);
@@ -13872,85 +14057,14 @@
         if (typeof autoRunPipeline === 'function') {
             autoRunPipeline().then(function() {
                 setTimeout(function() {
-                    autoAgentAnalyzeResults();
+                    autoAgentObserve({ type: 'observe', isAr: currentLang === 'ar' }, currentLang === 'ar');
                 }, 500);
             }).catch(function() {});
         }
     }
 
     function autoAgentAnalyzeResults() {
-        var isAr = currentLang === 'ar';
-        var total = _autoPipeline.length;
-        var done = 0; var errs = 0;
-        for (var i = 0; i < _autoPipeline.length; i++) {
-            if (_autoPipeline[i].status === 'done') done++;
-            if (_autoPipeline[i].status === 'error') errs++;
-        }
-        var summary = isAr
-            ? '&#128202; <b>ملخص التحليل:</b><br><br>&#10003; تم بنجاح: <b>' + done + '/' + total + '</b> أدوات'
-            : '&#128202; <b>Analysis Summary:</b><br><br>&#10003; Passed: <b>' + done + '/' + total + '</b> tools';
-        if (errs > 0) {
-            summary += '<br>&#10007; فشل: <b>' + errs + '</b>';
-        }
-
-        var recommendations = autoAgentGenerateRecs();
-        if (recommendations) {
-            summary += '<br><br>&#128161; <b>' + (isAr ? 'توصيات:' : 'Recommendations:') + '</b><br>' + recommendations;
-        }
-        autoAgentAddMsg(summary, 'agent');
-
-        var chips = isAr
-            ? [
-                { label: '&#128200; تحليل شامل', fn: "autoAgentCmd('full')" },
-                { label: '&#128221; تحليل المحتوى', fn: "autoAgentCmd('content')" },
-                { label: '&#128273; الكلمات', fn: "autoAgentCmd('keywords')" },
-                { label: '&#128196; تقرير', fn: "autoAgentCmd('report')" }
-            ]
-            : [
-                { label: '&#128200; Full Audit', fn: "autoAgentCmd('full')" },
-                { label: '&#128221; Content', fn: "autoAgentCmd('content')" },
-                { label: '&#128273; Keywords', fn: "autoAgentCmd('keywords')" },
-                { label: '&#128196; Report', fn: "autoAgentCmd('report')" }
-            ];
-        autoAgentSetChips(chips);
-    }
-
-    function autoAgentGenerateRecs() {
-        var isAr = currentLang === 'ar';
-        var recs = [];
-        for (var i = 0; i < _autoPipeline.length; i++) {
-            var step = _autoPipeline[i];
-            if (step.status !== 'done') continue;
-            var outHtml = _autoResults[step.id] || '';
-            if (step.id === 'score') {
-                var scoreMatch = outHtml.match(/(\d{1,3})\s*\/\s*100/);
-                if (scoreMatch) {
-                    var s = parseInt(scoreMatch[1]);
-                    if (s < 50) recs.push(isAr ? '&#128308; النقاط منخفضة (' + s + '/100). يُنصح بمراجعة الأخطاء الأساسية.' : '&#128308; Low score (' + s + '/100). Review critical errors.');
-                    else if (s < 80) recs.push(isAr ? '&#128992; النقاط متوسطة (' + s + '/100). هناك مجال للتحسين.' : '&#128992; Medium score (' + s + '/100). Room for improvement.');
-                    else recs.push(isAr ? '&#128994; نقاط ممتازة (' + s + '/100)!' : '&#128994; Excellent score (' + s + '/100)!');
-                }
-                if (outHtml.indexOf('Title Tag') !== -1 && outHtml.indexOf('pass') === -1) recs.push(isAr ? '&#128221; حسّن عنوان الصفحة (Title Tag)' : '&#128221; Improve page title (Title Tag)');
-                if (outHtml.indexOf('Meta Description') !== -1 && outHtml.indexOf('pass') === -1) recs.push(isAr ? '&#128221; أضف وصف Meta Description' : '&#128221; Add Meta Description');
-            }
-            if (step.id === 'images') {
-                if (outHtml.indexOf('missing') !== -1 || outHtml.indexOf('alt') !== -1) recs.push(isAr ? '&#128444; بعض الصور تفتقر لنص بديل Alt' : '&#128444; Some images missing alt text');
-            }
-            if (step.id === 'headings') {
-                if (outHtml.indexOf('h1') !== -1 && outHtml.indexOf('No H1') !== -1) recs.push(isAr ? '&#128209; أضف عنوان H1 رئيسي' : '&#128209; Add a main H1 heading');
-            }
-            if (step.id === 'content') {
-                var wcMatch = outHtml.match(/(\d[\d,]*)\s*(words|كلمة)/);
-                if (wcMatch) {
-                    var wc = parseInt(wcMatch[1].replace(/,/g, ''));
-                    if (wc < 300) recs.push(isAr ? '&#128221; المحتوى قصير (' + wc + ' كلمة). يُنصح بـ 500+ كلمة.' : '&#128221; Content is thin (' + wc + ' words). Aim for 500+ words.');
-                }
-            }
-        }
-        if (recs.length === 0) {
-            recs.push(isAr ? '&#9989; لم يتم اكتشاف مشاكل رئيسية.' : '&#9989; No major issues detected.');
-        }
-        return recs.slice(0, 5).join('<br>');
+        autoAgentObserve({ type: 'observe', isAr: currentLang === 'ar' }, currentLang === 'ar');
     }
 
     function autoAgentMsgEdit() {
