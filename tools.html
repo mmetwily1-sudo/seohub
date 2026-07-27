@@ -13872,13 +13872,17 @@
         { id: 'score',     name: 'Score',      nameAr: '\u0627\u0644\u0646\u062a\u064A\u062C\u0629',       icon: '\uD83D\uDCCA', fn: 'runScore',     urlInput: 'score-url',     outDiv: 'score-output' },
         { id: 'meta',      name: 'Meta Tags',  nameAr: '\u0627\u0644\u0648\u0633\u0648\u0645',              icon: '\uD83C\uDFD4\uFE0F', fn: 'runMeta',      urlInput: 'meta-url',      outDiv: 'meta-output' },
         { id: 'headings',  name: 'Headings',   nameAr: '\u0627\u0644\u0639\u0646\u0627\u0648\u064A\u0646',  icon: '\uD83D\uDCC9', fn: 'runHeadings',  urlInput: 'head-url',      outDiv: 'head-output' },
+        { id: 'schema',    name: 'Schema',     nameAr: '\u0627\u0644\u0647\u064A\u0643\u0644',              icon: '\uD83D\uDD27', fn: 'autoRunSchemaCheck',  urlInput: null, outDiv: 'schema-output' },
         { id: 'audit',     name: 'Audit',      nameAr: '\u0627\u0644\u0645\u0648\u0627\u0642\u0639\u0629',  icon: '\uD83D\uDD0D', fn: 'runAudit',     urlInput: 'audit-url',     outDiv: 'audit-output' },
         { id: 'speed',     name: 'Speed',      nameAr: '\u0627\u0644\u0633\u0631\u0639\u0629',              icon: '\u26A1',      fn: 'runSpeed',     urlInput: 'speed-url',     outDiv: 'speed-output' },
         { id: 'content',   name: 'Content',    nameAr: '\u0627\u0644\u0645\u062D\u062A\u0648\u0649',        icon: '\uD83D\uDCDD', fn: 'runContent',   urlInput: 'content-url',   outDiv: 'content-output' },
         { id: 'keywords',  name: 'Keywords',   nameAr: '\u0627\u0644\u0643\u0644\u0645\u0627\u062A',        icon: '\uD83D\uDD11', fn: 'runKeywords',  urlInput: 'kw-url',        outDiv: 'kw-output' },
         { id: 'images',    name: 'Images',     nameAr: '\u0627\u0644\u0635\u0648\u0631',                    icon: '\uD83D\uDDBC\uFE0F', fn: 'runImages',    urlInput: 'img-url',       outDiv: 'img-output' },
         { id: 'links',     name: 'Links',      nameAr: '\u0627\u0644\u0631\u0648\u0627\u0628\u0637',        icon: '\uD83D\uDD17', fn: 'runLinks',     urlInput: 'link-url',      outDiv: 'link-output' },
+        { id: 'robots',    name: 'Robots',     nameAr: '\u0627\u0644\u0628\u0648\u062A',                    icon: '\uD83E\uDD16', fn: 'autoRunRobotsCheck',  urlInput: null, outDiv: 'robots-output' },
         { id: 'sitemap',   name: 'Sitemap',    nameAr: '\u062E\u0631\u064A\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639', icon: '\uD83D\uDDFA\uFE0F', fn: 'runSitemap',   urlInput: 'sm-url',        outDiv: 'sm-output' },
+        { id: 'competitor',name: 'Competitor', nameAr: '\u0627\u0644\u0645\u0646\u0627\u0641\u0633',       icon: '\uD83C\uDFAF', fn: 'autoRunCompetitorStep', urlInput: null, outDiv: 'comp-output' },
+        { id: 'full-audit',name: 'Full Audit', nameAr: '\u062A\u062D\u0644\u064A\u0644 \u0634\u0627\u0645\u0644', icon: '\uD83D\uDCCB', fn: 'autoRunFullAuditStep', urlInput: null, outDiv: 'auditfull-output' },
         { id: 'report',    name: 'Report',     nameAr: '\u0627\u0644\u062A\u0642\u0631\u064A\u0631',        icon: '\uD83D\uDCC4', fn: 'runReport',    urlInput: 'rpt-url',       outDiv: 'rpt-output' },
         { id: 'product-monitor', name: 'Product Monitor', nameAr: '\u0631\u0635\u062F \u0627\u0644\u0645\u0646\u062A\u062C\u0627\u062A', icon: '\uD83D\uDED2', fn: 'autoRunProductMonitor', urlInput: null, outDiv: 'crawl-output' },
         { id: 'kw-research', name: 'Keyword Research', nameAr: '\u0628\u062D\u062B \u0643\u0644\u0645\u0627\u062A \u0645\u0641\u062A\u0627\u062D\u064A\u0629', icon: '\uD83D\uDD0E', fn: 'autoRunKeywordResearch', urlInput: null, outDiv: 'kr-output' },
@@ -13887,12 +13891,12 @@
 
     var _autoTemplates = {
         quick:      ['score','meta','audit','ai-agent'],
-        full:       ['score','meta','headings','audit','speed','content','keywords','images','links','sitemap','product-monitor','kw-research','ai-agent'],
+        full:       ['score','meta','headings','schema','audit','speed','content','keywords','images','links','robots','sitemap','competitor','full-audit','report','product-monitor','kw-research','ai-agent'],
         content:    ['content','keywords','kw-research','images','ai-agent'],
-        technical:  ['sitemap','links','speed','audit','ai-agent'],
-        prepublish: ['meta','headings','content','keywords','kw-research','images','ai-agent'],
-        competitor: ['score','content','keywords','kw-research','report','ai-agent'],
-        ecommerce: ['score','meta','headings','content','images','links','product-monitor','kw-research','ai-agent'],
+        technical:  ['schema','robots','sitemap','links','speed','audit','ai-agent'],
+        prepublish: ['meta','headings','schema','content','keywords','kw-research','images','ai-agent'],
+        competitor: ['score','content','keywords','kw-research','competitor','report','ai-agent'],
+        ecommerce: ['score','meta','headings','schema','content','images','links','product-monitor','kw-research','ai-agent'],
         custom:     []
     };
 
@@ -14134,6 +14138,22 @@
             await autoRunKeywordResearch();
             return;
         }
+        if (step.id === 'schema') {
+            await autoRunSchemaCheck();
+            return;
+        }
+        if (step.id === 'robots') {
+            await autoRunRobotsCheck();
+            return;
+        }
+        if (step.id === 'competitor') {
+            await autoRunCompetitorStep();
+            return;
+        }
+        if (step.id === 'full-audit') {
+            await autoRunFullAuditStep();
+            return;
+        }
         var origInput = document.getElementById(step.urlInput);
         var origOutput = document.getElementById(step.outDiv);
         if (origInput) origInput.value = url;
@@ -14211,6 +14231,225 @@
             outHtml = '<p style="color:var(--gray-2);font-style:italic;">Keyword research completed.</p>';
         }
         _autoResults['kw-research'] = outHtml;
+    }
+
+    async function autoRunSchemaCheck() {
+        var isArS = currentLang === 'ar';
+        var urlVal = document.getElementById('auto-url').value.trim();
+        var origOut = document.getElementById('schema-output');
+        if (!urlVal) {
+            _autoResults['schema'] = '<div style="padding:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;text-align:center;color:#991b1b;font-weight:600;">' + (isArS ? '\u0627\u0643\u062A\u0628 \u0627\u0644\u0631\u0627\u0628\u0637 \u0623\u0648\u0644\u0627\u064B' : 'Enter URL first') + '</div>';
+            return;
+        }
+        if (origOut) origOut.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>' + (isArS ? '\u062C\u0627\u0631\u064D \u0641\u062D\u0635 \u0627\u0644\u0647\u064A\u0643\u0644...' : 'Checking schema markup...') + '</p></div>';
+        try {
+            var html = await fetchHTML(urlVal);
+            var doc = parseHTML(html);
+            var jsonld = doc.querySelectorAll('script[type="application/ld+json"]');
+            var microdata = doc.querySelectorAll('[itemscope]');
+            var types = [];
+            var schemas = [];
+            for (var i = 0; i < jsonld.length; i++) {
+                try {
+                    var data = JSON.parse(jsonld[i].textContent);
+                    if (data['@type']) types.push(data['@type']);
+                    schemas.push(data);
+                } catch(e) {}
+            }
+            var microTypes = [];
+            for (var j = 0; j < microdata.length; j++) {
+                var t = microdata[j].getAttribute('itemtype');
+                if (t) microTypes.push(t);
+            }
+            var hasSchema = types.length > 0 || microTypes.length > 0;
+            var score = 0;
+            if (types.length > 0) score += 40;
+            if (microTypes.length > 0) score += 20;
+            if (types.indexOf('Organization') !== -1 || types.indexOf('WebSite') !== -1) score += 15;
+            if (types.indexOf('BreadcrumbList') !== -1) score += 10;
+            if (types.indexOf('FAQPage') !== -1) score += 5;
+            if (types.indexOf('Product') !== -1) score += 5;
+            if (types.indexOf('Article') !== -1 || types.indexOf('BlogPosting') !== -1) score += 5;
+            score = Math.min(score, 100);
+            var color = score >= 60 ? '#059669' : (score >= 30 ? '#d97706' : '#dc2626');
+            var html2 = '<div style="padding:20px;">';
+            html2 += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">';
+            html2 += '<div style="width:56px;height:56px;border-radius:50%;background:' + color + ';display:flex;align-items:center;justify-content:center;font-size:22px;color:white;font-weight:800;">' + score + '</div>';
+            html2 += '<div><h3 style="margin:0;font-size:16px;color:' + color + ';">' + (isArS ? '\u0646\u062A\u064A\u062C\u0629 \u0627\u0644\u0647\u064A\u0643\u0644' : 'Schema Score') + ': ' + score + '/100</h3>';
+            html2 += '<p style="margin:2px 0 0;font-size:12px;color:var(--gray-1);">' + (hasSchema ? (isArS ? '\u062A\u0645 \u0627\u0643\u062A\u0634\u0627\u0641 \u0647\u064A\u0643\u0644' : 'Schema detected') : (isArS ? '\u0644\u0645 \u064A\u062A\u0645 \u0627\u0643\u062A\u0634\u0627\u0641 \u0647\u064A\u0643\u0644' : 'No schema found')) + '</p></div></div>';
+            if (types.length > 0) {
+                html2 += '<div style="margin-bottom:16px;"><h4 style="font-size:13px;color:var(--gray-1);margin-bottom:8px;">JSON-LD Types (' + types.length + '):</h4>';
+                for (var k = 0; k < types.length; k++) {
+                    html2 += '<span style="display:inline-block;background:#ede9fe;color:#6d28d9;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin:2px 4px;">' + esc(types[k]) + '</span>';
+                }
+                html2 += '</div>';
+            }
+            if (microTypes.length > 0) {
+                html2 += '<div style="margin-bottom:16px;"><h4 style="font-size:13px;color:var(--gray-1);margin-bottom:8px;">Microdata (' + microTypes.length + '):</h4>';
+                for (var m2 = 0; m2 < Math.min(microTypes.length, 5); m2++) {
+                    html2 += '<div style="font-size:12px;color:var(--gray-1);padding:2px 0;font-family:monospace;">' + esc(microTypes[m2]) + '</div>';
+                }
+                html2 += '</div>';
+            }
+            if (!hasSchema) {
+                html2 += '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;font-size:13px;color:#991b1b;">';
+                html2 += (isArS ? '\u26A0\uFE0F \u0644\u0645 \u064A\u062A\u0645 \u0627\u0643\u062A\u0634\u0627\u0641 structured data \u0641\u064A \u0627\u0644\u0635\u0641\u062D\u0629. \u064A\u064F\u0646\u0638\u0631 \u0625\u0636\u0627\u0641\u0629 JSON-LD.' : '\u26A0\uFE0F No structured data found. Add JSON-LD markup for better rich results.');
+                html2 += '</div>';
+            }
+            html2 += '</div>';
+            if (origOut) origOut.innerHTML = html2;
+            _autoResults['schema'] = html2;
+        } catch(e) {
+            var errHtml = '<div style="padding:16px;color:#dc2626;">Schema check failed: ' + esc(e.message) + '</div>';
+            if (origOut) origOut.innerHTML = errHtml;
+            _autoResults['schema'] = errHtml;
+        }
+    }
+
+    async function autoRunRobotsCheck() {
+        var isArR = currentLang === 'ar';
+        var urlVal = document.getElementById('auto-url').value.trim();
+        var origOut = document.getElementById('robots-output');
+        if (!urlVal) {
+            _autoResults['robots'] = '<div style="padding:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;text-align:center;color:#991b1b;font-weight:600;">' + (isArR ? '\u0627\u0643\u062A\u0628 \u0627\u0644\u0631\u0627\u0628\u0637 \u0623\u0648\u0644\u0627\u064B' : 'Enter URL first') + '</div>';
+            return;
+        }
+        if (origOut) origOut.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>' + (isArR ? '\u062C\u0627\u0631\u064D \u0627\u0644\u0628\u062D\u062B \u0639\u0646 robots.txt...' : 'Checking robots.txt...') + '</p></div>';
+        try {
+            var robotsUrl = urlVal.replace(/\/$/, '') + '/robots.txt';
+            var robotsText = '';
+            try {
+                robotsText = await fetchHTML(robotsUrl, { timeout: 8000, proxyLimit: 3 });
+            } catch(e) {}
+            if (!robotsText || robotsText.indexOf('404') !== -1 || robotsText.indexOf('Not Found') !== -1) {
+                var noRobots = '<div style="padding:20px;"><h3 style="color:#dc2626;margin:0 0 12px;">\u274C ' + (isArR ? 'robots.txt \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F' : 'robots.txt Not Found') + '</h3>';
+                noRobots += '<p style="color:#991b1b;font-size:13px;">' + (isArR ? '\u0644\u0645 \u064A\u062A\u0645 \u0627\u0643\u062A\u0634\u0627\u0641 robots.txt \u0641\u064A ' + esc(urlVal) : 'No robots.txt found at ' + esc(urlVal)) + '</p>';
+                noRobots += '<p style="color:#78350f;font-size:12px;margin-top:8px;">\u26A0\uFE0F ' + (isArR ? '\u064A\u064F\u0646\u0638\u0631 \u0625\u0646\u0634\u0627\u0621 robots.txt' : 'Consider creating a robots.txt file') + '</p></div>';
+                if (origOut) origOut.innerHTML = noRobots;
+                _autoResults['robots'] = noRobots;
+                return;
+            }
+            var lines = robotsText.split('\n');
+            var disallows = [];
+            var allows = [];
+            var sitemaps = [];
+            var crawlDelay = '';
+            var userAgents = [];
+            for (var i = 0; i < lines.length; i++) {
+                var ln = lines[i].trim();
+                if (ln.indexOf('User-agent:') === 0) userAgents.push(ln.substring(11).trim());
+                if (ln.indexOf('Disallow:') === 0) { var v = ln.substring(9).trim(); if (v) disallows.push(v); }
+                if (ln.indexOf('Allow:') === 0) { var av = ln.substring(6).trim(); if (av) allows.push(av); }
+                if (ln.indexOf('Sitemap:') === 0) sitemaps.push(ln.substring(8).trim());
+                if (ln.indexOf('Crawl-delay:') === 0) crawlDelay = ln.substring(12).trim();
+            }
+            var score = 50;
+            if (userAgents.length > 0) score += 10;
+            if (sitemaps.length > 0) score += 15;
+            if (disallows.length > 0) score += 10;
+            if (crawlDelay) score += 5;
+            score = Math.min(score, 100);
+            var color = score >= 70 ? '#059669' : (score >= 40 ? '#d97706' : '#dc2626');
+            var html2 = '<div style="padding:20px;">';
+            html2 += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">';
+            html2 += '<div style="width:56px;height:56px;border-radius:50%;background:' + color + ';display:flex;align-items:center;justify-content:center;font-size:22px;color:white;font-weight:800;">' + score + '</div>';
+            html2 += '<div><h3 style="margin:0;font-size:16px;color:' + color + ';">' + (isArR ? '\u0646\u062A\u064A\u062C\u0629 robots.txt' : 'Robots.txt Score') + ': ' + score + '/100</h3>';
+            html2 += '<p style="margin:2px 0 0;font-size:12px;color:var(--gray-1);">' + esc(robotsUrl) + '</p></div></div>';
+            html2 += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">';
+            html2 += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#3b82f6;">' + userAgents.length + '</div><div style="font-size:11px;color:var(--gray-1);">' + (isArR ? 'User-agents' : 'User-agents') + '</div></div>';
+            html2 += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#dc2626;">' + disallows.length + '</div><div style="font-size:11px;color:var(--gray-1);">' + (isArR ? '\u0645\u0631\u0641\u0648\u0636\u0627\u062A' : 'Disallows') + '</div></div>';
+            html2 += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#059669;">' + allows.length + '</div><div style="font-size:11px;color:var(--gray-1);">' + (isArR ? '\u0645\u0633\u0645\u0648\u062D' : 'Allows') + '</div></div>';
+            html2 += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#8b5cf6;">' + sitemaps.length + '</div><div style="font-size:11px;color:var(--gray-1);">' + (isArR ? '\u062E\u0631\u0627\u0626\u0637' : 'Sitemaps') + '</div></div>';
+            html2 += '</div>';
+            if (sitemaps.length > 0) {
+                html2 += '<div style="margin-bottom:12px;"><h4 style="font-size:13px;color:#059669;margin-bottom:6px;">\u2705 Sitemaps:</h4>';
+                for (var s = 0; s < sitemaps.length; s++) html2 += '<div style="font-size:12px;font-family:monospace;color:var(--gray-1);padding:2px 0;">' + esc(sitemaps[s]) + '</div>';
+                html2 += '</div>';
+            }
+            if (disallows.length > 0) {
+                html2 += '<div style="margin-bottom:12px;"><h4 style="font-size:13px;color:#dc2626;margin-bottom:6px;">\u274C Disallows:</h4>';
+                for (var d = 0; d < Math.min(disallows.length, 10); d++) html2 += '<div style="font-size:12px;font-family:monospace;color:var(--gray-1);padding:2px 0;">' + esc(disallows[d]) + '</div>';
+                if (disallows.length > 10) html2 += '<div style="font-size:11px;color:var(--gray-2);">+' + (disallows.length - 10) + ' more...</div>';
+                html2 += '</div>';
+            }
+            html2 += '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;font-size:12px;color:var(--gray-1);white-space:pre-wrap;max-height:200px;overflow-y:auto;">' + esc(robotsText.substring(0, 2000)) + '</div>';
+            html2 += '</div>';
+            if (origOut) origOut.innerHTML = html2;
+            _autoResults['robots'] = html2;
+        } catch(e) {
+            var errHtml = '<div style="padding:16px;color:#dc2626;">Robots check failed: ' + esc(e.message) + '</div>';
+            if (origOut) origOut.innerHTML = errHtml;
+            _autoResults['robots'] = errHtml;
+        }
+    }
+
+    async function autoRunCompetitorStep() {
+        var isArC2 = currentLang === 'ar';
+        var urlVal = document.getElementById('auto-url').value.trim();
+        var origOut = document.getElementById('comp-output');
+        if (!urlVal) {
+            _autoResults['competitor'] = '<div style="padding:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;text-align:center;color:#991b1b;font-weight:600;">' + (isArC2 ? '\u0627\u0643\u062A\u0628 \u0631\u0627\u0628\u0637 \u0627\u0644\u0645\u0646\u0641\u0633 \u0623\u0648\u0644\u0627\u064B' : 'Enter competitor URL first') + '</div>';
+            return;
+        }
+        var comp2 = document.getElementById('comp-url2');
+        if (comp2 && !comp2.value.trim()) comp2.value = urlVal;
+        if (typeof window['runCompetitor'] === 'function') {
+            try { await window['runCompetitor'](); } catch(e) {}
+        } else {
+            try {
+                var html = await fetchHTML(urlVal);
+                var doc = parseHTML(html);
+                var m = extractMeta(doc);
+                var text = getBodyText(doc);
+                var wc = wordCount(text);
+                var imgs = doc.querySelectorAll('img');
+                var links = doc.querySelectorAll('a[href]');
+                var h1s = doc.querySelectorAll('h1');
+                var html2 = '<div style="padding:16px;"><h3 style="margin:0 0 12px;">\uD83C\uDFAF ' + (isArC2 ? '\u062A\u062D\u0644\u064A\u0644 \u0627\u0644\u0645\u0648\u0642\u0639' : 'Site Analysis') + '</h3>';
+                html2 += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">';
+                html2 += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#3b82f6;">' + wc + '</div><div style="font-size:11px;color:var(--gray-1);">' + (isArC2 ? '\u0643\u0644\u0645\u0629' : 'Words') + '</div></div>';
+                html2 += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#10b981;">' + imgs.length + '</div><div style="font-size:11px;color:var(--gray-1);">' + (isArC2 ? '\u0635\u0648\u0631\u0629' : 'Images') + '</div></div>';
+                html2 += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#8b5cf6;">' + links.length + '</div><div style="font-size:11px;color:var(--gray-1);">' + (isArC2 ? '\u0631\u0627\u0628\u0637' : 'Links') + '</div></div>';
+                html2 += '</div>';
+                html2 += '<div style="margin-top:12px;font-size:13px;"><strong>' + (isArC2 ? '\u0627\u0644\u0639\u0646\u0648\u0627\u0646:' : 'Title:') + '</strong> ' + esc(m.title || 'N/A') + '</div>';
+                html2 += '<div style="font-size:13px;"><strong>' + (isArC2 ? '\u0627\u0644\u0648\u0635\u0641:' : 'Description:') + '</strong> ' + esc((m.description || 'N/A').substring(0, 200)) + '</div>';
+                html2 += '<div style="font-size:13px;"><strong>' + (isArC2 ? '\u0627\u0644\u0639\u0646\u0648\u0627\u0646 H1:' : 'H1 Count:') + '</strong> ' + h1s.length + '</div>';
+                html2 += '</div>';
+                if (origOut) origOut.innerHTML = html2;
+                _autoResults['competitor'] = html2;
+            } catch(e) {
+                var errHtml = '<div style="padding:16px;color:#dc2626;">Competitor analysis failed: ' + esc(e.message) + '</div>';
+                if (origOut) origOut.innerHTML = errHtml;
+                _autoResults['competitor'] = errHtml;
+            }
+        }
+    }
+
+    async function autoRunFullAuditStep() {
+        var isArFA = currentLang === 'ar';
+        var urlVal = document.getElementById('auto-url').value.trim();
+        var origOut = document.getElementById('auditfull-output');
+        if (!urlVal) {
+            _autoResults['full-audit'] = '<div style="padding:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;text-align:center;color:#991b1b;font-weight:600;">' + (isArFA ? '\u0627\u0643\u062A\u0628 \u0627\u0644\u0631\u0627\u0628\u0637 \u0623\u0648\u0644\u0627\u064B' : 'Enter URL first') + '</div>';
+            return;
+        }
+        var origUrl = document.getElementById('auditfull-url');
+        if (origUrl) origUrl.value = urlVal;
+        if (origOut) origOut.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>' + (isArFA ? '\u062C\u0627\u0631\u064D \u0627\u0644\u062A\u062D\u0644\u064A\u0644 \u0627\u0644\u0634\u0627\u0645\u0644...' : 'Running full audit...') + '</p></div>';
+        try {
+            if (typeof window['runFullAudit'] === 'function') {
+                await window['runFullAudit']();
+            } else {
+                throw new Error('runFullAudit not found');
+            }
+            await new Promise(function(r) { setTimeout(r, 500); });
+        } catch(e) {}
+        var outHtml = '';
+        if (origOut) outHtml = origOut.innerHTML;
+        if (!outHtml || outHtml.indexOf('tool-loading') !== -1) {
+            outHtml = '<p style="color:var(--gray-2);font-style:italic;">Full audit completed.</p>';
+        }
+        _autoResults['full-audit'] = outHtml;
     }
 
     async function autoRunAgentStep() {
@@ -14291,6 +14530,33 @@
                 if (kwCountM) allPassed.push({ tool: isArA ? s.nameAr : s.name, count: parseInt(kwCountM[1]) });
                 if (text.indexOf('Enter') !== -1 || text.indexOf('\u0627\u0643\u062A\u0628') !== -1) {
                     allWarnings.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'Keyword research requires a keyword' });
+                }
+            }
+            if (s.id === 'schema') {
+                if (text.indexOf('Score') !== -1 || text.indexOf('\u0646\u062A\u064A\u062C\u0629') !== -1) {
+                    var schemaScoreM = text.match(/(\d+)\/100/);
+                    if (schemaScoreM && parseInt(schemaScoreM[1]) < 30) {
+                        allIssues.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'No or minimal schema markup found' });
+                    } else if (schemaScoreM && parseInt(schemaScoreM[1]) < 60) {
+                        allWarnings.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'Schema markup could be improved' });
+                    } else if (schemaScoreM) {
+                        allPassed.push({ tool: isArA ? s.nameAr : s.name, count: 1 });
+                    }
+                }
+                if (text.indexOf('No schema found') !== -1 || text.indexOf('\u0644\u0645 \u064A\u062A\u0645 \u0627\u0643\u062A\u0634\u0627\u0641') !== -1) {
+                    allIssues.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'No structured data found' });
+                }
+            }
+            if (s.id === 'robots') {
+                if (text.indexOf('Not Found') !== -1 || text.indexOf('\u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F') !== -1) {
+                    allWarnings.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'robots.txt not found' });
+                }
+                if (text.indexOf('Sitemaps') !== -1 || text.indexOf('\u062E\u0631\u0627\u0626\u0637') !== -1) allPassed.push({ tool: isArA ? s.nameAr : s.name, count: 1 });
+            }
+            if (s.id === 'full-audit') {
+                if (text.indexOf('score') !== -1 || text.indexOf('\u0646\u062A\u064A\u062C\u0629') !== -1) {
+                    var faScoreM = text.match(/(\d+)\/100/);
+                    if (faScoreM) allPassed.push({ tool: isArA ? s.nameAr : s.name, count: parseInt(faScoreM[1]) });
                 }
             }
         }
