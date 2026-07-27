@@ -1,0 +1,222 @@
+{
+  "name": "SEOHUB AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "seo-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "seo-agent-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===== REASON ENGINE =====\n// Analyzes user input and determines intent\n\nconst message = $input.first().json.message || '';\nconst url = $input.first().json.url || '';\nconst context = $input.first().json.context || {};\nconst isArabic = /[\\u0600-\\u06FF]/.test(message);\n\nconst lower = message.toLowerCase().trim();\n\n// Extract URL from message if not provided directly\nlet extractedUrl = url;\nif (!extractedUrl) {\n  const urlMatch = lower.match(/https?:\\/\\/[^\\s]+/) || lower.match(/(?:www\\.)?([a-z0-9\\-]+\\.[a-z]{2,})/);\n  if (urlMatch) {\n    extractedUrl = urlMatch[0];\n    if (!extractedUrl.startsWith('http')) extractedUrl = 'https://' + extractedUrl;\n  }\n}\n\nlet intent = {\n  type: 'unknown',\n  tools: [],\n  template: null,\n  url: extractedUrl,\n  isAr: isArabic,\n  reasoning: '',\n  message: message\n};\n\n// HELP\nif (lower === 'help' || lower === 'مساعدة' || lower === '?' || lower === '.help') {\n  intent.type = 'help';\n  intent.reasoning = 'User wants help';\n  return [{ json: intent }];\n}\n\n// URL SCAN - just a URL pasted\nif (!lower.match(/audit|full|speed|content|meta|image|link|heading|schema|robots|sitemap|score|keyword|competitor|product|quick|شامل|سرعة|محتوى|كلمات|صور|روابط|عنوان|هيكل|روبوت|خريطة|نتيجة|وسوم|منافس|منتجات|بحث|سريع/) && extractedUrl) {\n  intent.type = 'template';\n  intent.template = 'quick';\n  intent.reasoning = 'URL provided without specific command - running quick scan';\n  return [{ json: intent }];\n}\n\n// COMPLEX INTENTS\nif (lower.indexOf('competitor') !== -1 || lower.indexOf('منافس') !== -1) {\n  intent.type = 'multi';\n  intent.tools = ['score', 'content', 'keywords', 'meta', 'competitor'];\n  intent.reasoning = 'Competitor analysis needs content + keywords + meta comparison';\n  return [{ json: intent }];\n}\n\nif (lower.indexOf('ecommerce') !== -1 || lower.indexOf('متجر') !== -1 || lower.indexOf('shop') !== -1 || lower.indexOf('store') !== -1) {\n  intent.type = 'multi';\n  intent.tools = ['score', 'meta', 'headings', 'schema', 'content', 'images', 'links', 'product-monitor', 'kw-research'];\n  intent.reasoning = 'E-commerce audit needs product + SEO tools';\n  return [{ json: intent }];\n}\n\nif (lower.indexOf('prepublish') !== -1 || lower.indexOf('قبل النشر') !== -1 || lower.indexOf('نشر') !== -1) {\n  intent.type = 'multi';\n  intent.tools = ['meta', 'headings', 'schema', 'content', 'keywords', 'images'];\n  intent.reasoning = 'Pre-publish check needs content + meta + structure tools';\n  return [{ json: intent }];\n}\n\nif (lower.indexOf('technical') !== -1 || lower.indexOf('تقني') !== -1) {\n  intent.type = 'multi';\n  intent.tools = ['schema', 'robots', 'sitemap', 'links', 'speed', 'audit'];\n  intent.reasoning = 'Technical SEO needs crawlability + performance tools';\n  return [{ json: intent }];\n}\n\nif (lower.indexOf('full') !== -1 || lower.indexOf('audit') !== -1 || lower.indexOf('شامل') !== -1 || lower.indexOf('report') !== -1 || lower.indexOf('تقرير') !== -1) {\n  intent.type = 'template';\n  intent.template = 'full';\n  intent.reasoning = 'Full audit requires all available tools';\n  return [{ json: intent }];\n}\n\nif (lower.indexOf('content') !== -1 || lower.indexOf('محتوى') !== -1) {\n  intent.type = 'multi';\n  intent.tools = ['content', 'keywords', 'kw-research', 'images', 'headings'];\n  intent.reasoning = 'Content analysis needs text + keywords + images + headings';\n  return [{ json: intent }];\n}\n\n// SINGLE TOOL INTENTS\nconst singleMap = [\n  { keys: ['speed', 'سرعة', 'fast', 'أداء'], id: 'speed' },\n  { keys: ['keyword', 'كلمات', 'الكلمات', 'مفتاح'], id: 'keywords' },\n  { keys: ['schema', 'هيكل', 'هيكلي', 'structured'], id: 'schema' },\n  { keys: ['robots', 'روبوت', 'بوت'], id: 'robots' },\n  { keys: ['score', 'النتيجة', 'نقط', 'نقاط'], id: 'score' },\n  { keys: ['meta', 'وسوم', 'الوسوم', 'title', 'description'], id: 'meta' },\n  { keys: ['image', 'صور', 'الصور', 'صورة'], id: 'images' },\n  { keys: ['link', 'روابط', 'الروابط', 'رابط'], id: 'links' },\n  { keys: ['heading', 'عنوان', 'العناوين', 'headings', 'h1', 'h2'], id: 'headings' },\n  { keys: ['sitemap', 'خريطة', 'الخريطة'], id: 'sitemap' },\n  { keys: ['research', 'بحث', 'seo keywords'], id: 'kw-research' },\n  { keys: ['product', 'منتجات', 'المنتجات', 'رصد'], id: 'product-monitor' }\n];\n\nfor (const s of singleMap) {\n  for (const k of s.keys) {\n    if (lower.indexOf(k) !== -1) {\n      intent.type = 'single';\n      intent.tools = [s.id];\n      intent.reasoning = 'User wants ' + s.id;\n      return [{ json: intent }];\n    }\n  }\n}\n\n// TEMPLATE INTENTS\nif (lower.indexOf('quick') !== -1 || lower.indexOf('سريع') !== -1) {\n  intent.type = 'template';\n  intent.template = 'quick';\n  intent.reasoning = 'Quick scan requested';\n  return [{ json: intent }];\n}\n\n// UNKNOWN\nintent.type = 'unknown';\nintent.reasoning = 'Could not determine intent';\nreturn [{ json: intent }];"
+      },
+      "id": "reason-engine",
+      "name": "Reason Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "outputIndex": 0,
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputIndex": 1,
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "unknown",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputIndex": 2,
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "template",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputIndex": 3,
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "single",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputIndex": 4,
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "multi",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "fallbackOutput": 5
+        }
+      },
+      "id": "route-intent",
+      "name": "Route Intent",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"type\": \"help\",\n  \"report\": \"<b>Available Commands (18 tools):</b><br><br><code>analyze [url]</code> - Quick SEO scan<br><code>audit</code> / <code>full</code> - Full audit<br><code>score</code> - SEO score<br><code>meta</code> - Meta tags<br><code>speed</code> - Page speed<br><code>content</code> - Content analysis<br><code>keywords</code> - Extract keywords<br><code>images</code> - Image analysis<br><code>links</code> - Link analysis<br><code>headings</code> - Heading structure<br><code>schema</code> - Structured data<br><code>robots</code> - robots.txt<br><code>sitemap</code> - Sitemap<br><code>competitor</code> - Competitor analysis<br><code>products</code> - Product monitoring<br><code>research</code> - Keyword research\",\n  \"chips\": [\"quick\", \"full\", \"speed\", \"content\", \"products\", \"research\"]\n}"
+      },
+      "id": "help-response",
+      "name": "Help Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 100]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"type\": \"unknown\",\n  \"report\": \"<b>I didn't understand.</b> Type <code>help</code> to see available commands.\",\n  \"chips\": [\"quick\", \"full\", \"products\", \"research\"]\n}"
+      },
+      "id": "unknown-response",
+      "name": "Unknown Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===== BUILD TOOL PIPELINE =====\n// Maps intent to SEO tool URLs to fetch\n\nconst intent = $input.first().json;\nconst baseUrl = 'https://seohub-proxy.mmetwily1.workers.dev';\nconst siteUrl = intent.url;\n\n// Tool catalog: maps tool ID to proxy URL pattern\nconst toolCatalog = {\n  'score':          { path: '/?url={site}', name: 'Score', nameAr: 'النتيجة', icon: '\uD83D\uDCCA' },\n  'meta':           { path: '/?url={site}', name: 'Meta Tags', nameAr: 'الوسوم', icon: '\uD83C\uDFD4\uFE0F' },\n  'headings':       { path: '/?url={site}', name: 'Headings', nameAr: 'العناوين', icon: '\uD83D\uDCC9' },\n  'schema':         { path: '/?url={site}', name: 'Schema', nameAr: 'الهيكل', icon: '\uD83D\uDD27' },\n  'audit':          { path: '/?url={site}', name: 'Audit', nameAr: 'المواضعية', icon: '\uD83D\uDD0D' },\n  'speed':          { path: '/?url={site}', name: 'Speed', nameAr: 'السرعة', icon: '\u26A1' },\n  'content':        { path: '/?url={site}', name: 'Content', nameAr: 'المحتوى', icon: '\uD83D\uDCDD' },\n  'keywords':       { path: '/?url={site}', name: 'Keywords', nameAr: 'الكلمات', icon: '\uD83D\uDD11' },\n  'images':         { path: '/?url={site}', name: 'Images', nameAr: 'الصور', icon: '\uD83D\uDDBC\uFE0F' },\n  'links':          { path: '/?url={site}', name: 'Links', nameAr: 'الروابط', icon: '\uD83D\uDD17' },\n  'robots':         { path: '/?url={site}', name: 'Robots', nameAr: 'البوت', icon: '\uD83E\uDD16' },\n  'sitemap':        { path: '/?url={site}', name: 'Sitemap', nameAr: 'الخريطة', icon: '\uD83D\uDDFA\uFE0F' },\n  'kw-research':    { path: '/?url={site}', name: 'KW Research', nameAr: 'بحث كلمات', icon: '\uD83D\uDD0E' },\n  'product-monitor':{ path: '/?url={site}', name: 'Products', nameAr: 'المنتجات', icon: '\uD83D\uDED2' },\n  'competitor':     { path: '/?url={site}', name: 'Competitor', nameAr: 'المنافس', icon: '\uD83C\uDFAF' }\n};\n\n// Templates\nconst templates = {\n  'quick': ['score', 'meta', 'headings', 'content', 'speed'],\n  'full': ['score', 'meta', 'headings', 'schema', 'audit', 'speed', 'content', 'keywords', 'images', 'links', 'robots', 'sitemap'],\n  'content': ['content', 'keywords', 'kw-research', 'images', 'headings'],\n  'technical': ['schema', 'robots', 'sitemap', 'links', 'speed', 'audit'],\n  'prepublish': ['meta', 'headings', 'schema', 'content', 'keywords', 'images'],\n  'ecommerce': ['score', 'meta', 'headings', 'schema', 'content', 'images', 'links', 'product-monitor', 'kw-research']\n};\n\n// Determine tool list\nlet toolIds = [];\nif (intent.template && templates[intent.template]) {\n  toolIds = templates[intent.template];\n} else if (intent.tools && intent.tools.length > 0) {\n  toolIds = intent.tools;\n}\n\n// Build pipeline items\nconst pipeline = [];\nfor (const toolId of toolIds) {\n  const tool = toolCatalog[toolId];\n  if (tool && siteUrl) {\n    pipeline.push({\n      id: toolId,\n      name: tool.name,\n      nameAr: tool.nameAr,\n      icon: tool.icon,\n      url: baseUrl + tool.path.replace('{site}', encodeURIComponent(siteUrl))\n    });\n  }\n}\n\nreturn [{\n  json: {\n    intent: intent,\n    pipeline: pipeline,\n    siteUrl: siteUrl,\n    isAr: intent.isAr\n  }\n}];"
+      },
+      "id": "build-pipeline",
+      "name": "Build Pipeline",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 380]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===== EXECUTE TOOLS SEQUENTIALLY =====\n// Fetches each tool's output via the proxy\n\nconst input = $input.first().json;\nconst pipeline = input.pipeline || [];\nconst siteUrl = input.siteUrl;\nconst intent = input.intent;\nconst isAr = input.isAr;\n\nif (pipeline.length === 0) {\n  return [{\n    json: {\n      intent: intent,\n      results: {},\n      done: 0,\n      errors: 0,\n      pipeline: [],\n      isAr: isAr\n    }\n  }];\n}\n\nconst results = {};\nlet done = 0;\nlet errors = 0;\n\n// Execute each tool\nfor (const step of pipeline) {\n  try {\n    const response = await fetch(step.url, {\n      headers: {\n        'User-Agent': 'SEOHUB-Agent/1.0'\n      }\n    });\n    const data = await response.json();\n    results[step.id] = {\n      html: data.contents || data.error || 'No data',\n      status: 'done',\n      name: step.name,\n      nameAr: step.nameAr,\n      icon: step.icon\n    };\n    done++;\n  } catch (e) {\n    results[step.id] = {\n      html: 'Error: ' + e.message,\n      status: 'error',\n      name: step.name,\n      nameAr: step.nameAr,\n      icon: step.icon\n    };\n    errors++;\n  }\n}\n\nreturn [{\n  json: {\n    intent: intent,\n    results: results,\n    done: done,\n    errors: errors,\n    pipeline: pipeline,\n    siteUrl: siteUrl,\n    isAr: isAr\n  }\n}];"
+      },
+      "id": "execute-tools",
+      "name": "Execute Tools",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1140, 380]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===== OBSERVE ENGINE =====\n// Analyzes tool results and generates structured report\n\nconst input = $input.first().json;\nconst intent = input.intent;\nconst results = input.results || {};\nconst done = input.done || 0;\nconst errors = input.errors || 0;\nconst pipeline = input.pipeline || [];\nconst isAr = input.isAr !== false;\nconst siteUrl = input.siteUrl || '';\n\nconst criticalIssues = [];\nconst warnings = [];\nconst passed = [];\nconst observations = [];\n\n// Helper: extract text from HTML\nfunction getText(html) {\n  if (!html) return '';\n  return html.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim();\n}\n\n// Helper: extract number from text\nfunction extractNum(text, pattern) {\n  const m = text.match(pattern);\n  return m ? parseInt(m[1].replace(/,/g, '')) : null;\n}\n\n// Analyze each tool result\nfor (const step of pipeline) {\n  const r = results[step.id];\n  if (!r || r.status !== 'done') continue;\n  const text = getText(r.html);\n  const icon = step.icon || '';\n  const name = isAr ? step.nameAr : step.name;\n\n  switch (step.id) {\n    case 'score': {\n      const sc = extractNum(text, /(\\d{1,3})/);\n      if (sc !== null) {\n        observations.push({ tool: name, finding: 'Score: ' + sc + '/100', severity: sc >= 80 ? 'pass' : (sc >= 50 ? 'warn' : 'critical') });\n        if (sc < 50) criticalIssues.push(icon + ' ' + (isAr ? 'النتيجة منخفضة جداً' : 'Score is very low') + ' (' + sc + '/100)');\n        else if (sc < 80) warnings.push(icon + ' ' + (isAr ? 'النتيجة متوسطة' : 'Score is average') + ' (' + sc + '/100)');\n        else passed.push(icon + ' ' + (isAr ? 'نتيجة ممتازة' : 'Excellent score') + ' (' + sc + '/100)');\n      }\n      break;\n    }\n    case 'meta': {\n      if (text.indexOf('Title: N/A') !== -1 || text.indexOf('العنوان: N/A') !== -1 || text.indexOf('No title') !== -1) criticalIssues.push(icon + ' ' + (isAr ? 'العنوان (Title Tag) مفقود' : 'Missing Title Tag'));\n      else passed.push(icon + ' ' + (isAr ? 'العنوان موجود' : 'Title tag present'));\n      if (text.indexOf('Description: N/A') !== -1 || text.indexOf('الوصف: N/A') !== -1 || text.indexOf('No description') !== -1) criticalIssues.push(icon + ' ' + (isAr ? 'الوصف مفقود' : 'Missing Meta Description'));\n      else passed.push(icon + ' ' + (isAr ? 'الوصف موجود' : 'Meta description present'));\n      break;\n    }\n    case 'headings': {\n      if (text.indexOf('H1') === -1 || text.indexOf('No H1') !== -1) criticalIssues.push(icon + ' ' + (isAr ? 'لا يوجد عنوان H1' : 'Missing H1 heading'));\n      else passed.push(icon + ' ' + (isAr ? 'عنوان H1 موجود' : 'H1 heading present'));\n      break;\n    }\n    case 'images': {\n      const altM = text.match(/(\\d+)\\s*(?:missing|بدون|sans)/i);\n      if (altM && parseInt(altM[1]) > 0) warnings.push(icon + ' ' + altM[1] + ' ' + (isAr ? 'صورة بدون نص بديل' : 'images missing alt text'));\n      else passed.push(icon + ' ' + (isAr ? 'جميع الصور لها نص بديل' : 'All images have alt text'));\n      break;\n    }\n    case 'links': {\n      const bm = text.match(/(\\d+)\\s*(?:broken|dead|404)/i);\n      if (bm && parseInt(bm[1]) > 0) criticalIssues.push(icon + ' ' + bm[1] + ' ' + (isAr ? 'رابط مكسور' : 'broken links'));\n      break;\n    }\n    case 'speed': {\n      if (text.indexOf('404') !== -1) warnings.push(icon + ' ' + (isAr ? 'فحص السرعة أخطأ' : 'Speed check failed'));\n      else passed.push(icon + ' ' + (isAr ? 'فحص السرعة تم' : 'Speed check OK'));\n      break;\n    }\n    case 'schema': {\n      if (text.indexOf('No schema') !== -1 || text.indexOf('لم يتم') !== -1 || text.indexOf('not found') !== -1) warnings.push(icon + ' ' + (isAr ? 'لا يوجد Structured Data' : 'No Structured Data found'));\n      else passed.push(icon + ' ' + (isAr ? 'Structured Data موجود' : 'Structured Data present'));\n      break;\n    }\n    case 'robots': {\n      if (text.indexOf('Not Found') !== -1 || text.indexOf('غير موجود') !== -1) warnings.push(icon + ' ' + (isAr ? 'robots.txt غير موجود' : 'robots.txt not found'));\n      else passed.push(icon + ' ' + (isAr ? 'robots.txt موجود' : 'robots.txt present'));\n      break;\n    }\n    case 'sitemap': {\n      if (text.indexOf('Not Found') !== -1 || text.indexOf('غير موجود') !== -1) warnings.push(icon + ' ' + (isAr ? 'Sitemap غير موجود' : 'Sitemap not found'));\n      else passed.push(icon + ' ' + (isAr ? 'Sitemap موجود' : 'Sitemap present'));\n      break;\n    }\n    case 'content': {\n      const wc = extractNum(text, /(\\d[\\d,]*)\\s*(words|كلمة|word)/i);\n      if (wc !== null) {\n        if (wc < 300) warnings.push(icon + ' ' + (isAr ? 'المحتوى قصير' : 'Content is thin') + ' (' + wc + ' ' + (isAr ? 'كلمة' : 'words') + ')');\n        else passed.push(icon + ' ' + (isAr ? 'المحتوى كافٍ' : 'Content is sufficient') + ' (' + wc + ' ' + (isAr ? 'كلمة' : 'words') + ')');\n      }\n      break;\n    }\n  }\n}\n\n// Build report HTML\nlet report = '';\nreport += '<b>' + (isAr ? 'تقرير التحليل' : 'Analysis Report') + '</b> - ' + siteUrl + '<br><br>';\nreport += '&#128202; ' + (isAr ? 'تم تنفيذ' : 'Executed') + ': <b>' + done + '/' + pipeline.length + '</b> ' + (isAr ? 'أدوات' : 'tools');\nif (errors > 0) report += ' (' + errors + ' ' + (isAr ? 'أخطاء' : 'errors') + ')';\n\nif (passed.length > 0) {\n  report += '<br><br>&#9989; <b>' + (isAr ? 'الإيجابيات:' : 'Passed:') + '</b><br>';\n  for (let i = 0; i < Math.min(passed.length, 8); i++) report += '&#8226; ' + passed[i] + '<br>';\n}\nif (warnings.length > 0) {\n  report += '<br>&#9888;&#65039; <b>' + (isAr ? 'تحذيرات:' : 'Warnings:') + '</b><br>';\n  for (let i = 0; i < Math.min(warnings.length, 8); i++) report += '&#8226; ' + warnings[i] + '<br>';\n}\nif (criticalIssues.length > 0) {\n  report += '<br>&#128308; <b>' + (isAr ? 'مشاكل حرجة:' : 'Critical Issues:') + '</b><br>';\n  for (let i = 0; i < Math.min(criticalIssues.length, 8); i++) report += '&#8226; ' + criticalIssues[i] + '<br>';\n}\n\n// Recommendations\nconst recs = [];\nif (criticalIssues.length > 0) recs.push(isAr ? '&#128680; يُنصح بإصلاح المشاكل الحرجة فوراً' : '&#128680; Fix critical issues immediately');\nif (warnings.length > 2) recs.push(isAr ? '&#128200; هناك مجال واسع للتحسين' : '&#128200; Significant room for improvement');\nif (passed.length > 3 && criticalIssues.length === 0) recs.push(isAr ? '&#127881; الموقع في حالة جيدة!' : '&#127881; Site is in good shape!');\nif (passed.length === 0 && warnings.length === 0 && criticalIssues.length === 0) recs.push(isAr ? '&#128533; لا توجد بيانات كافية للتحليل' : '&#128533; Insufficient data for analysis');\n\nif (recs.length > 0) {\n  report += '<br><br>&#128161; <b>' + (isAr ? 'التوصيات:' : 'Recommendations:') + '</b><br>';\n  for (let i = 0; i < recs.length; i++) report += recs[i] + '<br>';\n}\n\n// Determine next chips\nconst chips = [];\nif (criticalIssues.length > 0) chips.push(isAr ? 'إصلاح المشاكل' : 'Fix Issues');\nchips.push(isAr ? 'تقرير مفصل' : 'Full Report');\nif (warnings.length > 0) chips.push(isAr ? 'تحليل المحتوى' : 'Content');\nchips.push(isAr ? 'بحث كلمات' : 'KW Research');\nchips.push(isAr ? 'تحليل آخر' : 'Analyze Another');\n\nreturn [{\n  json: {\n    type: 'report',\n    report: report,\n    chips: chips,\n    passed: passed.length,\n    warnings: warnings.length,\n    critical: criticalIssues.length,\n    done: done,\n    total: pipeline.length,\n    siteUrl: siteUrl,\n    isAr: isAr\n  }\n}];"
+      },
+      "id": "observe-engine",
+      "name": "Observe Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1380, 380]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}"
+      },
+      "id": "final-response",
+      "name": "Final Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1620, 380]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Reason Engine", "type": "main", "index": 0 }]
+      ]
+    },
+    "Reason Engine": {
+      "main": [
+        [{ "node": "Route Intent", "type": "main", "index": 0 }]
+      ]
+    },
+    "Route Intent": {
+      "main": [
+        [{ "node": "Help Response", "type": "main", "index": 0 }],
+        [{ "node": "Unknown Response", "type": "main", "index": 0 }],
+        [{ "node": "Build Pipeline", "type": "main", "index": 0 }],
+        [{ "node": "Build Pipeline", "type": "main", "index": 0 }],
+        [{ "node": "Build Pipeline", "type": "main", "index": 0 }],
+        [{ "node": "Build Pipeline", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Pipeline": {
+      "main": [
+        [{ "node": "Execute Tools", "type": "main", "index": 0 }]
+      ]
+    },
+    "Execute Tools": {
+      "main": [
+        [{ "node": "Observe Engine", "type": "main", "index": 0 }]
+      ]
+    },
+    "Observe Engine": {
+      "main": [
+        [{ "node": "Final Response", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [{ "name": "seo-agent" }, { "name": "seohub" }]
+}

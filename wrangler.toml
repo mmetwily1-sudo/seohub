@@ -1,3 +1,9 @@
 name = "seohub-proxy"
 main = "worker/proxy.js"
 compatibility_date = "2026-07-24"
+
+# Set N8N_WEBHOOK_URL in Cloudflare dashboard:
+# Workers & Pages > seohub-proxy > Settings > Variables
+# Example: https://your-n8n-instance.com/webhook/seo-agent
+[vars]
+# N8N_WEBHOOK_URL = ""
