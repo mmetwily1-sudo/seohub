@@ -1,0 +1,4 @@
+node_modules/
+_check.js
+tools_check.js
+*.cache
