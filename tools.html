@@ -14069,15 +14069,7 @@
             for (var i = 0; i < _autoPipeline.length; i++) {
                 var s = _autoPipeline[i];
                 var content = _autoResults[s.id] || '';
-                var statusIcon = s.status === 'done' ? '&#9989;' : (s.status === 'error' ? '&#10060;' : '&#9203;');
-                html += '<div class="auto-combined-section">';
-                html += '<div class="auto-combined-header">';
-                html += '<span class="auto-combined-icon">' + s.icon + '</span>';
-                html += '<span class="auto-combined-title">' + (isArC ? s.nameAr : s.name) + '</span>';
-                html += '<span class="auto-combined-status">' + statusIcon + '</span>';
-                html += '</div>';
-                html += '<div class="auto-combined-body">' + (content || '<p style="color:var(--gray-2);font-style:italic;">' + (isArC ? '\u0644\u0645 \u064A\u062A\u0645 \u0627\u0644\u062A\u0634\u063A\u064A\u0644 \u0628\u0639\u062F' : 'Not completed') + '</p>') + '</div>';
-                html += '</div>';
+                html += '<div style="margin-bottom:2px;">' + content + '</div>';
             }
             html += '</div>';
             body.innerHTML = html;
