@@ -393,10 +393,39 @@
         .auto-add-item .auto-add-icon{font-size:16px;flex-shrink:0}
         .auto-progress{width:100%;height:4px;background:var(--gray-4);border-radius:100px;overflow:hidden;margin-bottom:12px}
         .auto-progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),#10b981);border-radius:100px;transition:width .4s}
-        .auto-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+        .auto-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
         .auto-summary-card{padding:14px;background:var(--gray-5);border:1px solid var(--gray-4);border-radius:10px;text-align:center}
         .auto-summary-card .auto-summary-val{font-size:24px;font-weight:800;color:var(--primary);display:block}
         .auto-summary-card .auto-summary-label{font-size:11px;color:var(--gray-2);font-weight:600;text-transform:uppercase;margin-top:4px}
+        .auto-split{display:grid;grid-template-columns:380px 1fr;gap:16px;align-items:start}
+        .auto-agent{background:var(--white);border:1px solid var(--gray-4);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;height:580px}
+        .auto-agent-header{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}
+        .auto-agent-avatar{width:38px;height:38px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+        .auto-agent-header-text h4{margin:0;font-size:14px;font-weight:700}
+        .auto-agent-header-text p{margin:0;font-size:11px;opacity:.8}
+        .auto-agent-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+        .auto-agent-msg{max-width:88%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.55;word-wrap:break-word}
+        .auto-agent-msg.agent{background:var(--gray-5);border:1px solid var(--gray-4);border-bottom-left-radius:4px;align-self:flex-start}
+        .auto-agent-msg.user{background:var(--primary);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+        .auto-agent-msg .msg-time{font-size:10px;color:var(--gray-2);margin-top:4px;display:block}
+        .auto-agent-msg.user .msg-time{color:rgba(255,255,255,.6)}
+        .auto-agent-msg.agent .msg-actions{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px}
+        .auto-agent-msg .msg-action-btn{padding:5px 10px;border:1px solid var(--primary);border-radius:100px;background:var(--white);color:var(--primary);font-size:11px;font-weight:600;cursor:pointer;transition:var(--transition)}
+        .auto-agent-msg .msg-action-btn:hover{background:var(--primary);color:#fff}
+        .auto-agent-typing{display:flex;gap:4px;padding:12px 16px;align-self:flex-start}
+        .auto-agent-typing .dot{width:7px;height:7px;background:var(--gray-2);border-radius:50%;animation:autoDot 1.2s ease-in-out infinite}
+        .auto-agent-typing .dot:nth-child(2){animation-delay:.2s}
+        .auto-agent-typing .dot:nth-child(3){animation-delay:.4s}
+        @keyframes autoDot{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-6px);opacity:1}}
+        .auto-agent-input{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--gray-4);background:var(--white)}
+        .auto-agent-input input{flex:1;padding:10px 14px;border:2px solid var(--gray-4);border-radius:100px;font-size:13px;font-family:inherit;outline:none;transition:var(--transition)}
+        .auto-agent-input input:focus{border-color:#6366f1}
+        .auto-agent-input button{width:38px;height:38px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:var(--transition)}
+        .auto-agent-input button:hover{transform:scale(1.08)}
+        .auto-agent-chips{display:flex;flex-wrap:wrap;gap:4px;padding:0 14px 10px}
+        .auto-agent-chip{padding:4px 10px;border:1px solid var(--gray-4);border-radius:100px;font-size:11px;color:var(--gray-1);cursor:pointer;transition:var(--transition);background:var(--white);white-space:nowrap}
+        .auto-agent-chip:hover{border-color:#6366f1;color:#6366f1}
+        @media(max-width:900px){.auto-split{grid-template-columns:1fr}.auto-agent{height:420px}}
         @media(max-width:768px){.auto-pipeline{flex-direction:column;align-items:stretch}.auto-arrow{transform:rotate(90deg);text-align:center}.auto-step{justify-content:center}}
     </style>
 </head><body>
@@ -739,42 +768,64 @@
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
                     <h3 style="margin:0;">&#128260; <span data-i18n="auto_title">Automation Pipeline</span></h3>
                 </div>
-                <p style="color:var(--gray-1);margin-bottom:14px;font-size:13px;" data-i18n="auto_desc">Chain multiple SEO tools into one automated workflow. Enter a URL, pick a template, and run everything in sequence.</p>
+                <p style="color:var(--gray-1);margin-bottom:14px;font-size:13px;" data-i18n="auto_desc">Chain multiple SEO tools into one automated workflow. Use the AI Agent to control everything with natural language.</p>
 
-                <div style="margin-bottom:14px;">
-                    <div class="tool-input-row" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
-                        <div style="flex:1;min-width:250px;">
-                            <label style="font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;">&#128279; Target URL</label>
-                            <input type="url" id="auto-url" class="tool-input" placeholder="https://example.com" style="padding:12px 16px;font-size:15px;border-radius:12px;width:100%;box-sizing:border-box;" onkeypress="if(event.key==='Enter')autoRunPipeline()">
+                <div class="auto-split">
+                    <div style="display:flex;flex-direction:column;gap:14px;">
+                        <div class="auto-agent" id="auto-agent">
+                            <div class="auto-agent-header">
+                                <div class="auto-agent-avatar">&#129302;</div>
+                                <div class="auto-agent-header-text">
+                                    <h4>SEO Agent</h4>
+                                    <p>AI-powered workflow assistant</p>
+                                </div>
+                            </div>
+                            <div class="auto-agent-body" id="auto-agent-body"></div>
+                            <div class="auto-agent-chips" id="auto-agent-chips"></div>
+                            <div class="auto-agent-input">
+                                <input type="text" id="auto-agent-input" placeholder="Type a command..." onkeypress="if(event.key==='Enter')autoAgentSend()">
+                                <button onclick="autoAgentSend()">&#10148;</button>
+                            </div>
                         </div>
-                        <button class="kr-btn kr-btn-run" onclick="autoRunPipeline()" id="auto-run-btn" style="background:linear-gradient(135deg,var(--primary),#8b5cf6);">&#128640; Run Pipeline</button>
-                        <button class="kr-btn kr-btn-sm" onclick="autoStopPipeline()" id="auto-stop-btn" style="background:#ef4444;display:none;">&#9724; Stop</button>
                     </div>
-                </div>
 
-                <div style="margin-bottom:14px;">
-                    <label style="font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">&#128203; Workflow Templates</label>
-                    <div class="auto-templates" id="auto-templates">
-                        <button class="auto-tpl active" onclick="autoLoadTemplate('quick')" data-tpl="quick">&#9889; Quick SEO Check</button>
-                        <button class="auto-tpl" onclick="autoLoadTemplate('full')" data-tpl="full">&#128200; Full Site Audit</button>
-                        <button class="auto-tpl" onclick="autoLoadTemplate('content')" data-tpl="content">&#128221; Content Analysis</button>
-                        <button class="auto-tpl" onclick="autoLoadTemplate('technical')" data-tpl="technical">&#128295; Technical SEO</button>
-                        <button class="auto-tpl" onclick="autoLoadTemplate('prepublish')" data-tpl="prepublish">&#10003; Pre-Publish</button>
-                        <button class="auto-tpl" onclick="autoLoadTemplate('competitor')" data-tpl="competitor">&#127919; Competitive Intel</button>
-                        <button class="auto-tpl" onclick="autoLoadTemplate('custom')" data-tpl="custom">&#128221; Custom</button>
+                    <div style="display:flex;flex-direction:column;gap:14px;">
+                        <div style="margin-bottom:4px;">
+                            <div class="tool-input-row" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+                                <div style="flex:1;min-width:200px;">
+                                    <label style="font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;">&#128279; Target URL</label>
+                                    <input type="url" id="auto-url" class="tool-input" placeholder="https://example.com" style="padding:10px 14px;font-size:14px;border-radius:10px;width:100%;box-sizing:border-box;" onkeypress="if(event.key==='Enter')autoRunPipeline()">
+                                </div>
+                                <button class="kr-btn kr-btn-run" onclick="autoRunPipeline()" id="auto-run-btn" style="background:linear-gradient(135deg,var(--primary),#8b5cf6);padding:10px 22px;font-size:13px;">&#128640; Run</button>
+                                <button class="kr-btn kr-btn-sm" onclick="autoStopPipeline()" id="auto-stop-btn" style="background:#ef4444;display:none;">&#9724; Stop</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">&#128203; Workflow Templates</label>
+                            <div class="auto-templates" id="auto-templates">
+                                <button class="auto-tpl active" onclick="autoLoadTemplate('quick')" data-tpl="quick">&#9889; Quick Check</button>
+                                <button class="auto-tpl" onclick="autoLoadTemplate('full')" data-tpl="full">&#128200; Full Audit</button>
+                                <button class="auto-tpl" onclick="autoLoadTemplate('content')" data-tpl="content">&#128221; Content</button>
+                                <button class="auto-tpl" onclick="autoLoadTemplate('technical')" data-tpl="technical">&#128295; Technical</button>
+                                <button class="auto-tpl" onclick="autoLoadTemplate('prepublish')" data-tpl="prepublish">&#10003; Pre-Publish</button>
+                                <button class="auto-tpl" onclick="autoLoadTemplate('custom')" data-tpl="custom">&#128221; Custom</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">&#128230; Pipeline</label>
+                            <div class="auto-pipeline" id="auto-pipeline"></div>
+                        </div>
+
+                        <div class="auto-progress" id="auto-progress" style="display:none;"><div class="auto-progress-bar" id="auto-progress-bar" style="width:0%"></div></div>
+                        <div class="auto-summary" id="auto-summary" style="display:none;"></div>
+
+                        <div class="auto-results" id="auto-results" style="display:none;">
+                            <div class="auto-results-header" id="auto-results-header"></div>
+                            <div class="auto-results-body" id="auto-results-body"></div>
+                        </div>
                     </div>
-                </div>
-
-                <label style="font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">&#128230; Pipeline Steps</label>
-                <div class="auto-pipeline" id="auto-pipeline"></div>
-
-                <div class="auto-progress" id="auto-progress" style="display:none;"><div class="auto-progress-bar" id="auto-progress-bar" style="width:0%"></div></div>
-
-                <div class="auto-summary" id="auto-summary" style="display:none;"></div>
-
-                <div class="auto-results" id="auto-results" style="display:none;">
-                    <div class="auto-results-header" id="auto-results-header"></div>
-                    <div class="auto-results-body" id="auto-results-body"></div>
                 </div>
             </div>
         </div>
@@ -13401,6 +13452,385 @@
         return html;
     };
 
+    // ===== AI AGENT =====
+    var _agentHistory = [];
+    var _agentWelcomeSent = false;
+
+    function autoAgentTime() {
+        var d = new Date();
+        var h = d.getHours(); var m = d.getMinutes();
+        return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+    }
+
+    function autoAgentScroll() {
+        var body = document.getElementById('auto-agent-body');
+        if (body) body.scrollTop = body.scrollHeight;
+    }
+
+    function autoAgentAddMsg(text, type, actions) {
+        var body = document.getElementById('auto-agent-body');
+        if (!body) return;
+        var div = document.createElement('div');
+        div.className = 'auto-agent-msg ' + type;
+        var html = text;
+        html += '<span class="msg-time">' + autoAgentTime() + '</span>';
+        if (actions && actions.length > 0) {
+            html += '<div class="msg-actions">';
+            for (var i = 0; i < actions.length; i++) {
+                html += '<button class="msg-action-btn" onclick="' + actions[i].fn + '">' + actions[i].label + '</button>';
+            }
+            html += '</div>';
+        }
+        div.innerHTML = html;
+        body.appendChild(div);
+        autoAgentScroll();
+    }
+
+    function autoAgentShowTyping() {
+        var body = document.getElementById('auto-agent-body');
+        if (!body) return;
+        var div = document.createElement('div');
+        div.className = 'auto-agent-typing';
+        div.id = 'auto-agent-typing';
+        div.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+        body.appendChild(div);
+        autoAgentScroll();
+    }
+
+    function autoAgentHideTyping() {
+        var el = document.getElementById('auto-agent-typing');
+        if (el) el.remove();
+    }
+
+    function autoAgentSetChips(chips) {
+        var el = document.getElementById('auto-agent-chips');
+        if (!el) return;
+        var html = '';
+        for (var i = 0; i < chips.length; i++) {
+            html += '<button class="auto-agent-chip" onclick="' + chips[i].fn + '">' + chips[i].label + '</button>';
+        }
+        el.innerHTML = html;
+    }
+
+    function autoAgentWelcome() {
+        if (_agentWelcomeSent) return;
+        _agentWelcomeSent = true;
+        var isAr = currentLang === 'ar';
+        var welcome = isAr
+            ? '&#129302; <b>مرحباً! أنا مساعد SEO Agent الذكي.</b><br><br>يمكنني مساعدتك في تحليل أي موقع باستخدام أدوات SEOHub. فقط أرسل لي رابط الموقع أو اكتب أمر باللغة العربية أو الإنجليزية.'
+            : '&#129302; <b>Hi! I\'m the SEO Agent.</b><br><br>I can help you analyze any website using SEOHub tools. Just send me a URL or type a command in English or Arabic.';
+        autoAgentAddMsg(welcome, 'agent');
+        setTimeout(function() {
+            var tips = isAr
+                ? 'يمكنك كتابة أوامر مثل:<br>&#8226; <code>حلل example.com</code><br>&#8226; <code>audit</code> - تحليل شامل<br>&#8226; <code>سرعة</code> - فحص السرعة<br>&#8226; <code>محتوى</code> - تحليل المحتوى<br>&#8226; <code>مساعدة</code> - عرض الأوامر'
+                : 'You can type commands like:<br>&#8226; <code>analyze example.com</code><br>&#8226; <code>full audit</code> - comprehensive analysis<br>&#8226; <code>speed</code> - check speed<br>&#8226; <code>content</code> - content analysis<br>&#8226; <code>help</code> - show all commands';
+            autoAgentAddMsg(tips, 'agent');
+        }, 600);
+        setTimeout(function() {
+            autoAgentSetChips([
+                { label: isAr ? '&#128269; تحليل سريع' : '&#128269; Quick Scan', fn: "autoAgentCmd('quick')" },
+                { label: isAr ? '&#128200; تحليل شامل' : '&#128200; Full Audit', fn: "autoAgentCmd('full')" },
+                { label: isAr ? '&#9889; فحص السرعة' : '&#9889; Speed Check', fn: "autoAgentCmd('speed')" },
+                { label: isAr ? '&#128221; تحليل المحتوى' : '&#128221; Content', fn: "autoAgentCmd('content')" },
+                { label: isAr ? '&#128273; استخراج الكلمات' : '&#128273; Keywords', fn: "autoAgentCmd('keywords')" },
+                { label: isAr ? '&#128196; تقرير كامل' : '&#128196; Full Report', fn: "autoAgentCmd('report')" }
+            ]);
+        }, 1200);
+    }
+
+    function autoAgentSend() {
+        var input = document.getElementById('auto-agent-input');
+        if (!input) return;
+        var text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        autoAgentAddMsg(esc(text), 'user');
+        autoAgentProcessInput(text);
+    }
+
+    function autoAgentCmd(cmd) {
+        autoAgentAddMsg(esc(cmd), 'user');
+        autoAgentProcessInput(cmd);
+    }
+
+    function autoAgentProcessInput(text) {
+        var lower = text.toLowerCase().trim();
+        var isAr = /[\u0600-\u06FF]/.test(text);
+        autoAgentShowTyping();
+
+        var urlMatch = lower.match(/https?:\/\/[^\s]+/);
+        if (!urlMatch) urlMatch = lower.match(/(?:www\.)?([a-z0-9\-]+\.[a-z]{2,})/);
+        var url = urlMatch ? urlMatch[0] : null;
+        if (url && url.indexOf('http') !== 0) url = 'https://' + url;
+
+        setTimeout(function() {
+            autoAgentHideTyping();
+
+            // HELP
+            if (lower === 'help' || lower === 'مساعدة' || lower === '?') {
+                var h = isAr
+                    ? '&#128295; <b>الأوامر المتاحة:</b><br><br>' +
+                      '<code>حلل [url]</code> - تحليل سريع للموقع<br>' +
+                      '<code>audit</code> - تحليل شامل كامل<br>' +
+                      '<code>سرعة</code> / <code>speed</code> - فحص سرعة التحميل<br>' +
+                      '<code>محتوى</code> / <code>content</code> - تحليل المحتوى<br>' +
+                      '<code>كلمات</code> / <code>keywords</code> - استخراج الكلمات المفتاحية<br>' +
+                      '<code>صور</code> / <code>images</code> - فحص الصور<br>' +
+                      '<code>روابط</code> / <code>links</code> - تحليل الروابط<br>' +
+                      '<code>عنوان</code> / <code>headings</code> - فحص العناوين<br>' +
+                      '<code>خريطة</code> / <code>sitemap</code> - فحص خريطة الموقع<br>' +
+                      '<code>تقرير</code> / <code>report</code> - تقرير مفصل<br>' +
+                      '<code>شامل</code> / <code>full</code> - تحليل شامل (كل الأدوات)<br><br>' +
+                      'يمكنك also write رابط الموقع مباشرة لبدء التحليل السريع.'
+                    : '&#128295; <b>Available Commands:</b><br><br>' +
+                      '<code>analyze [url]</code> - Quick SEO scan<br>' +
+                      '<code>audit</code> / <code>full audit</code> - Full comprehensive audit<br>' +
+                      '<code>speed</code> - Page speed check<br>' +
+                      '<code>content</code> - Content analysis<br>' +
+                      '<code>keywords</code> - Extract keywords<br>' +
+                      '<code>images</code> - Image analysis<br>' +
+                      '<code>links</code> - Link analysis<br>' +
+                      '<code>headings</code> - Heading structure<br>' +
+                      '<code>sitemap</code> - Sitemap check<br>' +
+                      '<code>report</code> - Full report<br><br>' +
+                      'You can also just paste a URL to start a quick scan.';
+                autoAgentAddMsg(h, 'agent');
+                autoAgentSetChips([
+                    { label: isAr ? '&#128269; تحليل سريع' : '&#128269; Quick Scan', fn: "autoAgentCmd('quick')" },
+                    { label: isAr ? '&#128200; تحليل شامل' : '&#128200; Full Audit', fn: "autoAgentCmd('full')" },
+                    { label: isAr ? '&#9889; فحص السرعة' : '&#9889; Speed Check', fn: "autoAgentCmd('speed')" }
+                ]);
+                return;
+            }
+
+            // URL-only → quick scan
+            if (url && !autoAgentMatchCommand(lower)) {
+                autoAgentSetUrlAndRun(url, 'quick', isAr);
+                return;
+            }
+
+            // ANALYZE with URL
+            if ((lower.indexOf('analyze') !== -1 || lower.indexOf('حلل') !== -1 || lower.indexOf('تحليل') !== -1) && url) {
+                autoAgentSetUrlAndRun(url, 'quick', isAr);
+                return;
+            }
+
+            // FULL AUDIT
+            if (lower.indexOf('full') !== -1 || lower.indexOf('audit') !== -1 || lower.indexOf('شامل') !== -1 || lower.indexOf('audit full') !== -1) {
+                if (url) {
+                    autoAgentSetUrlAndRun(url, 'full', isAr);
+                } else {
+                    var urlField = document.getElementById('auto-url');
+                    if (urlField && urlField.value.trim()) {
+                        autoAgentSetUrlAndRun(urlField.value.trim(), 'full', isAr);
+                    } else {
+                        autoAgentAddMsg(isAr ? '&#9888; أدخل رابط الموقع أولاً. مثال: <code>audit example.com</code>' : '&#9888; Please provide a URL. Example: <code>audit example.com</code>', 'agent');
+                    }
+                }
+                return;
+            }
+
+            // SPEED
+            if (lower.indexOf('speed') !== -1 || lower.indexOf('سرعة') !== -1 || lower.indexOf('fast') !== -1) {
+                autoAgentRunSingleTool('speed', url, isAr, isAr ? 'فحص السرعة' : 'Speed Check');
+                return;
+            }
+
+            // CONTENT
+            if (lower.indexOf('content') !== -1 || lower.indexOf('محتوى') !== -1 || lower.indexOf('المحتوى') !== -1) {
+                autoAgentRunSingleTool('content', url, isAr, isAr ? 'تحليل المحتوى' : 'Content Analysis');
+                return;
+            }
+
+            // KEYWORDS
+            if (lower.indexOf('keyword') !== -1 || lower.indexOf('كلمات') !== -1 || lower.indexOf('الكلمات') !== -1) {
+                autoAgentRunSingleTool('keywords', url, isAr, isAr ? 'استخراج الكلمات' : 'Keywords Extraction');
+                return;
+            }
+
+            // IMAGES
+            if (lower.indexOf('image') !== -1 || lower.indexOf('صور') !== -1 || lower.indexOf('الصور') !== -1) {
+                autoAgentRunSingleTool('images', url, isAr, isAr ? 'فحص الصور' : 'Image Analysis');
+                return;
+            }
+
+            // LINKS
+            if (lower.indexOf('link') !== -1 || lower.indexOf('روابط') !== -1 || lower.indexOf('الروابط') !== -1) {
+                autoAgentRunSingleTool('links', url, isAr, isAr ? 'تحليل الروابط' : 'Link Analysis');
+                return;
+            }
+
+            // HEADINGS
+            if (lower.indexOf('heading') !== -1 || lower.indexOf('عنوان') !== -1 || lower.indexOf('العناوين') !== -1 || lower.indexOf('headings') !== -1) {
+                autoAgentRunSingleTool('headings', url, isAr, isAr ? 'فحص العناوين' : 'Headings Check');
+                return;
+            }
+
+            // SITEMAP
+            if (lower.indexOf('sitemap') !== -1 || lower.indexOf('خريطة') !== -1 || lower.indexOf('الخريطة') !== -1) {
+                autoAgentRunSingleTool('sitemap', url, isAr, isAr ? 'فحص خريطة الموقع' : 'Sitemap Check');
+                return;
+            }
+
+            // REPORT
+            if (lower.indexOf('report') !== -1 || lower.indexOf('تقرير') !== -1) {
+                autoAgentSetUrlAndRun(url || document.getElementById('auto-url').value.trim(), 'full', isAr);
+                return;
+            }
+
+            // QUICK
+            if (lower.indexOf('quick') !== -1 || lower.indexOf('سريع') !== -1) {
+                autoAgentSetUrlAndRun(url || document.getElementById('auto-url').value.trim(), 'quick', isAr);
+                return;
+            }
+
+            // NO MATCH
+            var noMatch = isAr
+                ? '&#10067; لم أفهم الأمر. اكتب <code>مساعدة</code> لعرض جميع الأوامر المتاحة.'
+                : '&#10067; I didn\'t understand that. Type <code>help</code> to see all available commands.';
+            autoAgentAddMsg(noMatch, 'agent');
+            autoAgentSetChips([
+                { label: isAr ? '&#128269; تحليل' : '&#128269; Analyze', fn: "autoAgentCmd('quick')" },
+                { label: isAr ? '&#128200; شامل' : '&#128200; Full Audit', fn: "autoAgentCmd('full')" },
+                { label: isAr ? '&#128196; تقرير' : '&#128196; Report', fn: "autoAgentCmd('report')" }
+            ]);
+        }, 800 + Math.random() * 600);
+    }
+
+    function autoAgentMatchCommand(lower) {
+        var cmds = ['analyze','audit','full','speed','content','keywords','images','links','headings','sitemap','report','quick',
+                     'حلل','تحليل','شامل','سرعة','محتوى','المحتوى','كلمات','الكلمات','صور','الصور','روابط','الروابط','عنوان','العناوين','خريطة','الخريطة','تقرير','سريع'];
+        for (var i = 0; i < cmds.length; i++) {
+            if (lower.indexOf(cmds[i]) !== -1) return true;
+        }
+        return false;
+    }
+
+    function autoAgentSetUrlAndRun(url, template, isAr) {
+        if (!url) {
+            autoAgentAddMsg(isAr ? '&#9888; أدخل رابط الموقع أولاً.' : '&#9888; Please provide a URL first.', 'agent');
+            return;
+        }
+        if (!/^https?:\/\//.test(url)) url = 'https://' + url;
+        document.getElementById('auto-url').value = url;
+        autoLoadTemplate(template);
+        var tplNames = { quick: isAr ? 'التحليل السريع' : 'Quick SEO Check', full: isAr ? 'التحليل الشامل' : 'Full Site Audit', content: isAr ? 'تحليل المحتوى' : 'Content Analysis', technical: isAr ? 'التحليل التقني' : 'Technical SEO', prepublish: isAr ? 'قبل النشر' : 'Pre-Publish', custom: isAr ? 'مخصص' : 'Custom' };
+        var msg = isAr
+            ? '&#9889; جاري تحديد <b>' + (tplNames[template] || template) + '</b> للموقع<br><code>' + esc(url) + '</code><br><br>اضغط <b>Run</b> لبدء التحليل.'
+            : '&#9889; Set up <b>' + (tplNames[template] || template) + '</b> for<br><code>' + esc(url) + '</code><br><br>Click <b>Run</b> to start the analysis.';
+        autoAgentAddMsg(msg, 'agent', [
+            { label: '&#128640; ' + (isAr ? 'تشغيل الآن' : 'Run Now'), fn: 'autoAgentRunPipeline()' },
+            { label: isAr ? '&#9998; تعديل' : '&#9998; Edit', fn: 'autoAgentMsgEdit()' }
+        ]);
+        autoAgentSetChips([
+            { label: isAr ? '&#128640; تشغيل' : '&#128640; Run', fn: 'autoAgentRunPipeline()' },
+            { label: isAr ? '&#128200; تحليل شامل' : '&#128200; Full Audit', fn: "autoAgentCmd('full')" }
+        ]);
+    }
+
+    function autoAgentRunSingleTool(toolId, url, isAr, label) {
+        if (url) {
+            if (!/^https?:\/\//.test(url)) url = 'https://' + url;
+            document.getElementById('auto-url').value = url;
+        }
+        var tool = autoGetTool(toolId);
+        if (!tool) return;
+        _autoPipeline = [{ id: tool.id, name: tool.name, nameAr: tool.nameAr, icon: tool.icon, fn: tool.fn, urlInput: tool.urlInput, outDiv: tool.outDiv, status: 'pending' }];
+        autoRenderPipeline();
+        document.querySelectorAll('.auto-tpl').forEach(function(b) { b.classList.remove('active'); });
+        autoAgentAddMsg((isAr ? '&#9889; جاري تشغيل: ' : '&#9889; Running: ') + '<b>' + label + '</b>', 'agent');
+        autoAgentRunPipeline();
+    }
+
+    function autoAgentRunPipeline() {
+        if (typeof autoRunPipeline === 'function') {
+            autoRunPipeline().then(function() {
+                setTimeout(function() {
+                    autoAgentAnalyzeResults();
+                }, 500);
+            }).catch(function() {});
+        }
+    }
+
+    function autoAgentAnalyzeResults() {
+        var isAr = currentLang === 'ar';
+        var total = _autoPipeline.length;
+        var done = 0; var errs = 0;
+        for (var i = 0; i < _autoPipeline.length; i++) {
+            if (_autoPipeline[i].status === 'done') done++;
+            if (_autoPipeline[i].status === 'error') errs++;
+        }
+        var summary = isAr
+            ? '&#128202; <b>ملخص التحليل:</b><br><br>&#10003; تم بنجاح: <b>' + done + '/' + total + '</b> أدوات'
+            : '&#128202; <b>Analysis Summary:</b><br><br>&#10003; Passed: <b>' + done + '/' + total + '</b> tools';
+        if (errs > 0) {
+            summary += '<br>&#10007; فشل: <b>' + errs + '</b>';
+        }
+
+        var recommendations = autoAgentGenerateRecs();
+        if (recommendations) {
+            summary += '<br><br>&#128161; <b>' + (isAr ? 'توصيات:' : 'Recommendations:') + '</b><br>' + recommendations;
+        }
+        autoAgentAddMsg(summary, 'agent');
+
+        var chips = isAr
+            ? [
+                { label: '&#128200; تحليل شامل', fn: "autoAgentCmd('full')" },
+                { label: '&#128221; تحليل المحتوى', fn: "autoAgentCmd('content')" },
+                { label: '&#128273; الكلمات', fn: "autoAgentCmd('keywords')" },
+                { label: '&#128196; تقرير', fn: "autoAgentCmd('report')" }
+            ]
+            : [
+                { label: '&#128200; Full Audit', fn: "autoAgentCmd('full')" },
+                { label: '&#128221; Content', fn: "autoAgentCmd('content')" },
+                { label: '&#128273; Keywords', fn: "autoAgentCmd('keywords')" },
+                { label: '&#128196; Report', fn: "autoAgentCmd('report')" }
+            ];
+        autoAgentSetChips(chips);
+    }
+
+    function autoAgentGenerateRecs() {
+        var isAr = currentLang === 'ar';
+        var recs = [];
+        for (var i = 0; i < _autoPipeline.length; i++) {
+            var step = _autoPipeline[i];
+            if (step.status !== 'done') continue;
+            var outHtml = _autoResults[step.id] || '';
+            if (step.id === 'score') {
+                var scoreMatch = outHtml.match(/(\d{1,3})\s*\/\s*100/);
+                if (scoreMatch) {
+                    var s = parseInt(scoreMatch[1]);
+                    if (s < 50) recs.push(isAr ? '&#128308; النقاط منخفضة (' + s + '/100). يُنصح بمراجعة الأخطاء الأساسية.' : '&#128308; Low score (' + s + '/100). Review critical errors.');
+                    else if (s < 80) recs.push(isAr ? '&#128992; النقاط متوسطة (' + s + '/100). هناك مجال للتحسين.' : '&#128992; Medium score (' + s + '/100). Room for improvement.');
+                    else recs.push(isAr ? '&#128994; نقاط ممتازة (' + s + '/100)!' : '&#128994; Excellent score (' + s + '/100)!');
+                }
+                if (outHtml.indexOf('Title Tag') !== -1 && outHtml.indexOf('pass') === -1) recs.push(isAr ? '&#128221; حسّن عنوان الصفحة (Title Tag)' : '&#128221; Improve page title (Title Tag)');
+                if (outHtml.indexOf('Meta Description') !== -1 && outHtml.indexOf('pass') === -1) recs.push(isAr ? '&#128221; أضف وصف Meta Description' : '&#128221; Add Meta Description');
+            }
+            if (step.id === 'images') {
+                if (outHtml.indexOf('missing') !== -1 || outHtml.indexOf('alt') !== -1) recs.push(isAr ? '&#128444; بعض الصور تفتقر لنص بديل Alt' : '&#128444; Some images missing alt text');
+            }
+            if (step.id === 'headings') {
+                if (outHtml.indexOf('h1') !== -1 && outHtml.indexOf('No H1') !== -1) recs.push(isAr ? '&#128209; أضف عنوان H1 رئيسي' : '&#128209; Add a main H1 heading');
+            }
+            if (step.id === 'content') {
+                var wcMatch = outHtml.match(/(\d[\d,]*)\s*(words|كلمة)/);
+                if (wcMatch) {
+                    var wc = parseInt(wcMatch[1].replace(/,/g, ''));
+                    if (wc < 300) recs.push(isAr ? '&#128221; المحتوى قصير (' + wc + ' كلمة). يُنصح بـ 500+ كلمة.' : '&#128221; Content is thin (' + wc + ' words). Aim for 500+ words.');
+                }
+            }
+        }
+        if (recs.length === 0) {
+            recs.push(isAr ? '&#9989; لم يتم اكتشاف مشاكل رئيسية.' : '&#9989; No major issues detected.');
+        }
+        return recs.slice(0, 5).join('<br>');
+    }
+
+    function autoAgentMsgEdit() {
+        autoAgentAddMsg(currentLang === 'ar' ? 'يمكنك تعديل الأدوات في الأقسام أعلاه، ثم اضغط Run.' : 'You can edit the tools above, then click Run.', 'agent');
+    }
+
     // ===== AUTOMATION PIPELINE =====
     var _autoRunning = false;
     var _autoStopFlag = false;
@@ -13652,6 +14082,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         applyLang();
         autoLoadTemplate('quick');
+        setTimeout(function() {
+            autoAgentWelcome();
+        }, 500);
         setTimeout(function() {
             var fab = document.getElementById('chatFab');
             if (fab) fab.style.display = 'flex';
