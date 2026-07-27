@@ -357,6 +357,47 @@
         .kr-section-title{font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--gray-4)}
         @media(max-width:768px){.kr-topic-layout{grid-template-columns:1fr}.kr-topic-sidebar{max-height:200px}.kr-toolbar{flex-direction:column;align-items:stretch}.kr-toolbar-sep{display:none}.kr-toolbar-label{display:none}}
         @media(max-width:600px){.kr-controls{flex-direction:column}.kr-keyword-input{min-width:100%}.kr-stats{grid-template-columns:repeat(2,1fr)}.kr-view-bar{flex-wrap:wrap}.kr-options{flex-direction:column}}
+        .auto-pipeline{display:flex;flex-wrap:wrap;gap:0;align-items:center;margin-bottom:16px;padding:16px;background:var(--gray-5);border:1px solid var(--gray-4);border-radius:12px;min-height:60px}
+        .auto-step{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--white);border:2px solid var(--gray-4);border-radius:10px;font-size:12px;font-weight:600;cursor:default;transition:var(--transition);position:relative}
+        .auto-step:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(37,99,235,.1)}
+        .auto-step.pending{border-color:var(--gray-4)}
+        .auto-step.running{border-color:#f59e0b;background:#fffbeb;animation:autoPulse 1.5s ease-in-out infinite}
+        .auto-step.done{border-color:#10b981;background:#ecfdf5}
+        .auto-step.error{border-color:#ef4444;background:#fef2f2}
+        .auto-step .auto-step-icon{font-size:16px;flex-shrink:0}
+        .auto-step .auto-step-name{white-space:nowrap}
+        .auto-step .auto-step-remove{position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#ef4444;color:#fff;border:none;border-radius:50%;font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1}
+        .auto-step:hover .auto-step-remove{display:flex}
+        .auto-arrow{color:var(--gray-2);font-size:18px;margin:0 4px;flex-shrink:0}
+        @keyframes autoPulse{0%,100%{opacity:1}50%{opacity:.7}}
+        .auto-templates{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+        .auto-tpl{padding:6px 14px;border:2px solid var(--gray-4);border-radius:100px;background:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:var(--transition)}
+        .auto-tpl:hover,.auto-tpl.active{border-color:var(--primary);color:var(--primary);background:rgba(37,99,235,.04)}
+        .auto-tpl.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .auto-add-step{padding:8px 14px;border:2px dashed var(--gray-4);border-radius:10px;font-size:12px;font-weight:600;color:var(--gray-2);cursor:pointer;transition:var(--transition);background:transparent}
+        .auto-add-step:hover{border-color:var(--primary);color:var(--primary)}
+        .auto-results{border:1px solid var(--gray-4);border-radius:12px;overflow:hidden}
+        .auto-results-header{display:flex;flex-wrap:wrap;gap:0;background:var(--gray-5);border-bottom:1px solid var(--gray-4)}
+        .auto-results-tab{padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:var(--transition);color:var(--gray-2)}
+        .auto-results-tab:hover{color:var(--primary)}
+        .auto-results-tab.active{color:var(--primary);border-bottom-color:var(--primary);background:var(--white)}
+        .auto-results-tab .auto-tab-status{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+        .auto-results-tab .auto-tab-status.done{background:#10b981}
+        .auto-results-tab .auto-tab-status.running{background:#f59e0b;animation:autoPulse 1s infinite}
+        .auto-results-tab .auto-tab-status.error{background:#ef4444}
+        .auto-results-tab .auto-tab-status.pending{background:var(--gray-4)}
+        .auto-results-body{padding:16px;min-height:100px;max-height:600px;overflow-y:auto;font-size:13px}
+        .auto-add-dropdown{position:absolute;background:var(--white);border:1px solid var(--gray-4);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;padding:8px;max-height:300px;overflow-y:auto;width:220px}
+        .auto-add-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;transition:var(--transition)}
+        .auto-add-item:hover{background:var(--gray-5)}
+        .auto-add-item .auto-add-icon{font-size:16px;flex-shrink:0}
+        .auto-progress{width:100%;height:4px;background:var(--gray-4);border-radius:100px;overflow:hidden;margin-bottom:12px}
+        .auto-progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),#10b981);border-radius:100px;transition:width .4s}
+        .auto-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+        .auto-summary-card{padding:14px;background:var(--gray-5);border:1px solid var(--gray-4);border-radius:10px;text-align:center}
+        .auto-summary-card .auto-summary-val{font-size:24px;font-weight:800;color:var(--primary);display:block}
+        .auto-summary-card .auto-summary-label{font-size:11px;color:var(--gray-2);font-weight:600;text-transform:uppercase;margin-top:4px}
+        @media(max-width:768px){.auto-pipeline{flex-direction:column;align-items:stretch}.auto-arrow{transform:rotate(90deg);text-align:center}.auto-step{justify-content:center}}
     </style>
 </head><body>
     <header class="header">
@@ -403,6 +444,7 @@
                 <button class="tool-tab" onclick="showTab('report',this)"><span class="tool-tab-icon">&#128196;</span> <span data-i18n="tab_report">Report</span></button>
                 <button class="tool-tab" onclick="showTab('crawler',this)"><span class="tool-tab-icon">&#128270;</span> <span data-i18n="tab_crawler">Crawler</span></button>
                 <button class="tool-tab" onclick="showTab('keyword-research',this)"><span class="tool-tab-icon">&#128270;</span> <span data-i18n="tab_kwresearch">Keyword Research</span></button>
+                <button class="tool-tab" onclick="showTab('automation',this)"><span class="tool-tab-icon">&#128260;</span> <span data-i18n="tab_automation">Automation</span></button>
             </div>
         </div>
     </section>    <section class="tools-body">
@@ -692,6 +734,48 @@
                 <div id="kr-intent-view" style="display:none;"></div>
                 <div id="kr-optimize-view" style="display:none;"></div>
                 <div id="kr-clusters-view" style="display:none;"></div>
+            </div>
+            <div class="tool-panel" id="tab-automation">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
+                    <h3 style="margin:0;">&#128260; <span data-i18n="auto_title">Automation Pipeline</span></h3>
+                </div>
+                <p style="color:var(--gray-1);margin-bottom:14px;font-size:13px;" data-i18n="auto_desc">Chain multiple SEO tools into one automated workflow. Enter a URL, pick a template, and run everything in sequence.</p>
+
+                <div style="margin-bottom:14px;">
+                    <div class="tool-input-row" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+                        <div style="flex:1;min-width:250px;">
+                            <label style="font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;">&#128279; Target URL</label>
+                            <input type="url" id="auto-url" class="tool-input" placeholder="https://example.com" style="padding:12px 16px;font-size:15px;border-radius:12px;width:100%;box-sizing:border-box;" onkeypress="if(event.key==='Enter')autoRunPipeline()">
+                        </div>
+                        <button class="kr-btn kr-btn-run" onclick="autoRunPipeline()" id="auto-run-btn" style="background:linear-gradient(135deg,var(--primary),#8b5cf6);">&#128640; Run Pipeline</button>
+                        <button class="kr-btn kr-btn-sm" onclick="autoStopPipeline()" id="auto-stop-btn" style="background:#ef4444;display:none;">&#9724; Stop</button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                    <label style="font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">&#128203; Workflow Templates</label>
+                    <div class="auto-templates" id="auto-templates">
+                        <button class="auto-tpl active" onclick="autoLoadTemplate('quick')" data-tpl="quick">&#9889; Quick SEO Check</button>
+                        <button class="auto-tpl" onclick="autoLoadTemplate('full')" data-tpl="full">&#128200; Full Site Audit</button>
+                        <button class="auto-tpl" onclick="autoLoadTemplate('content')" data-tpl="content">&#128221; Content Analysis</button>
+                        <button class="auto-tpl" onclick="autoLoadTemplate('technical')" data-tpl="technical">&#128295; Technical SEO</button>
+                        <button class="auto-tpl" onclick="autoLoadTemplate('prepublish')" data-tpl="prepublish">&#10003; Pre-Publish</button>
+                        <button class="auto-tpl" onclick="autoLoadTemplate('competitor')" data-tpl="competitor">&#127919; Competitive Intel</button>
+                        <button class="auto-tpl" onclick="autoLoadTemplate('custom')" data-tpl="custom">&#128221; Custom</button>
+                    </div>
+                </div>
+
+                <label style="font-size:11px;font-weight:700;color:var(--gray-2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">&#128230; Pipeline Steps</label>
+                <div class="auto-pipeline" id="auto-pipeline"></div>
+
+                <div class="auto-progress" id="auto-progress" style="display:none;"><div class="auto-progress-bar" id="auto-progress-bar" style="width:0%"></div></div>
+
+                <div class="auto-summary" id="auto-summary" style="display:none;"></div>
+
+                <div class="auto-results" id="auto-results" style="display:none;">
+                    <div class="auto-results-header" id="auto-results-header"></div>
+                    <div class="auto-results-body" id="auto-results-body"></div>
+                </div>
             </div>
         </div>
     </section>    <section class="cta-section">
@@ -4583,7 +4667,8 @@
             tab_score: 'Score', tab_meta: 'Meta', tab_headings: 'Headings', tab_schema: 'Schema',
             tab_audit: 'Audit', tab_speed: 'Speed', tab_content: 'Content', tab_keywords: 'Keywords',
             tab_images: 'Images', tab_links: 'Links', tab_robots: 'Robots', tab_sitemap: 'Sitemap',
-            tab_competitor: 'Competitor', tab_fullaudit: 'Full Audit', tab_report: 'Report', tab_crawler: 'Product Monitor', tab_kwresearch: 'Keyword Research',
+            tab_competitor: 'Competitor', tab_fullaudit: 'Full Audit', tab_report: 'Report', tab_crawler: 'Product Monitor', tab_kwresearch: 'Keyword Research', tab_automation: 'Automation',
+            auto_title: 'Automation Pipeline', auto_desc: 'Chain multiple SEO tools into one automated workflow. Enter a URL, pick a template, and run everything in sequence.',
             btn_analyze: 'Analyze', btn_analyze_meta: 'Analyze Meta Tags', btn_check_headings: 'Check Headings',
             btn_run_audit: 'Run Audit', btn_test_speed: 'Test Speed', btn_analyze_content: 'Analyze Content',
             btn_extract_kw: 'Extract Keywords', btn_check_images: 'Check Images', btn_analyze_links: 'Analyze Links',
@@ -4640,7 +4725,8 @@
             tab_score: '\u0627\u0644\u0646\u062a\u064a\u062c\u0629', tab_meta: '\u0627\u0644\u0648\u0633\u0648\u0645', tab_headings: '\u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646', tab_schema: '\u0627\u0644\u0647\u064a\u0643\u0644',
             tab_audit: '\u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629', tab_speed: '\u0627\u0644\u0633\u0631\u0639\u0629', tab_content: '\u0627\u0644\u0645\u062d\u062a\u0648\u0649', tab_keywords: '\u0627\u0644\u0643\u0644\u0645\u0627\u062a',
             tab_images: '\u0627\u0644\u0635\u0648\u0631', tab_links: '\u0627\u0644\u0631\u0648\u0627\u0628\u0637', tab_robots: '\u0627\u0644\u0628\u0648\u062a', tab_sitemap: '\u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639',
-            tab_competitor: '\u0627\u0644\u0645\u0646\u0627\u0641\u0633', tab_fullaudit: '\u062a\u062d\u0644\u064a\u0644 \u0634\u0627\u0645\u0644', tab_report: '\u0627\u0644\u062a\u0642\u0631\u064a\u0631', tab_crawler: '\u0631\u0635\u062f \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a', tab_kwresearch: '\u0628\u062d\u062b \u0639\u0646 \u0627\u0644\u0643\u0644\u0645\u0627\u062a',
+            tab_competitor: '\u0627\u0644\u0645\u0646\u0627\u0641\u0633', tab_fullaudit: '\u062a\u062d\u0644\u064a\u0644 \u0634\u0627\u0645\u0644', tab_report: '\u0627\u0644\u062a\u0642\u0631\u064a\u0631', tab_crawler: '\u0631\u0635\u062f \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a', tab_kwresearch: '\u0628\u062d\u062b \u0639\u0646 \u0627\u0644\u0643\u0644\u0645\u0627\u062a', tab_automation: '\u0627\u0644\u0623\u062a\u0648\u0645\u0627\u0634\u0646',
+            auto_title: '\u062e\u0637\u0629 \u0627\u0644\u0623\u062a\u0648\u0645\u0627\u0634\u0646', auto_desc: '\u0627\u0631\u0628\u0637 \u0628\u0639\u0636 \u0627\u0644\u0623\u062F\u0648\u0627\u062A \u0641\u064A \u0639\u0645\u0644\u064A\u0629 \u0645\u0648\u062D\u062F\u0629. \u0623\u062F\u062E\u0644 URL \u0648\u0627\u062E\u062A\u0631 \u0627\u0644\u0642\u0627\u0644\u0628 \u0648\u0634\u063A\u0644 \u062C\u0645\u064A\u0639 \u0627\u0644\u0623\u062F\u0648\u0627\u062A \u0628\u062A\u0633\u0627\u0644\u0633.',
             btn_analyze: '\u062a\u062d\u0644\u064a\u0644', btn_analyze_meta: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0648\u0633\u0648\u0645', btn_check_headings: '\u0641\u062d\u0635 \u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646',
             btn_run_audit: '\u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629', btn_test_speed: '\u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0644\u0633\u0631\u0639\u0629', btn_analyze_content: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0645\u062d\u062a\u0648\u0649',
             btn_extract_kw: '\u0627\u0633\u062a\u062e\u0631\u0627\u062c \u0627\u0644\u0643\u0644\u0645\u0627\u062a', btn_check_images: '\u0641\u062d\u0635 \u0627\u0644\u0635\u0648\u0631', btn_analyze_links: '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0631\u0648\u0627\u0628\u0637',
@@ -13315,8 +13401,257 @@
         return html;
     };
 
+    // ===== AUTOMATION PIPELINE =====
+    var _autoRunning = false;
+    var _autoStopFlag = false;
+    var _autoResults = {};
+
+    var _autoToolCatalog = [
+        { id: 'score',     name: 'Score',      nameAr: '\u0627\u0644\u0646\u062a\u064A\u062C\u0629',       icon: '\uD83D\uDCCA', fn: 'runScore',     urlInput: 'score-url',     outDiv: 'score-output' },
+        { id: 'meta',      name: 'Meta Tags',  nameAr: '\u0627\u0644\u0648\u0633\u0648\u0645',              icon: '\uD83C\uDFD4\uFE0F', fn: 'runMeta',      urlInput: 'meta-url',      outDiv: 'meta-output' },
+        { id: 'headings',  name: 'Headings',   nameAr: '\u0627\u0644\u0639\u0646\u0627\u0648\u064A\u0646',  icon: '\uD83D\uDCC9', fn: 'runHeadings',  urlInput: 'head-url',      outDiv: 'head-output' },
+        { id: 'audit',     name: 'Audit',      nameAr: '\u0627\u0644\u0645\u0648\u0627\u0642\u0639\u0629',  icon: '\uD83D\uDD0D', fn: 'runAudit',     urlInput: 'audit-url',     outDiv: 'audit-output' },
+        { id: 'speed',     name: 'Speed',      nameAr: '\u0627\u0644\u0633\u0631\u0639\u0629',              icon: '\u26A1',      fn: 'runSpeed',     urlInput: 'speed-url',     outDiv: 'speed-output' },
+        { id: 'content',   name: 'Content',    nameAr: '\u0627\u0644\u0645\u062D\u062A\u0648\u0649',        icon: '\uD83D\uDCDD', fn: 'runContent',   urlInput: 'content-url',   outDiv: 'content-output' },
+        { id: 'keywords',  name: 'Keywords',   nameAr: '\u0627\u0644\u0643\u0644\u0645\u0627\u062A',        icon: '\uD83D\uDD11', fn: 'runKeywords',  urlInput: 'kw-url',        outDiv: 'kw-output' },
+        { id: 'images',    name: 'Images',     nameAr: '\u0627\u0644\u0635\u0648\u0631',                    icon: '\uD83D\uDDBC\uFE0F', fn: 'runImages',    urlInput: 'img-url',       outDiv: 'img-output' },
+        { id: 'links',     name: 'Links',      nameAr: '\u0627\u0644\u0631\u0648\u0627\u0628\u0637',        icon: '\uD83D\uDD17', fn: 'runLinks',     urlInput: 'link-url',      outDiv: 'link-output' },
+        { id: 'sitemap',   name: 'Sitemap',    nameAr: '\u062E\u0631\u064A\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639', icon: '\uD83D\uDDFA\uFE0F', fn: 'runSitemap',   urlInput: 'sm-url',        outDiv: 'sm-output' },
+        { id: 'report',    name: 'Report',     nameAr: '\u0627\u0644\u062A\u0642\u0631\u064A\u0631',        icon: '\uD83D\uDCC4', fn: 'runReport',    urlInput: 'rpt-url',       outDiv: 'rpt-output' }
+    ];
+
+    var _autoTemplates = {
+        quick:      ['score','meta','audit'],
+        full:       ['score','meta','headings','audit','speed','content','keywords','images','links','sitemap'],
+        content:    ['content','keywords','images'],
+        technical:  ['sitemap','links','speed','audit'],
+        prepublish: ['meta','headings','content','keywords','images'],
+        competitor: ['score','content','keywords','report'],
+        custom:     []
+    };
+
+    var _autoPipeline = [];
+
+    function autoGetTool(id) {
+        for (var i = 0; i < _autoToolCatalog.length; i++) {
+            if (_autoToolCatalog[i].id === id) return _autoToolCatalog[i];
+        }
+        return null;
+    }
+
+    function autoRenderPipeline() {
+        var el = document.getElementById('auto-pipeline');
+        var html = '';
+        for (var i = 0; i < _autoPipeline.length; i++) {
+            var t = _autoPipeline[i];
+            if (i > 0) html += '<span class="auto-arrow">\u27A1</span>';
+            html += '<div class="auto-step ' + (t.status || 'pending') + '" id="auto-step-' + i + '">';
+            html += '<span class="auto-step-icon">' + t.icon + '</span>';
+            html += '<span class="auto-step-name">' + (currentLang === 'ar' ? t.nameAr : t.name) + '</span>';
+            html += '<button class="auto-step-remove" onclick="autoRemoveStep(' + i + ')" title="Remove">\u2715</button>';
+            html += '</div>';
+        }
+        html += '<span class="auto-arrow">\u27A1</span>';
+        html += '<button class="auto-add-step" onclick="autoShowAddMenu(event)">+ Add</button>';
+        el.innerHTML = html;
+    }
+
+    function autoShowAddMenu(e) {
+        e.stopPropagation();
+        var existing = document.querySelector('.auto-add-dropdown');
+        if (existing) { existing.remove(); return; }
+        var dd = document.createElement('div');
+        dd.className = 'auto-add-dropdown';
+        var html = '';
+        for (var i = 0; i < _autoToolCatalog.length; i++) {
+            var t = _autoToolCatalog[i];
+            html += '<div class="auto-add-item" onclick="autoAddStep(\'' + t.id + '\')">';
+            html += '<span class="auto-add-icon">' + t.icon + '</span>';
+            html += '<span>' + (currentLang === 'ar' ? t.nameAr : t.name) + '</span>';
+            html += '</div>';
+        }
+        dd.innerHTML = html;
+        var btn = e.currentTarget || e.target;
+        btn.parentNode.appendChild(dd);
+        setTimeout(function() {
+            document.addEventListener('click', function autoCloseDropdown() {
+                var d = document.querySelector('.auto-add-dropdown');
+                if (d) d.remove();
+                document.removeEventListener('click', autoCloseDropdown);
+            });
+        }, 10);
+    }
+
+    function autoAddStep(toolId) {
+        var tool = autoGetTool(toolId);
+        if (!tool) return;
+        var step = { id: tool.id, name: tool.name, nameAr: tool.nameAr, icon: tool.icon, fn: tool.fn, urlInput: tool.urlInput, outDiv: tool.outDiv, status: 'pending' };
+        _autoPipeline.push(step);
+        var dd = document.querySelector('.auto-add-dropdown');
+        if (dd) dd.remove();
+        autoRenderPipeline();
+        document.querySelectorAll('.auto-tpl').forEach(function(b) { b.classList.remove('active'); });
+        var customBtn = document.querySelector('[data-tpl="custom"]');
+        if (customBtn) customBtn.classList.add('active');
+    }
+
+    function autoRemoveStep(idx) {
+        _autoPipeline.splice(idx, 1);
+        autoRenderPipeline();
+    }
+
+    function autoLoadTemplate(name) {
+        document.querySelectorAll('.auto-tpl').forEach(function(b) { b.classList.remove('active'); });
+        var btn = document.querySelector('[data-tpl="' + name + '"]');
+        if (btn) btn.classList.add('active');
+        _autoPipeline = [];
+        var ids = _autoTemplates[name] || [];
+        for (var i = 0; i < ids.length; i++) {
+            var tool = autoGetTool(ids[i]);
+            if (tool) {
+                _autoPipeline.push({ id: tool.id, name: tool.name, nameAr: tool.nameAr, icon: tool.icon, fn: tool.fn, urlInput: tool.urlInput, outDiv: tool.outDiv, status: 'pending' });
+            }
+        }
+        autoRenderPipeline();
+    }
+
+    async function autoRunPipeline() {
+        if (_autoRunning) return;
+        var url = document.getElementById('auto-url').value.trim();
+        if (!url) { alert(currentLang === 'ar' ? '\u0623\u062F\u062E\u0644 \u0631\u0628\u0637 URL' : 'Enter a URL first'); return; }
+        if (!/^https?:\/\//.test(url)) url = 'https://' + url;
+        if (_autoPipeline.length === 0) { alert(currentLang === 'ar' ? '\u0623\u0636\u0641 \u062E\u0637\u0648\u0629 \u0639\u0644\u0649 \u0627\u0644\u0645\u0633\u0627\u0631' : 'Add at least one step to the pipeline'); return; }
+
+        _autoRunning = true;
+        _autoStopFlag = false;
+        _autoResults = {};
+        document.getElementById('auto-run-btn').style.display = 'none';
+        document.getElementById('auto-stop-btn').style.display = 'inline-flex';
+        document.getElementById('auto-progress').style.display = 'block';
+        document.getElementById('auto-results').style.display = 'block';
+        document.getElementById('auto-summary').style.display = 'grid';
+        document.getElementById('auto-summary').innerHTML = '';
+        document.getElementById('auto-progress-bar').style.width = '0%';
+
+        var total = _autoPipeline.length;
+        var completed = 0;
+        var passed = 0;
+        var failed = 0;
+
+        for (var i = 0; i < _autoPipeline.length; i++) {
+            if (_autoStopFlag) break;
+            var step = _autoPipeline[i];
+            step.status = 'running';
+            autoRenderPipeline();
+            autoUpdateProgress(completed, total);
+            autoRenderResultsHeader();
+
+            try {
+                await autoRunStep(step, url);
+                step.status = 'done';
+                passed++;
+            } catch (err) {
+                step.status = 'error';
+                _autoResults[step.id] = '<p style="color:#ef4444;">Error: ' + esc(err.message || String(err)) + '</p>';
+                failed++;
+            }
+            completed++;
+            autoUpdateProgress(completed, total);
+            autoRenderPipeline();
+            autoRenderResultsHeader();
+        }
+
+        autoUpdateProgress(total, total);
+        autoRenderResultsHeader();
+        if (_autoResults[Object.keys(_autoResults)[0]]) {
+            autoShowResultTab(Object.keys(_autoResults)[0]);
+        }
+
+        var summEl = document.getElementById('auto-summary');
+        summEl.innerHTML = '';
+        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val">' + total + '</span><span class="auto-summary-label">Total Steps</span></div>';
+        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val" style="color:#10b981;">' + passed + '</span><span class="auto-summary-label">Passed</span></div>';
+        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val" style="color:#ef4444;">' + failed + '</span><span class="auto-summary-label">Failed</span></div>';
+        summEl.innerHTML += '<div class="auto-summary-card"><span class="auto-summary-val">' + (passed > 0 ? Math.round(passed / total * 100) + '%' : '0%') + '</span><span class="auto-summary-label">Success Rate</span></div>';
+
+        _autoRunning = false;
+        document.getElementById('auto-run-btn').style.display = 'inline-flex';
+        document.getElementById('auto-stop-btn').style.display = 'none';
+    }
+
+    function autoStopPipeline() {
+        _autoStopFlag = true;
+        _autoRunning = false;
+        document.getElementById('auto-run-btn').style.display = 'inline-flex';
+        document.getElementById('auto-stop-btn').style.display = 'none';
+    }
+
+    function autoUpdateProgress(done, total) {
+        var pct = total > 0 ? Math.round(done / total * 100) : 0;
+        document.getElementById('auto-progress-bar').style.width = pct + '%';
+    }
+
+    function autoRenderResultsHeader() {
+        var header = document.getElementById('auto-results-header');
+        var html = '';
+        for (var i = 0; i < _autoPipeline.length; i++) {
+            var s = _autoPipeline[i];
+            var activeClass = '';
+            if (_autoResults[s.id]) activeClass = ' active';
+            html += '<div class="auto-results-tab' + activeClass + '" onclick="autoShowResultTab(\'' + s.id + '\')">';
+            html += '<span class="auto-tab-status ' + s.status + '"></span>';
+            html += s.icon + ' ' + (currentLang === 'ar' ? s.nameAr : s.name);
+            html += '</div>';
+        }
+        header.innerHTML = html;
+    }
+
+    function autoShowResultTab(toolId) {
+        var tabs = document.querySelectorAll('.auto-results-tab');
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        var body = document.getElementById('auto-results-body');
+        var tool = autoGetTool(toolId);
+        if (_autoResults[toolId]) {
+            body.innerHTML = _autoResults[toolId];
+        } else if (tool) {
+            var origOut = document.getElementById(tool.outDiv);
+            if (origOut && origOut.innerHTML.trim()) {
+                body.innerHTML = origOut.innerHTML;
+                _autoResults[toolId] = origOut.innerHTML;
+            } else {
+                body.innerHTML = '<p style="color:var(--gray-2);font-style:italic;">No results yet for this step.</p>';
+            }
+        }
+        tabs.forEach(function(t) {
+            if (t.textContent.indexOf(tool ? (currentLang === 'ar' ? tool.nameAr : tool.name) : '') !== -1) t.classList.add('active');
+        });
+    }
+
+    async function autoRunStep(step, url) {
+        var origInput = document.getElementById(step.urlInput);
+        var origOutput = document.getElementById(step.outDiv);
+        if (origInput) origInput.value = url;
+        if (origOutput) origOutput.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>Running ' + esc(step.name) + '...</p></div>';
+
+        if (typeof window[step.fn] === 'function') {
+            await window[step.fn]();
+        } else {
+            throw new Error('Tool function ' + step.fn + ' not found');
+        }
+
+        await new Promise(function(resolve) { setTimeout(resolve, 500); });
+
+        var outHtml = '';
+        if (origOutput) outHtml = origOutput.innerHTML;
+        if (!outHtml || outHtml.indexOf('tool-loading') !== -1) {
+            outHtml = '<p style="color:var(--gray-2);font-style:italic;">Step completed (output captured from original tool).</p>';
+        }
+        _autoResults[step.id] = outHtml;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         applyLang();
+        autoLoadTemplate('quick');
         setTimeout(function() {
             var fab = document.getElementById('chatFab');
             if (fab) fab.style.display = 'flex';
