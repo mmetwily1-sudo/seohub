@@ -821,6 +821,7 @@
                                 <button class="auto-tpl" onclick="autoLoadTemplate('content')" data-tpl="content">&#128221; Content</button>
                                 <button class="auto-tpl" onclick="autoLoadTemplate('technical')" data-tpl="technical">&#128295; Technical</button>
                                 <button class="auto-tpl" onclick="autoLoadTemplate('prepublish')" data-tpl="prepublish">&#10003; Pre-Publish</button>
+                                <button class="auto-tpl" onclick="autoLoadTemplate('ecommerce')" data-tpl="ecommerce">&#128722; E-commerce</button>
                                 <button class="auto-tpl" onclick="autoLoadTemplate('custom')" data-tpl="custom">&#128221; Custom</button>
                             </div>
                         </div>
@@ -13592,10 +13593,12 @@
                       '<code>صور</code> / <code>images</code> - فحص الصور<br>' +
                       '<code>روابط</code> / <code>links</code> - تحليل الروابط<br>' +
                       '<code>عنوان</code> / <code>headings</code> - فحص العناوين<br>' +
-                      '<code>خريطة</code> / <code>sitemap</code> - فحص خريطة الموقع<br>' +
-                      '<code>تقرير</code> / <code>report</code> - تقرير مفصل<br>' +
-                      '<code>شامل</code> / <code>full</code> - تحليل شامل (كل الأدوات)<br><br>' +
-                      'يمكنك also write رابط الموقع مباشرة لبدء التحليل السريع.'
+                       '<code>خريطة</code> / <code>sitemap</code> - فحص خريطة الموقع<br>' +
+                       '<code>تقرير</code> / <code>report</code> - تقرير مفصل<br>' +
+                       '<code>منتجات</code> / <code>products</code> - رصد المنتجات<br>' +
+                       '<code>بحث</code> / <code>research</code> - بحث الكلمات المفتاحية<br>' +
+                       '<code>شامل</code> / <code>full</code> - تحليل شامل (كل الأدوات)<br><br>' +
+                       'يمكنك also write رابط الموقع مباشرة لبدء التحليل السريع.'
                     : '&#128295; <b>Available Commands:</b><br><br>' +
                       '<code>analyze [url]</code> - Quick SEO scan<br>' +
                       '<code>audit</code> / <code>full audit</code> - Full comprehensive audit<br>' +
@@ -13606,7 +13609,9 @@
                       '<code>links</code> - Link analysis<br>' +
                       '<code>headings</code> - Heading structure<br>' +
                       '<code>sitemap</code> - Sitemap check<br>' +
-                      '<code>report</code> - Full report<br><br>' +
+                      '<code>report</code> - Full report<br>' +
+                      '<code>products</code> / <code>store</code> - Product monitoring<br>' +
+                      '<code>research</code> - Keyword research<br><br>' +
                       'You can also just paste a URL to start a quick scan.';
                 autoAgentAddMsg(h, 'agent');
                 autoAgentSetChips([
@@ -13686,6 +13691,18 @@
                 return;
             }
 
+            // PRODUCT MONITOR
+            if (lower.indexOf('product') !== -1 || lower.indexOf('منتجات') !== -1 || lower.indexOf('المنتجات') !== -1 || lower.indexOf('رصد') !== -1 || lower.indexOf('monitor') !== -1 || lower.indexOf('متجر') !== -1 || lower.indexOf('store') !== -1 || lower.indexOf('shop') !== -1) {
+                autoAgentSetUrlAndRun(url || document.getElementById('auto-url').value.trim(), 'ecommerce', isAr);
+                return;
+            }
+
+            // KEYWORD RESEARCH
+            if (lower.indexOf('research') !== -1 || lower.indexOf('بحث') !== -1 || lower.indexOf('مفتاح') !== -1 || lower.indexOf('seo keywords') !== -1) {
+                autoAgentSetUrlAndRun(url || document.getElementById('auto-url').value.trim(), 'kw-research', isAr);
+                return;
+            }
+
             // REPORT
             if (lower.indexOf('report') !== -1 || lower.indexOf('تقرير') !== -1) {
                 autoAgentSetUrlAndRun(url || document.getElementById('auto-url').value.trim(), 'full', isAr);
@@ -13706,7 +13723,8 @@
             autoAgentSetChips([
                 { label: isAr ? '&#128269; تحليل' : '&#128269; Analyze', fn: "autoAgentCmd('quick')" },
                 { label: isAr ? '&#128200; شامل' : '&#128200; Full Audit', fn: "autoAgentCmd('full')" },
-                { label: isAr ? '&#128196; تقرير' : '&#128196; Report', fn: "autoAgentCmd('report')" }
+                { label: isAr ? '&#128722; منتجات' : '&#128722; Products', fn: "autoAgentCmd('products')" },
+                { label: isAr ? '&#128270; بحث كلمات' : '&#128270; KW Research', fn: "autoAgentCmd('research')" }
             ]);
         }, 800 + Math.random() * 600);
     }
@@ -13862,16 +13880,19 @@
         { id: 'links',     name: 'Links',      nameAr: '\u0627\u0644\u0631\u0648\u0627\u0628\u0637',        icon: '\uD83D\uDD17', fn: 'runLinks',     urlInput: 'link-url',      outDiv: 'link-output' },
         { id: 'sitemap',   name: 'Sitemap',    nameAr: '\u062E\u0631\u064A\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639', icon: '\uD83D\uDDFA\uFE0F', fn: 'runSitemap',   urlInput: 'sm-url',        outDiv: 'sm-output' },
         { id: 'report',    name: 'Report',     nameAr: '\u0627\u0644\u062A\u0642\u0631\u064A\u0631',        icon: '\uD83D\uDCC4', fn: 'runReport',    urlInput: 'rpt-url',       outDiv: 'rpt-output' },
+        { id: 'product-monitor', name: 'Product Monitor', nameAr: '\u0631\u0635\u062F \u0627\u0644\u0645\u0646\u062A\u062C\u0627\u062A', icon: '\uD83D\uDED2', fn: 'autoRunProductMonitor', urlInput: null, outDiv: 'crawl-output' },
+        { id: 'kw-research', name: 'Keyword Research', nameAr: '\u0628\u062D\u062B \u0643\u0644\u0645\u0627\u062A \u0645\u0641\u062A\u0627\u062D\u064A\u0629', icon: '\uD83D\uDD0E', fn: 'autoRunKeywordResearch', urlInput: null, outDiv: 'kr-output' },
         { id: 'ai-agent',  name: 'AI Agent',   nameAr: '\u0627\u0644\u0645\u0633\u0627\u0639\u062F \u0627\u0644\u0630\u0643\u064A', icon: '\uD83E\uDD16', fn: 'autoRunAgentStep', urlInput: null, outDiv: 'auto-agent-output' }
     ];
 
     var _autoTemplates = {
         quick:      ['score','meta','audit','ai-agent'],
-        full:       ['score','meta','headings','audit','speed','content','keywords','images','links','sitemap','ai-agent'],
-        content:    ['content','keywords','images','ai-agent'],
+        full:       ['score','meta','headings','audit','speed','content','keywords','images','links','sitemap','product-monitor','kw-research','ai-agent'],
+        content:    ['content','keywords','kw-research','images','ai-agent'],
         technical:  ['sitemap','links','speed','audit','ai-agent'],
-        prepublish: ['meta','headings','content','keywords','images','ai-agent'],
-        competitor: ['score','content','keywords','report','ai-agent'],
+        prepublish: ['meta','headings','content','keywords','kw-research','images','ai-agent'],
+        competitor: ['score','content','keywords','kw-research','report','ai-agent'],
+        ecommerce: ['score','meta','headings','content','images','links','product-monitor','kw-research','ai-agent'],
         custom:     []
     };
 
@@ -14105,6 +14126,14 @@
             await autoRunAgentStep();
             return;
         }
+        if (step.id === 'product-monitor') {
+            await autoRunProductMonitor();
+            return;
+        }
+        if (step.id === 'kw-research') {
+            await autoRunKeywordResearch();
+            return;
+        }
         var origInput = document.getElementById(step.urlInput);
         var origOutput = document.getElementById(step.outDiv);
         if (origInput) origInput.value = url;
@@ -14124,6 +14153,64 @@
             outHtml = '<p style="color:var(--gray-2);font-style:italic;">Step completed (output captured from original tool).</p>';
         }
         _autoResults[step.id] = outHtml;
+    }
+
+    async function autoRunProductMonitor() {
+        var isArP = currentLang === 'ar';
+        var urlVal = document.getElementById('auto-url').value.trim();
+        if (!urlVal) {
+            _autoResults['product-monitor'] = '<div style="padding:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;text-align:center;color:#991b1b;font-weight:600;">' + (isArP ? '\u0627\u0643\u062A\u0628 \u0631\u0627\u0628\u0637 \u0627\u0644\u0645\u062A\u062C\u0631 \u0623\u0648\u0644\u0627\u064B' : 'Enter store URL first') + '</div>';
+            return;
+        }
+        var origUrl = document.getElementById('crawl-url');
+        if (origUrl) origUrl.value = urlVal;
+        var origPlat = document.getElementById('crawl-platform');
+        if (origPlat) origPlat.value = 'auto';
+        var origOut = document.getElementById('crawl-output');
+        if (origOut) origOut.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>' + (isArP ? '\u062C\u0627\u0631\u064D \u0631\u0635\u062F \u0627\u0644\u0645\u0646\u062A\u062C\u0627\u062A...' : 'Scanning products...') + '</p></div>';
+        try {
+            if (typeof window['runCrawler'] === 'function') {
+                await window['runCrawler']();
+            } else {
+                throw new Error('runCrawler not found');
+            }
+            await new Promise(function(r) { setTimeout(r, 500); });
+        } catch(e) {}
+        var outHtml = '';
+        if (origOut) outHtml = origOut.innerHTML;
+        if (!outHtml || outHtml.indexOf('tool-loading') !== -1) {
+            outHtml = '<p style="color:var(--gray-2);font-style:italic;">Product monitoring completed.</p>';
+        }
+        _autoResults['product-monitor'] = outHtml;
+    }
+
+    async function autoRunKeywordResearch() {
+        var isArK = currentLang === 'ar';
+        var urlVal = document.getElementById('auto-url').value.trim();
+        if (!urlVal) {
+            _autoResults['kw-research'] = '<div style="padding:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;text-align:center;color:#991b1b;font-weight:600;">' + (isArK ? '\u0627\u0643\u062A\u0628 \u0639\u0628\u0627\u0631\u0629 \u0623\u0648\u0644\u0627\u064B \u0623\u0648 \u0627\u0633\u0645 \u0627\u0644\u0645\u0648\u0642\u0639' : 'Enter a keyword or site name first') + '</div>';
+            return;
+        }
+        var domain = '';
+        try { domain = urlVal.replace(/https?:\/\//, '').replace(/\/.*/, '').replace(/^www\./, '').split('.')[0]; } catch(e) { domain = urlVal; }
+        var origSeed = document.getElementById('kr-seed');
+        if (origSeed) origSeed.value = domain;
+        var origOut = document.getElementById('kr-output');
+        if (origOut) origOut.innerHTML = '<div class="tool-loading"><div class="spinner"></div><p>' + (isArK ? '\u062C\u0627\u0631\u064D \u0628\u062D\u062B \u0627\u0644\u0643\u0644\u0645\u0627\u062A...' : 'Researching keywords...') + '</p></div>';
+        try {
+            if (typeof window['runKeywordResearch'] === 'function') {
+                await window['runKeywordResearch']();
+            } else {
+                throw new Error('runKeywordResearch not found');
+            }
+            await new Promise(function(r) { setTimeout(r, 500); });
+        } catch(e) {}
+        var outHtml = '';
+        if (origOut) outHtml = origOut.innerHTML;
+        if (!outHtml || outHtml.indexOf('tool-loading') !== -1) {
+            outHtml = '<p style="color:var(--gray-2);font-style:italic;">Keyword research completed.</p>';
+        }
+        _autoResults['kw-research'] = outHtml;
     }
 
     async function autoRunAgentStep() {
@@ -14191,6 +14278,20 @@
             if (s.id === 'links') {
                 var brokenM = text.match(/(\d+)\s*(?:broken|dead|404)/i);
                 if (brokenM) allIssues.push({ tool: isArA ? s.nameAr : s.name, count: parseInt(brokenM[1]), content: 'Broken links found' });
+            }
+            if (s.id === 'product-monitor') {
+                var prodM = text.match(/(\d+)\s*(?:products?|\u0645\u0646\u062A\u062C)/i);
+                if (prodM) allPassed.push({ tool: isArA ? s.nameAr : s.name, count: parseInt(prodM[1]) });
+                if (text.indexOf('Cannot reach') !== -1 || text.indexOf('\u0627\u0633\u062A\u062D\u064A\u0644') !== -1 || text.indexOf('failed') !== -1) {
+                    allIssues.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'Product monitor could not reach store' });
+                }
+            }
+            if (s.id === 'kw-research') {
+                var kwCountM = text.match(/(\d+)\s*(?:keywords?|\u0643\u0644\u0645\u0629|\u0643\u0644\u0645\u0627\u062A)/i);
+                if (kwCountM) allPassed.push({ tool: isArA ? s.nameAr : s.name, count: parseInt(kwCountM[1]) });
+                if (text.indexOf('Enter') !== -1 || text.indexOf('\u0627\u0643\u062A\u0628') !== -1) {
+                    allWarnings.push({ tool: isArA ? s.nameAr : s.name, count: 1, content: 'Keyword research requires a keyword' });
+                }
             }
         }
 
@@ -14300,6 +14401,14 @@
         recommendations.push({ priority: '\uD83D\uDD17', text: isArA ? '\u062A\u062D\u0642\u0642 \u0645\u0646 \u0627\u0644\u0631\u0648\u0627\u0628\u0637 \u0627\u0644\u0645\u0643\u0633\u0631\u0631\u0629 \u0648\u0627\u0644\u0645\u062D\u0644\u064A\u0629' : 'Fix broken links and redirects' });
         recommendations.push({ priority: '\uD83D\uDDFA\uFE0F', text: isArA ? '\u062A\u0623\u0643\u064A\u062F \u0625\u0646\u0634\u0627\u0621 \u062E\u0631\u064A\u0637\u0629 \u0627\u0644\u0645\u0648\u0642\u0639 \u0641\u064A Google Search Console' : 'Submit sitemap to Google Search Console' });
         if (totalWarnings > 2) recommendations.push({ priority: '\u26A1', text: isArA ? '\u062D\u0633\u0651\u0646 \u0633\u0631\u0639\u0629 \u062A\u062D\u0645\u064A\u0644 \u0627\u0644\u0635\u0641\u062D\u0629' : 'Improve page load speed' });
+        var hasProductMonitor = false;
+        var hasKwResearch = false;
+        for (var pm = 0; pm < _autoPipeline.length; pm++) {
+            if (_autoPipeline[pm].id === 'product-monitor') hasProductMonitor = true;
+            if (_autoPipeline[pm].id === 'kw-research') hasKwResearch = true;
+        }
+        if (hasProductMonitor) recommendations.push({ priority: '\uD83D\uDED2', text: isArA ? '\u062A\u062D\u0642\u0642 \u0645\u0646 \u0635\u062D\u062A \u0627\u0644\u0645\u0646\u062A\u062C\u0627\u062A \u0648\u0627\u0644\u0623\u0633\u0639\u0627\u0631 \u0627\u0644\u0635\u062D\u064A\u062D\u0629 \u0627\u0644\u0645\u0633\u062C\u0644\u0629' : 'Verify product prices and availability are accurate' });
+        if (hasKwResearch) recommendations.push({ priority: '\uD83D\uDD0E', text: isArA ? '\u0627\u0633\u062A\u062E\u062F\u0645 \u0627\u0644\u0643\u0644\u0645\u0627\u062A \u0627\u0644\u0645\u0641\u062A\u0627\u062D\u064A\u0629 \u0644\u062A\u062D\u0633\u064A\u0646 \u0627\u0644\u0645\u062D\u062A\u0648\u0649 \u0648\u0627\u0644\u062A\u0635\u0646\u064A\u0641' : 'Use researched keywords to improve titles and content' });
 
         if (recommendations.length > 0) {
             html += '<div style="background:#f5f3ff;border-left:4px solid #7c3aed;border-radius:0 12px 12px 0;padding:16px 20px;margin-bottom:16px;">';
